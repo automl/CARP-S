@@ -6,7 +6,7 @@
 ```
 git clone https://github.com/AutoML/SMACBenchmarking.git
 cd SMACBenchmarking
-conda create -n smacbenchmarking python=3.8
+conda create -n smacbenchmarking python=3.11
 conda activate smacbenchmarking
 
 # Install for usage
