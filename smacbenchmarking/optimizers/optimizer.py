@@ -41,3 +41,12 @@ class Optimizer(ABC):
             Trial info containing configuration, budget, seed, instance.
         """
         raise NotImplementedError
+    
+    @abstractmethod
+    def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
+        """List of x and y values of the incumbents over time. x depends on ``sort_by``."""
+        raise NotImplementedError
+    
+    @abstractmethod
+    def run(self) -> None:
+        raise NotImplementedError
