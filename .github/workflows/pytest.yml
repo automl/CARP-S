@@ -22,7 +22,7 @@ on:
 
 env:
 
-  package-name: <<package-name>>
+  package-name: smacbenchmarking
   test-dir: tests
   extra-requires: "[dev]"  # "" for no extra_requires
 
@@ -84,8 +84,7 @@ jobs:
             exit 1
         fi
 
-<<requires::packaging
-  # Testing with conda
+# Testing with conda
   conda-tests:
     name: conda-${{ matrix.python-version }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -159,4 +158,3 @@ jobs:
     - name: Tests
       run: |
         pytest ${{ env.pytest-args }} ${{ env.test-dir }}
-  endrequires::packaging>>
