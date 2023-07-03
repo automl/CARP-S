@@ -21,6 +21,9 @@ from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from hydra.utils import instantiate, get_class
 from smacbenchmarking.utils.exceptions import NotSupportedError
+import pandas as pd
+from pathlib import Path
+import json
 
 
 def make_problem(cfg: DictConfig) -> Problem:
@@ -35,9 +38,33 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
     return optimizer
 
 
+def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict):
+    cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
+    # cfg_dict = pd.json_normalize(cfg_dict, sep=".").iloc[0].to_dict()  # flatten cfg
+
+    trajectory_data = {}
+    for sort_by in ["trials", "walltime"]:
+        try:
+            X, Y = optimizer.get_trajectory(sort_by=sort_by)
+            trajectory_data[sort_by] = {"X": X, "Y": Y}
+        except NotSupportedError:
+            continue
+
+    data = {
+        "cfg": cfg_dict,
+        "metadata": metadata,
+        "rundata": {
+            "trajectory": trajectory_data,
+        },
+    }
+
+    filename = "rundata.json"
+    with open(filename, "w") as file:
+        json.dump(data, file, indent="\t")
+
+
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
-   
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
     hydra_cfg = HydraConfig.instance().get()
@@ -55,8 +82,12 @@ def main(cfg: DictConfig) -> None:
         print("Not supported. Skipping.")
     except Exception as e:
         print("Something went wrong:")
-        print(e) 
-    
+        print(e)
+
+    metadata = {"hi": "hello"}  # TODO add reasonable meta data
+
+    save_run(cfg=cfg, optimizer=optimizer, metadata=metadata)
+
     return None
 
 

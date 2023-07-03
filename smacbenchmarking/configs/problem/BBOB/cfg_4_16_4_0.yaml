@@ -9,3 +9,4 @@ problem:
   seed: ${seed}
 task:
   n_trials: 100
+  n_objectives: 1

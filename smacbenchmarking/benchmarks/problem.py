@@ -5,6 +5,7 @@ from smac.runhistory.dataclasses import TrialInfo
 
 class Problem(ABC):
     """Problem to optimize."""
+
     def __init__(self) -> None:
         super().__init__()
 

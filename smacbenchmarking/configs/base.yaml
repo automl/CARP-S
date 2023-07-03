@@ -15,8 +15,9 @@ problem_id: ???  # Set in problem cfg. Can be directory.
 
 # Set in optimizer cfg
 optimizer: ???
-optimizer_id: ???  
+optimizer_id: ???
 
+timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}
 hydra:

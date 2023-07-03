@@ -20,14 +20,16 @@ Documentation at https://AutoML.github.io/SMACBenchmarking/main
 
 ## Minimal Example
 
-```
-# Your code here
+```bash
+python smacbenchmarking/run.py +problem/BBOB=cfg_4_1_4_0 +optimizer/smac20=blackbox
 ```
 
 
 ## Open Questions
 
 - How to aggregate and save data?
+    - Performance data
+        - trajectory: sorted by cost and time
 - What metadata do we need?
     - General
         - Timestamp

@@ -23,31 +23,25 @@ class SMAC3Optimizer(Optimizer):
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
-        self.smac: AbstractFacade | None = None
-    
+        self._smac: AbstractFacade | None = None
+
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
-    
-    def convert_to_trial(self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None) -> TrialInfo:
-        trial_info = TrialInfo(
-            config=config,
-            seed=seed,
-            budget=budget,
-            instance=instance
-        )
-        
+
+    def convert_to_trial(
+        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
+    ) -> TrialInfo:
+        trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
+
         return trial_info
-    
-    def target_function(self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None) -> float | list[float]:
-        trial_info = self.convert_to_trial(
-            config=config,
-            seed=seed,
-            budget=budget,
-            instance=instance
-        )
+
+    def target_function(
+        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
+    ) -> float | list[float]:
+        trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
         ret = self.problem.evaluate(trial_info=trial_info)
         return ret
-    
+
     def setup_smac(self) -> AbstractFacade:
         """
         Setup SMAC.
@@ -70,7 +64,6 @@ class SMAC3Optimizer(Optimizer):
         #         "cfg": OmegaConf.to_yaml(cfg=cfg),
         #     },
         # )
-
 
         # Select SMAC Facade
         smac_class = get_class(self.smac_cfg.smac_class)
@@ -135,10 +128,9 @@ class SMAC3Optimizer(Optimizer):
 
         return smac
 
-    
     def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
-        if len(self.task.objectives) > 1:
-            raise NotSupportedError
+        # if len(self.task.objectives) > 1:
+        #     raise NotSupportedError
 
         assert self._smac is not None
         rh = self._smac.runhistory
@@ -165,11 +157,11 @@ class SMAC3Optimizer(Optimizer):
             Y.append(cost)
 
         return X, Y
-    
-    def run(self) -> None:
-        if self.smac is None:
-            self.smac = self.setup_smac()
 
-        incumbent = self.smac.optimize()
-        
+    def run(self) -> None:
+        if self._smac is None:
+            self._smac = self.setup_smac()
+
+        incumbent = self._smac.optimize()
+
         return None

@@ -15,13 +15,12 @@ class BBOBProblem(SingleObjectiveProblem):
     @property
     def configspace(self) -> ConfigurationSpace:
         return self._configspace
-    
+
     def evaluate(self, trial_info: TrialInfo) -> float:
         configuration = trial_info.config
         input = list(dict(configuration).values())
         output = self._problem(input)
         return output
-
 
 
 def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tuple[ConfigurationSpace, Any]:
