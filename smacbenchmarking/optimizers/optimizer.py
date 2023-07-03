@@ -23,7 +23,7 @@ class Optimizer(ABC):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space.
+            Configuration space from Problem.
 
         Returns
         -------
@@ -63,4 +63,5 @@ class Optimizer(ABC):
 
     @abstractmethod
     def run(self) -> None:
+        """Run Optimizer on Problem"""
         raise NotImplementedError

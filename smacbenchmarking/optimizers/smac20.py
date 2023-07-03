@@ -12,7 +12,7 @@ from smac.runhistory.dataclasses import TrialInfo
 from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
+from smacbenchmarking.optimizers.optimizer import Optimizer
 
 
 class SMAC3Optimizer(Optimizer):
@@ -23,12 +23,44 @@ class SMAC3Optimizer(Optimizer):
         self.smac_cfg = smac_cfg
         self._smac: AbstractFacade | None = None
 
-    def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
+    def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
+        """Convert configuration space from Problem to Optimizer.
+
+        Here, we don't need to convert.
+
+        Parameters
+        ----------
+        configspace : ConfigurationSpace
+            Configuration space from Problem.
+
+        Returns
+        -------
+        ConfigurationSpace
+            Configuration space for Optimizer.
+        """
         return configspace
 
     def convert_to_trial(  # type: ignore[override]
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> TrialInfo:
+        """Convert proposal from SMAC to TrialInfo.
+
+        Parameters
+        ----------
+        config : Configuration
+            Configuration
+        seed : int | None, optional
+            Seed, by default None
+        budget : float | None, optional
+            Budget, by default None
+        instance : str | None, optional
+            Instance, by default None
+
+        Returns
+        -------
+        TrialInfo
+            Trial info containing configuration, budget, seed, instance.
+        """
         trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
 
         return trial_info
@@ -36,6 +68,26 @@ class SMAC3Optimizer(Optimizer):
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> float | list[float]:
+        """Target Function
+
+        Interface for the Problem.
+
+        Parameters
+        ----------
+        config : Configuration
+            Configuration
+        seed : int | None, optional
+            Seed, by default None
+        budget : float | None, optional
+            Budget, by default None
+        instance : str | None, optional
+            Instance, by default None
+
+        Returns
+        -------
+        float | list[float]
+            Cost as float or list[float], depending on the number of objectives.
+        """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
         ret = self.problem.evaluate(trial_info=trial_info)
         return ret
@@ -127,6 +179,18 @@ class SMAC3Optimizer(Optimizer):
         return smac
 
     def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
+        """List of x and y values of the incumbents over time. x depends on ``sort_by``.
+
+        Parameters
+        ----------
+        sort_by: str
+            Can be "trials" or "walltime".
+
+        Returns
+        -------
+        tuple[list[float], list[float]]
+
+        """
         # if len(self.task.objectives) > 1:
         #     raise NotSupportedError
 
@@ -157,6 +221,10 @@ class SMAC3Optimizer(Optimizer):
         return X, Y
 
     def run(self) -> None:
+        """Run SMAC on Problem.
+
+        If SMAC is not instantiated, instantiate.
+        """
         if self._smac is None:
             self._smac = self.setup_smac()
 

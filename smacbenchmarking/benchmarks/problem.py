@@ -15,6 +15,16 @@ class Problem(ABC):
     @property
     @abstractmethod
     def configspace(self) -> ConfigurationSpace:
+        """Configuration Space
+
+        All optimizers need to receive a configspace and
+        convert it to their search space definition.
+
+        Returns
+        -------
+        ConfigurationSpace
+            Configuration space.
+        """
         raise NotImplementedError
 
     @abstractmethod

@@ -17,9 +17,28 @@ class BBOBProblem(SingleObjectiveProblem):
 
     @property
     def configspace(self) -> ConfigurationSpace:
+        """Return configuration space.
+
+        Returns
+        -------
+        ConfigurationSpace
+            Configuration space.
+        """
         return self._configspace
 
     def evaluate(self, trial_info: TrialInfo) -> float:
+        """Evaluate problem.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Dataclass with configuration, seed, budget, instance.
+
+        Returns
+        -------
+        float
+            Cost
+        """
         configuration = trial_info.config
         input = list(dict(configuration).values())
         output = self._problem(input)
@@ -27,6 +46,24 @@ class BBOBProblem(SingleObjectiveProblem):
 
 
 def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tuple[ConfigurationSpace, Any]:
+    r"""Get BBOB problem
+
+    Parameters
+    ----------
+    fid : int
+        Function id $\in$ [1,24].
+    instance : int
+        Function instance.
+    dimension : int
+        Dimension. 1-x
+    seed : int
+        Seed for configuration space.
+
+    Returns
+    -------
+    tuple[ConfigurationSpace, Any]
+        Configuration space, target function.
+    """
     problem = ioh.get_problem(
         fid=fid,
         instance=instance,

@@ -15,18 +15,57 @@ from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
 def make_problem(cfg: DictConfig) -> Problem:
+    """Make Problem
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Global configuration.
+
+    Returns
+    -------
+    Problem
+        Target problem.
+    """
     problem_cfg = cfg.problem
     problem = instantiate(problem_cfg)
     return problem
 
 
 def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
+    """Make Optimizer
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Global configuration
+    problem : Problem
+        Target problem
+
+    Returns
+    -------
+    Optimizer
+        Instantiated optimizer.
+    """
     optimizer_cfg = cfg.optimizer
     optimizer = instantiate(optimizer_cfg)(problem=problem)
     return optimizer
 
 
-def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict) -> None:
+def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict | None = None) -> None:
+    """Save Run Data
+
+    Save run to global database.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Global configuration of run.
+    optimizer : Optimizer
+        Optimizer, needed to extract the trajectories.
+    metadata : dict | None
+        Optional metadata, by default None.
+    """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     # cfg_dict = pd.json_normalize(cfg_dict, sep=".").iloc[0].to_dict()  # flatten cfg
 
@@ -37,6 +76,9 @@ def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict) -> None:
             trajectory_data[sort_by] = {"X": X, "Y": Y}
         except NotSupportedError:
             continue
+
+    if metadata is None:
+        metadata = {}
 
     data = {
         "cfg": cfg_dict,
@@ -53,6 +95,16 @@ def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict) -> None:
 
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
+    """Run optimizer on problem.
+
+    Save trajectory and metadata to database.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Global configuration.
+
+    """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
     hydra_cfg = HydraConfig.instance().get()
