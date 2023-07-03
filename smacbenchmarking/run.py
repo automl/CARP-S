@@ -26,7 +26,7 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
     return optimizer
 
 
-def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict):
+def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict) -> None:
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     # cfg_dict = pd.json_normalize(cfg_dict, sep=".").iloc[0].to_dict()  # flatten cfg
 
@@ -51,7 +51,7 @@ def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict):
         json.dump(data, file, indent="\t")
 
 
-@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)
+@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)

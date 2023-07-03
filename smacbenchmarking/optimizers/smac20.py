@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
@@ -24,7 +26,7 @@ class SMAC3Optimizer(Optimizer):
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
 
-    def convert_to_trial(
+    def convert_to_trial(  # type: ignore[override]
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> TrialInfo:
         trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)

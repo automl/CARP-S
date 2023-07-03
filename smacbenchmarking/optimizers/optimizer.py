@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -31,7 +33,7 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def convert_to_trial(self, *args, **kwargs) -> TrialInfo:
+    def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
         """Convert proposal by optimizer to TrialInfo.
 
         This ensures that the problem can be evaluated with a unified API.
