@@ -3,7 +3,7 @@
 
 
 ## Installation
-```
+```bash
 git clone https://github.com/AutoML/SMACBenchmarking.git
 cd SMACBenchmarking
 conda create -n smacbenchmarking python=3.11
@@ -14,6 +14,8 @@ pip install .
 
 # Install for development
 make install-dev
+
+pip install -r requirements.txt
 ```
 
 Documentation at https://AutoML.github.io/SMACBenchmarking/main
@@ -21,7 +23,11 @@ Documentation at https://AutoML.github.io/SMACBenchmarking/main
 ## Minimal Example
 
 ```bash
-python smacbenchmarking/run.py +problem/BBOB=cfg_4_1_4_0 +optimizer/smac20=blackbox
+# Run SMAC BlackBoxFacade on certain BBOB problem
+python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1
+
+# Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
+python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
 ```
 
 
