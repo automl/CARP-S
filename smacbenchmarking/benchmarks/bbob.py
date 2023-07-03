@@ -1,8 +1,8 @@
 from typing import Any
 import ioh
 from ConfigSpace import ConfigurationSpace, Float, Configuration
-from problem import SingleObjectiveProblem
-from ..utils.target_instance import TargetInstance
+from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
+from smacbenchmarking.utils.target_instance import TargetInstance
 from smac.runhistory.dataclasses import TrialInfo
 
 

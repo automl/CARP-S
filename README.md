@@ -23,3 +23,23 @@ Documentation at https://AutoML.github.io/SMACBenchmarking/main
 ```
 # Your code here
 ```
+
+
+## Open Questions
+
+- How to aggregate and save data?
+- What metadata do we need?
+    - General
+        - Timestamp
+        - Machine
+    - Optimizer
+        - Name
+        - Repo
+        - Commit
+        - Version
+    - SMACBenchmarking
+        - Version
+        - Commit
+
+## Open Todos
+- [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".

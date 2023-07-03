@@ -1,2 +1,4 @@
 ConfigSpace
 hydra-core
+hydra-colorlog
+rich

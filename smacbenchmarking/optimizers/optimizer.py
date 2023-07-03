@@ -6,7 +6,7 @@ from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo
 
 
-SearchSpace = TypeAlias(Any)
+SearchSpace = Any
 
 class Optimizer(ABC):
     def __init__(self, problem: Problem) -> None:

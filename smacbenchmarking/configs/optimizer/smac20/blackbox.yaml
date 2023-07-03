@@ -1,0 +1,16 @@
+# @package _global_
+optimizer_id: SMAC3-BlackBoxFacade
+optimizer:
+  _target_: smacbenchmarking.optimizers.smac20.SMAC3Optimizer
+  _partial_: true
+
+  smac_cfg:
+    smac_class: smac.facade.blackbox_facade.BlackBoxFacade
+    scenario:
+      seed: ${seed}
+      n_trials: ${task.n_trials}
+      deterministic: true
+      n_workers: 1
+      output_directory: ${outdir}/${seed}/smac3_output
+    smac_kwargs:
+      dask_client: null

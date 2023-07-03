@@ -1,0 +1,27 @@
+defaults:
+  - _self_
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+seed: 1
+
+# Set in problem cfg
+problem: ???
+task:
+  n_trials: ???  # Optimization budget as number of evaluations.
+
+benchmark_id: ??? # Set in problem cfg.
+problem_id: ???  # Set in problem cfg. Can be directory.
+
+# Set in optimizer cfg
+optimizer: ???
+optimizer_id: ???  
+
+
+outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}
+hydra:
+  run:
+    dir: ${outdir}/${seed}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${outdir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${seed}
