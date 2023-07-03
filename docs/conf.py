@@ -1,7 +1,6 @@
 import automl_sphinx_theme
 
-from smacbenchmarking import copyright, author, version, name
-
+from smacbenchmarking import author, copyright, name, version
 
 options = {
     "copyright": copyright,

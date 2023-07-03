@@ -1,10 +1,11 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Any
-from typing_extensions import TypeAlias
-from ..benchmarks.problem import Problem
+
 from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo
+from typing_extensions import TypeAlias
 
+from ..benchmarks.problem import Problem
 
 SearchSpace = Any
 

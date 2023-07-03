@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from typing import Any
-from ConfigSpace import ConfigurationSpace, Configuration
+
+from ConfigSpace import Configuration, ConfigurationSpace
 
 
 class TargetInstance(object):

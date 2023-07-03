@@ -1,20 +1,19 @@
-from ConfigSpace import ConfigurationSpace, Configuration
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.optimizers.optimizer import SearchSpace
-from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.exceptions import NotSupportedError
-
-from smac.runhistory.dataclasses import TrialInfo
-from smac.facade.abstract_facade import AbstractFacade
-from smac.scenario import Scenario
-
-from smac.callback.metadata_callback import MetadataCallback
-from git import Repo
-from rich import print as printr
-from hydra.utils import get_class
-from omegaconf import OmegaConf, DictConfig
 import sys
 from pathlib import Path
+
+from ConfigSpace import Configuration, ConfigurationSpace
+from git import Repo
+from hydra.utils import get_class
+from omegaconf import DictConfig, OmegaConf
+from rich import print as printr
+from smac.callback.metadata_callback import MetadataCallback
+from smac.facade.abstract_facade import AbstractFacade
+from smac.runhistory.dataclasses import TrialInfo
+from smac.scenario import Scenario
+
+from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
+from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
 class SMAC3Optimizer(Optimizer):

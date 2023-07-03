@@ -1,29 +1,26 @@
-import hydra
-import sys
-from omegaconf import DictConfig
-import smac
-
-from smac import Scenario
-
-import os
-from hydra.core.hydra_config import HydraConfig
-
-
 from typing import Any
 
-from ConfigSpace import Configuration, ConfigurationSpace, Float
-from omegaconf import DictConfig, ListConfig, OmegaConf
-from rich import print as printr
-from rich import inspect
+import json
+import os
+import sys
 from functools import partial
+from pathlib import Path
+
+import hydra
 import numpy as np
+import pandas as pd
+import smac
+from ConfigSpace import Configuration, ConfigurationSpace, Float
+from hydra.core.hydra_config import HydraConfig
+from hydra.utils import get_class, instantiate
+from omegaconf import DictConfig, ListConfig, OmegaConf
+from rich import inspect
+from rich import print as printr
+from smac import Scenario
+
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
-from hydra.utils import instantiate, get_class
 from smacbenchmarking.utils.exceptions import NotSupportedError
-import pandas as pd
-from pathlib import Path
-import json
 
 
 def make_problem(cfg: DictConfig) -> Problem:

@@ -1,9 +1,11 @@
 from typing import Any
+
 import ioh
-from ConfigSpace import ConfigurationSpace, Float, Configuration
+from ConfigSpace import Configuration, ConfigurationSpace, Float
+from smac.runhistory.dataclasses import TrialInfo
+
 from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
 from smacbenchmarking.utils.target_instance import TargetInstance
-from smac.runhistory.dataclasses import TrialInfo
 
 
 class BBOBProblem(SingleObjectiveProblem):

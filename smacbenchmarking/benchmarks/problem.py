@@ -1,4 +1,5 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
+
 from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo
 
