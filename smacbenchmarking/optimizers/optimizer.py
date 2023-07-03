@@ -3,9 +3,8 @@ from typing import Any
 
 from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo
-from typing_extensions import TypeAlias
 
-from ..benchmarks.problem import Problem
+from smacbenchmarking.benchmarks.problem import Problem
 
 SearchSpace = Any
 

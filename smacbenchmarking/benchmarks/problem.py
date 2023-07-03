@@ -15,6 +15,22 @@ class Problem(ABC):
     def configspace(self) -> ConfigurationSpace:
         raise NotImplementedError
 
+    @abstractmethod
+    def evaluate(self, trial_info: TrialInfo) -> list[float] | float:
+        """Evaluate problem.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Dataclass with configuration, seed, budget, instance.
+
+        Returns
+        -------
+        list[float] | float
+            Cost (vector).
+        """
+        raise NotImplementedError
+
 
 class SingleObjectiveProblem(Problem):
     @abstractmethod

@@ -1,22 +1,13 @@
-from typing import Any
+from __future__ import annotations
 
 import json
-import os
-import sys
-from functools import partial
-from pathlib import Path
 
 import hydra
-import numpy as np
-import pandas as pd
-import smac
-from ConfigSpace import Configuration, ConfigurationSpace, Float
 from hydra.core.hydra_config import HydraConfig
-from hydra.utils import get_class, instantiate
-from omegaconf import DictConfig, ListConfig, OmegaConf
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 from rich import inspect
 from rich import print as printr
-from smac import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer

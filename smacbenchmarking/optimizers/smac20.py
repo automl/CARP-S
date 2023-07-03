@@ -1,19 +1,16 @@
-import sys
-from pathlib import Path
-
 from ConfigSpace import Configuration, ConfigurationSpace
-from git import Repo
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
-from smac.callback.metadata_callback import MetadataCallback
+
+# from git import Repo
+# from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
 from smac.runhistory.dataclasses import TrialInfo
 from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
-from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
 class SMAC3Optimizer(Optimizer):
@@ -161,6 +158,6 @@ class SMAC3Optimizer(Optimizer):
         if self._smac is None:
             self._smac = self.setup_smac()
 
-        incumbent = self._smac.optimize()
+        incumbent = self._smac.optimize()  # noqa: F841
 
         return None
