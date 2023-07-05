@@ -131,3 +131,4 @@ dmypy.json
 outputs
 runs
 *.json
+*.code-workspace

@@ -51,3 +51,7 @@ python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)
 
 ## Open Todos
 - [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
+- [ ] Add budget under `task` as time AND number of function evaluations
+    - If we use time as a budget, we need to check whether the hardware is the same.
+- [ ] Create `dispatch.py` checking if run already exists
+- [ ] Add slurm config

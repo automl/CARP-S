@@ -29,6 +29,7 @@ class Problem(ABC):
 
     @abstractmethod
     def evaluate(self, trial_info: TrialInfo) -> list[float] | float:
+        # TODO Maybe add logger to track all interesting info here
         """Evaluate problem.
 
         Parameters

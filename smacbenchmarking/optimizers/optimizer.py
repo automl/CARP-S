@@ -47,6 +47,7 @@ class Optimizer(ABC):
 
     @abstractmethod
     def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
+        # TODO return a list of tuples. Something more verbose like a dict or DataFrame would be better.
         """List of x and y values of the incumbents over time. x depends on ``sort_by``.
 
         Parameters
