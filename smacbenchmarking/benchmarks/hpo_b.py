@@ -12,15 +12,18 @@ for details, please refer to https://github.com/releaunifreiburg/HPO-B
 
 from __future__ import annotations
 
-from pathlib import Path
 import json
+from pathlib import Path
+import time
 
+
+import numpy as np
 import xgboost as xgb
 
 from ConfigSpace import ConfigurationSpace
-from smac.runhistory.dataclasses import TrialInfo
 
-from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
+from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 HPOB_SEARCH_SPACE_DIMS = {"4796": 3,
                           "5527": 8,
@@ -40,7 +43,7 @@ HPOB_SEARCH_SPACE_DIMS = {"4796": 3,
                           "5889": 6}
 
 
-class HPOBProblem(SingleObjectiveProblem):
+class HPOBProblem(Problem):
     def __init__(self,
                  dataset_id: tuple[str, int],
                  model_id: tuple[str, int],
@@ -104,7 +107,7 @@ class HPOBProblem(SingleObjectiveProblem):
         """
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> float:
+    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters
@@ -114,12 +117,18 @@ class HPOBProblem(SingleObjectiveProblem):
 
         Returns
         -------
-        float
+        TrialValue
             Cost
         """
         configuration = trial_info.config
-        input = list(dict(configuration).values())
+        input = np.asarray(dict(configuration).values())
+        starttime = time.time()
         x_q = xgb.DMatrix(input.reshape(-1, self.search_space_dims))
         predicted_output = self.surrogate_model.predict(x_q)
+        endtime = time.time()
+        T = endtime - starttime
+
         # we would like to do minimization
-        return - predicted_output
+        trial_value = TrialValue(cost=-predicted_output, time=T, starttime=starttime, endtime=endtime)
+
+        return trial_value
