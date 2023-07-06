@@ -3,11 +3,12 @@ from __future__ import annotations
 from typing import Any
 
 import time
+
 import ioh
 from ConfigSpace import ConfigurationSpace, Float
-from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class BBOBProblem(Problem):
@@ -45,14 +46,9 @@ class BBOBProblem(Problem):
         starttime = time.time()
         cost = self._problem(input)
         endtime = time.time()
-        T = endtime - starttime  
+        T = endtime - starttime
 
-        trial_value = TrialValue(
-            cost=cost,
-            time=T,
-            starttime=starttime,
-            endtime=endtime
-        )
+        trial_value = TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
 
         return trial_value
 
