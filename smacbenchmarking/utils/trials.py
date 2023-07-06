@@ -3,6 +3,7 @@ from typing import Any
 from dataclasses import dataclass, field
 from enum import IntEnum
 
+import dataclasses_json
 from ConfigSpace import Configuration
 from dataclasses_json import dataclass_json
 
@@ -36,6 +37,7 @@ class TrialInfo:
     budget: float | None = None
 
 
+@dataclasses_json
 @dataclass(frozen=True)
 class TrialValue:
     """Values of a trial.
