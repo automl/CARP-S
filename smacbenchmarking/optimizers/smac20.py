@@ -89,8 +89,8 @@ class SMAC3Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        ret = self.problem.evaluate(trial_info=trial_info)
-        return ret
+        trial_value = self.problem.evaluate(trial_info=trial_info)
+        return trial_value.cost
 
     def setup_smac(self) -> AbstractFacade:
         """
