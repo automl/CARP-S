@@ -37,7 +37,7 @@ class TrialInfo:
     budget: float | None = None
 
 
-@dataclasses_json
+@dataclass_json
 @dataclass(frozen=True)
 class TrialValue:
     """Values of a trial.
