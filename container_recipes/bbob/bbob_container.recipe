@@ -16,6 +16,7 @@ From: continuumio/anaconda3
     apt install curl -y
     apt install wget -y
     apt install git -y
+    apt install cmake3 -y
     . /opt/conda/etc/profile.d/conda.sh
 
    conda update -n base -c defaults conda
