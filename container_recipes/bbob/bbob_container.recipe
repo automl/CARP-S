@@ -23,6 +23,7 @@ From: continuumio/anaconda3
    conda create -n environment python=3.11
    conda init bash
    conda activate environment
+   pip install wheel
    pip install -r benchmarking/requirements.txt
    pip install ../benchmarking
    pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
