@@ -31,6 +31,6 @@ From: continuumio/anaconda3
    pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
 
    # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/bbob/bbob_requirements.txt
+   pip install -r benchmarking/container_recipes/dummy_benchmark/dummy_benchmark_requirements.txt
 
    echo "Successfully installed all features"
