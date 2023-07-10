@@ -29,6 +29,7 @@ def main(cfg: DictConfig) -> None:
 
     image_name = cfg_dict["benchmark_id"]
     problem_instance = Client.instance(f"{image_name}.sif")
+    problem_instance.run()
 
     # problem = make_problem(cfg=cfg)
     # inspect(problem)
