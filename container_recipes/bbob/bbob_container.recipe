@@ -17,6 +17,8 @@ From: continuumio/anaconda3
     apt install wget -y
     apt install git -y
     apt install gcc -y
+    apt install build-essential -y
+    apt install clang -y
     . /opt/conda/etc/profile.d/conda.sh
 
    conda update -n base -c defaults conda
