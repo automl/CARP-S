@@ -30,23 +30,23 @@ def main(cfg: DictConfig) -> None:
     image_name = cfg_dict["benchmark_id"]
     problem_instance = Client.instance(f"{image_name}.sif")
 
-    problem = make_problem(cfg=cfg)
-    inspect(problem)
+    # problem = make_problem(cfg=cfg)
+    # inspect(problem)
 
-    optimizer = make_optimizer(cfg=cfg, problem=problem)
-    inspect(optimizer)
+    # optimizer = make_optimizer(cfg=cfg, problem=problem)
+    # inspect(optimizer)
 
-    try:
-        optimizer.run()
-    except NotSupportedError:
-        print("Not supported. Skipping.")
-    except Exception as e:
-        print("Something went wrong:")
-        print(e)
+    # try:
+    #    optimizer.run()
+    # except NotSupportedError:
+    #    print("Not supported. Skipping.")
+    # except Exception as e:
+    #    print("Something went wrong:")
+    #    print(e)
 
-    metadata = {"hi": "hello"}  # TODO add reasonable meta data
+    # metadata = {"hi": "hello"}  # TODO add reasonable meta data
 
-    save_run(cfg=cfg, optimizer=optimizer, metadata=metadata)
+    # save_run(cfg=cfg, optimizer=optimizer, metadata=metadata)
 
     return None
 
