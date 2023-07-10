@@ -1,0 +1,24 @@
+Bootstrap: docker
+From: continuumio/anaconda3
+
+%files
+    . /benchmarking
+
+%post
+    apt update -y
+    apt upgrade -y
+    apt install curl -y
+    apt install wget -y
+    apt install git -y
+    . /opt/conda/etc/profile.d/conda.sh
+
+   conda update -n base -c defaults conda
+   conda create -n environment python=3.11
+   conda init bash
+   conda activate environment
+
+   pip install -r benchmarking/requirements.txt
+   pip install ../benchmarking
+   pip install -r benchmarking/container_recipes/general_requirements_container_runner.txt
+
+   echo "Successfully installed all features"

@@ -1,9 +1,10 @@
 from domdf_python_tools.utils import printr
 from hydra.core.hydra_config import HydraConfig
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import DictConfig, OmegaConf
 from rich import inspect
+from spython.main import Client
 
-from smacbenchmarking.run import make_problem, make_optimizer, save_run
+from smacbenchmarking.run import make_optimizer, make_problem, save_run
 from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
@@ -25,6 +26,9 @@ def main(cfg: DictConfig) -> None:
     printr(cfg_dict)
     hydra_cfg = HydraConfig.instance().get()
     printr(hydra_cfg.run.dir)
+
+    image_name = cfg_dict["benchmark_id"]
+    problem_instance = Client.instance(f"{image_name}.sif")
 
     problem = make_problem(cfg=cfg)
     inspect(problem)
