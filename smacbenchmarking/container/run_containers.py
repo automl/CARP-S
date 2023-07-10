@@ -27,6 +27,10 @@ def main(cfg: DictConfig) -> None:
     hydra_cfg = HydraConfig.instance().get()
     printr(hydra_cfg.run.dir)
 
+    # write hydra config to file
+    print(f"{hydra_cfg.run.dir}/hydra_config.yaml")
+    OmegaConf.save(config=cfg, f=f"{hydra_cfg.run.dir}/hydra_config.yaml")
+
     image_name = cfg_dict["benchmark_id"]
     problem_instance = Client.instance(f"{image_name}.sif")
     problem_instance.run()
