@@ -21,4 +21,4 @@ VERSION v0.0.1
 
 
 %runscript
-    python -s /home/HPOBench/hpobench/container/server_abstract_benchmark.py ml.xgboost_benchmark $@
+    python -s /home/HPOBench/hpobench/container/server_abstract_benchmark.py ml.rf_benchmark $@
