@@ -2,10 +2,10 @@ from time import sleep, time
 
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
-from smac.runhistory import TrialInfo
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
+from smacbenchmarking.utils.trials import TrialInfo
 
 
 class DummyOptimizer(Optimizer):
