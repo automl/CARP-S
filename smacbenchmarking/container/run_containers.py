@@ -1,3 +1,4 @@
+import hydra
 from domdf_python_tools.utils import printr
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
@@ -8,7 +9,7 @@ from smacbenchmarking.run import make_optimizer, make_problem, save_run
 from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
-@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
+@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
     """Run optimizer on problem.
 
