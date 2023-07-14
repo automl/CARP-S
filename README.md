@@ -17,6 +17,11 @@ make install-dev
 
 pip install -r requirements.txt
 ```
+### Database
+All results will be written to a central database.
+This database needs to be set up once on the server.
+MySQL can be installed with the information [here](https://dev.mysql.com/doc/refman/8.0/en/linux-installation.html).
+
 
 Documentation at https://AutoML.github.io/SMACBenchmarking/main
 

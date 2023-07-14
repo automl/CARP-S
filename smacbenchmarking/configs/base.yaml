@@ -1,5 +1,6 @@
 defaults:
   - _self_
+  - database
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
 

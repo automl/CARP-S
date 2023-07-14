@@ -1,0 +1,40 @@
+# @package _global_
+database:
+  host: localhost
+  user: root
+  password: samtigerpilz
+  database_name: results
+  table_name: table0  # You can't use just `table`. This is reserved in MySQL.
+  resultfields: "best_optimizer:VARCHAR(50), hihi:VARCHAR(50)"
+  # experiment_id there by default, enforce unique combination with n_trials to avoid
+  # duplicate entries for the same optimization step
+  logtableaddition: UNIQUE KEY unique_trial_per_experiment (experiment_id, n_trials)  
+  logtables: 
+    n_trials: INT
+    trial_info:
+      config: VARCHAR(${database.string2vec_encoder.max_vector_length})  # TODO add an encoder check if reach the limit
+      instance: INT
+      seed: INT
+      budget: DOUBLE
+    trial_value:
+      cost: VARCHAR(${database.string2vec_encoder.max_vector_length})  # at most 10 objectives
+      time: DOUBLE
+      status: VARCHAR(50)
+      starttime: DOUBLE
+      endttime: DOUBLE
+
+  string2vec_encoder: 
+    max_vector_length: 256
+
+experiment:
+  # What will be logged as experiment config to the database
+  # keyfield name must be from root level. dots are replaced by "__",
+  # e.g. for `trask__n_trials` 
+  # TODO What other unique identifiers do we need for each experiment?
+  keyfields:
+    benchmark_id: VARCHAR(50)
+    problem_id: VARCHAR(50)
+    optimizer_id: VARCHAR(50)
+    task__n_trials: INT
+    seed: INT
+
