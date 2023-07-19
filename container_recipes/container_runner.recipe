@@ -18,4 +18,4 @@ From: continuumio/anaconda3
     echo "Successfully installed all features"
 
 %runscript
-    python benchmarking/container/run_container.py "$@"
+    python benchmarking/container/run_containers.py "$@"
