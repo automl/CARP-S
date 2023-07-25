@@ -1,3 +1,5 @@
+import os
+
 import hydra
 from domdf_python_tools.utils import printr
 from hydra.core.hydra_config import HydraConfig
@@ -26,15 +28,21 @@ def main(cfg: DictConfig) -> None:
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
     hydra_cfg = HydraConfig.instance().get()
-    printr(hydra_cfg.run.dir)
 
     # write hydra config to file
-    print(f"{hydra_cfg.run.dir}/hydra_config.yaml")
-    OmegaConf.save(config=cfg, f=f"{hydra_cfg.run.dir}/hydra_config.yaml")
+    cfg_path = f"{hydra_cfg.run.dir}/hydra_config.yaml"
+    print(cfg_path)
+    OmegaConf.save(config=cfg, f=cfg_path)
 
-    image_name = cfg_dict["benchmark_id"]
-    problem_instance = Client.instance(f"{image_name}.sif")
-    problem_instance.run()
+    job_id = os.environ["SLURM_JOB_ID"]
+
+    # write the cfg_path to file job_id_config.yaml
+    with open(f"{job_id}_config.txt") as f:
+        f.write(cfg_path)
+
+    # image_name = cfg_dict["benchmark_id"]
+    # problem_instance = Client.instance(f"{image_name}.sif")
+    # problem_instance.run()
 
     # problem = make_problem(cfg=cfg)
     # inspect(problem)
