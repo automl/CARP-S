@@ -26,7 +26,7 @@ OPTIMIZER_CONTAINER="$(cat "${SLURM_JOB_ID}_optimizer_container.txt")"
 echo "Starting problem container"
 singularity instance start "${PROBLEM_CONTAINER}.sif" problem "${SLURM_JOB_ID}_config.txt"
 
-API_URL="localhost:5000"  # Replace with the actual API URL
+API_URL="localhost:5000/configspace"  # Replace with the actual API URL
 
 while true; do
     response=$(curl -s -o /dev/null -w "%{http_code}" $API_URL)
