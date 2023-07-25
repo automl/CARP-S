@@ -26,10 +26,24 @@ OPTIMIZER_CONTAINER="$(cat "${SLURM_JOB_ID}_optimizer_container.txt")"
 echo "Starting problem container"
 singularity instance start "${PROBLEM_CONTAINER}.sif" problem "${SLURM_JOB_ID}_config.txt"
 
-while ! ping -c1 localhost:5000 &>/dev/null; do
-  echo "Waiting for Server"
-  sleep 1
+API_URL="localhost:5000"  # Replace with the actual API URL
+
+while true; do
+    response=$(curl -s -o /dev/null -w "%{http_code}" $API_URL)
+
+if [ "$response" = "200" ]; then
+    echo "API is up and running!"
+    break
+else
+    echo "API is not yet ready (HTTP status: $response). Retrying in 5 seconds..."
+    sleep 5
+fi
 done
+
+#while ! ping -c1 localhost:5000 &>/dev/null; do
+#  echo "Waiting for Server"
+#  sleep 1
+#done
 
 echo "Host Found"
 
