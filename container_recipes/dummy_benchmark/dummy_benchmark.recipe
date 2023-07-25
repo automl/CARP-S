@@ -2,7 +2,7 @@ Bootstrap: docker
 From: continuumio/anaconda3
 
 %startscript
-    flask run
+    flask run "{@}"
 
 %environment
     export FLASK_APP=smacbenchmarking/container/container_app.py
