@@ -1,10 +1,10 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: ml/lr/10101
+problem_id: ml/xgboost/146818
 problem:
   _target_: smacbenchmarking.benchmarks.hpo_bench.HPOBenchProblem
-  model: lr
-  task_id: 10101
+  model: xgboost
+  task_id: 146818
   seed: ${seed}
 task:
   n_trials: 100

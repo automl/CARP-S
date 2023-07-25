@@ -1,10 +1,10 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: ml/lr/10101
+problem_id: ml/rf/146821
 problem:
   _target_: smacbenchmarking.benchmarks.hpo_bench.HPOBenchProblem
-  model: lr
-  task_id: 10101
+  model: rf
+  task_id: 146821
   seed: ${seed}
 task:
   n_trials: 100
