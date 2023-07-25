@@ -27,7 +27,7 @@ singularity run "${PROBLEM_CONTAINER}.sif" "${SLURM_JOB_ID}_config.txt"
 
 while ! ping -c1 localhost:5000 &>/dev/null; do
   echo "Waiting for Server"
-  sleep
+  sleep 1
 done
 
 echo "Host Found"
@@ -38,3 +38,8 @@ echo "Starting optimizer container"
 singularity run "${OPTIMIZER_CONTAINER}.sif" "${SLURM_JOB_ID}_config.txt"
 
 echo "All containers started"
+
+# Remove temporary files
+rm "${SLURM_JOB_ID}_config.txt"
+rm "${SLURM_JOB_ID}_problem_container.txt"
+rm "${SLURM_JOB_ID}_optimizer_container.txt"

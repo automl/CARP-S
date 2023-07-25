@@ -1,4 +1,5 @@
 import json
+import sys
 
 from ConfigSpace import ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
@@ -6,7 +7,9 @@ from flask import Flask, request
 
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
-# TODO: load actual config given by hydra, instantiate benchie accordingly
+# command line arg
+config_path = sys.argv[1]
+
 configspace = ConfigurationSpace()
 
 app = Flask(__name__)
