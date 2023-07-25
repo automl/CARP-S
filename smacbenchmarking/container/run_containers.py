@@ -37,7 +37,7 @@ def main(cfg: DictConfig) -> None:
     job_id = os.environ["SLURM_JOB_ID"]
 
     # write the cfg_path to file job_id_config.yaml
-    with open(f"{job_id}_config.txt") as f:
+    with open(f"{job_id}_config.txt", 'w+') as f:
         f.write(cfg_path)
 
     # image_name = cfg_dict["benchmark_id"]
