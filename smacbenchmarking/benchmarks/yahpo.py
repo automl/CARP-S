@@ -117,7 +117,9 @@ class YahpoProblem(SingleObjectiveProblem):
               'iaml_xgboost': ['40981', '41146', '1489', '1067'],
               'iaml_super': ['40981', '41146', '1489', '1067']}
 
-    def __init__(self, scenario: str, instance: str, budget_type: str, metric, seed: int):
+    def __init__(self, bench: str, instance: str, budget_type: str, metric,  lower_is_better:
+    bool =
+    True):
         """Initialize a Yahpo problem.
 
         Parameters
@@ -129,20 +131,21 @@ class YahpoProblem(SingleObjectiveProblem):
         """
         super().__init__()
 
-        assert scenario in list_scenarios(), f'The scenario you choose is not available.'
+        assert bench in list_scenarios(), f'The scenario you choose is not available.'
         assert str(instance) in self.COMBIS[
-            scenario], f'The instance you choose is not available in ' \
-                       f'{scenario}.'
+            bench], f'The instance you choose is not available in ' \
+                       f'{bench}.'
 
-        self.scenario = scenario
+        self.scenario = bench
         self.instance = str(instance)
 
-        self._problem = BenchmarkSet(scenario=scenario, instance=self.instance)
+        self._problem = BenchmarkSet(scenario=bench, instance=self.instance)
         self._configspace = self._problem.get_opt_space(drop_fidelity_params=True)
         self.fidelity_space = self._problem.get_fidelity_space()
         self.fidelity_dims = list(self._problem.get_fidelity_space()._hyperparameters.keys())
 
         self.budget_type = budget_type
+        self.lower_is_better = lower_is_better
 
         assert budget_type in self.fidelity_dims, f'The budget type you choose is not available ' \
                                                   f'in this instance. Please choose from ' \
@@ -164,7 +167,6 @@ class YahpoProblem(SingleObjectiveProblem):
         # local_config.set_data_path("some_path")
 
         self.metric = metric
-        self.seed = seed  # TODO this is yet unused
 
     @property
     def configspace(self) -> ConfigurationSpace:
@@ -211,58 +213,84 @@ class YahpoProblem(SingleObjectiveProblem):
             xs.update(self.max_other_fidelities)
 
         # fixme: figure out why list is returned here!
-        return self._problem.objective_function(xs)[0][self.metric]
-#:q
-# if __name__ == '__main__':
-#
-#
-#
-#
-#     list_scenarios()
-#
-#     b = BenchmarkSet(scenario="lcbenchb")
-#
-#     b.targets
-#
-#     b.instances
-#
-#     # Set an instance
-#     b.set_instance("3945")
-#
-#     combi = {}
-#     fids = {}
-#     for s in list_scenarios():
-#         b = BenchmarkSet(scenario=s)
-#         combi[s] = []
-#
-#         for i in b.instances:
-#             combi[s].append(i)
-#             fids[s, i] = list(b.get_fidelity_space()._hyperparameters.keys())
-#
-#     # Sample a point from the configspace
-#     search_space = b.get_opt_space()  # NOTICE this has drop_fidelity_params=True argument
-#     search_space
-#
-#     xs = search_space.sample_configuration(1)
-#     xs
-#
-#     # evaluate
-#     b.objective_function(xs)
-#
-#     # setting up meta data
-#     from yahpo_gym import local_config
-#
-#     local_config.init_config()
-#     local_config.set_data_path("~/PycharmProjects/SMACBenchmarking/bench_data/yahpo_data")
-#
-#
-#     # when using drop fidelity option:
-#     b = BenchmarkSet("lcbench", instance="3945")
-#     # Sample a point from the configspace
-#     xs = b.get_opt_space(drop_fidelity_params=True).sample_configuration(1)
-#     # Convert to dictionary and add epoch
-#     xs = xs.get_dictionary()
-#     xs.update({'epoch': 52})
-#     xs
-#     b.objective_function(xs)
+
+        if self.lower_is_better:
+            return self._problem.objective_function(xs)[0][self.metric]
+
+        else:
+            return -self._problem.objective_function(xs)[0][self.metric]
+
+
+
+
+if __name__ == '__main__':
+
+
+
+
+
+
+
+
+
+    list_scenarios()
+
+    YahpoProblem.COMBIS
+
+
+
+    b = BenchmarkSet(scenario="lcbench")
+
+    b.targets
+
+    b.instances
+
+
+
+    # Set an instance
+    b.set_instance("3945")
+
+    combi = {}
+    fids = {}
+    metrics = {}
+    for s in list_scenarios():
+        b = BenchmarkSet(scenario=s)
+        combi[s] = []
+        all_fids = set()
+
+        metrics[s] = b.targets
+
+        for i in b.instances:
+            combi[s].append(i)
+            fid= b.get_fidelity_space()
+            all_fids.update(list(k.upper for k in fid._hyperparameters.values()))
+            fids[s, i] = list(fid._hyperparameters.keys())
+        print(f'{s}: {all_fids}   {len(all_fids)}')
+
+    # Sample a point from the configspace
+    search_space = b.get_opt_space()  # NOTICE this has drop_fidelity_params=True argument
+    search_space
+
+    xs = search_space.sample_configuration(1)
+    xs
+
+    # evaluate
+    b.objective_function(xs)
+
+    # setting up meta data
+    from yahpo_gym import local_config
+
+    local_config.init_config()
+    local_config.set_data_path("~/PycharmProjects/SMACBenchmarking/bench_data/yahpo_data")
+
+
+    # when using drop fidelity option:
+    b = BenchmarkSet("lcbench", instance="3945")
+    # Sample a point from the configspace
+    xs = b.get_opt_space(drop_fidelity_params=True).sample_configuration(1)
+    # Convert to dictionary and add epoch
+    xs = xs.get_dictionary()
+    xs.update({'epoch': 52})
+    xs
+    b.objective_function(xs)
 

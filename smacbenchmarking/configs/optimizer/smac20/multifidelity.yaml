@@ -13,8 +13,8 @@ optimizer:
       deterministic: true
       n_workers: 1
       output_directory: ${outdir}/${seed}/smac3_output
-      min_budget: 1 # Todo configure min & max budget - depending on yahpo problem fidelity type
-      max_budget: 52
+      min_budget: ${task.min_budget} # Todo configure min & max budget - depending on yahpo problem fidelity type
+      max_budget: ${task.max_budget}
     smac_kwargs:
       dask_client: null
       intensifier: smac.intensifier.hyperband.Hyperband
