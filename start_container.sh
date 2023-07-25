@@ -18,8 +18,8 @@ done
 echo "Runner container finished"
 
 # Read PROBLEM_CONTAINER from file
-PROBLEM_CONTAINER=$(cat "${SLURM_JOB_ID}_problem_container.txt")
-OPTIMIZER_CONTAINER=$(cat "${SLURM_JOB_ID}_optimizer_container.txt")
+echo PROBLEM_CONTAINER="$(cat "${SLURM_JOB_ID}_problem_container.txt")"
+echo OPTIMIZER_CONTAINER="$(cat "${SLURM_JOB_ID}_optimizer_container.txt")"
 
 # Start the problem container & wait for the flask server to start
 echo "Starting problem container"
