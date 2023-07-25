@@ -40,6 +40,12 @@ def main(cfg: DictConfig) -> None:
     with open(f"{job_id}_config.txt", 'w+') as f:
         f.write(cfg_path)
 
+    with open(f"{job_id}_problem_container.txt", 'w+') as f:
+        f.write(cfg_dict["benchmark_id"])
+
+    with open(f"{job_id}_optimizer_container.txt", 'w+') as f:
+        f.write(cfg_dict["optimizer_id"])
+
     # image_name = cfg_dict["benchmark_id"]
     # problem_instance = Client.instance(f"{image_name}.sif")
     # problem_instance.run()
