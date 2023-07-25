@@ -18,14 +18,13 @@ done
 echo "Runner container finished"
 
 # Read PROBLEM_CONTAINER from file
-export PROBLEM_CONTAINER="$(cat "${SLURM_JOB_ID}_problem_container.txt")"
-export OPTIMIZER_CONTAINER="$(cat "${SLURM_JOB_ID}_optimizer_container.txt")"
+PROBLEM_CONTAINER="$(cat "${SLURM_JOB_ID}_problem_container.txt")"
+OPTIMIZER_CONTAINER="$(cat "${SLURM_JOB_ID}_optimizer_container.txt")"
 
-cat "${SLURM_JOB_ID}_config.txt"
 
 # Start the problem container & wait for the flask server to start
 echo "Starting problem container"
-singularity run "${PROBLEM_CONTAINER}.sif" "${SLURM_JOB_ID}_config.txt"
+singularity run "${SLURM_JOB_ID}_config.txt" "${PROBLEM_CONTAINER}.sif"
 
 while ! ping -c1 localhost:5000 &>/dev/null; do
   echo "Waiting for Server"
@@ -37,7 +36,7 @@ echo "Host Found"
 
 # Start the optimizer container
 echo "Starting optimizer container"
-singularity run "${OPTIMIZER_CONTAINER}.sif" "${SLURM_JOB_ID}_config.txt"
+singularity run "${SLURM_JOB_ID}_config.txt" "${OPTIMIZER_CONTAINER}.sif"
 
 echo "All containers started"
 
