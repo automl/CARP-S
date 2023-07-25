@@ -40,13 +40,7 @@ else
 fi
 done
 
-#while ! ping -c1 localhost:5000 &>/dev/null; do
-#  echo "Waiting for Server"
-#  sleep 1
-#done
-
 echo "Host Found"
-
 
 # Start the optimizer container
 echo "Starting optimizer container"
@@ -59,4 +53,5 @@ rm "${SLURM_JOB_ID}_config.txt"
 rm "${SLURM_JOB_ID}_problem_container.txt"
 rm "${SLURM_JOB_ID}_optimizer_container.txt"
 
+# Stop the problem container
 singularity instance stop problem

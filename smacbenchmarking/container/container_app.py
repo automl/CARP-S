@@ -8,7 +8,7 @@ from flask import Flask, request
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 # command line arg
-config_path = sys.argv[1]
+print(sys.argv)
 
 configspace = ConfigurationSpace()
 
