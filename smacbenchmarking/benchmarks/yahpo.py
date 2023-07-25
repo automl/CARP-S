@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Any
+from yahpo_gym import BenchmarkSet, list_scenarios
 
-from yahpo_gym import *
-
-from ConfigSpace import ConfigurationSpace, Float
+from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo
 
 from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
@@ -214,10 +212,7 @@ class YahpoProblem(SingleObjectiveProblem):
 
         # fixme: figure out why list is returned here!
         return self._problem.objective_function(xs)[0][self.metric]
-#
-#
-#
-#
+#:q
 # if __name__ == '__main__':
 #
 #

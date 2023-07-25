@@ -3,7 +3,6 @@ benchmark_id: YAHPO
 problem_id: lcbench/3945
 problem:
   _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
-  budget_type: epoch # ${problem.budget_type} # CAREFULL: config dependency to problem! results in recusrive interpolation???
   scenario: lcbench
   instance: 3945
   metric: val_cross_entropy

@@ -3,7 +3,6 @@ benchmark_id: YAHPO
 problem_id: rbv2_ranger/4135
 problem:
   _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
-  budget_type: repl # ${problem.budget_type} # CAREFULL: config dependency to problem! results in recusrive interpolation???
   scenario: rbv2_ranger
   instance: 4135
   metric: acc
