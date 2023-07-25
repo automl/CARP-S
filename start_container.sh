@@ -59,4 +59,4 @@ rm "${SLURM_JOB_ID}_config.txt"
 rm "${SLURM_JOB_ID}_problem_container.txt"
 rm "${SLURM_JOB_ID}_optimizer_container.txt"
 
-# TODO: Stop the problem container at the end
+singularity instance stop problem
