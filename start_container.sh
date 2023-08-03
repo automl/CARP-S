@@ -45,9 +45,9 @@ echo "Host Found"
 
 # Start the optimizer container
 echo "Starting optimizer container"
-singularity run "${OPTIMIZER_CONTAINER}.sif" "${BENCHMARKING_JOB_ID}_config.txt"
+singularity exec "${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_optimizer.py
 
-echo "All containers started"
+echo "Run Finished"
 
 # Remove temporary files
 rm "${BENCHMARKING_JOB_ID}_config.txt"

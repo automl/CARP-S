@@ -28,6 +28,3 @@ From: continuumio/anaconda3
    pip install -r benchmarking/container_recipes/dummy_optimizer/dummy_optimizer_requirements.txt
 
    echo "Successfully installed all features"
-
-%runscript
-    python smacbenchmarking/container/container_optimizer.py "$@"
