@@ -8,3 +8,6 @@ dataclasses-json~=0.5.9
 
 # HPO-B
 xgboost==1.5.2
+
+#syne_tune
+syne-tune[basic]
