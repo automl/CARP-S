@@ -24,7 +24,7 @@ OPTIMIZER_CONTAINER="$(cat "${SLURM_JOB_ID}_optimizer_container.txt")"
 
 # Start the problem container & wait for the flask server to start
 echo "Starting problem container"
-singularity instance start "${PROBLEM_CONTAINER}.sif" problem "${SLURM_JOB_ID}_config.txt"
+singularity instance start "${PROBLEM_CONTAINER}.sif" problem "${SLURM_JOB_ID}_config.txt" > output.txt
 
 API_URL="localhost:5000/configspace"  # Replace with the actual API URL
 
