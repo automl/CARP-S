@@ -20,5 +20,7 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
     problem = ContainerizedProblemClient()
     optimizer = make_optimizer(cfg=cfg, problem=problem)
 
+    optimizer.run()
+
 print("problem :(")
 
