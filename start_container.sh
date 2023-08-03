@@ -25,7 +25,7 @@ OPTIMIZER_CONTAINER="$(cat "${BENCHMARKING_JOB_ID}_optimizer_container.txt")"
 
 # Start the problem container & wait for the flask server to start
 echo "Starting problem container"
-singularity instance start "${PROBLEM_CONTAINER}.sif" problem "${BENCHMARKING_JOB_ID}_config.txt"
+singularity instance start "${PROBLEM_CONTAINER}.sif" problem
 
 API_URL="localhost:5000/configspace"  # Replace with the actual API URL
 

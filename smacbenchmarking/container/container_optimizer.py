@@ -5,8 +5,8 @@ from hydra import initialize, compose
 from smacbenchmarking.container.wrapper import ContainerizedProblemClient
 from smacbenchmarking.run import make_optimizer
 
-
 if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
+    print("Hello :)")
     with open(f"{job_id}_config.txt", 'r') as f:
         hydra_config_path = f.read()
 
@@ -19,4 +19,6 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
 
     problem = ContainerizedProblemClient()
     optimizer = make_optimizer(cfg=cfg, problem=problem)
+
+print("problem :(")
 
