@@ -10,6 +10,10 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 # command line arg
 print(sys.argv)
 
+# write argv to file
+with open('output.txt', 'w+') as f:
+    f.write(str(sys.argv))
+
 configspace = ConfigurationSpace()
 
 app = Flask(__name__)
