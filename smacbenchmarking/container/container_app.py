@@ -18,7 +18,7 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
 
 # path pattern runs/DUMMY_Optimizer/DUMMY/dummy/1/hydra_config.yaml
 # we divide into hydra_config.yaml and rest of path
-hydra_config_path = hydra_config_path[:len(hydra_config_path)-17]
+hydra_config_path = '../' + hydra_config_path[:len(hydra_config_path)-17]
 
 initialize(version_base=None, config_path=hydra_config_path)
 cfg = compose("hydra_config.yaml")
