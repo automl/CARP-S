@@ -8,7 +8,10 @@ From: continuumio/anaconda3
     export FLASK_APP=smacbenchmarking/container/container_app.py
 
 %files
-    . /benchmarking
+    ./smacbenchmarking /benchmarking/smacbenchmarking
+    ./container_recipes /benchmarking/container_recipes
+    requirements.txt /benchmarking/requirements.txt
+    setup.py /benchmarking/setup.py
 
 %post
     apt update -y
