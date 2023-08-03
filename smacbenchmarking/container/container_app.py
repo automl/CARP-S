@@ -16,7 +16,11 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
     with open(f"{job_id}_config.txt", 'r') as f:
         hydra_config_path = f.read()
 
-initialize(version_base=None, config_path="conf")
+# path pattern runs/DUMMY_Optimizer/DUMMY/dummy/1/hydra_config.yaml
+# we divide into hydra_config.yaml and rest of path
+path = hydra_config_path[:len(hydra_config_path)-17]
+
+initialize(version_base=None, config_path="hydra_config.yaml")
 cfg = compose(hydra_config_path)
 
 problem = make_problem(cfg=cfg)
