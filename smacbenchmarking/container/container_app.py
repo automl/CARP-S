@@ -1,5 +1,6 @@
 import json
 import sys
+import os
 
 from ConfigSpace import ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
@@ -10,9 +11,15 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 # command line arg
 print(sys.argv)
 
+if job_id := os.environ['SLURM_JOB_ID'] != '':
+    with open(f"{job_id}_config.txt", 'r') as f:
+        hydra_config_path = f.read()
+
+
 # write argv to file
 with open('output.txt', 'w+') as f:
-    f.write(str(sys.argv))
+    f.write(str(sys.argv) + '\n')
+    f.write(hydra_config_path)
 
 configspace = ConfigurationSpace()
 
