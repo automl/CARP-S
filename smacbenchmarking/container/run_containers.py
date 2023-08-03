@@ -27,7 +27,7 @@ def main(cfg: DictConfig) -> None:
     print(cfg_path)
     OmegaConf.save(config=cfg, f=cfg_path)
 
-    job_id = os.environ["SLURM_JOB_ID"]
+    job_id = os.environ["BENCHMARKING_JOB_ID"]
 
     # write the cfg_path to file job_id_config.yaml
     with open(f"{job_id}_config.txt", 'w+') as f:

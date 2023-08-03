@@ -12,7 +12,7 @@ from smacbenchmarking.run import make_problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
-if (job_id := os.environ['SLURM_JOB_ID']) != '':
+if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
     with open(f"{job_id}_config.txt", 'r') as f:
         hydra_config_path = f.read()
 
