@@ -21,7 +21,7 @@ From: continuumio/anaconda3
    pip install -r benchmarking/container_recipes/general_requirements_container_optimizer.txt
 
    # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/dummy_benchmark/dummy_optimizer_requirements.txt
+   pip install -r benchmarking/container_recipes/dummy_optimizer/dummy_optimizer_requirements.txt
 
    echo "Successfully installed all features"
 
