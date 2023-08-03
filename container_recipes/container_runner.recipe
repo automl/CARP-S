@@ -2,7 +2,11 @@ Bootstrap: docker
 From: continuumio/anaconda3
 
 %files
-    . /benchmarking
+    ./smacbenchmarking /benchmarking/smacbenchmarking
+    ./container_recipes /benchmarking/container_recipes
+    requirements.txt /benchmarking/requirements.txt
+    setup.py /benchmarking/setup.py
+    README.md /benchmarking/README.md
 
 %post
     apt update -y
