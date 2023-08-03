@@ -5,4 +5,4 @@ optimizer:
   _partial_: true
 
   dummy_cfg:
-   timeout: 10
+   timeout: 60
