@@ -50,3 +50,39 @@ class Problem(ABC):
                 - additional_info : dict[str, Any], defaults to {}
         """
         raise NotImplementedError
+
+
+class SingleObjectiveProblem(Problem):
+    @abstractmethod
+    def evaluate(self, trial_info: TrialInfo) -> float:  # TODO Return runtime of one eval as well?
+        """Evaluate problem.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Dataclass with configuration, seed, budget, instance.
+
+        Returns
+        -------
+        float
+            Cost
+        """
+        raise NotImplementedError
+
+
+class MultiObjectiveProblem(Problem):
+    @abstractmethod
+    def evaluate(self, trial_info: TrialInfo) -> list[float]:
+        """Evaluate problem.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Dataclass with configuration, seed, budget, instance.
+
+        Returns
+        -------
+        list[float]
+            Cost vector.
+        """
+        raise NotImplementedError
