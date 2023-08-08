@@ -29,6 +29,12 @@ def make_problem(cfg: DictConfig) -> Problem:
     """
     problem_cfg = cfg.problem
     problem = instantiate(problem_cfg)
+
+    if "logger" in cfg and cfg.logger is not None:
+        loggercls = instantiate(cfg.logger)
+        hydra_cfg = HydraConfig.instance().get()
+        problem = loggercls(problem=problem, outdir=hydra_cfg.run.dir)
+
     return problem
 
 

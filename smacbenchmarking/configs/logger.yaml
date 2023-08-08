@@ -1,0 +1,4 @@
+# @package _global_
+logger:
+  _target_: smacbenchmarking.logger.FileLogger
+  _partial_: True
