@@ -71,23 +71,25 @@ def configspaceHP2syneTuneHP(hp: Hyperparameter) -> Callable:
 
 class SynetuneOptimizer(Optimizer):
     def __init__(self, problem: Problem, optimizer_name: 'str',
+                 max_budget: float | None = None,
                  num_trials: int | None = None,
                  wallclock_times: float | None = None) -> None:
         super().__init__(problem)
-        self.fidelity_enable = True
+        self.fidelity_enabled = True
 
         self.configspace = self.problem.configspace
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts['with_mf']:
             if not hasattr(problem, 'budget_type'):
                 raise ValueError('To run multi-fidelity optimizer, the problem must have a budget_type!')
-            if not hasattr(problem, 'max_budget'):
-                raise ValueError('To run multi-fidelity optimizer, the problem determines a max_budget!')
+            if max_budget is None:
+                raise ValueError('To run multi-fidelity optimizer, we must specify max_budget!')
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, 'metric', 'cost')
         self.budget_type = getattr(self.problem, 'budget_type')
         self.trial_counter = 0
+        self.max_budget = max_budget
 
         self.rh = RunHistory()
         self.optimizer_name = optimizer_name
@@ -232,7 +234,7 @@ class SynetuneOptimizer(Optimizer):
         )
         if self.optimizer_name in mf_optimizer_dicts['with_mf']:
             optimizer_kwargs['resource_attr'] = self.problem.budget_type
-            optimizer_kwargs['max_t1'] = self.problem.max_budget
+            optimizer_kwargs['max_resource_attr'] = self.max_budget
 
         bscheduler = optimizers_dict[self.optimizer_name](**optimizer_kwargs)
         return bscheduler
