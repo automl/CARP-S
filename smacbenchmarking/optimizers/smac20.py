@@ -23,6 +23,7 @@ class SMAC3Optimizer(Optimizer):
         self.smac_cfg = smac_cfg
         self._smac: AbstractFacade | None = None
 
+
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
 
@@ -117,16 +118,9 @@ class SMAC3Optimizer(Optimizer):
 
         # Select SMAC Facade
         smac_class = get_class(self.smac_cfg.smac_class)
-
-        if (
-            smac_class == get_class("smac.facade.multi_fidelity_facade.MultiFidelityFacade")
-            and "budget_variable" not in self.smac_cfg
-        ):
-            raise ValueError(
-                "In order to use the MultiFidelityFacade you need to provide `budget_variable` at "
-                "your configs root level indicating which variable of your config is the fidelity "
-                "and controls the budget."
-            )
+        from smac.facade.multi_fidelity_facade import MultiFidelityFacade
+        if smac_class == get_class("smac.facade.multi_fidelity_facade.MultiFidelityFacade"):
+            self.fidelity_enabled = True
 
         # Setup other SMAC kwargs
         smac_kwargs = {}

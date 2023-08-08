@@ -1,0 +1,15 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/rbv2_rpart/40670/repl
+problem:
+  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  bench: rbv2_rpart
+  instance: '40670'
+  budget_type: repl
+  lower_is_better: false
+  metric: acc
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: 1
+  max_budget: 10

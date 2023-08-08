@@ -36,7 +36,9 @@ extras_require = {
         "pydocstyle",
         "flake8",
         "pre-commit",
-    ]
+    ],
+    'yahpo': ['yahpo-gym'],
+    'smac20': ['smac>=2.0'],
 }
 
 setuptools.setup(
@@ -52,7 +54,14 @@ setuptools.setup(
     version=version,
     packages=setuptools.find_packages(exclude=["tests"]),
     python_requires=">=3.8",
-    install_requires=["numpy"],
+    install_requires=[
+        "numpy",
+        # 'ConfigSpace',
+        # 'hydra-core',
+        # 'hydra-colorlog',
+        # 'rich',
+        # 'pandas',
+    ],
     extras_require=extras_require,
     test_suite="pytest",
     platforms=["Linux"],
