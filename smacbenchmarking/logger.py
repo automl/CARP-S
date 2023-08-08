@@ -6,6 +6,7 @@ from typing import Any
 import json
 from dataclasses import asdict
 from pathlib import Path
+from omegaconf import DictConfig
 
 from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
@@ -16,8 +17,9 @@ from smacbenchmarking.benchmarks.problem import Problem
 
 
 class AbstractLogger(Problem, ABC):
-    def __init__(self, problem: Problem) -> None:
+    def __init__(self, problem: Problem, cfg: DictConfig) -> None:
         self.problem: Problem = problem
+        self.cfg = cfg
         self.n_trials: int = 0
 
     @abstractmethod
