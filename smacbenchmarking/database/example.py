@@ -1,22 +1,27 @@
 from __future__ import annotations
 
-from rich import print as printr
-from smacbenchmarking.database import utils
-from py_experimenter.result_processor import ResultProcessor
 import logging
-from smacbenchmarking.database.utils import load_config
+
+from omegaconf import OmegaConf
+from py_experimenter.result_processor import ResultProcessor
+from rich import print as printr
+
+from smacbenchmarking.database import utils
 from smacbenchmarking.database.connector import DatabaseConnectorMySQL
 from smacbenchmarking.database.result_processor import ResultProcessor
-from omegaconf import OmegaConf
-
+from smacbenchmarking.database.utils import load_config
 
 logging.basicConfig(level=logging.DEBUG)
 
 # Load config
 config_fn = "smacbenchmarking/configs/database.yaml"
 cfg = load_config(config_fn)
-problem_cfg = load_config("/home/numina/Documents/repos/SMACBenchmarking/smacbenchmarking/configs/problem/BBOB/cfg_4_1_4_0.yaml")
-optimizer_cfg = load_config("/home/numina/Documents/repos/SMACBenchmarking/smacbenchmarking/configs/optimizer/smac20/blackbox.yaml")
+problem_cfg = load_config(
+    "/home/numina/Documents/repos/SMACBenchmarking/smacbenchmarking/configs/problem/BBOB/cfg_4_1_4_0.yaml"
+)
+optimizer_cfg = load_config(
+    "/home/numina/Documents/repos/SMACBenchmarking/smacbenchmarking/configs/optimizer/smac20/blackbox.yaml"
+)
 configs = (cfg, problem_cfg, optimizer_cfg)
 cfg = OmegaConf.merge(*configs)
 printr(cfg)
@@ -35,29 +40,27 @@ experiment_id = connector.find_experiment_id(parameters)
 printr(experiment_id)
 
 
-
-
 # TODO Should we save additional info?
 
 
 # Process results belonging to experiment id
 table_name = cfg.database.table_name
 result_processor = ResultProcessor(
-    config=cfg, 
-    use_codecarbon=False, 
+    config=cfg,
+    use_codecarbon=False,
     table_name=table_name,
     codecarbon_config=None,
     database_cfg=cfg.database,
     experiment_id=experiment_id,  # The AUTO_INCREMENT is 1-based
     result_fields=cfg["database"]["resultfields"],
-    )
+)
 print("Created tables")
 
 
 log = {
     "trials": {
         "n_trials": 3,
-        "trial_info__config": str([0,1]),
+        "trial_info__config": str([0, 1]),
         "trial_info__instance": 0,
         "trial_info__seed": 0,
         "trial_info__budget": 0,
@@ -69,7 +72,6 @@ log = {
     }
 }
 result_processor.process_logs(log)
-
 
 
 # # Connect to the database
