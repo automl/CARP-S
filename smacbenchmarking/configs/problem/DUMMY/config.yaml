@@ -1,5 +1,5 @@
 # @package _global_
-benchmark_id: DUMMY
+benchmark_id: DUMMY_Problem
 problem_id: dummy
 problem:
   _target_: smacbenchmarking.benchmarks.dummy_problem.DummyProblem
