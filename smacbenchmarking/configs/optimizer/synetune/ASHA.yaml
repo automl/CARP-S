@@ -5,6 +5,7 @@ optimizer:
   _partial_: true
 
   optimizer_name: 'ASHA'
+  max_budget: ${task.max_budget}
   num_trials: 100
   wallclock_times: 3600
 
