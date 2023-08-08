@@ -7,6 +7,7 @@ from smac.runhistory.dataclasses import TrialInfo
 
 from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
 
+
 # TODO write into genererate problems, how to collect all the benchmark problems automatically.
 class YahpoProblem(SingleObjectiveProblem):
     COMBIS = {'lcbench': ['3945', '7593', '34539', '126025', '126026', '126029', '146212', '167104',
@@ -117,9 +118,14 @@ class YahpoProblem(SingleObjectiveProblem):
               'iaml_xgboost': ['40981', '41146', '1489', '1067'],
               'iaml_super': ['40981', '41146', '1489', '1067']}
 
-    def __init__(self, bench: str, instance: str, budget_type: str, metric,  lower_is_better:
-    bool =
-    True):
+    def __init__(
+            self,
+            bench: str,
+            instance: str,
+            budget_type: str,
+            metric,
+            lower_is_better: bool = True
+    ):
         """Initialize a Yahpo problem.
 
         Parameters
@@ -134,7 +140,7 @@ class YahpoProblem(SingleObjectiveProblem):
         assert bench in list_scenarios(), f'The scenario you choose is not available.'
         assert str(instance) in self.COMBIS[
             bench], f'The instance you choose is not available in ' \
-                       f'{bench}.'
+                    f'{bench}.'
 
         self.scenario = bench
         self.instance = str(instance)
@@ -157,7 +163,6 @@ class YahpoProblem(SingleObjectiveProblem):
             for fidelity in other_fidelities:
                 self.max_other_fidelities[fidelity] = self.fidelity_space.get_hyperparameter(
                     fidelity).upper
-
 
         # TODO on installation of yahpo you need to clone this repo and move it to some_path
         # setting up meta data for surrogate benchmarks
@@ -221,31 +226,17 @@ class YahpoProblem(SingleObjectiveProblem):
             return -self._problem.objective_function(xs)[0][self.metric]
 
 
-
-
 if __name__ == '__main__':
-
-
-
-
-
-
-
-
 
     list_scenarios()
 
     YahpoProblem.COMBIS
-
-
 
     b = BenchmarkSet(scenario="lcbench")
 
     b.targets
 
     b.instances
-
-
 
     # Set an instance
     b.set_instance("3945")
@@ -262,7 +253,7 @@ if __name__ == '__main__':
 
         for i in b.instances:
             combi[s].append(i)
-            fid= b.get_fidelity_space()
+            fid = b.get_fidelity_space()
             all_fids.update(list(k.upper for k in fid._hyperparameters.values()))
             fids[s, i] = list(fid._hyperparameters.keys())
         print(f'{s}: {all_fids}   {len(all_fids)}')
@@ -283,7 +274,6 @@ if __name__ == '__main__':
     local_config.init_config()
     local_config.set_data_path("~/PycharmProjects/SMACBenchmarking/bench_data/yahpo_data")
 
-
     # when using drop fidelity option:
     b = BenchmarkSet("lcbench", instance="3945")
     # Sample a point from the configspace
@@ -293,4 +283,3 @@ if __name__ == '__main__':
     xs.update({'epoch': 52})
     xs
     b.objective_function(xs)
-
