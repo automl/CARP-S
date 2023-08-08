@@ -12,22 +12,26 @@ from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
 
+# TODO log optimizer's execution time
+
 
 class AbstractLogger(Problem, ABC):
     def __init__(self, problem: Problem) -> None:
         self.problem: Problem = problem
+        self.n_trials: int = 0
 
     @abstractmethod
     def write_buffer(self) -> None:
         ...
 
     @abstractmethod
-    def trial_to_buffer(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def trial_to_buffer(self, trial_info: TrialInfo, trial_value: TrialValue, n_trials: int | None = None) -> None:
         ...
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         trial_value = self.problem.evaluate(trial_info)
-        self.trial_to_buffer(trial_info=trial_info, trial_value=trial_value)
+        self.n_trials += 1
+        self.trial_to_buffer(trial_info=trial_info, trial_value=trial_value, n_trials=self.n_trials)
         self.write_buffer()
         return trial_value
 
@@ -57,8 +61,8 @@ class FileLogger(AbstractLogger):
                 file.writelines(self.buffer)
             self.buffer = []
 
-    def trial_to_buffer(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+    def trial_to_buffer(self, trial_info: TrialInfo, trial_value: TrialValue, n_trials: int | None = None) -> None:
+        info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
         info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())  # TODO beautify serialization
-        info_str = json.dumps(info)
+        info_str = json.dumps(info) + "\n"
         self.buffer.append(info_str)
