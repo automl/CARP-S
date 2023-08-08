@@ -50,7 +50,7 @@ class BBOBProblem(Problem):
 
         trial_value = TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
 
-        return trial_value
+        return trial_value.cost
 
 
 def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tuple[ConfigurationSpace, Any]:

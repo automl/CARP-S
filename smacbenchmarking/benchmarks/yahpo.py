@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from time import time
+
 from yahpo_gym import BenchmarkSet, list_scenarios
 
 from ConfigSpace import ConfigurationSpace
 from smac.runhistory.dataclasses import TrialInfo
 
 from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
+from smacbenchmarking.utils.trials import TrialValue, StatusType
 
 # TODO write into genererate problems, how to collect all the benchmark problems automatically.
 COMBIS = {
@@ -195,7 +198,7 @@ class YahpoProblem(SingleObjectiveProblem):
     # def fidelity_space(self):
     #     return FidelitySpace(self.fidelity_dims)
 
-    def evaluate(self, trial_info: TrialInfo) -> float:
+    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters
@@ -211,21 +214,27 @@ class YahpoProblem(SingleObjectiveProblem):
         configuration = trial_info.config
         xs = dict(configuration)
 
-        # fixme: if there are multiple fidelities, we will need to max the respective other
-        #  dimension here!
-
+        # if there are multiple fidelities, we will need to max the respective other
+        #  dimension here
         xs.update({self.budget_type: int(trial_info.budget)})
 
         if len(self.fidelity_dims) > 1:
             xs.update(self.max_other_fidelities)
 
-        # fixme: figure out why list is returned here!
+        starttime = time()
+        query = self._problem.objective_function(xs)[0]
+        cost = query[self.metric]
+        if not self.lower_is_better:
+            cost = -cost
 
-        if self.lower_is_better:
-            return self._problem.objective_function(xs)[0][self.metric]
-
-        else:
-            return -self._problem.objective_function(xs)[0][self.metric]
+        return TrialValue(
+            cost=cost,
+            time=query['runtime'],
+            status=StatusType.SUCCESS,
+            starttime=starttime,
+            endtime=None,
+            additional_info={}
+        )
 
 
 if __name__ == '__main__':
