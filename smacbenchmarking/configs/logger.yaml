@@ -2,3 +2,4 @@
 logger:
   _target_: smacbenchmarking.logger.FileLogger
   _partial_: True
+  outdir: ${outdir}/${seed}
