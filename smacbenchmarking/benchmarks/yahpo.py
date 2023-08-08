@@ -222,10 +222,10 @@ class YahpoProblem(SingleObjectiveProblem):
         # fixme: figure out why list is returned here!
 
         if self.lower_is_better:
-            return {'cost': self._problem.objective_function(xs)[0][self.metric]}
+            return self._problem.objective_function(xs)[0][self.metric]
 
         else:
-            return {'cost': -self._problem.objective_function(xs)[0][self.metric]}
+            return -self._problem.objective_function(xs)[0][self.metric]
 
 
 if __name__ == '__main__':

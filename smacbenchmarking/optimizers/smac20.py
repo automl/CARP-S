@@ -91,7 +91,7 @@ class SMAC3Optimizer(Optimizer):
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
         trial_value = self.problem.evaluate(trial_info=trial_info)
-        return trial_value.cost
+        return trial_value
 
     def setup_smac(self) -> AbstractFacade:
         """
