@@ -75,11 +75,13 @@ class SynetuneOptimizer(Optimizer):
                  num_trials: int | None = None,
                  wallclock_times: float | None = None) -> None:
         super().__init__(problem)
-        self.fidelity_enabled = True
+        self.fidelity_enabled = False
 
         self.configspace = self.problem.configspace
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts['with_mf']:
+            raise NotImplementedError('Multi-Fidelity Optimization on SyneTune is not implemented yet!')
+            self.fidelity_enabled = True
             if not hasattr(problem, 'budget_type'):
                 raise ValueError('To run multi-fidelity optimizer, the problem must have a budget_type!')
             if max_budget is None:
@@ -87,7 +89,7 @@ class SynetuneOptimizer(Optimizer):
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, 'metric', 'cost')
-        self.budget_type = getattr(self.problem, 'budget_type')
+        self.budget_type = getattr(self.problem, 'budget_type', None)
         self.trial_counter = 0
         self.max_budget = max_budget
 
@@ -234,7 +236,7 @@ class SynetuneOptimizer(Optimizer):
         )
         if self.optimizer_name in mf_optimizer_dicts['with_mf']:
             optimizer_kwargs['resource_attr'] = self.problem.budget_type
-            optimizer_kwargs['max_resource_attr'] = self.max_budget
+            optimizer_kwargs['max_t'] = self.max_budget
 
         bscheduler = optimizers_dict[self.optimizer_name](**optimizer_kwargs)
         return bscheduler
@@ -255,7 +257,6 @@ class SynetuneOptimizer(Optimizer):
         # if len(self.task.objectives) > 1:
         #     raise NotSupportedError
 
-        rh = self.rh
         X: list[int | float] = []
         Y: list[float] = []
 
