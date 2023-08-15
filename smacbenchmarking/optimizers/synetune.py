@@ -34,12 +34,12 @@ from smacbenchmarking.optimizers.optimizer import Optimizer
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
     "BayesianOptimization": BayesianOptimization,
-    "ASHA": ASHA,
+    # "ASHA": ASHA,
     "MOBSTER": MOBSTER,
     "BOHB": BOHB,
     "KDE": KDE,
     "BORE": BORE,
-    "DEHB": DEHB,
+    # "DEHB": DEHB,
 }
 
 mf_optimizer_dicts = {
