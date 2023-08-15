@@ -30,9 +30,10 @@ def make_problem(cfg: DictConfig) -> Problem:
     problem_cfg = cfg.problem
     problem = instantiate(problem_cfg)
 
-    if "logger" in cfg and cfg.logger is not None:
-        loggercls = instantiate(cfg.logger)
-        problem = loggercls(problem=problem, cfg=cfg)
+    if "loggers" in cfg and cfg.loggers is not None:
+        for logger in cfg.loggers:
+            loggercls = instantiate(logger)
+            problem = loggercls(problem=problem, cfg=cfg)
 
     return problem
 

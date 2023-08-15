@@ -21,7 +21,8 @@ database:
       time: DOUBLE
       status: VARCHAR(50)
       starttime: DOUBLE
-      endttime: DOUBLE
+      endtime: DOUBLE
+      additional_info: VARCHAR(256)
 
   string2vec_encoder: 
     max_vector_length: 256
