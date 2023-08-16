@@ -3,19 +3,17 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
-from omegaconf import DictConfig
 
+from omegaconf import DictConfig
+from rich import print as printr
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-
 from smacbenchmarking.database import utils
 from smacbenchmarking.database.connector import DatabaseConnectorMySQL
 from smacbenchmarking.database.result_processor import ResultProcessor
 from smacbenchmarking.database.utils import load_config
-
-from rich import print as printr
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 
 
 class DatabaseLogger(AbstractLogger):
@@ -27,7 +25,7 @@ class DatabaseLogger(AbstractLogger):
         connector.create_table_if_not_existing()
         parameters = utils.get_keyfield_data(cfg)
         connector.config = cfg
-        connector.fill_table(parameters=parameters) 
+        connector.fill_table(parameters=parameters)
         printr("Databse parameters:", parameters)
         experiment_id = connector.find_experiment_id(parameters)
         printr("Database experiment id:", experiment_id)
@@ -45,9 +43,10 @@ class DatabaseLogger(AbstractLogger):
         print("Created tables")
 
     def trial_to_buffer(self, trial_info: TrialInfo, trial_value: TrialValue, n_trials: int | None = None) -> None:
-        
         info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = str(list(dict(info["trial_info"]["config"]).values()))  # TODO beautify serialization
+        info["trial_info"]["config"] = str(
+            list(dict(info["trial_info"]["config"]).values())
+        )  # TODO beautify serialization
         info["trial_value"]["status"] = info["trial_value"]["status"].name
         info["trial_value"]["additional_info"] = str(info["trial_value"]["additional_info"])
         keys = ["trial_info", "trial_value"]
@@ -62,10 +61,7 @@ class DatabaseLogger(AbstractLogger):
                     # Missing keys will automatically filled with NULL in MySQL.
                     pass
 
-        log = {
-            "trials":
-                info
-        }
+        log = {"trials": info}
 
         # log = {
         #     "trials":
@@ -87,5 +83,5 @@ class DatabaseLogger(AbstractLogger):
     def write_buffer(self) -> None:
         if self.buffer:
             for log in self.buffer:
-                self.result_processor.process_logs(log) 
+                self.result_processor.process_logs(log)
             self.buffer = []

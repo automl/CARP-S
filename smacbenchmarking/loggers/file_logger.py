@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
-from omegaconf import DictConfig
 
+from omegaconf import DictConfig
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
@@ -52,8 +52,7 @@ class FileLogger(AbstractLogger):
         self.filename = Path(self.outdir) / self._filename
 
     def write_buffer(self) -> None:
-        """Write buffer to file.
-        """
+        """Write buffer to file."""
         if self.buffer:
             with open(self.filename, mode="a") as file:
                 file.writelines(self.buffer)

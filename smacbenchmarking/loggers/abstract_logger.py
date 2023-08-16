@@ -6,9 +6,9 @@ from typing import Any
 import json
 from dataclasses import asdict
 from pathlib import Path
-from omegaconf import DictConfig
 
 from ConfigSpace import ConfigurationSpace
+from omegaconf import DictConfig
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
@@ -44,8 +44,7 @@ class AbstractLogger(Problem, ABC):
 
     @abstractmethod
     def write_buffer(self) -> None:
-        """Write buffer to destination.
-        """
+        """Write buffer to destination."""
         ...
 
     @abstractmethod
