@@ -99,8 +99,7 @@ def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict | None = None
         json.dump(data, file, indent="\t")
 
 
-@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
-def main(cfg: DictConfig) -> None:
+def optimize(cfg: DictConfig) -> None:
     """Run optimizer on problem.
 
     Save trajectory and metadata to database.
@@ -133,6 +132,23 @@ def main(cfg: DictConfig) -> None:
     metadata = {"hi": "hello"}  # TODO add reasonable meta data
 
     save_run(cfg=cfg, optimizer=optimizer, metadata=metadata)
+
+    return None
+
+
+@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
+def main(cfg: DictConfig) -> None:
+    """Run optimizer on problem.
+
+    Save trajectory and metadata to database.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Global configuration.
+
+    """
+    optimize(cfg=cfg)
 
     return None
 
