@@ -14,13 +14,16 @@ from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
-def make_problem(cfg: DictConfig) -> Problem:
+def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
     """Make Problem
 
     Parameters
     ----------
     cfg : DictConfig
         Global configuration.
+    logging : bool
+        By default False, whether the problem should be wrapped in possibly
+        specified loggers.
 
     Returns
     -------
@@ -30,7 +33,7 @@ def make_problem(cfg: DictConfig) -> Problem:
     problem_cfg = cfg.problem
     problem = instantiate(problem_cfg)
 
-    if "loggers" in cfg and cfg.loggers is not None:
+    if logging and "loggers" in cfg and cfg.loggers is not None:
         for logger in cfg.loggers:
             loggercls = instantiate(logger)
             problem = loggercls(problem=problem, cfg=cfg)
@@ -115,7 +118,7 @@ def optimize(cfg: DictConfig) -> None:
     hydra_cfg = HydraConfig.instance().get()
     printr(hydra_cfg.run.dir)
 
-    problem = make_problem(cfg=cfg)
+    problem = make_problem(cfg=cfg, logging=True)
     inspect(problem)
 
     optimizer = make_optimizer(cfg=cfg, problem=problem)
