@@ -109,3 +109,7 @@ class AbstractLogger(Problem, ABC):
             Configuration space.
         """
         return self.problem.configspace
+    
+    @property
+    def f_min(self) -> float | None:
+        return self.problem.f_min

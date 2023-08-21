@@ -18,6 +18,10 @@ class BBOBProblem(Problem):
         self._configspace, self._problem = get_bbob_problem(fid=fid, instance=instance, dimension=dimension, seed=seed)
 
     @property
+    def f_min(self) -> float | None:
+        return self._problem.optimum.y
+
+    @property
     def configspace(self) -> ConfigurationSpace:
         """Return configuration space.
 
