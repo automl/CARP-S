@@ -9,6 +9,9 @@ from ConfigSpace import ConfigurationSpace, Float
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.benchmarks.manyaffinebbob import register_many_affine_functions
+
+register_many_affine_functions()
 
 
 class BBOBProblem(Problem):
