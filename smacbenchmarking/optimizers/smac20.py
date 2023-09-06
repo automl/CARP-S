@@ -160,6 +160,11 @@ class SMAC3Optimizer(Optimizer):
                     configspace=self.configspace,
                     acquisition_function=smac_kwargs["acquisition_function"]
                 )
+                # TODO Fix this custom init
+                if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(smac_kwargs["acquisition_maximizer"].selector, "expl2callback"):
+                    if not "callbacks" in smac_kwargs:
+                        smac_kwargs["callbacks"] = []
+                    smac_kwargs["callbacks"].append(smac_kwargs["acquisition_maximizer"].selector.expl2callback)
         
         if "config_selector" in smac_kwargs:
             smac_kwargs["config_selector"] = smac_kwargs["config_selector"](
