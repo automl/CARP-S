@@ -1,8 +1,11 @@
-from typing import Any, Dict, List, Union
+from __future__ import annotations
+
+from typing import Any
 
 from dataclasses import dataclass, field
 from enum import IntEnum
 
+import dataclasses_json
 from ConfigSpace import Configuration
 from dataclasses_json import dataclass_json
 
@@ -31,9 +34,9 @@ class TrialInfo:
     """
 
     config: Configuration
-    instance: Union[str, None] = None
-    seed: Union[int, None] = None
-    budget: Union[float, None] = None
+    instance: str | None = None
+    seed: int | None = None
+    budget: float | None = None
 
 
 @dataclass_json
@@ -51,9 +54,9 @@ class TrialValue:
     additional_info : dict[str, Any], defaults to {}
     """
 
-    cost: Union[float, List[float]]
+    cost: float | list[float]
     time: float = 0.0
     status: StatusType = StatusType.SUCCESS
     starttime: float = 0.0
     endtime: float = 0.0
-    additional_info: Dict[str, Any] = field(default_factory=dict)
+    additional_info: dict[str, Any] = field(default_factory=dict)
