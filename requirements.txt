@@ -1,5 +1,10 @@
-ConfigSpace
+ConfigSpace~=0.7.1
 hydra-core
 hydra-colorlog
-rich
+rich~=13.4.2
 pandas
+omegaconf~=2.3.0
+dataclasses-json~=0.5.9
+
+# HPO-B
+xgboost==1.5.2

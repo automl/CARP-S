@@ -23,7 +23,6 @@ class SMAC3Optimizer(Optimizer):
         self.smac_cfg = smac_cfg
         self._smac: AbstractFacade | None = None
 
-
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
 
@@ -90,8 +89,8 @@ class SMAC3Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        ret = self.problem.evaluate(trial_info=trial_info)
-        return ret
+        trial_value = self.problem.evaluate(trial_info=trial_info)
+        return trial_value.cost
 
     def setup_smac(self) -> AbstractFacade:
         """
@@ -119,6 +118,7 @@ class SMAC3Optimizer(Optimizer):
         # Select SMAC Facade
         smac_class = get_class(self.smac_cfg.smac_class)
         from smac.facade.multi_fidelity_facade import MultiFidelityFacade
+
         if smac_class == get_class("smac.facade.multi_fidelity_facade.MultiFidelityFacade"):
             self.fidelity_enabled = True
 

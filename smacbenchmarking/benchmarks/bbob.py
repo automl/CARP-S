@@ -2,14 +2,16 @@ from __future__ import annotations
 
 from typing import Any
 
+import time
+
 import ioh
 from ConfigSpace import ConfigurationSpace, Float
-from smac.runhistory.dataclasses import TrialInfo
 
-from smacbenchmarking.benchmarks.problem import SingleObjectiveProblem
+from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
-class BBOBProblem(SingleObjectiveProblem):
+class BBOBProblem(Problem):
     def __init__(self, fid: int, instance: int, dimension: int, seed: int):
         super().__init__()
 
@@ -26,7 +28,7 @@ class BBOBProblem(SingleObjectiveProblem):
         """
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> float:
+    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters
@@ -41,8 +43,14 @@ class BBOBProblem(SingleObjectiveProblem):
         """
         configuration = trial_info.config
         input = list(dict(configuration).values())
-        output = self._problem(input)
-        return output
+        starttime = time.time()
+        cost = self._problem(input)
+        endtime = time.time()
+        T = endtime - starttime
+
+        trial_value = TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
+
+        return trial_value
 
 
 def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tuple[ConfigurationSpace, Any]:
