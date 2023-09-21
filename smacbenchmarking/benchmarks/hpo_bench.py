@@ -59,7 +59,7 @@ class HPOBenchProblem(Problem):
         configuration = trial_info.config
         starttime = time.time()
 
-        budget_value = float(str(trial_info.budget)) if self.budget_type == "subsample" else int(str(trial_info.budget))
+        budget_value = float(trial_info.budget) if self.budget_type == "subsample" else int(trial_info.budget)
 
         result_dict = self._problem.objective_function(
             configuration=configuration, fidelity={self.budget_type: budget_value}, rng=trial_info.seed
