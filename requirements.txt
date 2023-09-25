@@ -5,3 +5,6 @@ rich~=13.4.2
 pandas
 omegaconf~=2.3.0
 dataclasses-json~=0.5.9
+pymysql
+cryptography
+py-experimenter

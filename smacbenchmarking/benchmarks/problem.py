@@ -13,6 +13,19 @@ class Problem(ABC):
     def __init__(self) -> None:
         super().__init__()
 
+
+    @property
+    def f_min(self) -> float | None:
+        """Return the minimum function value.
+
+        Returns
+        -------
+        float | None
+            Minimum function value (if exists).
+            Else, return None.
+        """
+        return None
+
     @property
     @abstractmethod
     def configspace(self) -> ConfigurationSpace:
