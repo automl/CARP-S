@@ -46,14 +46,14 @@ The optimizer then has to be built to an image named after the optimizer id, e.g
 `DummyOptimizer` using the following command:
 
 ```bash
-singularity build DUMMY_optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
+singularity build DUMMY_Optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
 To facilitate this process, a short script is provided for this purpose, which is however system-specific to Noctua2.
 It can be run as follows:
 
 ```bash
-./compile_noctua2.sh build DUMMY_optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
+./compile_noctua2.sh DUMMY_Optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
 ### Benchmark
@@ -66,7 +66,13 @@ using
 the following command:
 
 ```bash
-singularity build DUMMY_benchmark.sif container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
+singularity build DUMMY_Problem.sif container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
+```
+
+Command for Noctua2:
+
+```bash
+./compile_noctua2.sh DUMMY_Problem.sif container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
 ```
 
 ### Running
@@ -75,6 +81,12 @@ benchmark, but can be used as is. It can be built as follows:
 
 ```bash
 singularity build hydra_initializer.sif container_recipes/hydra_initializer.recipe
+```
+
+Command for Noctua2:
+
+```bash
+./compile_noctua2.sh hydra_initializer.sif container_recipes/hydra_initializer.recipe
 ```
 
 Running the containerized benchmarking system is also system-dependent. An example for Noctua2 is provided in the
