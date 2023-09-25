@@ -1,49 +1,22 @@
 from __future__ import annotations
 
-import json
 from dataclasses import asdict
-from pathlib import Path
 
 from omegaconf import DictConfig
-from rich import print as printr
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.database import utils
-from smacbenchmarking.database.connector import DatabaseConnectorMySQL
 from smacbenchmarking.database.result_processor import ResultProcessor
-from smacbenchmarking.database.utils import load_config
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 
 
 class DatabaseLogger(AbstractLogger):
-    def __init__(self, problem: Problem, cfg: DictConfig) -> None:
+    def __init__(self, problem: Problem, cfg: DictConfig, result_processor: ResultProcessor) -> None:
         super().__init__(problem, cfg)
-        self.buffer: list[dict] = []
-        connector = DatabaseConnectorMySQL(database_cfg=cfg.database)
-        connector.config = cfg
-        connector.create_table_if_not_existing()
-        parameters = utils.get_keyfield_data(cfg)
-        connector.config = cfg
-        connector.fill_table(parameters=parameters)
-        printr("Databse parameters:", parameters)
-        experiment_id = connector.find_experiment_id(parameters)
-        printr("Database experiment id:", experiment_id)
+        self.result_processor = result_processor
 
-        table_name = cfg.database.table_name
-        self.result_processor = ResultProcessor(
-            config=cfg,
-            use_codecarbon=False,
-            table_name=table_name,
-            codecarbon_config=None,
-            database_cfg=cfg.database,
-            experiment_id=experiment_id,  # The AUTO_INCREMENT is 1-based
-            result_fields=cfg["database"]["resultfields"],
-        )
-        print("Created tables")
-
-    def trial_to_buffer(self, trial_info: TrialInfo, trial_value: TrialValue, n_trials: int | None = None) -> None:
-        info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+    def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+        info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
         info["trial_info"]["config"] = str(
             list(dict(info["trial_info"]["config"]).values())
         )  # TODO beautify serialization
@@ -78,10 +51,4 @@ class DatabaseLogger(AbstractLogger):
         #             "trial_value__status": "OK",
         #         }
         # }
-        self.buffer.append(log)
-
-    def write_buffer(self) -> None:
-        if self.buffer:
-            for log in self.buffer:
-                self.result_processor.process_logs(log)
-            self.buffer = []
+        self.result_processor.process_logs(log)
