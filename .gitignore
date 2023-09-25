@@ -138,3 +138,5 @@ runs
 /.idea/SMACBenchmarking.iml
 /.idea/vcs.xml
 /.idea/.gitignore
+/.codecarbon.config
+/smacbenchmarking.db
