@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from smac.runhistory.dataclasses import TrialInfo, TrialValue
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 
+
 class LoggingProblem(Problem, ABC):
 
     def __init__(self) -> None:

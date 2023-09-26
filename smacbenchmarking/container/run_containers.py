@@ -1,37 +1,31 @@
+import ast
 import os
 
-import hydra
 from domdf_python_tools.utils import printr
-from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
+from py_experimenter.experiment_status import ExperimentStatus
+from py_experimenter.experimenter import PyExperimenter
+from py_experimenter.result_processor import ResultProcessor
 
 
-@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
-def main(cfg: DictConfig) -> None:
-    """Run optimizer on problem.
+def py_experimenter_evaluate(parameters: dict,
+                             result_processor: ResultProcessor,
+                             custom_config: dict):
+    config = parameters['config']
+    print(parameters)
+    cfg_dict = ast.literal_eval(config)
 
-    Save trajectory and metadata to database.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Global configuration.
-
-    """
-    cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
-    hydra_cfg = HydraConfig.instance().get()
 
-    # write hydra config to file
-    cfg_path = f"{hydra_cfg.run.dir}/hydra_config.yaml"
-    print(cfg_path)
-    OmegaConf.save(config=cfg, f=cfg_path)
+    #job_id = os.environ["BENCHMARKING_JOB_ID"]
+    job_id = 'test'
 
-    job_id = os.environ["BENCHMARKING_JOB_ID"]
+    dict_config = OmegaConf.create(cfg_dict)
+    cfg_path = f"{job_id}_hydra_config.yaml"
+    OmegaConf.save(config=dict_config, f=cfg_path)
 
-    # write the cfg_path to file job_id_config.yaml
-    with open(f"{job_id}_config.txt", 'w+') as f:
-        f.write(cfg_path)
+    with open(f"{job_id}_pyexperimenter_id.txt", 'w+') as f:
+        f.write(str(result_processor._experiment_id))
 
     with open(f"{job_id}_problem_container.txt", 'w+') as f:
         f.write(cfg_dict["benchmark_id"])
@@ -39,7 +33,19 @@ def main(cfg: DictConfig) -> None:
     with open(f"{job_id}_optimizer_container.txt", 'w+') as f:
         f.write(cfg_dict["optimizer_id"])
 
-    return None
+    return ExperimentStatus.PAUSED.value
+
+
+def main() -> None:
+    # slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
+    slurm_job_id = 'test'
+    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
+    experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
+                                  name='example_notebook',
+                                  database_credential_file_path='01_lcbench_yahpo/credentials.cfg',
+                                  log_file=f'logs/{slurm_job_id}.log')
+
+    experimenter.execute(py_experimenter_evaluate, max_experiments=1)
 
 
 if __name__ == "__main__":

@@ -7,14 +7,21 @@ from ConfigSpace.read_and_write import json as cs_json
 from flask import Flask, request
 from hydra import initialize, compose
 from hydra.core.hydra_config import HydraConfig
-from omegaconf import OmegaConf
 
 from smacbenchmarking.run import make_problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
-    cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")
+    with open(f"{job_id}_config.txt", 'r') as f:
+        hydra_config_path = f.read()
+
+# path pattern runs/DUMMY_Optimizer/DUMMY/dummy/1/hydra_config.yaml
+# we divide into hydra_config.yaml and rest of path
+hydra_config_path = '../../' + hydra_config_path[:len(hydra_config_path)-17]
+
+initialize(version_base=None, config_path=hydra_config_path)
+cfg = compose("hydra_config.yaml")
 
 problem = make_problem(cfg=cfg)
 

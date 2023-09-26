@@ -12,7 +12,7 @@ singularity run hydra_initializer.sif "${@}"
 # singularity run runner.sif +optimizer/DUMMY=config +problem/DUMMY=config
 
 # Wait for the runner container to finish
-while [ ! -f "${BENCHMARKING_JOB_ID}_config.txt" ]; do
+while [ ! -f "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt" ]; do
   echo "Waiting for runner container"
   sleep 1
 done
@@ -50,7 +50,7 @@ singularity exec "${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/
 echo "Run Finished"
 
 # Remove temporary files
-rm "${BENCHMARKING_JOB_ID}_config.txt"
+rm "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt"
 rm "${BENCHMARKING_JOB_ID}_problem_container.txt"
 rm "${BENCHMARKING_JOB_ID}_optimizer_container.txt"
 
