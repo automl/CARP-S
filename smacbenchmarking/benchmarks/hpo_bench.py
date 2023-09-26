@@ -91,35 +91,35 @@ def get_hpobench_problem(model: str, task_id: int, seed: int) -> Any:
             rng=seed,
             task_id=task_id,
             container_name="lr_benchmark",
-            container_source="./smacbenchmarking/singularity/containers/hpobench",
+            container_source="./container_recipes/hpobench/model_recipes",
         )
     elif model == "nn":
         problem = NNBenchmark(
             rng=seed,
             task_id=task_id,
             container_name="nn_benchmark",
-            container_source="./smacbenchmarking/singularity/containers/hpobench",
+            container_source="./container_recipes/hpobench/model_recipes",
         )
     elif model == "rf":
         problem = RandomForestBenchmark(
             rng=seed,
             task_id=task_id,
             container_name="rf_benchmark",
-            container_source="./smacbenchmarking/singularity/containers/hpobench",
+            container_source="./container_recipes/hpobench/model_recipes",
         )
     elif model == "svm":
         problem = SVMBenchmark(
             rng=seed,
             task_id=task_id,
             container_name="svm_benchmark",
-            container_source="./smacbenchmarking/singularity/containers/hpobench",
+            container_source="./container_recipes/hpobench/model_recipes",
         )
     elif model == "xgboost":
         problem = XGBoostBenchmark(
             rng=seed,
             task_id=task_id,
             container_name="xgboost_benchmark",
-            container_source="./smacbenchmarking/singularity/containers/hpobench",
+            container_source="./container_recipes/hpobench/model_recipes",
         )
     else:
         raise ValueError(f"Unknown model {model} for HPOBench.")

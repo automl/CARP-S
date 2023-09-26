@@ -1,0 +1,47 @@
+Bootstrap: docker
+From: continuumio/anaconda3:2021.05
+
+%startscript
+    # this is necessary to start the benchmarking server
+    flask run
+
+%environment
+    # this is necessary to start the benchmarking server
+    export FLASK_APP=smacbenchmarking/container/container_app.py
+
+%files
+    ./smacbenchmarking /benchmarking/smacbenchmarking
+    ./container_recipes /benchmarking/container_recipes
+    requirements.txt /benchmarking/requirements.txt
+    setup.py /benchmarking/setup.py
+    README.md /benchmarking/README.md
+    containers/hpobench/lr_benchmark_latest /benchmarking/containers/hpobench/lr_benchmark_latest
+    containers/hpobench/nn_benchmark_latest /benchmarking/containers/hpobench/nn_benchmark_latest
+    containers/hpobench/rf_benchmark_latest /benchmarking/containers/hpobench/rf_benchmark_latest
+    containers/hpobench/svm_benchmark_latest /benchmarking/containers/hpobench/svm_benchmark_latest
+    containers/hpobench/xgboost_benchmark_latest /benchmarking/containers/hpobench/xgboost_benchmark_latest
+
+%post
+    apt update -y
+    apt upgrade -y
+    apt install curl -y
+    apt install wget -y
+    apt install git -y
+    apt install gcc -y
+    apt install build-essential -y
+    apt install clang -y
+    . /opt/conda/etc/profile.d/conda.sh
+
+   pip install wheel
+   pip install -r benchmarking/requirements.txt
+   pip install ../benchmarking
+   pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
+
+   # benchmark-specific commands go here
+   cd /home
+   git clone https://github.com/automl/HPOBench.git
+   cd HPOBench
+   git checkout master
+   pip install .
+
+   echo "Successfully installed all features"
