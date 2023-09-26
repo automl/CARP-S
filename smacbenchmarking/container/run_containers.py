@@ -17,8 +17,7 @@ def py_experimenter_evaluate(parameters: dict,
 
     printr(cfg_dict)
 
-    #job_id = os.environ["BENCHMARKING_JOB_ID"]
-    job_id = 'test'
+    job_id = os.environ["BENCHMARKING_JOB_ID"]
 
     dict_config = OmegaConf.create(cfg_dict)
     cfg_path = f"{job_id}_hydra_config.yaml"
@@ -37,8 +36,7 @@ def py_experimenter_evaluate(parameters: dict,
 
 
 def main() -> None:
-    # slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    slurm_job_id = 'test'
+    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
     experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='example_notebook',

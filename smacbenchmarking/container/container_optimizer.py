@@ -28,8 +28,7 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
 
     cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")
 
-    # slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    slurm_job_id = 'test'
+    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
     experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='example_notebook',
