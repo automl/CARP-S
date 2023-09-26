@@ -1,6 +1,5 @@
 import os
 
-from hydra import initialize, compose
 from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor

@@ -50,6 +50,7 @@ singularity exec "${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/
 echo "Run Finished"
 
 # Remove temporary files
+rm "${BENCHMARKING_JOB_ID}_hydra_config.yaml"
 rm "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt"
 rm "${BENCHMARKING_JOB_ID}_problem_container.txt"
 rm "${BENCHMARKING_JOB_ID}_optimizer_container.txt"
