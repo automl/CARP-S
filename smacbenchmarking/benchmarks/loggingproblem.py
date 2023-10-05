@@ -29,7 +29,11 @@ class LoggingProblem(Problem, ABC):
                 - endtime : float, defaults to 0.0
                 - additional_info : dict[str, Any], defaults to {}
         """
-        raise NotImplementedError
+        trial_value = self._evaluate(trial_info)
+        for logger in self.loggers:
+            logger.log_trial(trial_info, trial_value)
+        return trial_value
+
 
     def add_logger(self, logger: AbstractLogger):
         """Add the given logger to the problem.
@@ -61,6 +65,5 @@ class LoggingProblem(Problem, ABC):
                 - endtime : float, defaults to 0.0
                 - additional_info : dict[str, Any], defaults to {}
         """
-        trial_value = self.evaluate(trial_info)
-        for logger in self.loggers:
-            logger.log_trial(trial_info, trial_value)
+        raise NotImplementedError
+
