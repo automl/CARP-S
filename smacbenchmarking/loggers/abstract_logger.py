@@ -9,7 +9,7 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 # TODO log optimizer's execution time
 
-class AbstractLogger(Problem, ABC):
+class AbstractLogger(ABC):
     def __init__(self, problem: Problem, cfg: DictConfig) -> None:
         """AbstractLogger
 
