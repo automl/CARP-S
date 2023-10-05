@@ -47,11 +47,11 @@ class LoggingProblemWrapper(Problem):
             Minimum function value (if exists).
             Else, return None.
         """
-        return self.problem.f_min()
+        return self.problem.f_min
 
     @property
     def configspace(self) -> ConfigurationSpace:
-        return self.problem.configspace()
+        return self.problem.configspace
 
     def add_logger(self, logger: AbstractLogger):
         """Add the given logger to the problem.
