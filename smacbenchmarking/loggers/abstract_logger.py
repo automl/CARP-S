@@ -10,29 +10,12 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 # TODO log optimizer's execution time
 
 class AbstractLogger(ABC):
-    def __init__(self, problem: Problem, cfg: DictConfig) -> None:
+    def __init__(self) -> None:
         """AbstractLogger
 
-        Wraps `Problem` and intercepts the trial info and value
-        during evaluate.
-
-        Parameters
-        ----------
-        problem : Problem
-            The optimization problem.
-        cfg : DictConfig
-            The global experiment configuration. Might be relevant for
-            some loggers.
-
-        Attributes
-        ----------
-        problem : Problem
-        cfg : DictConfig
-        n_trials : int
-            The number of function evaluations.
+        Intercepts the trial info and value during evaluate.
         """
-        self.problem: Problem = problem
-        self.cfg = cfg
+        pass
 
     @abstractmethod
     def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:

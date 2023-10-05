@@ -4,15 +4,14 @@ from dataclasses import asdict
 
 from omegaconf import DictConfig
 
-from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.database.result_processor import ResultProcessor
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class DatabaseLogger(AbstractLogger):
-    def __init__(self, problem: Problem, cfg: DictConfig, result_processor: ResultProcessor) -> None:
-        super().__init__(problem, cfg)
+    def __init__(self, result_processor: ResultProcessor) -> None:
+        super().__init__()
         self.result_processor = result_processor
 
     def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
