@@ -60,7 +60,7 @@ The following example illustrates the principle based on a `DummyOptimizer` and 
 
 #### Noctua2 Setup Before Compilation
 
-Include the following lines in you `~/.bashrc`:
+Include the following lines in your `~/.bashrc`:
 
 ```bash
 export SINGULARITY_CACHEDIR=$PC2PFS/hpc-prf-intexml/<USER>/.singularity_cache
