@@ -13,7 +13,6 @@ class Problem(ABC):
     def __init__(self) -> None:
         super().__init__()
 
-
     @property
     def f_min(self) -> float | None:
         """Return the minimum function value.

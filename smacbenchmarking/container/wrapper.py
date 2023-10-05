@@ -24,3 +24,6 @@ class ContainerizedProblemClient(Problem):
         # ask server about evaluation
         response = requests.post("http://localhost:5000/evaluate", json=trial_info.to_json())
         return TrialValue.from_json(response.json())
+
+    def f_min(self) -> float | None:
+        raise NotImplementedError("f_min is not yet implemented for ContainerizedProblemClient")
