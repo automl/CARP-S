@@ -129,6 +129,14 @@ script `start_container_noctua2.sh`. It can be run as follows:
 ./start_container_noctua2.sh
 ```
 
+**NOTE**: This needs to be run in a SLURM-job, so either an interactive job
+
+```bash
+srun --cpus-per-task=2 -p normal --mem=2gb -n 1 --time=00:30:00 --pty bash
+```
+
+or a job allocated via script.
+
 This will pull a job from the database and run it (database needs to be initialized beforehand).
 To be efficient, this command should eventually be integrated into a SLURM script, which can be submitted to the
 cluster (e.g. with job arrays).
