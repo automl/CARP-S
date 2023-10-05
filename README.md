@@ -18,6 +18,24 @@ make install-dev
 pip install -r requirements.txt
 ```
 ### Database
+🚧 UNDER CONSTRUCTION 🚧
+
+Current Status: SQLite is used as a database for testing. Once the database server is up and running, 
+we will switch to MySQL.
+
+Before you can start any jobs, the jobs need to be dispatched to the database.
+To this end, call the file `create_cluster_configs.py` with the desired hydra arguments.
+This can be done locally or on the server if you can execute python there directly.
+If you execute it locally, the database file `smacbenchmarking.db` will be created in the current directory and 
+needs to be transferred to the cluster.
+
+```bash
+python smacbenchmarking/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
+```
+
+---
+Eventually:
+
 All results will be written to a central database.
 This database needs to be set up once on the server.
 MySQL can be installed with the information [here](https://dev.mysql.com/doc/refman/8.0/en/linux-installation.html).
@@ -44,7 +62,7 @@ The following example illustrates the principle based on a `DummyOptimizer` and 
 A Singularity recipe has to be created for the optimizer, which should be saved in the folder `container_recipes`.
 This recipe has the purpose of setting up a container in which the optimizer can be run, e.g., installing the 
 required packages, setting environment variables, copying files and so on.
-For the `DummyOptimizer` this is `container_recipes/dummy_optimizer/dummy_optimizer.recipe`, which you can consult 
+For the `Dummy_Optimizer` this is `container_recipes/dummy_optimizer/dummy_optimizer.recipe`, which you can consult 
 as a basis for other optimizers.
 
 The optimizer then has to be built to an image named after the optimizer id, e.g., `DUMMY_Optimizer.sif` for the
@@ -95,11 +113,18 @@ Command for Noctua2:
 ```
 
 Running the containerized benchmarking system is also system-dependent. An example for Noctua2 is provided in the
-script `start_container_noctua2.sh`. It can be run with hydra arguments, e.g. as follows:
+script `start_container_noctua2.sh`. It can be run as follows:
 
 ```bash
-./start_container_noctua2.sh +optimizer/DUMMY=config +problem/DUMMY=config
+./start_container_noctua2.sh
 ```
+
+This will pull a job from the database and run it (database needs to be initialized beforehand).
+To be efficient, this command should eventually be integrated into a SLURM script, which can be submitted to the
+cluster (e.g. with job arrays).
+
+### Example SLURM script
+# TODO
 
 ### Overview of the whole process
 
