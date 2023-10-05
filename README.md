@@ -65,6 +65,7 @@ Include the following lines in your `~/.bashrc`:
 ```bash
 export SINGULARITY_CACHEDIR=$PC2PFS/hpc-prf-intexml/<USER>/.singularity_cache
 export SINGULARITY_TMPDIR=/dev/shm/intexml<X>
+mkdir /dev/shm/intexml<X> -p
 ```
 
 ### Optimizer
