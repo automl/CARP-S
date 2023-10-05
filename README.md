@@ -58,6 +58,15 @@ To run benchmarking with containers, both the optimizer and benchmark have to be
 We use Singularity/ Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
 
+#### Noctua2 Setup Before Compilation
+
+Include the following lines in you `~/.bashrc`:
+
+```bash
+export SINGULARITY_CACHEDIR=$PC2PFS/hpc-prf-intexml/<USER>/.singularity_cache
+export SINGULARITY_TMPDIR=/dev/shm/intexml<X>
+```
+
 ### Optimizer
 A Singularity recipe has to be created for the optimizer, which should be saved in the folder `container_recipes`.
 This recipe has the purpose of setting up a container in which the optimizer can be run, e.g., installing the 
