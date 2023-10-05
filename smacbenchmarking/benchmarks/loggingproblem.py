@@ -1,7 +1,7 @@
 from smacbenchmarking.benchmarks.problem import Problem
 from abc import ABC, abstractmethod
-from smac.runhistory.dataclasses import TrialInfo, TrialValue
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class LoggingProblem(Problem, ABC):
