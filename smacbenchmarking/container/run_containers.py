@@ -19,6 +19,8 @@ def py_experimenter_evaluate(parameters: dict,
 
     job_id = os.environ["BENCHMARKING_JOB_ID"]
 
+    result_processor.process_results({'slurm_job_id': job_id})
+
     dict_config = OmegaConf.create(cfg_dict)
     cfg_path = f"{job_id}_hydra_config.yaml"
     OmegaConf.save(config=dict_config, f=cfg_path)
