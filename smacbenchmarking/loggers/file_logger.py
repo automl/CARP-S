@@ -4,12 +4,13 @@ import json
 from dataclasses import asdict
 
 from omegaconf import DictConfig
-from smac.runhistory.dataclasses import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 
 import logging
+
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class FileLogger(AbstractLogger):
