@@ -38,7 +38,6 @@ class DatabaseLogger(AbstractLogger):
         # log = {
         #     "trials":
         #         {
-        #             "n_trials": self.n_trials,
         #             "trial_info__config": str([0, 1]),
         #             "trial_info__instance": 0,
         #             "trial_info__seed": 0,
