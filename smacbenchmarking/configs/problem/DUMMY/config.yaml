@@ -1,0 +1,9 @@
+# @package _global_
+benchmark_id: DUMMY_Problem
+problem_id: dummy
+problem:
+  _target_: smacbenchmarking.benchmarks.dummy_problem.DummyProblem
+  return_value: 42
+task:
+  n_trials: 10
+  n_objectives: 1

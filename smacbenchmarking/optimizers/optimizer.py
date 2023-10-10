@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from ConfigSpace import ConfigurationSpace
-from smac.runhistory.dataclasses import TrialInfo
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.utils.trials import TrialInfo
 
 SearchSpace = Any
 

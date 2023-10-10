@@ -5,9 +5,7 @@ rich~=13.4.2
 pandas
 omegaconf~=2.3.0
 dataclasses-json~=0.5.9
-
-# HPO-B
-xgboost==1.5.2
-
-#syne_tune
-syne-tune[basic]
+pymysql
+cryptography
+domdf_python_tools
+py-experimenter @ git+https://github.com/tornede/py_experimenter@feature-pause-execution
