@@ -134,6 +134,12 @@ class YahpoProblem(Problem):
             bench], f'The instance you choose is not available in ' \
                        f'{bench}.'
 
+        # setting up meta data for surrogate benchmarks
+        from yahpo_gym import local_config
+
+        local_config.init_config()
+        local_config.set_data_path("yahpo_data")
+
         self.scenario = bench
         self.instance = str(instance)
 
@@ -155,14 +161,6 @@ class YahpoProblem(Problem):
             for fidelity in other_fidelities:
                 self.max_other_fidelities[fidelity] = self.fidelity_space.get_hyperparameter(
                     fidelity).upper
-
-
-        # TODO on installation of yahpo you need to clone this repo and move it to some_path
-        # setting up meta data for surrogate benchmarks
-        # from yahpo_gym import local_config
-        #
-        # local_config.init_config()
-        # local_config.set_data_path("some_path")
 
         self.metric = metric
 
