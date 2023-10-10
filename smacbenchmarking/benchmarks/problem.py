@@ -14,6 +14,18 @@ class Problem(ABC):
         super().__init__()
 
     @property
+    def f_min(self) -> float | None:
+        """Return the minimum function value.
+
+        Returns
+        -------
+        float | None
+            Minimum function value (if exists).
+            Else, return None.
+        """
+        return None
+
+    @property
     @abstractmethod
     def configspace(self) -> ConfigurationSpace:
         """Configuration Space
@@ -30,7 +42,6 @@ class Problem(ABC):
 
     @abstractmethod
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        # TODO Maybe add logger to track all interesting info here
         """Evaluate problem.
 
         Parameters

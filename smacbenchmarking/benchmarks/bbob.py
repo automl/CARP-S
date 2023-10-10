@@ -9,6 +9,9 @@ from ConfigSpace import ConfigurationSpace, Float
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from smacbenchmarking.benchmarks.manyaffinebbob import register_many_affine_functions
+
+register_many_affine_functions()
 
 
 class BBOBProblem(Problem):
@@ -16,6 +19,10 @@ class BBOBProblem(Problem):
         super().__init__()
 
         self._configspace, self._problem = get_bbob_problem(fid=fid, instance=instance, dimension=dimension, seed=seed)
+
+    @property
+    def f_min(self) -> float | None:
+        return self._problem.optimum.y
 
     @property
     def configspace(self) -> ConfigurationSpace:
