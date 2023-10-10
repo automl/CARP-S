@@ -1,0 +1,6 @@
+#!/bin/bash
+module load tools Apptainer
+TMP_BINDPATH=$SINGULARITY_BINDPATH
+SINGULARITY_BINDPATH=
+apptainer build $1 $2
+SINGULARITY_BINDPATH=$TMP_BINDPATH

@@ -1,50 +1,51 @@
+import ast
+import os
+
 from domdf_python_tools.utils import printr
-from hydra.core.hydra_config import HydraConfig
-from omegaconf import OmegaConf, DictConfig
-from rich import inspect
-
-from smacbenchmarking.run import make_problem, make_optimizer, save_run
-from smacbenchmarking.utils.exceptions import NotSupportedError
+from omegaconf import OmegaConf
+from py_experimenter.experiment_status import ExperimentStatus
+from py_experimenter.experimenter import PyExperimenter
+from py_experimenter.result_processor import ResultProcessor
 
 
-@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
-def main(cfg: DictConfig) -> None:
-    """Run optimizer on problem.
+def py_experimenter_evaluate(parameters: dict,
+                             result_processor: ResultProcessor,
+                             custom_config: dict):
+    config = parameters['config']
+    print(parameters)
+    cfg_dict = ast.literal_eval(config)
 
-    Save trajectory and metadata to database.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Global configuration.
-
-    """
-    # TODO: adapt to container structure: start problem container, start optimizer container, run optimizer, save run,
-    #  stop problem (optimizer should stop itself)
-    cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
-    hydra_cfg = HydraConfig.instance().get()
-    printr(hydra_cfg.run.dir)
 
-    problem = make_problem(cfg=cfg)
-    inspect(problem)
+    job_id = os.environ["BENCHMARKING_JOB_ID"]
 
-    optimizer = make_optimizer(cfg=cfg, problem=problem)
-    inspect(optimizer)
+    result_processor.process_results({'slurm_job_id': job_id})
 
-    try:
-        optimizer.run()
-    except NotSupportedError:
-        print("Not supported. Skipping.")
-    except Exception as e:
-        print("Something went wrong:")
-        print(e)
+    dict_config = OmegaConf.create(cfg_dict)
+    cfg_path = f"{job_id}_hydra_config.yaml"
+    OmegaConf.save(config=dict_config, f=cfg_path)
 
-    metadata = {"hi": "hello"}  # TODO add reasonable meta data
+    with open(f"{job_id}_pyexperimenter_id.txt", 'w+') as f:
+        f.write(str(result_processor._experiment_id))
 
-    save_run(cfg=cfg, optimizer=optimizer, metadata=metadata)
+    with open(f"{job_id}_problem_container.txt", 'w+') as f:
+        f.write(cfg_dict["benchmark_id"])
 
-    return None
+    with open(f"{job_id}_optimizer_container.txt", 'w+') as f:
+        f.write(cfg_dict["optimizer_id"])
+
+    return ExperimentStatus.PAUSED.value
+
+
+def main() -> None:
+    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
+    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
+    experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
+                                  name='example_notebook',
+                                  database_credential_file_path='01_lcbench_yahpo/credentials.cfg',
+                                  log_file=f'logs/{slurm_job_id}.log')
+
+    experimenter.execute(py_experimenter_evaluate, max_experiments=1)
 
 
 if __name__ == "__main__":

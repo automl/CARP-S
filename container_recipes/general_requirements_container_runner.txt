@@ -1,0 +1,3 @@
+# general requirements for the hydra-initializer container
+spython~=0.3.0
+domdf_python_tools
