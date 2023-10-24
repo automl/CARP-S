@@ -140,3 +140,4 @@ runs
 /.idea/.gitignore
 /.codecarbon.config
 /smacbenchmarking.db
+*.sif
