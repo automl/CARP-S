@@ -128,6 +128,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Yahpo data
+yahpo_data_r
+
+# Container
+containers
+
 outputs
 runs
 *.json
@@ -138,5 +144,8 @@ runs
 /.idea/SMACBenchmarking.iml
 /.idea/vcs.xml
 /.idea/.gitignore
+/.idea/inspectionProfiles
+/.idea/dataSources*
+/.idea/jupyter*
 /.codecarbon.config
 /smacbenchmarking.db

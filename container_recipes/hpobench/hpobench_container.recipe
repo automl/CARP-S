@@ -44,4 +44,27 @@ From: continuumio/anaconda3:2021.05
    git checkout master
    pip install .
 
+   chmod -R 755 /benchmarking/smacbenchmarking
+   mkdir /var/lib/hpobench
+   chmod -R 755 /var/lib/hpobench
+   mkdir /var/lib/hpobench/socket
+   mkdir /var/lib/hpobench/data
+   mkdir /var/lib/hpobench/cache
+   
+   # install singularity inside the container to use the benchmark specific containers inside
+   apt-get update
+   apt-get install -y build-essential libssl-dev uuid-dev libgpgme11-dev \
+   squashfs-tools libseccomp-dev wget pkg-config git
+   cd /home
+   wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
+   tar --directory=/usr/local -xzvf go1.13.linux-amd64.tar.gz
+   export PATH=/usr/local/go/bin:$PATH
+   wget https://github.com/singularityware/singularity/releases/download/v3.5.3/singularity-3.5.3.tar.gz
+   tar -xzf singularity-3.5.3.tar.gz
+   cd singularity
+   ./mconfig
+   cd builddir
+   make 
+   make install
+
    echo "Successfully installed all features"
