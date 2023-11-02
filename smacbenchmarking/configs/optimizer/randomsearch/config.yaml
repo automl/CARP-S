@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: RandomSampling
+optimizer_id: RandomSearch
 optimizer:
   _target_: smacbenchmarking.optimizers.random_sampling.RandomSamplingOptimizer
   _partial_: true
