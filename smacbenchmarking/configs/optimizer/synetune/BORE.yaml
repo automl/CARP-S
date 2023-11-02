@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: SyneTune_BORE
+optimizer_id: SyneTune
 optimizer:
   _target_: smacbenchmarking.optimizers.synetune.SynetuneOptimizer
   _partial_: true
