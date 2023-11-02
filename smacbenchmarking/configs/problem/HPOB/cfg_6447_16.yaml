@@ -1,11 +1,10 @@
-# @package _global_
-benchmark_id: HPOB
-problem_id: hpob/6447/16
+benchmark_id: HPOB_Problem
 problem:
   _target_: smacbenchmarking.benchmarks.hpo_b.HPOBProblem
-  model_id: '6447'
   dataset_id: '16'
+  model_id: '6447'
   surrogates_dir: smacbenchmarking/benchmark_data/HPO-B/saved-surrogates
+problem_id: hpob/6447/16
 task:
-  n_trials: 100
   n_objectives: 1
+  n_trials: 100

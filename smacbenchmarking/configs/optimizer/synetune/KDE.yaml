@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: SMAC3-MultiFidelityFacade
+optimizer_id: SyneTune_KDE
 optimizer:
   _target_: smacbenchmarking.optimizers.synetune.SynetuneOptimizer
   _partial_: true
