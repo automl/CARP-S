@@ -25,10 +25,6 @@ From: continuumio/anaconda3
     apt install clang -y
     . /opt/conda/etc/profile.d/conda.sh
 
-   conda update -n base -c defaults conda
-   conda create -n environment python=3.11
-   conda init bash
-   conda activate environment
    pip install wheel
    pip install -r benchmarking/requirements.txt
    pip install ../benchmarking
