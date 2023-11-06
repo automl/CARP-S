@@ -12,6 +12,9 @@ from rich import print as printr
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.exceptions import NotSupportedError
+from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
+from smacbenchmarking.loggers.database_logger import DatabaseLogger
+from smacbenchmarking.loggers.file_logger import FileLogger, dump_logs
 
 
 def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
@@ -33,10 +36,17 @@ def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
     problem_cfg = cfg.problem
     problem = instantiate(problem_cfg)
 
-    if logging and "loggers" in cfg and cfg.loggers is not None:
-        for logger in cfg.loggers:
-            loggercls = instantiate(logger)
-            problem = loggercls(problem=problem, cfg=cfg)
+    if logging:
+        # if logging and "loggers" in cfg and cfg.loggers is not None:
+        #     for logger in cfg.loggers:
+        #         loggercls = instantiate(logger)
+        #         problem = loggercls(problem=problem, cfg=cfg)
+
+        logging_problem_wrapper = LoggingProblemWrapper(problem=problem)
+
+        # logging_problem_wrapper.add_logger(DatabaseLogger(result_processor))
+        logging_problem_wrapper.add_logger(FileLogger())
+        problem = logging_problem_wrapper
 
     return problem
 
@@ -98,8 +108,7 @@ def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict | None = None
     }
 
     filename = "rundata.json"
-    with open(filename, "w") as file:
-        json.dump(data, file, indent="\t")
+    dump_logs(log_data=data, filename=filename)
 
 
 def optimize(cfg: DictConfig) -> None:
