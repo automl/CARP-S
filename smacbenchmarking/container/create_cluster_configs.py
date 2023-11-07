@@ -19,15 +19,18 @@ def main(cfg: DictConfig) -> None:
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
 
-    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
-    experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
-                                  name='smacbenchmarking')
+    experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.cfg"
+    experimenter = PyExperimenter(
+        experiment_configuration_file_path=experiment_configuration_file_path, name="smacbenchmarking"
+    )
 
-    rows = [{
-        'config': cfg_dict,
-        'problem_id': cfg_dict["benchmark_id"],
-        'optimizer_id': cfg_dict["optimizer_id"],
-    }]
+    rows = [
+        {
+            "config": cfg_dict,
+            "problem_id": cfg_dict["benchmark_id"],
+            "optimizer_id": cfg_dict["optimizer_id"],
+        }
+    ]
     experimenter.fill_table_with_rows(rows)
     return None
 

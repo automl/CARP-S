@@ -9,12 +9,12 @@ from omegaconf import DictConfig, OmegaConf
 from rich import inspect
 from rich import print as printr
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.exceptions import NotSupportedError
 from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
+from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.database_logger import DatabaseLogger
 from smacbenchmarking.loggers.file_logger import FileLogger, dump_logs
+from smacbenchmarking.optimizers.optimizer import Optimizer
+from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
 def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
@@ -140,6 +140,7 @@ def optimize(cfg: DictConfig) -> None:
     except Exception as e:
         print("Something went wrong:")
         print(e)
+        raise e
 
     metadata = {"hi": "hello"}  # TODO add reasonable meta data
 

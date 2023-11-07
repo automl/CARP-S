@@ -21,7 +21,7 @@ optimizer_id: ???
 
 timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
-outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}
+outdir: runs2/${optimizer_id}/${benchmark_id}/${problem_id}
 hydra:
   run:
     dir: ${outdir}/${seed}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}

@@ -152,8 +152,8 @@ cluster (e.g. with job arrays).
 The overall benchmarking system works as follows: 
 
 We have three different containers wrapping different functionality and a shell script controlling these containers. 
-The `Runner (HydraInitializer)` container is responsible for pulling a PyExperimenter experiment from the database and 
-writing files to the disk which are required to initialize the `Optimizer` and the `Benchmark` container. 
+The `HydraInitializer` container is responsible for constructing the Hydra configuration, 
+which is required to initialize the `Optimizer` and the `Benchmark` container. 
 The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
 First, it allows to get the search space associated with the benchmark. 
 Second, it answers requests providing a configuration to be evaluated with the corresponding evaluation result.

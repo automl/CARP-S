@@ -1,13 +1,13 @@
+from abc import ABC, abstractmethod
+
 from ConfigSpace import ConfigurationSpace
 
 from smacbenchmarking.benchmarks.problem import Problem
-from abc import ABC, abstractmethod
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class LoggingProblemWrapper(Problem):
-
     def __init__(self, problem: Problem) -> None:
         super().__init__()
         self.problem: Problem = problem

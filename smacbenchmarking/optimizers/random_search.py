@@ -3,14 +3,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
+from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
 
-from ConfigSpace import ConfigurationSpace, Configuration
-
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
 from smacbenchmarking.utils.trials import TrialInfo
 
-from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
 
 class RandomSamplingOptimizer(Optimizer):
     def __init__(self, problem: Problem, n_trials: int) -> None:
@@ -24,13 +23,13 @@ class RandomSamplingOptimizer(Optimizer):
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
-    
+
     def convert_to_trial(self, config: Configuration) -> TrialInfo:
         return TrialInfo(config=config)
-    
+
     def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
         return (self.trajectory_X, self.trajectory_y)
-    
+
     def run(self) -> None:
         best_y = 1e10
         for i in range(self.n_trials):

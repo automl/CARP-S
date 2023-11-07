@@ -1,24 +1,16 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import asdict
+from pathlib import Path
 
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-
-import logging
-from pathlib import Path
-
-
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-
-import json
-from hydra.core.hydra_config import HydraConfig
-from pathlib import Path
-
-
 
 
 def dump_logs(log_data: dict, filename: str):
@@ -33,7 +25,7 @@ def dump_logs(log_data: dict, filename: str):
     filename : str
         Filename without path. The path will be either the
         current working directory or if it is called during
-        a hydra session, the hydra run dir will be the log 
+        a hydra session, the hydra run dir will be the log
         dir.
     """
     log_data_str = json.dumps(log_data) + "\n"
@@ -49,7 +41,6 @@ def dump_logs(log_data: dict, filename: str):
 
 
 class FileLogger(AbstractLogger):
-
     def __init__(self) -> None:
         """File logger.
 
@@ -66,7 +57,6 @@ class FileLogger(AbstractLogger):
         # fh.setLevel(logging.DEBUG)
         # fh.setFormatter(formatter)
         # self.logger.addHandler(fh)
-
 
     def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
