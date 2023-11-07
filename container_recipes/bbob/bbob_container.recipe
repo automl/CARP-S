@@ -22,7 +22,7 @@ From: continuumio/anaconda3
     . /opt/conda/etc/profile.d/conda.sh
 
    conda update -n base -c defaults conda
-   conda create -n environment python=3.11
+   conda create -n environment python=3.10
    conda init bash
    conda activate environment
    pip install wheel
