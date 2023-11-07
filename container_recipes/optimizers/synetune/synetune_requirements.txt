@@ -1,1 +1,4 @@
 syne-tune[basic]
+# for bore
+xgboost
+scikit-learn
