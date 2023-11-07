@@ -24,8 +24,7 @@ from syne_tune.config_space import uniform, loguniform, randint, lograndint, cho
 from syne_tune.optimizer.baselines import ASHA, BORE, BayesianOptimization, DEHB, KDE, MOBSTER, BOHB
 
 
-from smac.runhistory.dataclasses import TrialInfo, TrialValue
-from smac.runhistory import RunHistory
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
@@ -93,7 +92,6 @@ class SynetuneOptimizer(Optimizer):
         self.trial_counter = 0
         self.max_budget = max_budget
 
-        self.rh = RunHistory()
         self.optimizer_name = optimizer_name
         self._optimizer: SyneTrialScheduler | None = None
 
@@ -213,7 +211,6 @@ class SynetuneOptimizer(Optimizer):
             if trial_value.endtime - self.start_time > self.wallclock_times:
                 # In this case, it is actually timed out. We will simply ignore that
                 return trial_value.cost
-        self.rh.add_trial(info=trial_info, value=trial_value)
         self.completed_experiments[self.trial_counter] = (trial_value, trial_info)
         return trial_value.cost
 
