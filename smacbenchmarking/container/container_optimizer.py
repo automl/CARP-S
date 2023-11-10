@@ -8,7 +8,7 @@ from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrap
 from smacbenchmarking.container.wrapper import ContainerizedProblemClient
 from smacbenchmarking.loggers.database_logger import DatabaseLogger
 from smacbenchmarking.loggers.file_logger import FileLogger
-from smacbenchmarking.run import make_optimizer
+from smacbenchmarking.utils.running import make_optimizer
 
 
 def optimizer_experiment(parameters: dict, result_processor: ResultProcessor, custom_config: dict):

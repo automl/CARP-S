@@ -9,7 +9,7 @@ from hydra import compose, initialize
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf
 
-from smacbenchmarking.run import make_problem
+from smacbenchmarking.utils.running import make_problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
