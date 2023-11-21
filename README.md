@@ -182,6 +182,14 @@ you can ignore all aspects of the system just described and simply follow the si
         - Version
         - Commit
 
+## Installation Instructions
+Just temporary notes on how to install the respective Benchmarks and Optimizers.
+
+- Benchmarks
+    - YAHPO is installable using `pip install yahpo-gym`, for surrogate benchmarks: collect the meta data by `mkdir bench_data; cd bench_data`, `git clone https://github.com/slds-lmu/yahpo_data`, downgrade config: `pip install configspace==0.6.1`
+  
+- Optimizers
+
 ## Open Todos
 - [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
 - [ ] Add budget under `task` as time AND number of function evaluations
