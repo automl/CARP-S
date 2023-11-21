@@ -1,0 +1,40 @@
+# @package _global_
+optimizer_id: BOHB
+optimizer:
+  _target_: smacbenchmarking.optimizers.bohb.BOHBOptimizer
+  _partial_: true
+
+  run_id: ${seed} # must be the same as nameserver.run_id
+  n_iterations: ${task.n_trials}
+  host: 127.0.0.1
+
+  bohb:
+    _target_: hpbandster.optimizers.bohb.BOHB
+    _partial_: true
+    min_budget: ${task.min_budget}
+    max_budget: ${task.max_budget}
+    nameserver: ${optimizer.nameserver}
+    # defaults:
+    eta: 3
+    min_points_in_model: null
+    top_n_percent: 15
+    num_samples: 64
+    random_fraction: 0.3333333333333333
+    bandwidth_factor: 3
+    min_bandwidth: 0.001
+
+  # todo checkout the other parallelization strategies and what they might need in terms of code changes (/generalizations of the current sequential one)
+  # Local Sequential
+  nameserver:
+    _target_: hpbandster.core.nameserver.NameServer
+    run_id: ${optimizer.run_id}
+    host: ${optimizer.host}
+    port: Null
+
+
+
+
+
+
+
+

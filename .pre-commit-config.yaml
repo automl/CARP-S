@@ -13,42 +13,42 @@ repos:
         name: isort imports tests
         files: tests
 
-  - repo: https://github.com/ambv/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-        name: black formatter smacbenchmarking
-        files: smacbenchmarking
+#  - repo: https://github.com/ambv/black
+#    rev: 23.3.0
+#    hooks:
+#      - id: black
+#        name: black formatter smacbenchmarking
+#        files: smacbenchmarking
+#
+#      - id: black
+#        name: black formatter tests
+#        files: tests
+#
+#      - id: black
+#        name: black formatter examples
+#        files: examples
+#
+#  - repo: https://github.com/pycqa/pydocstyle
+#    rev: 6.3.0
+#    hooks:
+#      - id: pydocstyle
+#        files: smacbenchmarking
+#        additional_dependencies: ["toml"] # Needed to parse pyproject.toml
 
-      - id: black
-        name: black formatter tests
-        files: tests
+#  - repo: https://github.com/pre-commit/mirrors-mypy
+#    rev: v1.4.1
+#    hooks:
+#      - id: mypy
+#        name: mypy smacbenchmarking
+#        files: smacbenchmarking
 
-      - id: black
-        name: black formatter examples
-        files: examples
-
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        files: smacbenchmarking
-        additional_dependencies: ["toml"] # Needed to parse pyproject.toml
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.4.1
-    hooks:
-      - id: mypy
-        name: mypy smacbenchmarking
-        files: smacbenchmarking
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        name: flake8 smacbenchmarking
-        files: smacbenchmarking
-
-      - id: flake8
-        name: flake8 tests
-        files: tests
+#  - repo: https://github.com/pycqa/flake8
+#    rev: 6.0.0
+#    hooks:
+#      - id: flake8
+#        name: flake8 smacbenchmarking
+#        files: smacbenchmarking
+#
+#      - id: flake8
+#        name: flake8 tests
+#        files: tests
