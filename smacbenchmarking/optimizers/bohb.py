@@ -40,7 +40,7 @@ class BOHBOptimizer(Optimizer):
         """Convert proposal from BOHB to TrialInfo."""
         return TrialInfo(config=config)
 
-    def get_trajectory(self, sort_by: str = "trials") -> typing.Tuple[typing.List[float], typing.list[float]]:
+    def get_trajectory(self, sort_by: str = "trials") -> typing.Tuple[typing.List[float], typing.List[float]]:
         """Get trajectory of optimizer."""
         return list(range(len(self.trajectory))), self.trajectory  # FIXME: Check trajectory!
 
