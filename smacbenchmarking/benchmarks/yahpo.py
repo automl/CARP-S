@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from ConfigSpace import ConfigurationSpace
-from smac.runhistory.dataclasses import TrialInfo
 from yahpo_gym import BenchmarkSet, list_scenarios
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.utils.trials import TrialInfo
 
 
 # TODO write into genererate problems, how to collect all the benchmark problems automatically.
