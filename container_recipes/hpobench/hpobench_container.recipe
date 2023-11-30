@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/anaconda3:2021.05
+From: continuumio/anaconda3:2022.05
 
 %startscript
     # this is necessary to start the benchmarking server
@@ -50,7 +50,7 @@ From: continuumio/anaconda3:2021.05
    mkdir /var/lib/hpobench/socket
    mkdir /var/lib/hpobench/data
    mkdir /var/lib/hpobench/cache
-   
+
    # install singularity inside the container to use the benchmark specific containers inside
    apt-get update
    apt-get install -y build-essential libssl-dev uuid-dev libgpgme11-dev \
@@ -64,7 +64,7 @@ From: continuumio/anaconda3:2021.05
    cd singularity
    ./mconfig
    cd builddir
-   make 
+   make
    make install
 
    echo "Successfully installed all features"
