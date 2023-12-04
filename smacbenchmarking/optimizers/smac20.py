@@ -147,6 +147,16 @@ class SMAC3Optimizer(Optimizer):
 
         smac_kwargs["scenario"] = scenario
 
+        # Convert callbacks to list if necessary
+        # Callbacks can come as a dict due to impossible hydra composition of 
+        # lists.
+        if not "callbacks" in smac_kwargs:
+            smac_kwargs["callbacks"] = []
+        elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == dict:
+            smac_kwargs["callbacks"] = list(smac_kwargs["callbacks"].values())
+        elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == list:
+            pass
+
         # If we have a custom intensifier we need to instantiate ourselves
         # because the helper methods in the facades expect a scenario.
         if "intensifier" in smac_kwargs:
@@ -161,8 +171,6 @@ class SMAC3Optimizer(Optimizer):
                 if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(
                     smac_kwargs["acquisition_maximizer"].selector, "expl2callback"
                 ):
-                    if not "callbacks" in smac_kwargs:
-                        smac_kwargs["callbacks"] = []
                     smac_kwargs["callbacks"].append(smac_kwargs["acquisition_maximizer"].selector.expl2callback)
 
         if "config_selector" in smac_kwargs:
