@@ -15,7 +15,7 @@ from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
 def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
-    """Make Problem
+    """Make Problem.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
 
 
 def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
-    """Make Optimizer
+    """Make Optimizer.
 
     Parameters
     ----------
@@ -62,7 +62,7 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
 
 
 def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict | None = None) -> None:
-    """Save Run Data
+    """Save Run Data.
 
     Save run to global database.
 
@@ -120,7 +120,7 @@ def optimize(cfg: DictConfig) -> None:
 
     # TODO @CARO: does it make sense to have a hydra.utils.call(cfg._target_: make_problem/path) ?
     #  to allow customization the setup if necessary?
-    problem = make_problem(cfg=cfg, logging=True)
+    problem = make_problem(cfg=cfg, logging=False)
     inspect(problem)
 
     optimizer = make_optimizer(cfg=cfg, problem=problem)

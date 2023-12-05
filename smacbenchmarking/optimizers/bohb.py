@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import typing
 
 import hpbandster.core.nameserver as hpns
-import hpbandster.core.result as hpres
 from ConfigSpace import Configuration
+from hpbandster.core.worker import Worker
 from hpbandster.optimizers import BOHB as BOHB
 
 from smacbenchmarking.benchmarks.problem import Problem
@@ -11,8 +13,16 @@ from smacbenchmarking.utils.trials import TrialInfo
 
 
 class BOHBOptimizer(Optimizer):
-    def __init__(self, problem: Problem, n_iterations, bohb: BOHB, nameserver: hpns.NameServer, run_id, host) -> None:
+    def __init__(
+            self, problem: Problem, n_iterations, bohb: BOHB, nameserver: hpns.NameServer, run_id,
+            host
+    ) -> None:
         """
+        BOHB Optimizer.
+
+        Wrapper build based on the following sequential example:
+        https://automl.github.io/HpBandSter/build/html/auto_examples/example_1_local_sequential.html
+
         Parameters
         ----------
         problem : Problem (Benchmark)
@@ -31,56 +41,62 @@ class BOHBOptimizer(Optimizer):
         super().__init__(problem)
         self.configspace = self.problem.configspace
         self.n_iterations = n_iterations
-        self.bohb = bohb(self.configspace, run_id=run_id)
         self.nameserver = nameserver
         self.host = host
+        self.bohb = bohb  # partial
+        self.run_id = run_id
         self.trajectory = []
 
-    def convert_to_trial(self, config: Configuration) -> TrialInfo:
+    def convert_configspace(self, configspace: Configuration) -> typing.Any:
+        """
+        Convert ConfigSpace configuration space to search space from optimizer.
+
+        Not required for BOHB, as it works directly with ConfigSpace.
+        """
+        pass
+
+    def convert_to_trial(self, config: Configuration, budget) -> TrialInfo:
         """Convert proposal from BOHB to TrialInfo."""
-        return TrialInfo(config=config)
+        return TrialInfo(config=config, budget=budget)
 
     def get_trajectory(self, sort_by: str = "trials") -> typing.Tuple[typing.List[float], typing.List[float]]:
         """Get trajectory of optimizer."""
         return list(range(len(self.trajectory))), self.trajectory  # FIXME: Check trajectory!
 
-    def setup_bohb(self, cfg) -> None:
+    def setup_bohb(self) -> None:
         """Setup BOHB optimizer."""
         # FIXME: interact with the problem or wrap it to meet the desired interface of the worker
-
-        class myWorker:
-            def __init__(self, nameserver, run_id) -> None:
-                self.nameserver = nameserver
-                self.run_id = run_id
-
-            def run(self, background=False) -> None:
-                pass
-
-            def compute(self, config, budget, **kwargs) -> float:
-                pass
-
-        self.w = myWorker(nameserver=cfg.host, run_id=cfg.run_id)
-
-    def run(self) -> None:
-        """Run optimizer."""
         self.nameserver.start()
 
+        problem = self.problem
+        convert_to_trial = self.convert_to_trial
+
+        class MyWorker(Worker):
+            def __init__(self, *args, **kwargs) -> None:
+                super().__init__(*args, **kwargs)
+
+            def compute(self, config, budget, **kwargs) -> dict:
+                return {
+                    "loss": float(problem.evaluate(convert_to_trial(config, budget))),
+                    # this is the a mandatory field to run hyperband
+                    "info": None,  # can be used for any user-defined information - also mandatory
+                }
+
+        self.w = MyWorker(nameserver=self.host, run_id=self.run_id)
         self.w.run(background=True)
 
-        # TODO analyse the return trajectory.
-        res = self.bohb.run(n_iterations=self.n_iterations)
-        res
-        hpres  # TODO what to use this for?
+        self.bohb = self.bohb(self.configspace, run_id=self.run_id)
 
+    def teardown_bohb(self) -> None:
+        """Teardown BOHB optimizer."""
         self.bohb.shutdown(shutdown_workers=True)
         self.nameserver.shutdown()
 
-        # timeout = self.cfg.timeout
-        # start_time = time()
-        # while time() - start_time < timeout:
-        #     sleep(1)
-        #     trial = self.problem.configspace.sample_configuration()
-        #     trial = self.convert_to_trial(trial)
-        #     result = self.problem.evaluate(trial)
-        #     self.trajectory.append(result.cost)
-        return
+    def run(self) -> None:
+        """Run optimizer."""
+        self.setup_bohb()
+        result = self.bohb.run(n_iterations=self.n_iterations)
+        self.teardown_bohb()
+
+        # consider: result.get_incumbent_trajectory()?
+        self.trajectory = [r.loss for r in result.get_all_runs()]

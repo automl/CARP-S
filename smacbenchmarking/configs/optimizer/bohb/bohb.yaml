@@ -13,7 +13,7 @@ optimizer:
     _partial_: true
     min_budget: ${task.min_budget}
     max_budget: ${task.max_budget}
-    nameserver: ${optimizer.nameserver}
+    nameserver: ${optimizer.host}
     # defaults:
     eta: 3
     min_points_in_model: null
