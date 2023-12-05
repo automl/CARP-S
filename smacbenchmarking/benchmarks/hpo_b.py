@@ -129,7 +129,7 @@ class HPOBProblem(Problem):
             Cost
         """
         configuration = trial_info.config
-        input = np.asarray(dict(configuration).values())
+        input = np.asarray(list(dict(configuration).values()))
         starttime = time.time()
         x_q = xgb.DMatrix(input.reshape(-1, self.search_space_dims))
         predicted_output = self.surrogate_model.predict(x_q)
@@ -137,6 +137,6 @@ class HPOBProblem(Problem):
         T = endtime - starttime
 
         # we would like to do minimization
-        trial_value = TrialValue(cost=-predicted_output, time=T, starttime=starttime, endtime=endtime)
+        trial_value = TrialValue(cost=-predicted_output.item(), time=T, starttime=starttime, endtime=endtime)
 
         return trial_value
