@@ -138,7 +138,7 @@ class YahpoProblem(Problem):
         from yahpo_gym import local_config
 
         local_config.init_config()
-        local_config.set_data_path("yahpo_data")
+        local_config.set_data_path("data/yahpo_data")
 
         self.scenario = bench
         self.instance = str(instance)
