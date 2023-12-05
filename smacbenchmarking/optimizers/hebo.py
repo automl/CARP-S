@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from collections import OrderedDict
+from collections import abc, OrderedDict
 
 import pandas as pd
 import numpy as np
@@ -62,7 +62,7 @@ def HEBOcfg2ConfigSpacecfg(hebo_suggestion: pd.DataFrame,  design_space: DesignS
 
 
 class HEBOOptimizer(Optimizer):
-    def __init__(self, problem: Problem, optimizer_name: 'str',
+    def __init__(self, problem: Problem,
                  max_budget: float | None = None,
                  num_trials: int | None = None,
                  wallclock_times: float | None = None) -> None:
@@ -77,7 +77,6 @@ class HEBOOptimizer(Optimizer):
         self.trial_counter = 0
         self.max_budget = max_budget
 
-        self.optimizer_name = optimizer_name
         self._optimizer: HEBO | None = None
 
         if num_trials is None and wallclock_times is None:
@@ -155,7 +154,11 @@ class HEBOOptimizer(Optimizer):
         :param cost: float, cost values
         """
         self.trial_counter += 1
-        self._optimizer.observe(suggestion, cost)
+        if isinstance(cost, abc.Sequence):
+            cost = np.asarray([cost])
+        else:
+            cost = np.asarray(cost)
+        self._optimizer.observe(suggestion, np.asarray([cost]))
 
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
