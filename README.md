@@ -50,7 +50,7 @@ Documentation at https://AutoML.github.io/SMACBenchmarking/main
 python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
 
 # Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
 ## Containerization
