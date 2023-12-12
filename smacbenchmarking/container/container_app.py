@@ -17,6 +17,8 @@ if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
 
 problem = make_problem(cfg=cfg)
 
+# TODO Check that problem container and problem match
+
 app = Flask(__name__)
 
 
