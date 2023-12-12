@@ -21,10 +21,10 @@ optimizer_id: ???
 
 timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
-outdir: runs2/${optimizer_id}/${benchmark_id}/${problem_id}
+outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}
 hydra:
   run:
     dir: ${outdir}/${seed}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
-    dir: runs2  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: runs  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${optimizer_id}/${benchmark_id}/${problem_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir
