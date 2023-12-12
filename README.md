@@ -58,6 +58,9 @@ To run benchmarking with containers, both the optimizer and benchmark have to be
 We use Singularity/ Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
 
+💡 You can check the location of the log files of your singularity instances with `singularity instance list -l`.
+⚠ When creating recipes, take care that the paths are correct. In particular, check relative vs. absolute paths (e.g. benchmarking/... ❌ vs /benchmarking/... ✔).
+
 #### Noctua2 Setup Before Compilation
 
 Include the following lines in your `~/.bashrc`:
