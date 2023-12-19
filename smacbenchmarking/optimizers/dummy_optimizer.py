@@ -15,7 +15,8 @@ class DummyOptimizer(Optimizer):
         super().__init__(problem)
         self.cfg = dummy_cfg
         self.trajectory = []
-        self.fidelity_enabled = True
+        if self.cfg.budget is not None:
+            self.fidelity_enabled = True
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace

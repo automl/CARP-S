@@ -37,8 +37,8 @@ extras_require = {
         "flake8",
         "pre-commit",
     ],
-    'yahpo': ['yahpo-gym'],
-    'smac20': ['smac>=2.0'],
+    'yahpo': ["yahpo-gym==1.0.1", "onnxruntime==1.15.0", "ConfigSpace~=0.6.0"],
+    'smac20': ["smac>=2.0"],
 }
 
 setuptools.setup(
@@ -55,12 +55,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["tests"]),
     python_requires=">=3.8",
     install_requires=[
-        "numpy",
-        # 'ConfigSpace',
-        # 'hydra-core',
-        # 'hydra-colorlog',
-        # 'rich',
-        # 'pandas',
+        "numpy"
     ],
     extras_require=extras_require,
     test_suite="pytest",
