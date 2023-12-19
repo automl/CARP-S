@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import time
+
 from ConfigSpace import ConfigurationSpace
-from smac.runhistory.dataclasses import TrialInfo
 from yahpo_gym import BenchmarkSet, list_scenarios
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 # TODO write into genererate problems, how to collect all the benchmark problems automatically.
@@ -138,7 +140,7 @@ class YahpoProblem(Problem):
         from yahpo_gym import local_config
 
         local_config.init_config()
-        local_config.set_data_path("yahpo_data")
+        local_config.set_data_path("data/yahpo_data")
 
         self.scenario = bench
         self.instance = str(instance)
@@ -194,7 +196,7 @@ class YahpoProblem(Problem):
 
         Returns
         -------
-        float
+        TrialValue
             Cost
         """
         configuration = trial_info.config
@@ -202,7 +204,7 @@ class YahpoProblem(Problem):
 
         # fixme: if there are multiple fidelities, we will need to max the respective other
         #  dimension here!
-
+        starttime = time.time()
         xs.update({self.budget_type: int(trial_info.budget)})
 
         if len(self.fidelity_dims) > 1:
@@ -211,7 +213,12 @@ class YahpoProblem(Problem):
         # fixme: figure out why list is returned here!
 
         if self.lower_is_better:
-            return self._problem.objective_function(xs)[0][self.metric]
-
+            cost = self._problem.objective_function(xs)[0][self.metric]
         else:
-            return -self._problem.objective_function(xs)[0][self.metric]
+            cost = -self._problem.objective_function(xs)[0][self.metric]
+
+        endtime = time.time()
+        T = endtime - starttime
+
+        trial_value = TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
+        return trial_value

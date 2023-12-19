@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/anaconda3:2021.05
+From: continuumio/anaconda3
 
 %startscript
     # this is necessary to start the benchmarking server
@@ -28,14 +28,15 @@ From: continuumio/anaconda3:2021.05
     . /opt/conda/etc/profile.d/conda.sh
 
    pip install wheel
-   pip install -r benchmarking/requirements.txt
+   pip install -r /benchmarking/requirements.txt
    pip install ../benchmarking
-   pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
+   pip install -r /benchmarking/container_recipes/general_requirements_container_problem.txt
 
    # benchmark-specific commands go here
    pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt
-   pip install onnxruntime==1.8.0
    cd /benchmarking/smacbenchmarking
+   mkdir data
+   cd data
    git clone https://github.com/slds-lmu/yahpo_data.git
 
    echo "Successfully installed all features"
