@@ -14,7 +14,7 @@ class DatabaseLogger(AbstractLogger):
         super().__init__()
         self.result_processor = result_processor
 
-    def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
         info["trial_info"]["config"] = str(
             list(dict(info["trial_info"]["config"]).values())
@@ -32,6 +32,8 @@ class DatabaseLogger(AbstractLogger):
                     # If v is None, we omit it from the dict.
                     # Missing keys will automatically filled with NULL in MySQL.
                     pass
+
+        info["n_trials"] = n_trials
 
         log = {"trials": info}
 

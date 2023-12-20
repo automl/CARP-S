@@ -19,7 +19,7 @@ class AbstractLogger(ABC):
         pass
 
     @abstractmethod
-    def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Log the trial.
 
         Parameters

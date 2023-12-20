@@ -12,6 +12,7 @@ class LoggingProblemWrapper(Problem):
         super().__init__()
         self.problem: Problem = problem
         self.loggers = list()
+        self.n_calls: int = 0
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
@@ -32,9 +33,10 @@ class LoggingProblemWrapper(Problem):
                 - endtime : float, defaults to 0.0
                 - additional_info : dict[str, Any], defaults to {}
         """
+        self.n_calls += 1
         trial_value = self.problem.evaluate(trial_info)
         for logger in self.loggers:
-            logger.log_trial(trial_info, trial_value)
+            logger.log_trial(n_trials=self.n_calls - 1, trial_info=trial_info, trial_value=trial_value)
         return trial_value
 
     @property

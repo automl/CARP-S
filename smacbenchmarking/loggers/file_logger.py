@@ -65,7 +65,7 @@ class FileLogger(AbstractLogger):
         # fh.setFormatter(formatter)
         # self.logger.addHandler(fh)
 
-    def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
 
         Parameters
@@ -75,7 +75,7 @@ class FileLogger(AbstractLogger):
         trial_value : TrialValue
             Trial value.
         """
-        info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+        info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
         info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())  # TODO beautify serialization
         info_str = json.dumps(info) + "\n"
         logging.info(info_str)
