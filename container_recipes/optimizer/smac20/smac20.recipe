@@ -21,7 +21,7 @@ From: continuumio/anaconda3
     pip install swig
     pip install wheel
     pip install -r /benchmarking/requirements.txt
-    pip install ../benchmarking
+    pip install /benchmarking
     pip install -r /benchmarking/container_recipes/general_requirements_container_optimizer.txt
 
     # benchmark-specific commands go here
