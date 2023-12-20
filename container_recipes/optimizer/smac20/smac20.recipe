@@ -18,6 +18,7 @@ From: continuumio/anaconda3
     apt install build-essential -y
     apt install clang -y
 
+    pip install swig
     pip install wheel
     pip install -r /benchmarking/requirements.txt
     pip install ../benchmarking
