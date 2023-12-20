@@ -8,11 +8,11 @@ from rich import print as printr
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
-from smac.runhistory.dataclasses import TrialInfo
 from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class SMAC3Optimizer(Optimizer):
