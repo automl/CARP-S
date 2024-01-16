@@ -6,13 +6,12 @@ from dataclasses import asdict
 from pathlib import Path
 
 from hydra.core.hydra_config import HydraConfig
+from hydra.types import RunMode
 from omegaconf import DictConfig
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-
-from hydra.types import RunMode
 
 
 def dump_logs(log_data: dict, filename: str):
@@ -38,13 +37,12 @@ def dump_logs(log_data: dict, filename: str):
         if hydra_cfg.mode == RunMode.RUN:
             directory = Path(hydra_cfg.run.dir)
         else:  # MULTIRUN
-            directory = Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir        
+            directory = Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir
     except:
         directory = "."
     filename = Path(directory) / filename
     with open(filename, mode="a") as file:
         file.writelines([log_data_str])
-
 
 
 class FileLogger(AbstractLogger):

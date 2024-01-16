@@ -31,7 +31,7 @@ def main(cfg: DictConfig) -> None:
             "problem_id": cfg_dict["problem_id"],
             "optimizer_id": cfg_dict["optimizer_id"],
             "seed": cfg_dict["seed"],
-            "task__n_trials": cfg_dict["task"]["n_trials"]
+            "task__n_trials": cfg_dict["task"]["n_trials"],
         }
     ]
     experimenter.fill_table_with_rows(rows)

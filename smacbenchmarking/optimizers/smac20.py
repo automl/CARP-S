@@ -148,7 +148,7 @@ class SMAC3Optimizer(Optimizer):
         smac_kwargs["scenario"] = scenario
 
         # Convert callbacks to list if necessary
-        # Callbacks can come as a dict due to impossible hydra composition of 
+        # Callbacks can come as a dict due to impossible hydra composition of
         # lists.
         if not "callbacks" in smac_kwargs:
             smac_kwargs["callbacks"] = []
