@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/anaconda3
+From: python:3.10-slim
 
 %files
 
@@ -18,11 +18,10 @@ From: continuumio/anaconda3
     apt install gcc -y
     apt install build-essential -y
     apt install clang -y
-    . /opt/conda/etc/profile.d/conda.sh
 
-   pip install wheel
-   pip install -r benchmarking/requirements.txt
-   pip install ../benchmarking
-   pip install -r benchmarking/container_recipes/general_requirements_container_optimizer.txt
+    pip install wheel
+    pip install -r benchmarking/requirements.txt
+    pip install ../benchmarking
+    pip install -r benchmarking/container_recipes/general_requirements_container_optimizer.txt
 
-   echo "Successfully installed all features"
+    echo "Successfully installed all features"
