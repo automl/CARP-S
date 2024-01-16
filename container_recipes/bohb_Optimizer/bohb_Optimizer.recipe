@@ -26,7 +26,7 @@ From: continuumio/anaconda3
    pip install -r benchmarking/container_recipes/general_requirements_container_optimizer.txt
 
    # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/bohb/bohb_optimizer_requirements.txt
+   pip install -r benchmarking/container_recipes/bohb_Optimizer/bohb_Optimizer_requirements.txt
 
 
    echo "Successfully installed all features"
