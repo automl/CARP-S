@@ -21,12 +21,12 @@ app = Flask(__name__)
 
 
 @app.route("/configspace", methods=["GET"])
-def _request_configspace():
+def _request_configspace() -> str:
     return json.dumps(cs_json.write(problem.configspace))
 
 
 @app.route("/evaluate", methods=["POST"])
-def _request_evaluation():
+def _request_evaluation() -> str:
     if request.is_json:
         trial_info = TrialInfo(**json.loads(request.get_json()))
         return json.dumps(problem.evaluate(trial_info).to_json())

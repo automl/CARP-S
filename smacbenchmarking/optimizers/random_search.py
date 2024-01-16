@@ -20,19 +20,11 @@ class RandomSearchOptimizer(Optimizer):
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
 
-    def convert_to_trial(self, config: Configuration) -> TrialInfo:
+    def convert_to_trial(self, config: Configuration) -> TrialInfo:  # type: ignore[override]
         return TrialInfo(config=config)
 
-    def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
-        return (self.trajectory_X, self.trajectory_y)
-
     def run(self) -> None:
-        best_y = 1e10
         for i in range(self.n_trials):
             trial = self.problem.configspace.sample_configuration()
             trial = self.convert_to_trial(trial)
-            result = self.problem.evaluate(trial)
-            if result.cost < best_y:
-                best_y = result.cost
-                self.trajectory_X.append(list(trial.config.get_dictionary().values()))
-                self.trajectory_y.append(result.cost)
+            _ = self.problem.evaluate(trial)
