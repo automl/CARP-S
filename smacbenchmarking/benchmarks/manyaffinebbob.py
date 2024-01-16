@@ -60,8 +60,6 @@ def register_many_affine_functions():
 
     for dim in dimensions:
         for i in range(1, n_functions + 1):  # 1-based, same as original bbob
-            iid = 0
-
             weights = rng.uniform(size=24)
             iids = rng.integers(100, size=24)
             opt_loc = rng.uniform(size=dim) * 10 - 5  # in [-5,5] as BBOB

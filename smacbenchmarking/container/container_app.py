@@ -1,16 +1,14 @@
+from __future__ import annotations
+
 import json
 import os
-import sys
 
-from ConfigSpace import ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
 from flask import Flask, request
-from hydra import compose, initialize
-from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf
 
 from smacbenchmarking.utils.running import make_problem
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from smacbenchmarking.utils.trials import TrialInfo
 
 if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
     cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")

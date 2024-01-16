@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from omegaconf import DictConfig
-
 from smacbenchmarking.database.result_processor import ResultProcessor
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue

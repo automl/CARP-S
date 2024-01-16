@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from omegaconf import DictConfig
-
-from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 # TODO log optimizer's execution time

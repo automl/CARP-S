@@ -8,7 +8,6 @@ from rich import print as printr
 
 from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
 from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.database_logger import DatabaseLogger
 from smacbenchmarking.loggers.file_logger import FileLogger, dump_logs
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.exceptions import NotSupportedError

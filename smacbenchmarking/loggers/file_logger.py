@@ -7,9 +7,7 @@ from pathlib import Path
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
-from omegaconf import DictConfig
 
-from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
@@ -38,7 +36,7 @@ def dump_logs(log_data: dict, filename: str):
             directory = Path(hydra_cfg.run.dir)
         else:  # MULTIRUN
             directory = Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir
-    except:
+    except Exception:
         directory = "."
     filename = Path(directory) / filename
     with open(filename, mode="a") as file:

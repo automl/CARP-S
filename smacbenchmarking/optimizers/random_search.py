@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any
-
 from ConfigSpace import Configuration, ConfigurationSpace
-from omegaconf import DictConfig
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace

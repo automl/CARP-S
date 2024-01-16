@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ConfigSpace import Configuration, ConfigurationSpace
-from hydra.utils import get_class, instantiate
+from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
 
@@ -12,7 +12,7 @@ from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from smacbenchmarking.utils.trials import TrialInfo
 
 
 class SMAC3Optimizer(Optimizer):
@@ -150,7 +150,7 @@ class SMAC3Optimizer(Optimizer):
         # Convert callbacks to list if necessary
         # Callbacks can come as a dict due to impossible hydra composition of
         # lists.
-        if not "callbacks" in smac_kwargs:
+        if "callbacks" not in smac_kwargs:
             smac_kwargs["callbacks"] = []
         elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == dict:
             smac_kwargs["callbacks"] = list(smac_kwargs["callbacks"].values())
