@@ -11,7 +11,7 @@ from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
 from smacbenchmarking.utils.trials import TrialInfo
 
 
-class RandomSamplingOptimizer(Optimizer):
+class RandomSearchOptimizer(Optimizer):
     def __init__(self, problem: Problem, n_trials: int) -> None:
         super().__init__(problem)
 
