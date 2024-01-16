@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/anaconda3
+From: python:3.10-slim
 
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking
