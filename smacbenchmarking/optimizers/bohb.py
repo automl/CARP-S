@@ -59,10 +59,6 @@ class BOHBOptimizer(Optimizer):
         """Convert proposal from BOHB to TrialInfo."""
         return TrialInfo(config=config, budget=budget)
 
-    def get_trajectory(self, sort_by: str = "trials") -> typing.Tuple[typing.List[float], typing.List[float]]:
-        """Get trajectory of optimizer."""
-        return list(range(len(self.trajectory))), self.trajectory  # FIXME: Check trajectory!
-
     def setup_bohb(self) -> None:
         """Setup BOHB optimizer."""
         # FIXME: interact with the problem or wrap it to meet the desired interface of the worker
@@ -97,6 +93,3 @@ class BOHBOptimizer(Optimizer):
         self.setup_bohb()
         result = self.bohb.run(n_iterations=self.n_iterations)
         self.teardown_bohb()
-
-        # consider: result.get_incumbent_trajectory()?
-        self.trajectory = [r.loss for r in result.get_all_runs()]
