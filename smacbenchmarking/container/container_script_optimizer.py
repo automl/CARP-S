@@ -54,12 +54,13 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
         parsed_experiment_configuration_file.read_file(file)
 
     if parsed_experiment_configuration_file['PY_EXPERIMENTER']['provider'] == 'mysql':
-        database_credential_file = 'smacbenchmarking/container/credentials.cfg'
-        configparser = ConfigParser()
-        configparser.read_file(database_credential_file)
-        config = configparser['TUNNEL_CONFIG']
-        ssh_address_or_host = config['ssh_address_or_host']
-        ssh_keypass = config['ssh_keypass']
+        database_credential_file_path = 'smacbenchmarking/container/credentials.cfg'
+        with open(database_credential_file_path, 'r') as file:
+            configparser = ConfigParser()
+            configparser.read_file(file)
+            config = configparser['TUNNEL_CONFIG']
+            ssh_address_or_host = config['ssh_address_or_host']
+            ssh_keypass = config['ssh_keypass']
 
         with sshtunnel.SSHTunnelForwarder(ssh_address_or_host=(ssh_address_or_host, 22),
                                           ssh_private_key_password=ssh_keypass,
@@ -67,7 +68,7 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
                                           local_bind_address=('127.0.0.1', 3306)
                                           ) as tunnel:
             execute(slurm_job_id, experiment_configuration_file_path, experiment_id, optimizer_experiment,
-                    database_credential_file)
+                    database_credential_file_path)
 
     else:
         execute(slurm_job_id, experiment_configuration_file_path, experiment_id, optimizer_experiment)

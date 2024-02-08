@@ -61,11 +61,12 @@ def main() -> None:
 
     if parsed_experiment_configuration_file['PY_EXPERIMENTER']['provider'] == 'mysql':
         database_credential_file_path = 'smacbenchmarking/container/credentials.cfg'
-        configparser = ConfigParser()
-        configparser.read_file(database_credential_file_path)
-        config = configparser['TUNNEL_CONFIG']
-        ssh_address_or_host = config['ssh_address_or_host']
-        ssh_keypass = config['ssh_keypass']
+        with open(database_credential_file_path, 'r') as file:
+            configparser = ConfigParser()
+            configparser.read_file(file)
+            config = configparser['TUNNEL_CONFIG']
+            ssh_address_or_host = config['ssh_address_or_host']
+            ssh_keypass = config['ssh_keypass']
 
         with sshtunnel.SSHTunnelForwarder(ssh_address_or_host=(ssh_address_or_host, 22),
                                           ssh_private_key_password=ssh_keypass,
