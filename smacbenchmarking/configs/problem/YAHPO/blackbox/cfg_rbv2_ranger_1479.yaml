@@ -1,0 +1,15 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/rbv2_ranger/1479/None
+problem:
+  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  bench: rbv2_ranger
+  instance: '1479'
+  budget_type: null
+  lower_is_better: false
+  metric: acc
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: null
+  max_budget: null

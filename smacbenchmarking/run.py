@@ -118,6 +118,8 @@ def optimize(cfg: DictConfig) -> None:
     hydra_cfg = HydraConfig.instance().get()
     printr(hydra_cfg.run.dir)
 
+    # TODO @CARO: does it make sense to have a hydra.utils.call(cfg._target_: make_problem/path) ?
+    #  to allow customization the setup if necessary?
     problem = make_problem(cfg=cfg, logging=True)
     inspect(problem)
 
@@ -127,6 +129,7 @@ def optimize(cfg: DictConfig) -> None:
     try:
         optimizer.run()
     except NotSupportedError:
+        # TODO @CARO Set up proper logging?
         print("Not supported. Skipping.")
     except Exception as e:
         print("Something went wrong:")
