@@ -11,6 +11,10 @@ problem: ???
 task:
   n_trials: ???  # Optimization budget as number of evaluations.
 
+  # Multi-fidelity
+  min_budget: null
+  max_budget: null
+
 benchmark_id: ??? # Set in problem cfg.
 problem_id: ???  # Set in problem cfg. Can be directory.
 

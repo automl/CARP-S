@@ -1,1 +1,2 @@
 smac==1.4
+scikit-learn==1.1.3
