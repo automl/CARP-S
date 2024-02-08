@@ -15,11 +15,6 @@ From: continuumio/anaconda3:2022.05
     requirements.txt /benchmarking/requirements.txt
     setup.py /benchmarking/setup.py
     README.md /benchmarking/README.md
-    containers/hpobench/lr_benchmark_latest /benchmarking/containers/hpobench/lr_benchmark_latest
-    containers/hpobench/nn_benchmark_latest /benchmarking/containers/hpobench/nn_benchmark_latest
-    containers/hpobench/rf_benchmark_latest /benchmarking/containers/hpobench/rf_benchmark_latest
-    containers/hpobench/svm_benchmark_latest /benchmarking/containers/hpobench/svm_benchmark_latest
-    containers/hpobench/xgboost_benchmark_latest /benchmarking/containers/hpobench/xgboost_benchmark_latest
 
 %post
     apt update -y
@@ -52,21 +47,5 @@ From: continuumio/anaconda3:2022.05
    mkdir /var/lib/hpobench/socket
    mkdir /var/lib/hpobench/data
    mkdir /var/lib/hpobench/cache
-
-   # install singularity inside the container to use the benchmark specific containers inside
-   apt-get update
-   apt-get install -y build-essential libssl-dev uuid-dev libgpgme11-dev \
-   squashfs-tools libseccomp-dev wget pkg-config git
-   cd /home
-   wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz
-   tar --directory=/usr/local -xzvf go1.13.linux-amd64.tar.gz
-   export PATH=/usr/local/go/bin:$PATH
-   wget https://github.com/singularityware/singularity/releases/download/v3.5.3/singularity-3.5.3.tar.gz
-   tar -xzf singularity-3.5.3.tar.gz
-   cd singularity
-   ./mconfig
-   cd builddir
-   make
-   make install
 
    echo "Successfully installed all features"

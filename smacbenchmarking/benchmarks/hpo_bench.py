@@ -5,11 +5,11 @@ from typing import Any
 import time
 
 from ConfigSpace import ConfigurationSpace
-from hpobench.container.benchmarks.ml.lr_benchmark import LRBenchmark
-from hpobench.container.benchmarks.ml.nn_benchmark import NNBenchmark
-from hpobench.container.benchmarks.ml.rf_benchmark import RandomForestBenchmark
-from hpobench.container.benchmarks.ml.svm_benchmark import SVMBenchmark
-from hpobench.container.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
+from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
+from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
+from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
+from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
+from hpobench.benchmarks.ml.xgboost_benchmark_old import XGBoostBenchmark
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
@@ -90,36 +90,26 @@ def get_hpobench_problem(model: str, task_id: int, seed: int) -> Any:
         problem = LRBenchmark(
             rng=seed,
             task_id=task_id,
-            container_name="lr_benchmark",
-            container_source="./containers/hpobench",
         )
     elif model == "nn":
         problem = NNBenchmark(
             rng=seed,
             task_id=task_id,
-            container_name="nn_benchmark",
-            container_source="./containers/hpobench",
         )
     elif model == "rf":
         problem = RandomForestBenchmark(
             rng=seed,
             task_id=task_id,
-            container_name="rf_benchmark",
-            container_source="./containers/hpobench",
         )
     elif model == "svm":
         problem = SVMBenchmark(
             rng=seed,
             task_id=task_id,
-            container_name="svm_benchmark",
-            container_source="./containers/hpobench",
         )
     elif model == "xgboost":
         problem = XGBoostBenchmark(
             rng=seed,
             task_id=task_id,
-            container_name="xgboost_benchmark",
-            container_source="./containers/hpobench",
         )
     else:
         raise ValueError(f"Unknown model {model} for HPOBench.")
