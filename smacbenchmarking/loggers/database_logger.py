@@ -39,11 +39,11 @@ class DatabaseLogger(AbstractLogger):
             'trial_info__seed': info['trial_info__seed'],
             'trial_info__budget': info['trial_info__budget'],
             #'trial_value__cost': '4.0',
-            'trial_value__time': info['trial_value__time'],
-            'trial_value__status': info['trial_value__status'],
-            'trial_value__starttime': info['trial_value__starttime'],
-            'trial_value__endtime': info['trial_value__endtime'],
-            'trial_value__additional_info': info['trial_value__additional_info']
+            #'trial_value__time': info['trial_value__time'],
+            #'trial_value__status': info['trial_value__status'],
+            #'trial_value__starttime': info['trial_value__starttime'],
+            #'trial_value__endtime': info['trial_value__endtime'],
+            #'trial_value__additional_info': info['trial_value__additional_info']
         }
 
         print(log)
