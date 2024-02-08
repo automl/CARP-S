@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import asdict
 
 from smacbenchmarking.database.result_processor import ResultProcessor
@@ -14,9 +15,10 @@ class DatabaseLogger(AbstractLogger):
 
     def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = str(list(dict(info["trial_info"]["config"]).values()))
+        info["trial_info"]["config"] = json.dumps(trial_info['config'])
         info["trial_value"]["status"] = info["trial_value"]["status"].name
-        info["trial_value"]["additional_info"] = str(info["trial_value"]["additional_info"])
+        info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"])
+        info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["cost"])
         keys = ["trial_info", "trial_value"]
         for key in keys:
             D = info.pop(key)
