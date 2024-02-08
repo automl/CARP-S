@@ -60,10 +60,10 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
             configparser.read_file(file)
             config = configparser['TUNNEL_CONFIG']
             ssh_address_or_host = config['ssh_address_or_host']
-            ssh_keypass = config['ssh_keypass']
+            ssh_private_key_password = config['ssh_private_key_password']
 
         with sshtunnel.SSHTunnelForwarder(ssh_address_or_host=(ssh_address_or_host, 22),
-                                          ssh_private_key_password=ssh_keypass,
+                                          ssh_private_key_password=ssh_private_key_password,
                                           remote_bind_address=('127.0.0.1', 3306),
                                           local_bind_address=('127.0.0.1', 3306)
                                           ) as tunnel:
