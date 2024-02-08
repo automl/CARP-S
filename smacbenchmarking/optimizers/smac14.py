@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from typing import Any
-import numpy as np
 
+import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig, OmegaConf
-
 from smac.facade.smac_ac_facade import SMAC4AC
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.trials import TrialInfo
+
 
 class NotSupportedError(Exception):
     pass
@@ -105,15 +105,15 @@ class SMAC314Optimizer(Optimizer):
             Instance of a SMAC facade.
 
         """
+        from smac.facade.smac_ac_facade import SMAC4AC
         from smac.facade.smac_bb_facade import SMAC4BB
         from smac.facade.smac_hpo_facade import SMAC4HPO
         from smac.facade.smac_mf_facade import SMAC4MF
-        from smac.facade.smac_ac_facade import SMAC4AC
         from smac.scenario.scenario import Scenario
 
         if self.smac_cfg.scenario.n_workers > 1 and self.smac_cfg.optimization_type != "mf":
             raise NotSupportedError("SMAC 1.4 does not support parallel execution natively.")
-        
+
         if self.smac_cfg.scenario.wallclock_limit is None:
             self.smac_cfg.scenario.wallclock_limit = np.inf
 
