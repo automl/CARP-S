@@ -15,10 +15,6 @@ def py_experimenter_evaluate(parameters: dict,
                              result_processor: ResultProcessor,
                              custom_config: dict):
     config = parameters['config']
-    print(parameters)
-    print(type(config))
-    print(config)
-    #cfg_dict = ast.literal_eval(config)
     cfg_dict = json.loads(config)
 
     printr(cfg_dict)
