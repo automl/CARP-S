@@ -36,7 +36,9 @@ extras_require = {
         "pydocstyle",
         "flake8",
         "pre-commit",
-    ]
+    ],
+    'yahpo': ["yahpo-gym==1.0.1", "onnxruntime==1.15.0", "ConfigSpace~=0.6.0"],
+    'smac20': ["smac>=2.0"],
 }
 
 setuptools.setup(
@@ -52,7 +54,9 @@ setuptools.setup(
     version=version,
     packages=setuptools.find_packages(exclude=["tests"]),
     python_requires=">=3.8",
-    install_requires=["numpy"],
+    install_requires=[
+        "numpy"
+    ],
     extras_require=extras_require,
     test_suite="pytest",
     platforms=["Linux"],

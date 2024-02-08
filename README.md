@@ -185,6 +185,17 @@ you can ignore all aspects of the system just described and simply follow the si
         - Version
         - Commit
 
+## Installation Instructions
+Just temporary notes on how to install the respective Benchmarks and Optimizers.
+
+- Benchmarks
+    - YAHPO: 
+      - Download surrogate benchmarks with
+        `mkdir data; cd data; git clone https://github.com/slds-lmu/yahpo_data`
+      - Install specific requirements by `pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt`
+  
+- Optimizers
+
 ## Open Todos
 - [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
 - [ ] Add budget under `task` as time AND number of function evaluations
