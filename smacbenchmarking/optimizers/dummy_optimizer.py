@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from time import sleep, time
 from typing import Optional
+
+from time import sleep, time
 
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
@@ -16,7 +17,7 @@ class DummyOptimizer(Optimizer):
         super().__init__(problem)
         self.cfg = dummy_cfg
         self.trajectory = []
-        if 'budget' in self.cfg.keys():
+        if "budget" in self.cfg.keys():
             self.fidelity_enabled = True
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
@@ -30,7 +31,7 @@ class DummyOptimizer(Optimizer):
 
     def run(self) -> None:
         timeout = self.cfg.timeout
-        if 'budget' in self.cfg.keys():
+        if "budget" in self.cfg.keys():
             budget = self.cfg.budget
         else:
             budget = None
