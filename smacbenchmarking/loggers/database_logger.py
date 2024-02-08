@@ -15,7 +15,7 @@ class DatabaseLogger(AbstractLogger):
 
     def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = json.dumps(trial_info['config'])
+        info["trial_info"]["config"] = json.dumps(asdict(trial_info)['config'])
         info["trial_value"]["status"] = info["trial_value"]["status"].name
         info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"])
         info["trial_value"]["cost"] = json.dumps({'cost': json.dumps(info["trial_value"]["cost"])})
@@ -38,12 +38,12 @@ class DatabaseLogger(AbstractLogger):
             'trial_info__instance': info['trial_info__instance'],
             'trial_info__seed': info['trial_info__seed'],
             'trial_info__budget': info['trial_info__budget'],
-            #'trial_value__cost': '4.0',
-            #'trial_value__time': info['trial_value__time'],
-            #'trial_value__status': info['trial_value__status'],
-            #'trial_value__starttime': info['trial_value__starttime'],
-            #'trial_value__endtime': info['trial_value__endtime'],
-            #'trial_value__additional_info': info['trial_value__additional_info']
+            'trial_value__cost': info['trial_info__cost'],
+            'trial_value__time': info['trial_value__time'],
+            'trial_value__status': info['trial_value__status'],
+            'trial_value__starttime': info['trial_value__starttime'],
+            'trial_value__endtime': info['trial_value__endtime'],
+            'trial_value__additional_info': info['trial_value__additional_info']
         }
 
         print(log)
