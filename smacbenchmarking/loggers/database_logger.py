@@ -18,7 +18,7 @@ class DatabaseLogger(AbstractLogger):
         info["trial_info"]["config"] = json.dumps(trial_info['config'])
         info["trial_value"]["status"] = info["trial_value"]["status"].name
         info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"])
-        info["trial_value"]["cost"] = json.dumps(info["trial_value"]["cost"])
+        info["trial_value"]["cost"] = json.dumps({'cost': json.dumps(info["trial_value"]["cost"])})
         keys = ["trial_info", "trial_value"]
         for key in keys:
             D = info.pop(key)
