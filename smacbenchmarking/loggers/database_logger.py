@@ -15,7 +15,7 @@ class DatabaseLogger(AbstractLogger):
 
     def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = json.dumps(asdict(trial_info)['config'])
+        info["trial_info"]["config"] = json.dumps(asdict(trial_info)['config'].get_dictionary())
         info["trial_value"]["status"] = info["trial_value"]["status"].name
         info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"])
         info["trial_value"]["cost"] = json.dumps({'cost': json.dumps(info["trial_value"]["cost"])})
