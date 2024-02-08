@@ -134,6 +134,7 @@ yahpo_data_r
 # Container
 containers
 
+data
 outputs
 runs
 *.json
@@ -144,8 +145,5 @@ runs
 /.idea/SMACBenchmarking.iml
 /.idea/vcs.xml
 /.idea/.gitignore
-/.idea/inspectionProfiles
-/.idea/dataSources*
-/.idea/jupyter*
 /.codecarbon.config
 /smacbenchmarking.db

@@ -15,6 +15,8 @@ class Optimizer(ABC):
     def __init__(self, problem: Problem) -> None:
         self.problem = problem
         super().__init__()
+        # This indicates if the optimizer can deal with multi-fidelity optimization
+        self.fidelity_enabled = False
 
     @abstractmethod
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
