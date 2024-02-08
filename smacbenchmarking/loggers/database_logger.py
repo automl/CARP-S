@@ -38,7 +38,7 @@ class DatabaseLogger(AbstractLogger):
             'trial_info__instance': info['trial_info__instance'],
             'trial_info__seed': info['trial_info__seed'],
             'trial_info__budget': info['trial_info__budget'],
-            'trial_value__cost': info['trial_value__cost'],
+            'trial_value__cost': '4.0',
             'trial_value__time': info['trial_value__time'],
             'trial_value__status': info['trial_value__status'],
             'trial_value__starttime': info['trial_value__starttime'],
