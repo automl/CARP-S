@@ -1,4 +1,5 @@
 import ast
+import json
 import os
 from configparser import ConfigParser
 
@@ -17,7 +18,8 @@ def py_experimenter_evaluate(parameters: dict,
     print(parameters)
     print(type(config))
     print(config)
-    cfg_dict = ast.literal_eval(config)
+    #cfg_dict = ast.literal_eval(config)
+    cfg_dict = json.loads(config)
 
     printr(cfg_dict)
 
