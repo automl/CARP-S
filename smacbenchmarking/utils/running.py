@@ -138,8 +138,4 @@ def optimize(cfg: DictConfig) -> None:
         print(e)
         raise e
 
-    metadata = {"hi": "hello"}  # TODO add reasonable meta data
-
-    save_run(cfg=cfg, optimizer=optimizer, metadata=metadata)
-
     return None
