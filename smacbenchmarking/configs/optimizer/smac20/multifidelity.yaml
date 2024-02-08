@@ -6,21 +6,17 @@ optimizer:
 
   smac_cfg:
     smac_class: smac.facade.multi_fidelity_facade.MultiFidelityFacade
-    budget_variable: epoch # TODO configure based on fidelity type of yahpo problem
+    budget_variable: ${problem.budget_type}
     scenario:
       seed: ${seed}
       n_trials: ${task.n_trials}
       deterministic: true
       n_workers: 1
       output_directory: ${outdir}/${seed}/smac3_output
-      min_budget: ${task.min_budget} # Todo configure min & max budget - depending on yahpo problem fidelity type
+      min_budget: ${task.min_budget}
       max_budget: ${task.max_budget}
     smac_kwargs:
       dask_client: null
       intensifier: smac.intensifier.hyperband.Hyperband
       intensifier_kwargs:
         eta: 3
-
-#      walltime_limit: 60,  # After 60 seconds, we stop the hyperparameter optimization
-#      n_trials: 500,  # Evaluate max 500 different trials
-#      n_workers: 8,
