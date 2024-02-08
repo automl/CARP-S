@@ -53,10 +53,11 @@ def main(cfg: DictConfig) -> None:
     handler.setLevel(logging.INFO)
     logger.addHandler(handler)
 
-    parsed_experiment_configuration_file = ConfigParser()
-    parsed_experiment_configuration_file.read_file(experiment_configuration_file_path)
+    with open(experiment_configuration_file_path, 'r') as file:
+        parsed_experiment_configuration_file = ConfigParser()
+        parsed_experiment_configuration_file.read_file(file)
 
-    if parsed_experiment_configuration_file['provider'] == 'mysql':
+    if parsed_experiment_configuration_file['PY_EXPERIMENTER']['provider'] == 'mysql':
         with open(database_credential_file, 'r') as file:
             configparser = ConfigParser()
             configparser.read_file(file)

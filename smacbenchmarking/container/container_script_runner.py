@@ -55,10 +55,11 @@ def main() -> None:
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
     experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
 
-    parsed_experiment_configuration_file = ConfigParser()
-    parsed_experiment_configuration_file.read_file(experiment_configuration_file_path)
+    with open(experiment_configuration_file_path, 'r') as file:
+        parsed_experiment_configuration_file = ConfigParser()
+        parsed_experiment_configuration_file.read_file(file)
 
-    if parsed_experiment_configuration_file['provider'] == 'mysql':
+    if parsed_experiment_configuration_file['PY_EXPERIMENTER']['provider'] == 'mysql':
         database_credential_file_path = 'smacbenchmarking/container/credentials.cfg'
         configparser = ConfigParser()
         configparser.read_file(database_credential_file_path)
