@@ -6,10 +6,8 @@ module load system singularity
 export BENCHMARKING_JOB_ID=$SLURM_JOB_ID
 
 # Start the runner container - gets the hydra config and writes environment vars
-# Parse whole array of args given to this script to runner.sif
 echo "Starting runner container"
-singularity run hydra_initializer.sif "${@}"
-# singularity run runner.sif +optimizer/DUMMY=config +problem/DUMMY=config
+singularity run hydra_initializer.sif
 
 # Wait for the runner container to finish
 while [ ! -f "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt" ]; do

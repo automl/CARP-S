@@ -1,8 +1,29 @@
-# SMACBenchmarking
+# ⏱️ SMACBenchmarking 📐
+Welcome to SMACBenchmarking! 
+This repository contains a benchmarking framework for optimizers.
+It allows flexibly combining optimizers and benchmarks via a simple interface, and logging experiment results 
+and trajectories to a database.
+There are two main ways to use this framework:
+1. Run everything in the same environment (e.g. to test locally)
+2. Build separate Singularity/ Apptainer containers for the optimizer and the benchmark (e.g. to run on a cluster)
 
+The first options can allow for faster development, but the second option is more robust and flexible since python or 
+other package versions don't clash, and eases execution on e.g. a SLURM cluster.
 
+Main Topics of this README:
+- [Conceptual Overview 🗺](#conceptual-overview-🗺)
+- [Usage - Local Setup 📍](#usage---local-setup-📍)
+- [Usage - Cluster Setup 🤖](#usage---cluster-setup-🤖)
+- [Adding a new Optimizer or Benchmark 🆕](#adding-a-new-optimizer-or-benchmark-🆕)
 
-## Installation
+## Conceptual Overview 🗺 
+TODO Overview picture and description
+
+## Usage - Local Setup 📍
+
+### Installation
+Create a conda environment and install the package.
+
 ```bash
 git clone https://github.com/AutoML/SMACBenchmarking.git
 cd SMACBenchmarking
@@ -17,6 +38,38 @@ make install-dev
 
 pip install -r requirements.txt
 ```
+
+Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
+For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark, you need to install the
+requirements for both of them.
+
+```bash
+pip install -e ".[smac20]"
+pip install -e ".[bbob]"
+```
+
+### Minimal Example
+Once the requirements for both an optimizer and a benchmark, e.g. `SMAC2.0` and `BBOB`, are installed, you can run
+one of the following minimal examples to benchmark `SMAC2.0` on `BBOB` directly with Hydra:
+
+```bash
+# Run SMAC BlackBoxFacade on certain BBOB problem
+python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
+
+# Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
+python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+```
+
+Note that in this case, no logging is done.
+
+## Usage - Cluster Setup 🤖
+### Installation
+Local: Install Apptainer
+
+Cluster: Configure Singularity/ Apptainer
+
+Setup Database if you want to log to database (mysql)
+
 ### Database
 🚧 UNDER CONSTRUCTION 🚧
 
@@ -43,15 +96,6 @@ MySQL can be installed with the information [here](https://dev.mysql.com/doc/ref
 
 Documentation at https://AutoML.github.io/SMACBenchmarking/main
 
-## Minimal Example
-
-```bash
-# Run SMAC BlackBoxFacade on certain BBOB problem
-python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
-
-# Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
-```
 
 ## Containerization
 To run benchmarking with containers, both the optimizer and benchmark have to be wrapped separately. 
@@ -164,23 +208,18 @@ Note that we provide wrappers for the optimizer and the benchmark interfaces suc
 optimizer or a benchmark within our benchmarking framework, 
 you can ignore all aspects of the system just described and simply follow the simple API. 
 
-## Open Questions
-
-- How to aggregate and save data?
-    - Performance data
-        - trajectory: sorted by cost and time
-- What metadata do we need?
-    - General
-        - Timestamp
-        - Machine
-    - Optimizer
-        - Name
-        - Repo
-        - Commit
-        - Version
-    - SMACBenchmarking
-        - Version
-        - Commit
+## Adding a new Optimizer or Benchmark 🆕
+To add a new optimizer or benchmark to the repository you need to
+1. Implement the optimizer or benchmark according to the corresponding interface
+    - **Optimizer**
+       - [Optimizer Interface](smacbenchmarking/optimizers/optimizer.py) <br> 
+          put implementation in [optimizers](smacbenchmarking/optimizers)
+       - [Benchmark Interface](smacbenchmarking/benchmarks/problem.py); put implementation in folder [benchmarks]
+         (smacbenchmarking/benchmarks)
+2. Add requirements for the optimizer or benchmark to the [setup.py](setup.py) under `extras-require`. 
+   Please specify exact versions of all requirements! This is very important for reproducibility.
+3. Add the config TODO
+4. Add a howto TODO
 
 ## Open Todos
 - [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
@@ -188,3 +227,8 @@ you can ignore all aspects of the system just described and simply follow the si
     - If we use time as a budget, we need to check whether the hardware is the same.
 - [ ] Create `dispatch.py` checking if run already exists
 - [ ] Add slurm config
+- [ ] Write the temporary files actually to subdirs (don't know experiment id then though, only cluster id --> maybe 
+  logs subfolder?)
+- [ ] fix versions of packages
+- [ ] allow only running jobs with specified names/ resources (pyexperimenter modification?)
+- [ ] container registry?

@@ -1,6 +1,8 @@
 import ast
 import os
+from configparser import ConfigParser
 
+import sshtunnel
 from domdf_python_tools.utils import printr
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
@@ -37,15 +39,43 @@ def py_experimenter_evaluate(parameters: dict,
     return ExperimentStatus.PAUSED.value
 
 
-def main() -> None:
-    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
+def execute(experiment_configuration_file_path: str,
+            slurm_job_id: str,
+            database_credential_file_path: str = None,
+            ):
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='example_notebook',
-                                  database_credential_file_path='01_lcbench_yahpo/credentials.cfg',
+                                  database_credential_file_path=database_credential_file_path,
                                   log_file=f'logs/{slurm_job_id}.log')
 
     experimenter.execute(py_experimenter_evaluate, max_experiments=1)
+
+
+def main() -> None:
+    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
+    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
+
+    parsed_experiment_configuration_file = ConfigParser()
+    parsed_experiment_configuration_file.read_file(experiment_configuration_file_path)
+
+    if parsed_experiment_configuration_file['provider'] == 'mysql':
+        database_credential_file_path = 'smacbenchmarking/container/credentials.cfg'
+        configparser = ConfigParser()
+        configparser.read_file(database_credential_file_path)
+        config = configparser['TUNNEL_CONFIG']
+        ssh_address_or_host = config['ssh_address_or_host']
+        ssh_keypass = config['ssh_keypass']
+
+        with sshtunnel.SSHTunnelForwarder(ssh_address_or_host=(ssh_address_or_host, 22),
+                                          ssh_private_key_password=ssh_keypass,
+                                          remote_bind_address=('127.0.0.1', 3306),
+                                          local_bind_address=('127.0.0.1', 3306)
+                                          ) as tunnel:
+            execute(experiment_configuration_file_path, slurm_job_id,
+                    database_credential_file_path)
+
+    else:
+        execute(experiment_configuration_file_path, slurm_job_id)
 
 
 if __name__ == "__main__":
