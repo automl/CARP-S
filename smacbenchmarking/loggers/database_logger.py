@@ -35,7 +35,7 @@ class DatabaseLogger(AbstractLogger):
 
         info_2 = {
             'trial_info__config': info['trial_info__config'],
-            'trial_info__instance': info['trial_info__instance'],
+            'trial_info__instance': info['trial_info__instance'] if 'trial_info__instance' in info else None,
             'trial_info__seed': info['trial_info__seed'],
             'trial_info__budget': info['trial_info__budget'],
             'trial_value__cost': info['trial_info__cost'],
