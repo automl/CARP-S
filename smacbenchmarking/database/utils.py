@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import logging
 from configparser import ConfigParser
@@ -8,28 +8,7 @@ from datetime import datetime
 
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
-from py_experimenter.exceptions import (
-    ConfigError,
-    NoConfigFileError,
-    ParameterCombinationError,
-)
-
-
-# check if path to codecarbon file exists
-def load_config(path):
-    """
-    Load and return configuration file.
-    :param path: path to the config file
-    :return: configuration file
-    """
-    config = ConfigParser()
-    try:
-        with open(path) as f:
-            config.read_file(f)
-    except FileNotFoundError:
-        raise NoConfigFileError(f"Configuration file missing! Please add file: {path}")
-
-    return config
+from py_experimenter.exceptions import ConfigError, ParameterCombinationError
 
 
 def extract_codecarbon_config(config: ConfigParser) -> Tuple[ConfigParser]:
@@ -303,7 +282,8 @@ def combine_fill_table_parameters(keyfield_names, parameters, fixed_parameter_co
 
         if set(combination.keys()) != set(keyfield_names):
             raise ParameterCombinationError(
-                "The number of config_parameters + individual_parameters + parameters does not match the amount of keyfields!"
+                "The number of config_parameters + individual_parameters + parameters "
+                "does not match the amount of keyfields!"
             )
 
     return combinations

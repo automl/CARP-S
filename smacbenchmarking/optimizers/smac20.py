@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 from ConfigSpace import Configuration, ConfigurationSpace
-from hydra.utils import get_class, instantiate
+from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
 
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
-from smac.runhistory.dataclasses import TrialInfo
 from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
+from smacbenchmarking.utils.trials import TrialInfo
 
 
 class SMAC3Optimizer(Optimizer):
@@ -141,34 +141,37 @@ class SMAC3Optimizer(Optimizer):
 
         smac_kwargs["scenario"] = scenario
 
+        # Convert callbacks to list if necessary
+        # Callbacks can come as a dict due to impossible hydra composition of
+        # lists.
+        if "callbacks" not in smac_kwargs:
+            smac_kwargs["callbacks"] = []
+        elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == dict:
+            smac_kwargs["callbacks"] = list(smac_kwargs["callbacks"].values())
+        elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == list:
+            pass
+
         # If we have a custom intensifier we need to instantiate ourselves
         # because the helper methods in the facades expect a scenario.
         if "intensifier" in smac_kwargs:
-            smac_kwargs["intensifier"] = smac_kwargs["intensifier"](
-                scenario=scenario
-            )
-        
+            smac_kwargs["intensifier"] = smac_kwargs["intensifier"](scenario=scenario)
+
         if "acquisition_function" in smac_kwargs and "acquisition_maximizer" in smac_kwargs:
             if "acquisition_maximizer" in smac_kwargs:
                 smac_kwargs["acquisition_maximizer"] = smac_kwargs["acquisition_maximizer"](
-                    configspace=self.configspace,
-                    acquisition_function=smac_kwargs["acquisition_function"]
+                    configspace=self.configspace, acquisition_function=smac_kwargs["acquisition_function"]
                 )
                 # TODO Fix this custom init
-                if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(smac_kwargs["acquisition_maximizer"].selector, "expl2callback"):
-                    if not "callbacks" in smac_kwargs:
-                        smac_kwargs["callbacks"] = []
+                if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(
+                    smac_kwargs["acquisition_maximizer"].selector, "expl2callback"
+                ):
                     smac_kwargs["callbacks"].append(smac_kwargs["acquisition_maximizer"].selector.expl2callback)
-        
+
         if "config_selector" in smac_kwargs:
-            smac_kwargs["config_selector"] = smac_kwargs["config_selector"](
-                scenario=scenario
-            )
+            smac_kwargs["config_selector"] = smac_kwargs["config_selector"](scenario=scenario)
 
         if "initial_design" in smac_kwargs:
-            smac_kwargs["initial_design"] = smac_kwargs["initial_design"](
-                scenario=scenario
-            )
+            smac_kwargs["initial_design"] = smac_kwargs["initial_design"](scenario=scenario)
 
         printr(smac_class, smac_kwargs)
 

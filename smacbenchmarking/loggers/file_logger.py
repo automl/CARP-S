@@ -1,20 +1,49 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
-
-from omegaconf import DictConfig
-
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-
 import logging
+from dataclasses import asdict
+from pathlib import Path
 
+from hydra.core.hydra_config import HydraConfig
+from hydra.types import RunMode
+
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
-class FileLogger(AbstractLogger):
+def dump_logs(log_data: dict, filename: str):
+    """Dump log dict in jsonl format
 
+    This appends one json dict line to the filename.
+
+    Parameters
+    ----------
+    log_data : dict
+        Data to log, must be json serializable.
+    filename : str
+        Filename without path. The path will be either the
+        current working directory or if it is called during
+        a hydra session, the hydra run dir will be the log
+        dir.
+    """
+    log_data_str = json.dumps(log_data) + "\n"
+
+    try:
+        # Check if we are in a hydra context
+        hydra_cfg = HydraConfig.instance().get()
+        if hydra_cfg.mode == RunMode.RUN:
+            directory = Path(hydra_cfg.run.dir)
+        else:  # MULTIRUN
+            directory = Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir
+    except Exception:
+        directory = "."
+    filename = Path(directory) / filename
+    with open(filename, mode="a") as file:
+        file.writelines([log_data_str])
+
+
+class FileLogger(AbstractLogger):
     def __init__(self) -> None:
         """File logger.
 
@@ -24,8 +53,15 @@ class FileLogger(AbstractLogger):
         """
         super().__init__()
 
+        # self.logger = logging.getLogger("filelogger")
+        # formatter = logging.Formatter('%(message)s')
+        # # format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+        # fh = logging.FileHandler('trial_logs.jsonl')
+        # fh.setLevel(logging.DEBUG)
+        # fh.setFormatter(formatter)
+        # self.logger.addHandler(fh)
 
-    def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
 
         Parameters
@@ -35,7 +71,9 @@ class FileLogger(AbstractLogger):
         trial_value : TrialValue
             Trial value.
         """
-        info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+        info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
         info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())  # TODO beautify serialization
         info_str = json.dumps(info) + "\n"
         logging.info(info_str)
+
+        dump_logs(log_data=info, filename="trial_logs.jsonl")

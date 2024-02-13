@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from omegaconf import DictConfig
 
-from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
-
 # TODO log optimizer's execution time
+
 
 class AbstractLogger(ABC):
     def __init__(self) -> None:
@@ -18,7 +16,7 @@ class AbstractLogger(ABC):
         pass
 
     @abstractmethod
-    def log_trial(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Log the trial.
 
         Parameters

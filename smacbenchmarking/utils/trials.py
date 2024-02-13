@@ -5,7 +5,6 @@ from typing import Any
 from dataclasses import dataclass, field
 from enum import IntEnum
 
-import dataclasses_json
 from ConfigSpace import Configuration
 from dataclasses_json import dataclass_json
 
