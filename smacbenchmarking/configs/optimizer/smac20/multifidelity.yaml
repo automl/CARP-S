@@ -17,6 +17,7 @@ optimizer:
       max_budget: ${task.max_budget}
     smac_kwargs:
       dask_client: null
-      intensifier: smac.intensifier.hyperband.Hyperband
-      intensifier_kwargs:
+      intensifier:
+        _target_: smac.intensifier.hyperband.Hyperband
+        _partial_: true
         eta: 3
