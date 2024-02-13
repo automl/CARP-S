@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 import time
 
@@ -16,15 +16,15 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class HPOBenchProblem(Problem):
-    def __init__(self, model: str, task_id: int, budget_type: str, seed: int):
+    def __init__(self, model: str, task_id: int, seed: int, budget_type: Optional[str] = None):
         """Initialize a HPOBench problem.
 
         Parameters
         ----------
         model : str Model name.
         task_id : str Task ID, see https://arxiv.org/pdf/2109.06716.pdf, page 22.
-        budget_type : str Budget type that is available for the model.
         seed: int Random seed.
+        budget_type : Optional[str] Budget type for the multifidelity setting. Should be None for the blackbox setting.
         """
         super().__init__()
 
@@ -59,10 +59,14 @@ class HPOBenchProblem(Problem):
         configuration = trial_info.config
         starttime = time.time()
 
-        budget_value = float(trial_info.budget) if self.budget_type == "subsample" else int(trial_info.budget)
+        if self.budget_type is not None:
+            budget_value = float(trial_info.budget) if self.budget_type == "subsample" else round(trial_info.budget)
+            fidelity = {self.budget_type: budget_value}
+        else:
+            fidelity = None
 
         result_dict = self._problem.objective_function(
-            configuration=configuration, fidelity={self.budget_type: budget_value}, rng=trial_info.seed
+            configuration=configuration, fidelity=fidelity, rng=trial_info.seed
         )
         endtime = time.time()
         T = endtime - starttime

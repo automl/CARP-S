@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: ml/xgboost/3
+problem:
+  _target_: smacbenchmarking.benchmarks.hpo_bench.HPOBenchProblem
+  model: xgboost
+  task_id: 3
+  budget_type: null
+  seed: ${seed}
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: null
+  max_budget: null
