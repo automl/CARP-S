@@ -16,9 +16,6 @@ from py_experimenter.result_processor import ResultProcessor
 def py_experimenter_evaluate(parameters: dict,
                              result_processor: ResultProcessor,
                              custom_config: dict):
-    with open(f"hello_pyexperimenter.txt", 'w+') as f:
-        f.write(str(abspath(getsourcefile(lambda: 0))))
-
     config = parameters['config']
     cfg_dict = json.loads(config)
 
@@ -57,6 +54,9 @@ def execute(experiment_configuration_file_path: str,
 
 
 def main() -> None:
+    with open(f"hello_pyexperimenter.txt", 'w+') as f:
+        f.write(str(abspath(getsourcefile(lambda: 0))))
+
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
     experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
 
