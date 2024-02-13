@@ -140,4 +140,9 @@ runs
 /.idea/vcs.xml
 /.idea/.gitignore
 /.codecarbon.config
+
 /smacbenchmarking.db
+smacbenchmarking.db
+*.jsonl
+*.sif
+logs
