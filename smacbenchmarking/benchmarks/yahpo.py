@@ -121,5 +121,5 @@ class YahpoProblem(Problem):
         endtime = time.time()
         T = endtime - starttime
 
-        trial_value = TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
+        trial_value = TrialValue(cost=float(cost), time=T, starttime=starttime, endtime=endtime)
         return trial_value
