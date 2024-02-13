@@ -23,4 +23,4 @@ From: continuumio/anaconda3
 
 %runscript
     ls .
-    python ./benchmarking/smacbenchmarking/container/container_script_runner.py "$@"
+    python /benchmarking/smacbenchmarking/container/container_script_runner.py "$@"
