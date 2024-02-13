@@ -22,5 +22,5 @@ From: continuumio/anaconda3
     echo "Successfully installed all features"
 
 %runscript
-    ls
-    python ./benchmarking/container/container_script_runner.py "$@"
+    ls .
+    python ./benchmarking/smacbenchmarking/container/container_script_runner.py "$@"
