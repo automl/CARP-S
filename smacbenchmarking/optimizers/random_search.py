@@ -14,9 +14,6 @@ class RandomSearchOptimizer(Optimizer):
         self.configspace: ConfigurationSpace = self.problem.configspace
         self.n_trials: int = n_trials
 
-        self.trajectory_X: list[Configuration] = []
-        self.trajectory_y: list[float] = []
-
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
 
