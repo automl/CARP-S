@@ -2,6 +2,8 @@ import ast
 import json
 import os
 from configparser import ConfigParser
+from inspect import getsourcefile
+from os.path import abspath
 
 import sshtunnel
 from domdf_python_tools.utils import printr
@@ -14,6 +16,9 @@ from py_experimenter.result_processor import ResultProcessor
 def py_experimenter_evaluate(parameters: dict,
                              result_processor: ResultProcessor,
                              custom_config: dict):
+    with open(f"hello_pyexperimenter.txt", 'w+') as f:
+        f.write(str(abspath(getsourcefile(lambda: 0))))
+
     config = parameters['config']
     cfg_dict = json.loads(config)
 
