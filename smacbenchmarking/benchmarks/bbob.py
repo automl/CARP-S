@@ -7,9 +7,9 @@ import time
 import ioh
 from ConfigSpace import ConfigurationSpace, Float
 
+from smacbenchmarking.benchmarks.manyaffinebbob import register_many_affine_functions
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-from smacbenchmarking.benchmarks.manyaffinebbob import register_many_affine_functions
 
 register_many_affine_functions()
 

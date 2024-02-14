@@ -50,13 +50,16 @@ Documentation at https://AutoML.github.io/SMACBenchmarking/main
 python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
 
 # Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
 ## Containerization
 To run benchmarking with containers, both the optimizer and benchmark have to be wrapped separately. 
 We use Singularity/ Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
+
+💡 You can check the location of the log files of your singularity instances with `singularity instance list -l`.
+⚠ When creating recipes, take care that the paths are correct. In particular, check relative vs. absolute paths (e.g. benchmarking/... ❌ vs /benchmarking/... ✔).
 
 #### Noctua2 Setup Before Compilation
 
@@ -186,7 +189,10 @@ you can ignore all aspects of the system just described and simply follow the si
 Just temporary notes on how to install the respective Benchmarks and Optimizers.
 
 - Benchmarks
-    - YAHPO is installable using `pip install yahpo-gym`, for surrogate benchmarks: collect the meta data by `mkdir bench_data; cd bench_data`, `git clone https://github.com/slds-lmu/yahpo_data`, downgrade config: `pip install configspace==0.6.1`
+    - YAHPO: 
+      - Download surrogate benchmarks with
+        `mkdir data; cd data; git clone https://github.com/slds-lmu/yahpo_data`
+      - Install specific requirements by `pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt`
   
 - Optimizers
 
