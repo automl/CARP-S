@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: DUMMY_Optimizer
+optimizer_id: DUMMY_Optimizer-MultiFidelity
 optimizer:
   _target_: smacbenchmarking.optimizers.dummy_optimizer.DummyOptimizer
   _partial_: true
