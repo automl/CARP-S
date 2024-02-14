@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import copy
-import time
 from typing import Any, Callable
+
+import copy
 import datetime
+import time
 from collections import OrderedDict
 
 import numpy as np
@@ -11,24 +12,34 @@ from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
     Constant,
+    FloatHyperparameter,
     Hyperparameter,
-    OrdinalHyperparameter,
     IntegerHyperparameter,
-    FloatHyperparameter
+    OrdinalHyperparameter,
 )
-
 from syne_tune.backend.trial_status import Trial as SyneTrial
+from syne_tune.config_space import (
+    choice,
+    lograndint,
+    loguniform,
+    ordinal,
+    randint,
+    uniform,
+)
+from syne_tune.optimizer.baselines import (
+    ASHA,
+    BOHB,
+    BORE,
+    DEHB,
+    KDE,
+    MOBSTER,
+    BayesianOptimization,
+)
 from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
-
-from syne_tune.config_space import uniform, loguniform, randint, lograndint, choice, ordinal
-from syne_tune.optimizer.baselines import ASHA, BORE, BayesianOptimization, DEHB, KDE, MOBSTER, BOHB
-
-
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
-
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -41,10 +52,7 @@ optimizers_dict = {
     # "DEHB": DEHB,
 }
 
-mf_optimizer_dicts = {
-    'with_mf': {'ASHA', 'DEHB', 'MOBSTER'},
-    'without_mf': {'BORE', 'BayesianOptimization', 'KDE'}
-}
+mf_optimizer_dicts = {"with_mf": {"ASHA", "DEHB", "MOBSTER"}, "without_mf": {"BORE", "BayesianOptimization", "KDE"}}
 
 
 def configspaceHP2syneTuneHP(hp: Hyperparameter) -> Callable:
@@ -65,30 +73,34 @@ def configspaceHP2syneTuneHP(hp: Hyperparameter) -> Callable:
     elif isinstance(hp, Constant):
         return choice([hp.value])
     else:
-        raise NotImplementedError(f'Unknown hyperparameter type: {hp.__class__.__name__}')
+        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class SynetuneOptimizer(Optimizer):
-    def __init__(self, problem: Problem, optimizer_name: 'str',
-                 max_budget: float | None = None,
-                 num_trials: int | None = None,
-                 wallclock_times: float | None = None) -> None:
+    def __init__(
+        self,
+        problem: Problem,
+        optimizer_name: "str",
+        max_budget: float | None = None,
+        num_trials: int | None = None,
+        wallclock_times: float | None = None,
+    ) -> None:
         super().__init__(problem)
         self.fidelity_enabled = False
 
         self.configspace = self.problem.configspace
         assert optimizer_name in optimizers_dict
-        if optimizer_name in mf_optimizer_dicts['with_mf']:
-            raise NotImplementedError('Multi-Fidelity Optimization on SyneTune is not implemented yet!')
+        if optimizer_name in mf_optimizer_dicts["with_mf"]:
+            raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
             self.fidelity_enabled = True
-            if not hasattr(problem, 'budget_type'):
-                raise ValueError('To run multi-fidelity optimizer, the problem must have a budget_type!')
+            if not hasattr(problem, "budget_type"):
+                raise ValueError("To run multi-fidelity optimizer, the problem must have a budget_type!")
             if max_budget is None:
-                raise ValueError('To run multi-fidelity optimizer, we must specify max_budget!')
+                raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
-        self.metric = getattr(problem, 'metric', 'cost')
-        self.budget_type = getattr(self.problem, 'budget_type', None)
+        self.metric = getattr(problem, "metric", "cost")
+        self.budget_type = getattr(self.problem, "budget_type", None)
         self.trial_counter = 0
         self.max_budget = max_budget
 
@@ -228,12 +240,12 @@ class SynetuneOptimizer(Optimizer):
         """
         optimizer_kwargs = dict(
             config_space=self.syne_tune_configspace,
-            metric=getattr(self.problem, 'metric', 'cost'),
-            mode='min',
+            metric=getattr(self.problem, "metric", "cost"),
+            mode="min",
         )
-        if self.optimizer_name in mf_optimizer_dicts['with_mf']:
-            optimizer_kwargs['resource_attr'] = self.problem.budget_type
-            optimizer_kwargs['max_t'] = self.max_budget
+        if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
+            optimizer_kwargs["resource_attr"] = self.problem.budget_type
+            optimizer_kwargs["max_t"] = self.max_budget
 
         bscheduler = optimizers_dict[self.optimizer_name](**optimizer_kwargs)
         return bscheduler
