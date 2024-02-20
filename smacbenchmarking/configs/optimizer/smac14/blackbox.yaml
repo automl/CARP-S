@@ -1,5 +1,6 @@
 # @package _global_
 optimizer_id: SMAC3-1.4-BlackBoxFacade
+optimizer_container_id: SMAC3-1.4
 optimizer:
   _target_: smacbenchmarking.optimizers.smac14.SMAC314Optimizer  
   _partial_: true
