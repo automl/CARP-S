@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: BOHB
+optimizer_id: bohb_Optimizer
 optimizer:
   _target_: smacbenchmarking.optimizers.bohb.BOHBOptimizer
   _partial_: true
@@ -27,6 +27,7 @@ optimizer:
   # Local Sequential
   nameserver:
     _target_: hpbandster.core.nameserver.NameServer
+    nameserver_port: 9276
     run_id: ${optimizer.run_id}
     host: ${optimizer.host}
     port: Null

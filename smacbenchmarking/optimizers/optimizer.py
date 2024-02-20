@@ -47,6 +47,22 @@ class Optimizer(ABC):
         """
         raise NotImplementedError
 
+    # @abstractmethod
+    def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
+        """List of x and y values of the incumbents over time. x depends on ``sort_by``.
+
+        Parameters
+        ----------
+        sort_by: str
+            Can be "trials" or "walltime".
+
+        Returns
+        -------
+        tuple[list[float], list[float]]
+
+        """
+        raise NotImplementedError
+
     @abstractmethod
     def run(self) -> None:
         """Run Optimizer on Problem"""
