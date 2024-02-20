@@ -1,6 +1,5 @@
 defaults:
   - _self_
-  - database
   - logger
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
@@ -11,6 +10,10 @@ seed: 1
 problem: ???
 task:
   n_trials: ???  # Optimization budget as number of evaluations.
+
+  # Multi-fidelity
+  min_budget: null
+  max_budget: null
 
 benchmark_id: ??? # Set in problem cfg.
 problem_id: ???  # Set in problem cfg. Can be directory.
@@ -26,5 +29,5 @@ hydra:
   run:
     dir: ${outdir}/${seed}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
-    dir: ${outdir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
-    subdir: ${seed}
+    dir: runs  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${optimizer_id}/${benchmark_id}/${problem_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir

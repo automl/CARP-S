@@ -50,13 +50,16 @@ Documentation at https://AutoML.github.io/SMACBenchmarking/main
 python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
 
 # Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
 ## Containerization
 To run benchmarking with containers, both the optimizer and benchmark have to be wrapped separately. 
 We use Singularity/ Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
+
+💡 You can check the location of the log files of your singularity instances with `singularity instance list -l`.
+⚠ When creating recipes, take care that the paths are correct. In particular, check relative vs. absolute paths (e.g. benchmarking/... ❌ vs /benchmarking/... ✔).
 
 #### Noctua2 Setup Before Compilation
 
@@ -152,8 +155,8 @@ cluster (e.g. with job arrays).
 The overall benchmarking system works as follows: 
 
 We have three different containers wrapping different functionality and a shell script controlling these containers. 
-The `Runner (HydraInitializer)` container is responsible for pulling a PyExperimenter experiment from the database and 
-writing files to the disk which are required to initialize the `Optimizer` and the `Benchmark` container. 
+The `HydraInitializer` container is responsible for constructing the Hydra configuration, 
+which is required to initialize the `Optimizer` and the `Benchmark` container. 
 The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
 First, it allows to get the search space associated with the benchmark. 
 Second, it answers requests providing a configuration to be evaluated with the corresponding evaluation result.
@@ -181,6 +184,17 @@ you can ignore all aspects of the system just described and simply follow the si
     - SMACBenchmarking
         - Version
         - Commit
+
+## Installation Instructions
+Just temporary notes on how to install the respective Benchmarks and Optimizers.
+
+- Benchmarks
+    - YAHPO: 
+      - Download surrogate benchmarks with
+        `mkdir data; cd data; git clone https://github.com/slds-lmu/yahpo_data`
+      - Install specific requirements by `pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt`
+  
+- Optimizers
 
 ## Open Todos
 - [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
