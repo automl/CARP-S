@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 
 from omegaconf import OmegaConf
-from py_experimenter.result_processor import ResultProcessor
 from rich import print as printr
 
 from smacbenchmarking.database import utils
@@ -67,7 +66,6 @@ log = {
         "trial_value__cost": str(100),
         "trial_value__time": 3,
         "trial_value__starttime": 12345,
-        "trial_value__starttime": 12348,
         "trial_value__status": "OK",
     }
 }

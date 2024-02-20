@@ -27,12 +27,12 @@ From: continuumio/anaconda3
     apt install clang -y
     . /opt/conda/etc/profile.d/conda.sh
 
-   pip install wheel
-   pip install -r benchmarking/requirements.txt
-   pip install ../benchmarking
-   pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
-
-   # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/DUMMY_Problem/DUMMY_Problem_requirements.txt
-
-   echo "Successfully installed all features"
+    pip install wheel
+    pip install -r /benchmarking/requirements.txt
+    pip install ../benchmarking
+    pip install -r /benchmarking/container_recipes/general_requirements_container_problem.txt
+    
+    # benchmark-specific commands go here
+    pip install -r /benchmarking/container_recipes/DUMMY_Problem/DUMMY_Problem_requirements.txt
+    
+    echo "Successfully installed all features"

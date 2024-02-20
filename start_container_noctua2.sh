@@ -27,7 +27,7 @@ OPTIMIZER_CONTAINER="$(cat "${BENCHMARKING_JOB_ID}_optimizer_container.txt")"
 echo "Starting problem container"
 singularity instance start "${PROBLEM_CONTAINER}.sif" problem
 
-API_URL="localhost:5000/configspace"  # Replace with the actual API URL
+API_URL="localhost:5000/configspace"
 
 while true; do
     response=$(curl -s -o /dev/null -w "%{http_code}" $API_URL)

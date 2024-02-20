@@ -4,6 +4,7 @@ problem_id: dummy
 problem:
   _target_: smacbenchmarking.benchmarks.dummy_problem.DummyProblem
   return_value: 42
+  budget_type: epoch
 task:
   n_trials: 10
   n_objectives: 1

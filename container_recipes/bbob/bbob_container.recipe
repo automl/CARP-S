@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: continuumio/anaconda3
+From: python:3.10-slim
 
 %startscript
     flask run
@@ -8,7 +8,11 @@ From: continuumio/anaconda3
     export FLASK_APP=smacbenchmarking/container/container_app.py
 
 %files
-    . /benchmarking
+    ./smacbenchmarking /benchmarking/smacbenchmarking
+    ./container_recipes /benchmarking/container_recipes
+    requirements.txt /benchmarking/requirements.txt
+    setup.py /benchmarking/setup.py
+    README.md /benchmarking/README.md
 
 %post
     apt update -y
@@ -19,18 +23,13 @@ From: continuumio/anaconda3
     apt install gcc -y
     apt install build-essential -y
     apt install clang -y
-    . /opt/conda/etc/profile.d/conda.sh
 
-   conda update -n base -c defaults conda
-   conda create -n environment python=3.11
-   conda init bash
-   conda activate environment
-   pip install wheel
-   pip install -r benchmarking/requirements.txt
-   pip install ../benchmarking
-   pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
+    pip install wheel
+    pip install -r /benchmarking/requirements.txt
+    pip install ../benchmarking
+    pip install -r /benchmarking/container_recipes/general_requirements_container_problem.txt
 
-   # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/bbob/bbob_requirements.txt
+    # benchmark-specific commands go here
+    pip install -r /benchmarking/container_recipes/bbob/bbob_requirements.txt
 
-   echo "Successfully installed all features"
+    echo "Successfully installed all features"
