@@ -53,12 +53,15 @@ def HEBOcfg2ConfigSpacecfg(hebo_suggestion: pd.DataFrame,  design_space: DesignS
         hp_type = design_space.paras[k]
         if hp_type.is_numeric and hp_type.is_discrete:
             hyp[k] = int(hyp[k])
-            # Now we need to check if it is an ordinary hp
+            # Now we need to check if it is an ordinal hp
             hp_k = config_space.get_hyperparameter(k)
             if isinstance(hp_k, OrdinalHyperparameter):
                 hyp[k] = hp_k.sequence[hyp[k]]
 
     return Configuration(configuration_space=config_space, values=hyp)
+
+def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
+    ...
 
 
 class HEBOOptimizer(Optimizer):
@@ -107,52 +110,68 @@ class HEBOOptimizer(Optimizer):
         for _, v in configspace.items():
             hps_hebo.append(configspaceHP2HEBOHP(v))
         return DesignSpace().parse(hps_hebo)
+    
+    def convert_from_trial(self, trial_info: TrialInfo) -> pd.DataFrame:
+        return ...
 
-    def convert_to_trial(  # type: ignore[override]
-        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
-    ) -> TrialInfo:
-        """Convert proposal from SMAC to TrialInfo.
+    def convert_to_trial(self, rec: pd.DataFrame) -> TrialInfo:
+        """Convert HEBO's recommendation to trial info.
 
         Parameters
         ----------
-        config : Configuration
-            Configuration
-        seed : int | None, optional
-            Seed, by default None
-        budget : float | None, optional
-            Budget, by default None
-        instance : str | None, optional
-            Instance, by default None
+        rec : pd.DataFrame
+            HEBO recommendation, can look like this for 2d:
+                x1        x2
+            0  2.817594  0.336420
+            1 -2.293059 -1.381435
+            2 -0.666595  2.016661
+            3  0.130466 -3.203030
+
+            These are four points.
 
         Returns
         -------
         TrialInfo
-            Trial info containing configuration, budget, seed, instance.
+            trial info, needed to interact with the Problem
         """
-        trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
+        if len(rec) > 1:
+            raise ValueError(f"Only one suggestion is ok, got {len(rec)}.")
+        config = HEBOcfg2ConfigSpacecfg(
+            hebo_suggestion=rec, 
+            design_space=self.hebo_configspace, 
+            config_space=self.problem.configspace
+        )
+        trial_info = TrialInfo(
+            config=config,
+            instance=None,
+            budget=None,
+            seed=None
+        )
         return trial_info
 
-    def ask(self) -> pd.DataFrame:
+    def ask(self) -> TrialInfo:
         """
         Ask the scheduler for new trial to run
         :return: Trial to run
         """
         rec = self._optimizer.suggest(1)
-        return rec
+        trial_info = self.convert_to_trial(rec=rec)
+        return trial_info
 
-    def evaluate(self, suggestion: pd.DataFrame) -> float:
-        configuration = HEBOcfg2ConfigSpacecfg(hebo_suggestion=suggestion, design_space=self.hebo_configspace,
-                                               config_space=self.configspace)
-        cost = self.target_function(config=configuration)
+    def evaluate(self, trial_info: TrialInfo) -> float:
+        cost = self.target_function(config=trial_info.config, instance=trial_info.instance, budget=trial_info.budget, seed=trial_info.seed)
         return cost
 
-    def tell(self, suggestion: pd.DataFrame, cost: float):
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """
         Feed experiment results back to the Scheduler
 
         :param suggestion: suggestions suggested by HEBO optimizer
         :param cost: float, cost values
         """
+        cost = trial_value.cost
+        suggestion = self.convert_from_trial(trial_info=trial_info)
+
         self.trial_counter += 1
         if isinstance(cost, abc.Sequence):
             cost = np.asarray([cost])
@@ -183,7 +202,12 @@ class HEBOOptimizer(Optimizer):
         float
             cost
         """
-        trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
+        trial_info = TrialInfo(
+            config=config,
+            instance=instance,
+            budget=budget,
+            seed=seed
+        )
         trial_value = self.problem.evaluate(trial_info=trial_info)
         if self.wallclock_times is not None:
             if trial_value.endtime - self.start_time > self.wallclock_times:
@@ -245,9 +269,9 @@ class HEBOOptimizer(Optimizer):
         return X, Y
 
     def run(self) -> None:
-        """Run SMAC on Problem.
+        """Run HEBO on Problem.
 
-        If SMAC is not instantiated, instantiate.
+        If HEBO is not instantiated, instantiate.
         """
         if self._optimizer is None:
             self._optimizer = self.setup_optimizer()

@@ -116,13 +116,13 @@ A third container is needed that handles the hydra config. It does not need to b
 benchmark, but can be used as is. It can be built as follows:
 
 ```bash
-singularity build hydra_initializer.sif container_recipes/hydra_initializer.recipe
+singularity build exp_config_generator.sif container_recipes/exp_config_generator.recipe
 ```
 
 Command for Noctua2:
 
 ```bash
-./compile_noctua2.sh hydra_initializer.sif container_recipes/hydra_initializer.recipe
+./compile_noctua2.sh exp_config_generator.sif container_recipes/exp_config_generator.recipe
 ```
 
 Running the containerized benchmarking system is also system-dependent. An example for Noctua2 is provided in the
