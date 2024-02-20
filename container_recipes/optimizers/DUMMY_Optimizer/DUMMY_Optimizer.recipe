@@ -21,7 +21,7 @@ From: continuumio/anaconda3
     . /opt/conda/etc/profile.d/conda.sh
 
    pip install wheel
-   pip install -r benchmarking/requirements.txt
+   pip install -r /benchmarking/requirements.txt
    pip install ../benchmarking
     pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
