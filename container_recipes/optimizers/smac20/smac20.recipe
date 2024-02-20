@@ -25,6 +25,6 @@ From: continuumio/miniconda3
     pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
     # benchmark-specific commands go here
-    pip install -r /benchmarking/container_recipes/optimizer/smac20/smac20_requirements.txt
+    pip install -r /benchmarking/container_recipes/optimizers/smac20/smac20_requirements.txt
 
     echo "Successfully installed all features"
