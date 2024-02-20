@@ -25,23 +25,22 @@ From: continuumio/anaconda3:2022.05
     apt install gcc -y
     apt install build-essential -y
     apt install clang -y
-    . /opt/conda/etc/profile.d/conda.sh
 
    pip install wheel
-   pip install -r benchmarking/requirements.txt
+   pip install -r /benchmarking/requirements.txt
    pip install ../benchmarking
-   pip install -r benchmarking/container_recipes/general_requirements_container_problem.txt
+   pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
    # benchmark-specific commands go here
-   cd /home
+   cd /benchmarking/smacbenchmarking
    git clone https://github.com/automl/HPOBench.git
    cd HPOBench
    git checkout master
    pip install .
    pip install ConfigSpace==0.6.1
+   pip install ".[ml_mfbb]"
 
    chmod -R 755 /benchmarking
-   mkdir /benchmarking/runs
    mkdir /var/lib/hpobench
    chmod -R 755 /var/lib/hpobench
    mkdir /var/lib/hpobench/socket
