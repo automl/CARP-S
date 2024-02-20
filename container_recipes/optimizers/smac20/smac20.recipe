@@ -1,13 +1,5 @@
 Bootstrap: docker
-From: continuumio/anaconda3
-
-%startscript
-    # this is necessary to start the benchmarking server
-    flask run
-
-%environment
-    # this is necessary to start the benchmarking server
-    export FLASK_APP=smacbenchmarking/container/container_app.py
+From: continuumio/miniconda3
 
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking
@@ -25,14 +17,14 @@ From: continuumio/anaconda3
     apt install gcc -y
     apt install build-essential -y
     apt install clang -y
-    . /opt/conda/etc/profile.d/conda.sh
 
+    pip install swig
     pip install wheel
     pip install -r /benchmarking/requirements.txt
-    pip install ../benchmarking
-    pip install -r /benchmarking/container_recipes/general_requirements_container_problem.txt
-    
+    pip install /benchmarking
+    pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
+
     # benchmark-specific commands go here
-    pip install -r /benchmarking/container_recipes/DUMMY_Problem/DUMMY_Problem_requirements.txt
-    
+    pip install -r /benchmarking/container_recipes/optimizers/smac20/smac20_requirements.txt
+
     echo "Successfully installed all features"

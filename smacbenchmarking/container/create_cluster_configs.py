@@ -30,6 +30,7 @@ def main(cfg: DictConfig) -> None:
             "benchmark_id": cfg_dict["benchmark_id"],
             "problem_id": cfg_dict["problem_id"],
             "optimizer_id": cfg_dict["optimizer_id"],
+            "optimizer_container_id": cfg_dict["optimizer_container_id"],
             "seed": cfg_dict["seed"],
             "task__n_trials": cfg_dict["task"]["n_trials"],
         }

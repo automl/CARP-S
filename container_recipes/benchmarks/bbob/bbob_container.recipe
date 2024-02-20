@@ -1,5 +1,11 @@
 Bootstrap: docker
-From: continuumio/miniconda3
+From: python:3.10-slim
+
+%startscript
+    flask run
+
+%environment
+    export FLASK_APP=smacbenchmarking/container/container_app.py
 
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking
@@ -18,13 +24,12 @@ From: continuumio/miniconda3
     apt install build-essential -y
     apt install clang -y
 
-    pip install swig
     pip install wheel
     pip install -r /benchmarking/requirements.txt
-    pip install /benchmarking
-    pip install -r /benchmarking/container_recipes/general_requirements_container_optimizer.txt
+    pip install ../benchmarking
+    pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
     # benchmark-specific commands go here
-    pip install -r /benchmarking/container_recipes/optimizer/smac20/smac20_requirements.txt
+    pip install -r /benchmarking/container_recipes/benchmarks/bbob/bbob_requirements.txt
 
     echo "Successfully installed all features"

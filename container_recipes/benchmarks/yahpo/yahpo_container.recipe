@@ -30,10 +30,10 @@ From: continuumio/anaconda3
    pip install wheel
    pip install -r /benchmarking/requirements.txt
    pip install ../benchmarking
-   pip install -r /benchmarking/container_recipes/general_requirements_container_problem.txt
+   pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
    # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt
+   pip install -r /benchmarking/container_recipes/benchmarks/yahpo/yahpo_requirements.txt
    cd /benchmarking/smacbenchmarking
    mkdir data
    cd data
