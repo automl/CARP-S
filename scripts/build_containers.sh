@@ -8,7 +8,7 @@ export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
 # --------------------------------------------------------------------------------------------
 # HANDLERS (mandatory)
 # --------------------------------------------------------------------------------------------
-./compile_noctua2.sh ${CONT_GENERAL_PATH}/hydra_initializer.sif ${CONT_GENERAL_RECIPE_PATH}/hydra_initializer.recipe
+./compile_noctua2.sh ${CONT_GENERAL_PATH}/exp_config_generator.sif ${CONT_GENERAL_RECIPE_PATH}/exp_config_generator.recipe
 
 # --------------------------------------------------------------------------------------------
 # OPTIMIZERS
