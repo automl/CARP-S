@@ -44,7 +44,7 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
     "BayesianOptimization": BayesianOptimization,
-    # "ASHA": ASHA,
+    # "ASHA": ASHA,  # TODO Add ASHA and DEHB options back in
     "MOBSTER": MOBSTER,
     "BOHB": BOHB,
     "KDE": KDE,
@@ -139,7 +139,7 @@ class SynetuneOptimizer(Optimizer):
     def convert_to_trial(  # type: ignore[override]
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> TrialInfo:
-        """Convert proposal from SMAC to TrialInfo.
+        """Convert proposal from SyneTune to TrialInfo.
 
         Parameters
         ----------
@@ -230,12 +230,12 @@ class SynetuneOptimizer(Optimizer):
         """
         Setup Optimizer.
 
-        Retrieve defaults and instantiate SMAC.
+        Retrieve defaults and instantiate SyneTune.
 
         Returns
         -------
-        SMAC4AC
-            Instance of a SMAC facade.
+        SyneTrialScheduler
+            Instance of a SyneTune.
 
         """
         optimizer_kwargs = dict(
@@ -250,50 +250,10 @@ class SynetuneOptimizer(Optimizer):
         bscheduler = optimizers_dict[self.optimizer_name](**optimizer_kwargs)
         return bscheduler
 
-    def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
-        """List of x and y values of the incumbents over time. x depends on ``sort_by``.
-
-        Parameters
-        ----------
-        sort_by: str
-            Can be "trials" or "walltime".
-
-        Returns
-        -------
-        tuple[list[float], list[float]]
-
-        """
-        # if len(self.task.objectives) > 1:
-        #     raise NotSupportedError
-
-        X: list[int | float] = []
-        Y: list[float] = []
-
-        current_incumbent = np.inf
-
-        for k, v in self.completed_experiments.items():
-            trial_value, trial_info = v
-            cost = trial_value.cost
-            if cost > 1e6:
-                continue
-            if current_incumbent < cost:
-                current_incumbent = cost
-
-                if sort_by == "trials":
-                    X.append(k)
-                elif sort_by == "walltime":
-                    X.append(trial_value.endtime)
-                else:
-                    raise RuntimeError("Unknown sort_by.")
-
-                Y.append(cost)
-
-        return X, Y
-
     def run(self) -> None:
-        """Run SMAC on Problem.
+        """Run SyneTune on Problem.
 
-        If SMAC is not instantiated, instantiate.
+        If SyneTune is not instantiated, instantiate.
         """
         if self._optimizer is None:
             self._optimizer = self.setup_optimizer()
