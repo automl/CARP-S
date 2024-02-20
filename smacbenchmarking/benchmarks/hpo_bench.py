@@ -9,7 +9,7 @@ from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
 from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
 from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
-from hpobench.benchmarks.ml.xgboost_benchmark_old import XGBoostBenchmark
+from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
