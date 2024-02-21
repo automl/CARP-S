@@ -25,6 +25,9 @@ export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
 # SMAC3-1.4
 ./compile_noctua2.sh ${CONT_OPT_PATH}/SMAC3-1.4.sif ${CONT_OPT_RECIPE_PATH}/smac14/smac14.recipe 
 
+# HEBO
+./compile_noctua2.sh ${CONT_OPT_PATH}/HEBO.sif ${CONT_OPT_RECIPE_PATH}/HEBO/HEBO.recipe 
+
 # --------------------------------------------------------------------------------------------
 # PROBLEMS
 # --------------------------------------------------------------------------------------------
