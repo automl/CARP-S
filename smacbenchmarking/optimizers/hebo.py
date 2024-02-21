@@ -12,7 +12,7 @@ from ConfigSpace.hyperparameters import (
     Hyperparameter,
     OrdinalHyperparameter,
     IntegerHyperparameter,
-    FloatHyperparameter
+    FloatHyperparameter,
 )
 
 from hebo.optimizers.hebo import HEBO
@@ -25,29 +25,77 @@ from smacbenchmarking.optimizers.optimizer import Optimizer
 
 
 def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
+    """Convert ConfigSpace hyperparameter to HEBO hyperparameter
+
+    Parameters
+    ----------
+    hp : Hyperparameter
+        ConfigSpace hyperparameter
+
+    Returns
+    -------
+    dict
+        HEBO hyperparameter
+
+    Raises
+    ------
+    NotImplementedError
+        If ConfigSpace hyperparameter is anything else than
+        IntegerHyperparameter, FloatHyperparameter, CategoricalHyperparameter,
+        OrdinalHyperparameter or Constant
+    """
     if isinstance(hp, IntegerHyperparameter):
         if hp.log:
-            return {'name': hp.name, 'type': 'pow_int', 'lb': hp.lower, 'ub': hp.upper}
+            return {"name": hp.name, "type": "pow_int", "lb": hp.lower, "ub": hp.upper}
         else:
-            return {'name': hp.name, 'type': 'int', 'lb': hp.lower, 'ub': hp.upper}
+            return {"name": hp.name, "type": "int", "lb": hp.lower, "ub": hp.upper}
     elif isinstance(hp, FloatHyperparameter):
         if hp.log:
-            return {'name': hp.name, 'type': 'pow', 'lb': hp.lower, 'ub': hp.upper}
+            return {"name": hp.name, "type": "pow", "lb": hp.lower, "ub": hp.upper}
         else:
-            return {'name': hp.name, 'type': 'num', 'lb': hp.lower, 'ub': hp.upper}
+            return {"name": hp.name, "type": "num", "lb": hp.lower, "ub": hp.upper}
     elif isinstance(hp, CategoricalHyperparameter):
-        return {'name': hp.name, 'type': 'cat', 'categories': hp.choices}
+        return {"name": hp.name, "type": "cat", "categories": hp.choices}
     elif isinstance(hp, OrdinalHyperparameter):
-        return {'name': hp.name, 'type': 'step_int', 'lb': 0, 'ub': len(hp.sequence), 'step': 1, }
+        return {
+            "name": hp.name,
+            "type": "step_int",
+            "lb": 0,
+            "ub": len(hp.sequence),
+            "step": 1,
+        }
     elif isinstance(hp, Constant):
-        return {'name': hp.name, 'type': 'cat', 'categories': [hp.value]}
+        return {"name": hp.name, "type": "cat", "categories": [hp.value]}
     else:
-        raise NotImplementedError(f'Unknown hyperparameter type: {hp.__class__.__name__}')
+        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
-def HEBOcfg2ConfigSpacecfg(hebo_suggestion: pd.DataFrame,  design_space: DesignSpace,
-                           config_space: ConfigurationSpace):
-    # at the moment we only receive one suggestion from HEBO
+def HEBOcfg2ConfigSpacecfg(
+    hebo_suggestion: pd.DataFrame, design_space: DesignSpace, config_space: ConfigurationSpace
+) -> Configuration:
+    """Convert HEBO config to ConfigSpace config
+
+    Parameters
+    ----------
+    hebo_suggestion : pd.DataFrame
+        Configuration in HEBO format
+    design_space : DesignSpace
+        HEBO design space
+    config_space : ConfigurationSpace
+        ConfigSpace configuration space
+
+    Returns
+    -------
+    Configuration
+        Config in ConfigSpace format
+
+    Raises
+    ------
+    ValueError
+        If HEBO config is more than 1
+    """
+    if len(hebo_suggestion) > 1:
+        raise ValueError(f"Only one suggestion is ok, got {len(hebo_suggestion)}.")
     hyp = hebo_suggestion.iloc[0].to_dict()
     for k in hyp:
         hp_type = design_space.paras[k]
@@ -60,33 +108,63 @@ def HEBOcfg2ConfigSpacecfg(hebo_suggestion: pd.DataFrame,  design_space: DesignS
 
     return Configuration(configuration_space=config_space, values=hyp)
 
+
 def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
-    ...
+    """Convert ConfigSpace config to HEBO suggestion
+
+    Parameters
+    ----------
+    config : Configuration
+        Configuration
+
+    Returns
+    -------
+    pd.DataFrame
+        Configuration in HEBO format, e.g.
+            x1        x2
+        0  2.817594  0.336420
+    """
+    config_dict = dict(config)
+    rec = pd.DataFrame(config_dict, index=[0])
+    return rec
 
 
 class HEBOOptimizer(Optimizer):
-    def __init__(self, problem: Problem,
-                 max_budget: float | None = None,
-                 num_trials: int | None = None,
-                 wallclock_times: float | None = None) -> None:
-        super().__init__(problem)
-        self.fidelity_enabled = False
+    def __init__(
+        self, problem: Problem, num_trials: int | None = None, max_wallclock_time: float | None = None
+    ) -> None:
+        """
+        Parameters
+        ----------
+        problem : Problem
+            _description_
+        num_trials : int | None, optional
+            Number of trials after which the optimization is stopped, by default None
+        max_wallclock_time : float | None, optional
+            Time limit after which the optimization is stopped, by default None
 
+        Raises
+        ------
+        ValueError
+            If neither `num_trials` nor `max_wallclock_time` is specified.
+        """
+        super().__init__(problem)
+
+        # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace
 
         self.hebo_configspace = self.convert_configspace(self.configspace)
-        self.metric = getattr(problem, 'metric', 'cost')
-        self.budget_type = getattr(self.problem, 'budget_type', None)
+        self.metric = getattr(problem, "metric", "cost")
+        self.budget_type = getattr(self.problem, "budget_type", None)
         self.trial_counter = 0
-        self.max_budget = max_budget
 
         self._optimizer: HEBO | None = None
 
-        if num_trials is None and wallclock_times is None:
-            raise ValueError("either num_trials or wallclock_times must be given!")
+        if num_trials is None and max_wallclock_time is None:
+            raise ValueError("Specify either `num_trials` or `max_wallclock_time`!")
         self.max_num_trials = num_trials
         self.start_time = time.time()
-        self.wallclock_times = wallclock_times
+        self.max_wallclock_time = max_wallclock_time
 
         self.completed_experiments: OrderedDict[int, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
@@ -110,9 +188,11 @@ class HEBOOptimizer(Optimizer):
         for _, v in configspace.items():
             hps_hebo.append(configspaceHP2HEBOHP(v))
         return DesignSpace().parse(hps_hebo)
-    
+
     def convert_from_trial(self, trial_info: TrialInfo) -> pd.DataFrame:
-        return ...
+        return ConfigSpacecfg2HEBOcfg(
+            config=trial_info.config,
+        )
 
     def convert_to_trial(self, rec: pd.DataFrame) -> TrialInfo:
         """Convert HEBO's recommendation to trial info.
@@ -137,37 +217,32 @@ class HEBOOptimizer(Optimizer):
         if len(rec) > 1:
             raise ValueError(f"Only one suggestion is ok, got {len(rec)}.")
         config = HEBOcfg2ConfigSpacecfg(
-            hebo_suggestion=rec, 
-            design_space=self.hebo_configspace, 
-            config_space=self.problem.configspace
+            hebo_suggestion=rec, design_space=self.hebo_configspace, config_space=self.problem.configspace
         )
-        trial_info = TrialInfo(
-            config=config,
-            instance=None,
-            budget=None,
-            seed=None
-        )
+        trial_info = TrialInfo(config=config, instance=None, budget=None, seed=None)
         return trial_info
 
     def ask(self) -> TrialInfo:
-        """
-        Ask the scheduler for new trial to run
-        :return: Trial to run
+        """Ask the optimizer for a new trial to run
+
+        Returns
+        -------
+        TrialInfo
+            Configuration, instance, seed, budget
         """
         rec = self._optimizer.suggest(1)
         trial_info = self.convert_to_trial(rec=rec)
         return trial_info
 
-    def evaluate(self, trial_info: TrialInfo) -> float:
-        cost = self.target_function(config=trial_info.config, instance=trial_info.instance, budget=trial_info.budget, seed=trial_info.seed)
-        return cost
-
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        """
-        Feed experiment results back to the Scheduler
+        """Tell: Feed experiment results back to optimizer
 
-        :param suggestion: suggestions suggested by HEBO optimizer
-        :param cost: float, cost values
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Configuration, instance, seed, budget
+        trial_value : TrialValue
+            Cost and additional information
         """
         cost = trial_value.cost
         suggestion = self.convert_from_trial(trial_info=trial_info)
@@ -179,51 +254,32 @@ class HEBOOptimizer(Optimizer):
             cost = np.asarray(cost)
         self._optimizer.observe(suggestion, np.asarray([cost]))
 
-    def target_function(
-        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
-    ) -> float:
-        """Target Function
+    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+        """Evaluate target function.
 
-        Interface for the Problem.
+        Store data point.
 
         Parameters
         ----------
-        config : Configuration
-            Configuration
-        seed : int | None, optional
-            Seed, by default None
-        budget : float | None, optional
-            Budget, by default None
-        instance : str | None, optional
-            Instance, by default None
+        trial_info : TrialInfo
+            Which config to evaluate (and instance, seed, budget)
 
         Returns
         -------
-        float
-            cost
+        TrialValue
+            Information about function evaluation
         """
-        trial_info = TrialInfo(
-            config=config,
-            instance=instance,
-            budget=budget,
-            seed=seed
-        )
         trial_value = self.problem.evaluate(trial_info=trial_info)
-        if self.wallclock_times is not None:
-            if trial_value.endtime - self.start_time > self.wallclock_times:
-                # In this case, it is actually timed out. We will simply ignore that
-                return trial_value.cost
         self.completed_experiments[self.trial_counter] = (trial_value, trial_info)
-        return trial_value.cost
+        return trial_value
 
     def setup_optimizer(self) -> HEBO:
-        """
-        Setup Optimizer.
+        """Setup Optimizer
 
         Returns
         -------
         HEBO
-            Instance of a HEBO Optimizer.
+            Instance of a HEBO Optimizer
 
         """
         return HEBO(space=self.hebo_configspace)
@@ -280,12 +336,12 @@ class HEBOOptimizer(Optimizer):
             if self.max_num_trials is not None:
                 if self.trial_counter >= self.max_num_trials:
                     break
-            if self.wallclock_times is not None:
-                if time.time() - self.start_time > self.wallclock_times:
+            if self.max_wallclock_time is not None:
+                if time.time() - self.start_time > self.max_wallclock_time:
                     break
 
-            suggestion = self.ask()
-            cost = self.evaluate(suggestion)
-            self.tell(suggestion, cost)
+            trial_info = self.ask()
+            trial_value = self.evaluate(trial_info)
+            self.tell(trial_info=trial_info, trial_value=trial_value)
 
         return None
