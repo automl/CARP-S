@@ -8,7 +8,7 @@ export BENCHMARKING_JOB_ID=$SLURM_JOB_ID
 # Start the runner container - gets the hydra config and writes environment vars
 # Parse whole array of args given to this script to runner.sif
 echo "Starting runner container"
-singularity run containers/general/hydra_initializer.sif "${@}"
+singularity run containers/general/exp_config_generator.sif "${@}"
 # singularity run runner.sif +optimizer/DUMMY=config +problem/DUMMY=config
 
 # Wait for the runner container to finish
