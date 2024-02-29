@@ -10,3 +10,4 @@ problem:
 task:
   n_trials: 100
   n_objectives: 1
+  n_initial_design: 12

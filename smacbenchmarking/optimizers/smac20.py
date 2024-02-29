@@ -33,8 +33,8 @@ class SMAC3Optimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
-        -------
+        Returns:
+        --------
         ConfigurationSpace
             Configuration space for Optimizer.
         """
@@ -56,8 +56,8 @@ class SMAC3Optimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
-        -------
+        Returns:
+        --------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
@@ -68,7 +68,7 @@ class SMAC3Optimizer(Optimizer):
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> float | list[float]:
-        """Target Function
+        """Target Function.
 
         Interface for the Problem.
 
@@ -83,8 +83,8 @@ class SMAC3Optimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
-        -------
+        Returns:
+        --------
         float | list[float]
             Cost as float or list[float], depending on the number of objectives.
         """
@@ -93,13 +93,12 @@ class SMAC3Optimizer(Optimizer):
         return trial_value.cost
 
     def setup_smac(self) -> AbstractFacade:
-        """
-        Setup SMAC.
+        """Setup SMAC.
 
         Retrieve defaults and instantiate SMAC.
 
-        Returns
-        -------
+        Returns:
+        --------
         SMAC4AC
             Instance of a SMAC facade.
 

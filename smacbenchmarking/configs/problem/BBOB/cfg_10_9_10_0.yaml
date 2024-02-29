@@ -1,0 +1,13 @@
+# @package _global_
+benchmark_id: BBOB
+problem_id: noiseless/10/9/0
+problem:
+  _target_: smacbenchmarking.benchmarks.bbob.BBOBProblem
+  dimension: 10
+  fid: 9
+  instance: 0
+  seed: ${seed}
+task:
+  n_trials: 250
+  n_objectives: 1
+  n_initial_design: 30
