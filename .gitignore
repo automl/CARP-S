@@ -141,4 +141,4 @@ runs
 /.idea/.gitignore
 /.codecarbon.config
 /smacbenchmarking.db
-/smacbenchmarking/container/credentials.cfg
+/smacbenchmarking/container/credentials.yaml

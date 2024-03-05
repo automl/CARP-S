@@ -8,4 +8,5 @@ dataclasses-json~=0.5.9
 pymysql
 cryptography
 domdf_python_tools
-py-experimenter @ git+https://github.com/tornede/py_experimenter@feature-pause-execution
+# py-experimenter @ git+https://github.com/tornede/py_experimenter@feature-pause-execution
+py-experimenter>=1.4.0

@@ -41,48 +41,24 @@ def py_experimenter_evaluate(parameters: dict,
     return ExperimentStatus.PAUSED.value
 
 
-def execute(experiment_configuration_file_path: str,
-            slurm_job_id: str,
-            database_credential_file_path: str = None,
-            ):
+def main() -> None:
+    with open(f"hello_pyexperimenter.txt", 'w+') as f:
+        f.write(str(abspath(getsourcefile(lambda: 0))))
+
+    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
+    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.yaml'
+
+    if os.path.exists('smacbenchmarking/container/credentials.yaml'):
+        database_credential_file_path = 'smacbenchmarking/container/credentials.yaml'
+    else:
+        database_credential_file_path = None
+
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='example_notebook',
                                   database_credential_file_path=database_credential_file_path,
                                   log_file=f'logs/{slurm_job_id}.log')
 
     experimenter.execute(py_experimenter_evaluate, max_experiments=1)
-
-
-def main() -> None:
-    with open(f"hello_pyexperimenter.txt", 'w+') as f:
-        f.write(str(abspath(getsourcefile(lambda: 0))))
-
-    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.cfg'
-
-    with open(experiment_configuration_file_path, 'r') as file:
-        parsed_experiment_configuration_file = ConfigParser()
-        parsed_experiment_configuration_file.read_file(file)
-
-    if parsed_experiment_configuration_file['PY_EXPERIMENTER']['provider'] == 'mysql':
-        database_credential_file_path = 'smacbenchmarking/container/credentials.cfg'
-        with open(database_credential_file_path, 'r') as file:
-            configparser = ConfigParser()
-            configparser.read_file(file)
-            config = configparser['TUNNEL_CONFIG']
-            ssh_address_or_host = config['ssh_address_or_host']
-            ssh_private_key_password = config['ssh_private_key_password']
-
-        with sshtunnel.SSHTunnelForwarder(ssh_address_or_host=(ssh_address_or_host, 22),
-                                          ssh_private_key_password=ssh_private_key_password,
-                                          remote_bind_address=('127.0.0.1', 3306),
-                                          local_bind_address=('127.0.0.1', 3306)
-                                          ) as tunnel:
-            execute(experiment_configuration_file_path, slurm_job_id,
-                    database_credential_file_path)
-
-    else:
-        execute(experiment_configuration_file_path, slurm_job_id)
 
 
 if __name__ == "__main__":
