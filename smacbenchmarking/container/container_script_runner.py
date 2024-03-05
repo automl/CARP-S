@@ -56,7 +56,8 @@ def main() -> None:
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='example_notebook',
                                   database_credential_file_path=database_credential_file_path,
-                                  log_file=f'logs/{slurm_job_id}.log')
+                                  log_file=f'logs/{slurm_job_id}.log',
+                                  use_ssh_tunnel=True)
 
     experimenter.execute(py_experimenter_evaluate, max_experiments=1)
 

@@ -41,7 +41,8 @@ def main(cfg: DictConfig) -> None:
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='smacbenchmarking',
                                   database_credential_file_path=database_credential_file,
-                                  log_level=logging.INFO)
+                                  log_level=logging.INFO,
+                                  use_ssh_tunnel=True,)
 
     cfg_json = OmegaConf.to_container(cfg, resolve=True)
 

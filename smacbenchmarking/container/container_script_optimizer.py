@@ -43,6 +43,7 @@ if (job_id := os.environ['BENCHMARKING_JOB_ID']) != '':
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name='example_notebook',
                                   database_credential_file_path=database_credential_file,
-                                  log_file=f'logs/{slurm_job_id}.log')
+                                  log_file=f'logs/{slurm_job_id}.log',
+                                  use_ssh_tunnel=True)
 
     experimenter.unpause_experiment(experiment_id, optimizer_experiment)
