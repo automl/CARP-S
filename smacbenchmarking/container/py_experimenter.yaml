@@ -1,33 +1,34 @@
 PY_EXPERIMENTER:
   n_jobs: 1
 
-  provider: mysql
-  database: smacbenchmarking
-  table:
-    name: results
-    keyfields:
-      config:
-        type: JSON
-      problem_id:
-        type: VARCHAR(50)
-      optimizer_id:
-        type: VARCHAR(50)
-    resultfields:
-      slurm_job_id: VARCHAR(50)
-    resultfields.timestamps: false
+  Database:
+    provider: mysql
+    database: smacbenchmarking
+    table:
+      name: results
+      keyfields:
+        config:
+          type: JSON
+        problem_id:
+          type: VARCHAR(50)
+        optimizer_id:
+          type: VARCHAR(50)
+      resultfields:
+        slurm_job_id: VARCHAR(50)
+      resultfields.timestamps: false
 
-  logtables:
-    trials:
-      trial_info__config: JSON
-      trial_info__instance: INT
-      trial_info__seed: INT
-      trial_info__budget: DOUBLE
-      trial_value__cost: JSON
-      trial_value__time: DOUBLE
-      trial_value__status: VARCHAR(50)
-      trial_value__starttime: DOUBLE
-      trial_value__endtime: DOUBLE
-      trial_value__additional_info: JSON
+    logtables:
+      trials:
+        trial_info__config: JSON
+        trial_info__instance: INT
+        trial_info__seed: INT
+        trial_info__budget: DOUBLE
+        trial_value__cost: JSON
+        trial_value__time: DOUBLE
+        trial_value__status: VARCHAR(50)
+        trial_value__starttime: DOUBLE
+        trial_value__endtime: DOUBLE
+        trial_value__additional_info: JSON
 
   CodeCarbon:
     measure_power_secs: 15
