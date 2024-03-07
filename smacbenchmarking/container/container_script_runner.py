@@ -30,7 +30,7 @@ def py_experimenter_evaluate(parameters: dict,
     OmegaConf.save(config=dict_config, f=cfg_path)
 
     with open(f"{job_id}_pyexperimenter_id.txt", 'w+') as f:
-        f.write(str(result_processor._experiment_id))
+        f.write(str(result_processor.experiment_id))
 
     with open(f"{job_id}_problem_container.txt", 'w+') as f:
         f.write(cfg_dict["benchmark_id"])
