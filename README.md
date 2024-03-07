@@ -17,7 +17,7 @@ Main Topics of this README:
 - [Adding a new Optimizer or Benchmark 🆕](#adding-a-new-optimizer-or-benchmark-🆕)
 
 ## Conceptual Overview 🗺 
-TODO Overview picture and description
+[DO ONCE FINISHED]
 
 ## Usage - Local Setup 📍
 
@@ -63,6 +63,23 @@ python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)
 Note that in this case, no logging is done.
 
 ## Usage - Cluster Setup 🤖
+![Overview of the whole process](images/smac_benchmarking_containers.drawio.png)
+
+
+The overall benchmarking system works as follows: 
+
+We have three different containers wrapping different functionality and a shell script controlling these containers. 
+The `Runner` container is responsible for pulling a PyExperimenter experiment from the database and 
+writing files to the disk which are required to initialize the `Optimizer` and the `Benchmark` container. 
+The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
+First, it allows to get the search space associated with the benchmark. 
+Second, it answers requests providing a configuration to be evaluated with the corresponding evaluation result.
+The `Optimizer` container wraps the optimizer to be benchmarked and interacts with the `Benchmark` container.
+Any information required to boot the containers is written to the hard drive by the `HydraInitializer` container. 
+
+Note that we provide wrappers for the optimizer and the benchmark interfaces such that when you implement an 
+optimizer or a benchmark within our benchmarking framework, 
+you can ignore all aspects of the system just described and simply follow the simple API. 
 ### Installation
 Local: Install Apptainer
 
@@ -71,12 +88,12 @@ Cluster: Configure Singularity/ Apptainer
 Setup Database if you want to log to database (mysql)
 
 ### Database
-🚧 UNDER CONSTRUCTION 🚧
+Using SQLite vs. MySQL has some slight differences. Using SQLite is straightforward; you get a local database file but
+parallel execution is not efficient at all. You configure the used database in the 
+[pyexperimenter.yaml](smacbenchmarking/container/py_experimenter.yaml) file by changing the `provider` to `mysql` or 
+`sqlite`. 
 
-Current Status: SQLite is used as a database for testing. Once the database server is up and running, 
-we will switch to MySQL.
-
-Before you can start any jobs, the jobs need to be dispatched to the database.
+In any case, before you can start any jobs, the jobs need to be dispatched to the database.
 To this end, call the file `create_cluster_configs.py` with the desired hydra arguments.
 This can be done locally or on the server if you can execute python there directly.
 If you execute it locally, the database file `smacbenchmarking.db` will be created in the current directory and 
@@ -86,18 +103,36 @@ needs to be transferred to the cluster.
 python smacbenchmarking/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
 ```
 
----
-Eventually:
+In the case of MySQL, you need to authenticate yourself to the database. In our case, the MySQL server running on
+apollo. For this, you need
+- a user account on the MySQL server
+- an ssh certificate to authenticate yourself on apollo
+- an entry in the `.ssh/config` file that configures the connection, e.g.
+    ```
+    Host apollo
+    HostName apollo.ai.uni-hannover.de
+    User <Apollo User>
+    IdentityFile ~/.ssh/ssh_apollo
+    AddKeysToAgent yes
+    ```
+- a credentials file for pyexperimenter in `smacbenchmarking/container/credentials.yaml` with the following content:
+    ```yaml
+    CREDENTIALS:
+    Database:
+        host: 127.0.0.1
+        user: <MySQL User>
+        password: <MySQL Password>
 
-All results will be written to a central database.
-This database needs to be set up once on the server.
-MySQL can be installed with the information [here](https://dev.mysql.com/doc/refman/8.0/en/linux-installation.html).
+    Connection:
+        Standard:
+            server: apollo
+        Ssh:
+            server: 127.0.0.1
+            address: apollo
+            ssh_keypass: <SSH Key Password>
+    ```
 
-
-Documentation at https://AutoML.github.io/SMACBenchmarking/main
-
-
-## Containerization
+### Containerization
 To run benchmarking with containers, both the optimizer and benchmark have to be wrapped separately. 
 We use Singularity/ Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
@@ -112,7 +147,7 @@ export SINGULARITY_TMPDIR=/dev/shm/intexml<X>
 mkdir /dev/shm/intexml<X> -p
 ```
 
-### Optimizer
+#### Optimizer
 A Singularity recipe has to be created for the optimizer, which should be saved in the folder `container_recipes`.
 This recipe has the purpose of setting up a container in which the optimizer can be run, e.g., installing the 
 required packages, setting environment variables, copying files and so on.
@@ -133,7 +168,7 @@ It can be run as follows:
 ./compile_noctua2.sh DUMMY_Optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
-### Benchmark
+#### Benchmark
 Like for the optimizer, a Singularity recipe has to be created for the benchmark, which should be saved in the folder
 `container_recipes` as well.
 
@@ -152,7 +187,7 @@ Command for Noctua2:
 ./compile_noctua2.sh DUMMY_Problem.sif container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
 ```
 
-### Running
+#### Running
 A third container is needed that handles the hydra config. It does not need to be adjusted for each optimizer or
 benchmark, but can be used as is. It can be built as follows:
 
@@ -185,38 +220,14 @@ This will pull a job from the database and run it (database needs to be initiali
 To be efficient, this command should eventually be integrated into a SLURM script, which can be submitted to the
 cluster (e.g. with job arrays).
 
-### Example SLURM script
-# TODO
-
-### Overview of the whole process
-
-![Overview of the whole process](images/smac_benchmarking_containers.drawio.png)
-
-
-The overall benchmarking system works as follows: 
-
-We have three different containers wrapping different functionality and a shell script controlling these containers. 
-The `Runner (HydraInitializer)` container is responsible for pulling a PyExperimenter experiment from the database and 
-writing files to the disk which are required to initialize the `Optimizer` and the `Benchmark` container. 
-The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
-First, it allows to get the search space associated with the benchmark. 
-Second, it answers requests providing a configuration to be evaluated with the corresponding evaluation result.
-The `Optimizer` container wraps the optimizer to be benchmarked and interacts with the `Benchmark` container.
-Any information required to boot the containers is written to the hard drive by the `HydraInitializer` container. 
-
-Note that we provide wrappers for the optimizer and the benchmark interfaces such that when you implement an 
-optimizer or a benchmark within our benchmarking framework, 
-you can ignore all aspects of the system just described and simply follow the simple API. 
-
 ## Adding a new Optimizer or Benchmark 🆕
 To add a new optimizer or benchmark to the repository you need to
 1. Implement the optimizer or benchmark according to the corresponding interface
     - **Optimizer**
        - [Optimizer Interface](smacbenchmarking/optimizers/optimizer.py) <br> 
           put implementation in [optimizers](smacbenchmarking/optimizers)
-       - [Benchmark Interface](smacbenchmarking/benchmarks/problem.py); put implementation in folder [benchmarks]
-         (smacbenchmarking/benchmarks)
+       - [Benchmark Interface](smacbenchmarking/benchmarks/problem.py); put implementation in folder [benchmarks](smacbenchmarking/benchmarks)
 2. Add requirements for the optimizer or benchmark to the [setup.py](setup.py) under `extras-require`. 
    Please specify exact versions of all requirements! This is very important for reproducibility.
-3. Add the config TODO
-4. Add a howto TODO
+3. Add the configs
+4. Add a howto
