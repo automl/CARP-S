@@ -1,12 +1,8 @@
-import ast
 import json
 import os
-from configparser import ConfigParser
 from inspect import getsourcefile
 from os.path import abspath
 
-import sshtunnel
-from domdf_python_tools.utils import printr
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
@@ -18,8 +14,6 @@ def py_experimenter_evaluate(parameters: dict,
                              custom_config: dict):
     config = parameters['config']
     cfg_dict = json.loads(config)
-
-    printr(cfg_dict)
 
     job_id = os.environ["BENCHMARKING_JOB_ID"]
 

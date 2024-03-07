@@ -220,15 +220,3 @@ To add a new optimizer or benchmark to the repository you need to
    Please specify exact versions of all requirements! This is very important for reproducibility.
 3. Add the config TODO
 4. Add a howto TODO
-
-## Open Todos
-- [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
-- [ ] Add budget under `task` as time AND number of function evaluations
-    - If we use time as a budget, we need to check whether the hardware is the same.
-- [ ] Create `dispatch.py` checking if run already exists
-- [ ] Add slurm config
-- [ ] Write the temporary files actually to subdirs (don't know experiment id then though, only cluster id --> maybe 
-  logs subfolder?)
-- [ ] fix versions of packages
-- [ ] allow only running jobs with specified names/ resources (pyexperimenter modification?)
-- [ ] container registry?

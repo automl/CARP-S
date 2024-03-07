@@ -46,6 +46,4 @@ class DatabaseLogger(AbstractLogger):
             'trial_value__additional_info': info['trial_value__additional_info'] if 'trial_value__additional_info' in info else None,
         }
 
-        print(log)
-
         self.result_processor.process_logs({"trials": info_2})
