@@ -12,6 +12,8 @@ from smacbenchmarking.utils.trials import TrialInfo
 
 if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
     cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")
+else:
+    raise RuntimeError(f"No job id found, env var BENCHMARKING_JOB_ID is '{os.environ['BENCHMARKING_JOB_ID']}'.")
 
 problem = make_problem(cfg=cfg)
 
