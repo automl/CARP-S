@@ -26,9 +26,6 @@ class DummyOptimizer(Optimizer):
     def convert_to_trial(self, config: Configuration, budget: Optional[float] = None) -> TrialInfo:
         return TrialInfo(config=config, budget=budget)
 
-    def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
-        return list(range(len(self.trajectory))), self.trajectory
-
     def run(self) -> None:
         timeout = self.cfg.timeout
         if "budget" in self.cfg.keys():
