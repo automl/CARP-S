@@ -7,7 +7,7 @@ From: continuumio/anaconda3
 
 %environment
     # this is necessary to start the benchmarking server
-    export FLASK_APP=smacbenchmarking/container/container_script_optimizer.py
+    export FLASK_APP=smacbenchmarking/container/container_script_problem.py
 
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking
