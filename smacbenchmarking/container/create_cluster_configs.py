@@ -41,7 +41,7 @@ def main(cfg: DictConfig) -> None:
     rows = [{
         "config": json.dumps(cfg_json),
         "benchmark_id": cfg_dict["benchmark_id"],
-        "problem_id": cfg_dict["benchmark_id"],
+        "problem_id": cfg_dict["problem_id"],
         "optimizer_id": cfg_dict["optimizer_id"],
         "optimizer_container_id": cfg_dict["optimizer_container_id"],
         "seed": cfg_dict["seed"],

@@ -9,10 +9,18 @@ PY_EXPERIMENTER:
       keyfields:
         config:
           type: JSON
+        benchmark_id:
+          type: VARCHAR(50)
         problem_id:
           type: VARCHAR(50)
         optimizer_id:
           type: VARCHAR(50)
+        optimizer_container_id:
+          type: VARCHAR(50)
+        seed:
+          type: INT
+        task__n_trials:
+          type: INT
       resultfields:
         slurm_job_id: VARCHAR(50)
       resultfields.timestamps: false
