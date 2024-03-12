@@ -7,7 +7,7 @@ export BENCHMARKING_JOB_ID=$SLURM_JOB_ID
 
 # Start the runner container - gets the hydra config and writes environment vars
 echo "Starting runner container"
-singularity run containers/general/exp_config_generator.sif
+singularity run containers/general/runner.sif
 
 # Wait for the runner container to finish
 while [ ! -f "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt" ]; do

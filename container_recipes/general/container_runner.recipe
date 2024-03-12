@@ -22,8 +22,5 @@ From: python:3.10-slim
     echo "Successfully installed all features"
 
 %runscript
-<<<<<<<< HEAD:container_recipes/runner.recipe
     python /benchmarking/smacbenchmarking/container/container_script_runner.py "$@"
-========
-    python /benchmarking/smacbenchmarking/container/run_containers.py "$@"
->>>>>>>> main:container_recipes/general/exp_config_generator.recipe
+
