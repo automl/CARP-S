@@ -1,5 +1,5 @@
-import json
 import os
+import json
 from inspect import getsourcefile
 from os.path import abspath
 
@@ -17,40 +17,37 @@ def py_experimenter_evaluate(parameters: dict,
 
     job_id = os.environ["BENCHMARKING_JOB_ID"]
 
-    result_processor.process_results({'slurm_job_id': job_id})
+    result_processor.process_results({"slurm_job_id": job_id})
 
     dict_config = OmegaConf.create(cfg_dict)
     cfg_path = f"{job_id}_hydra_config.yaml"
     OmegaConf.save(config=dict_config, f=cfg_path)
 
-    with open(f"{job_id}_pyexperimenter_id.txt", 'w+') as f:
+    with open(f"{job_id}_pyexperimenter_id.txt", "w+") as f:
         f.write(str(result_processor.experiment_id))
 
-    with open(f"{job_id}_problem_container.txt", 'w+') as f:
+    with open(f"{job_id}_problem_container.txt", "w+") as f:
         f.write(cfg_dict["benchmark_id"])
 
-    with open(f"{job_id}_optimizer_container.txt", 'w+') as f:
-        f.write(cfg_dict["optimizer_id"])
+    with open(f"{job_id}_optimizer_container.txt", "w+") as f:
+        f.write(cfg_dict["optimizer_container_id"])
 
     return ExperimentStatus.PAUSED
 
 
 def main() -> None:
-    with open(f"hello_pyexperimenter.txt", 'w+') as f:
-        f.write(str(abspath(getsourcefile(lambda: 0))))
-
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = 'smacbenchmarking/container/py_experimenter.yaml'
+    experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
 
-    if os.path.exists('smacbenchmarking/container/credentials.yaml'):
-        database_credential_file_path = 'smacbenchmarking/container/credentials.yaml'
+    if os.path.exists("smacbenchmarking/container/credentials.yaml"):
+        database_credential_file_path = "smacbenchmarking/container/credentials.yaml"
     else:
         database_credential_file_path = None
 
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
-                                  name='example_notebook',
+                                  name="example_notebook",
                                   database_credential_file_path=database_credential_file_path,
-                                  log_file=f'logs/{slurm_job_id}.log',
+                                  log_file=f"logs/{slurm_job_id}.log",
                                   use_ssh_tunnel=True)
 
     experimenter.execute(py_experimenter_evaluate, max_experiments=1)

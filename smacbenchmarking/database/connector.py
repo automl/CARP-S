@@ -10,13 +10,10 @@ from omegaconf import DictConfig, OmegaConf
 from py_experimenter.database_connector_mysql import DatabaseConnectorMYSQL
 from py_experimenter.exceptions import (
     CreatingTableError,
-    DatabaseConnectionError,
     EmptyFillDatabaseCallError,
-    NoExperimentsLeftException,
     TableHasWrongStructureError,
 )
 from py_experimenter.experiment_status import ExperimentStatus
-from rich import print as printr
 
 from smacbenchmarking.database import utils
 from smacbenchmarking.database.utils import load_config
@@ -94,7 +91,8 @@ class DatabaseConnectorMySQL(DatabaseConnectorMYSQL):
         experiment_id = self.fetchall(cursor)[0][0]
         self.execute(
             cursor,
-            f"UPDATE {self.table_name} SET status = {self._prepared_statement_placeholder}, start_date = {self._prepared_statement_placeholder} WHERE id = {self._prepared_statement_placeholder};",
+            f"UPDATE {self.table_name} SET status = {self._prepared_statement_placeholder}, "
+            "start_date = {self._prepared_statement_placeholder} WHERE id = {self._prepared_statement_placeholder};",
             (ExperimentStatus.RUNNING.value, time, experiment_id),
         )
         keyfields = ",".join(utils.get_keyfield_names(self.config))
@@ -123,7 +121,6 @@ class DatabaseConnectorMySQL(DatabaseConnectorMYSQL):
         self.execute(cursor, query)
         values = self.fetchall(cursor)[0]
         self.commit(connection)
-        description = cursor.description
         ids = values
         if len(ids) > 1:
             warnings.warn(
@@ -193,11 +190,17 @@ class DatabaseConnectorMySQL(DatabaseConnectorMYSQL):
         if table_type == "standard":
             query += f", {columns}"
         elif table_type == "logtable":
-            query += f", experiment_id INTEGER, timestamp DATETIME, {columns}, FOREIGN KEY (experiment_id) REFERENCES {self.table_name}(ID) ON DELETE CASCADE"
+            query += (
+                f", experiment_id INTEGER, timestamp DATETIME, {columns}, "
+                "FOREIGN KEY (experiment_id) REFERENCES {self.table_name}(ID) ON DELETE CASCADE"
+            )
             if logatableaddition:
                 query += f", {logatableaddition}"
         elif table_type == "codecarbon":
-            query += f", experiment_id INTEGER, {columns}, FOREIGN KEY (experiment_id) REFERENCES {self.table_name}(ID) ON DELETE CASCADE"
+            query += (
+                f", experiment_id INTEGER, {columns}, FOREIGN KEY (experiment_id) "
+                "REFERENCES {self.table_name}(ID) ON DELETE CASCADE"
+            )
         else:
             raise ValueError(f"Unknown table type: {table_type}")
         return query + ");"

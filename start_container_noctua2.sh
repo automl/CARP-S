@@ -7,7 +7,7 @@ export BENCHMARKING_JOB_ID=$SLURM_JOB_ID
 
 # Start the runner container - gets the hydra config and writes environment vars
 echo "Starting runner container"
-singularity run runner.sif
+singularity run containers/general/exp_config_generator.sif
 
 # Wait for the runner container to finish
 while [ ! -f "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt" ]; do
@@ -23,9 +23,9 @@ OPTIMIZER_CONTAINER="$(cat "${BENCHMARKING_JOB_ID}_optimizer_container.txt")"
 
 # Start the problem container & wait for the flask server to start
 echo "Starting problem container"
-singularity instance start "${PROBLEM_CONTAINER}.sif" problem
+singularity instance start "containers/benchmarks/${PROBLEM_CONTAINER}.sif" problem
 
-API_URL="localhost:5000/configspace"  # Replace with the actual API URL
+API_URL="localhost:5000/configspace"
 
 while true; do
     response=$(curl -s -o /dev/null -w "%{http_code}" $API_URL)
@@ -43,7 +43,7 @@ echo "Host Found"
 
 # Start the optimizer container
 echo "Starting optimizer container"
-singularity exec "${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_script_optimizer.py
+singularity exec "containers/optimizers/${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_script_optimizer.py
 
 echo "Run Finished"
 

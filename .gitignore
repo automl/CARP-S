@@ -129,6 +129,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+data
 outputs
 runs
 *.json
@@ -140,5 +141,9 @@ runs
 /.idea/vcs.xml
 /.idea/.gitignore
 /.codecarbon.config
-/smacbenchmarking.db
+
 /smacbenchmarking/container/credentials.yaml
+smacbenchmarking.db
+*.jsonl
+*.sif
+logs
