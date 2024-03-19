@@ -35,6 +35,6 @@ export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
 ./compile_noctua2.sh ${CONT_BENCH_PATH}/DUMMY_Problem.sif ${CONT_BENCH_RECIPE_PATH}/DUMMY_Problem/DUMMY_Problem.recipe
 
 # HPOB
-./compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/hpob/hpob_container.recipe
+./compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/hpob/hpob_container.recipe ${CONT_BENCH_RECIPE_PATH}/hpob/download_data.sh
 
 
