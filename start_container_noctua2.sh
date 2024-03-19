@@ -6,10 +6,8 @@ module load system singularity
 export BENCHMARKING_JOB_ID=$SLURM_JOB_ID
 
 # Start the runner container - gets the hydra config and writes environment vars
-# Parse whole array of args given to this script to runner.sif
 echo "Starting runner container"
-singularity run containers/general/exp_config_generator.sif "${@}"
-# singularity run runner.sif +optimizer/DUMMY=config +problem/DUMMY=config
+singularity run containers/general/runner.sif
 
 # Wait for the runner container to finish
 while [ ! -f "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt" ]; do
@@ -45,7 +43,7 @@ echo "Host Found"
 
 # Start the optimizer container
 echo "Starting optimizer container"
-singularity exec "containers/optimizers/${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_optimizer.py
+singularity exec "containers/optimizers/${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_script_optimizer.py
 
 echo "Run Finished"
 

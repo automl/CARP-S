@@ -5,7 +5,7 @@ From: python:3.10-slim
     flask run
 
 %environment
-    export FLASK_APP=smacbenchmarking/container/container_app.py
+    export FLASK_APP=smacbenchmarking/container/container_script_problem.py
 
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking

@@ -1,8 +1,31 @@
-# SMACBenchmarking
+# ⏱️ SMACBenchmarking 📐
+Welcome to SMACBenchmarking! 
+This repository contains a benchmarking framework for optimizers.
+It allows flexibly combining optimizers and benchmarks via a simple interface, and logging experiment results 
+and trajectories to a database.
+There are two main ways to use this framework:
+1. Run everything in the same environment (e.g. to test locally)
+2. Build separate Singularity/ Apptainer containers for the optimizer and the benchmark (e.g. to run on a cluster)
 
+The first options can allow for faster development, but the second option is more robust and flexible since python or 
+other package versions don't clash, and eases execution on e.g. a SLURM cluster.
 
+Documentation at https://AutoML.github.io/SMACBenchmarking/main
 
-## Installation
+Main Topics of this README:
+- [Conceptual Overview 🗺](#conceptual-overview-🗺)
+- [Usage - Local Setup 📍](#usage---local-setup-📍)
+- [Usage - Cluster Setup 🤖](#usage---cluster-setup-🤖)
+- [Adding a new Optimizer or Benchmark 🆕](#adding-a-new-optimizer-or-benchmark-🆕)
+
+## Conceptual Overview 🗺 
+[DO ONCE FINISHED]
+
+## Usage - Local Setup 📍
+
+### Installation
+Create a conda environment and install the package.
+
 ```bash
 git clone https://github.com/AutoML/SMACBenchmarking.git
 cd SMACBenchmarking
@@ -17,13 +40,63 @@ make install-dev
 
 pip install -r requirements.txt
 ```
+
+Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
+For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark, you need to install the
+requirements for both of them.
+
+```bash
+pip install -e ".[smac20]"
+pip install -e ".[bbob]"
+```
+
+### Minimal Example
+Once the requirements for both an optimizer and a benchmark, e.g. `SMAC2.0` and `BBOB`, are installed, you can run
+one of the following minimal examples to benchmark `SMAC2.0` on `BBOB` directly with Hydra:
+
+```bash
+# Run SMAC BlackBoxFacade on certain BBOB problem
+python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
+
+# Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
+python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+```
+
+Note that in this case, no logging is done.
+
+## Usage - Cluster Setup 🤖
+![Overview of the whole process](images/smac_benchmarking_containers.drawio.png)
+
+
+The overall benchmarking system works as follows: 
+
+We have three different containers wrapping different functionality and a shell script controlling these containers. 
+The `HydraInitializer` container is responsible for constructing the Hydra configuration, 
+which is required to initialize the `Optimizer` and the `Benchmark` container. 
+The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
+First, it allows to get the search space associated with the benchmark. 
+Second, it answers requests providing a configuration to be evaluated with the corresponding evaluation result.
+The `Optimizer` container wraps the optimizer to be benchmarked and interacts with the `Benchmark` container.
+Any information required to boot the containers is written to the hard drive by the `HydraInitializer` container. 
+
+Note that we provide wrappers for the optimizer and the benchmark interfaces such that when you implement an 
+optimizer or a benchmark within our benchmarking framework, 
+you can ignore all aspects of the system just described and simply follow the simple API. 
+
+### Installation
+Local: Install Apptainer
+
+Cluster: Configure Singularity/ Apptainer
+
+Setup Database if you want to log to database (mysql)
+
 ### Database
-🚧 UNDER CONSTRUCTION 🚧
+Using SQLite vs. MySQL has some slight differences. Using SQLite is straightforward; you get a local database file but
+parallel execution is not efficient at all. You configure the used database in the 
+[pyexperimenter.yaml](smacbenchmarking/container/py_experimenter.yaml) file by changing the `provider` to `mysql` or 
+`sqlite`. 
 
-Current Status: SQLite is used as a database for testing. Once the database server is up and running, 
-we will switch to MySQL.
-
-Before you can start any jobs, the jobs need to be dispatched to the database.
+In any case, before you can start any jobs, the jobs need to be dispatched to the database.
 To this end, call the file `create_cluster_configs.py` with the desired hydra arguments.
 This can be done locally or on the server if you can execute python there directly.
 If you execute it locally, the database file `smacbenchmarking.db` will be created in the current directory and 
@@ -33,15 +106,34 @@ needs to be transferred to the cluster.
 python smacbenchmarking/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
 ```
 
----
-Eventually:
+In the case of MySQL, you need to authenticate yourself to the database. In our case, the MySQL server running on
+apollo. For this, you need
+- a user account on the MySQL server
+- an ssh certificate to authenticate yourself on apollo
+- an entry in the `.ssh/config` file that configures the connection, e.g.
+    ```
+    Host apollo
+    HostName apollo.ai.uni-hannover.de
+    User <Apollo User>
+    IdentityFile ~/.ssh/ssh_apollo
+    AddKeysToAgent yes
+    ```
+- a credentials file for pyexperimenter in `smacbenchmarking/container/credentials.yaml` with the following content:
+    ```yaml
+    CREDENTIALS:
+    Database:
+        host: 127.0.0.1
+        user: <MySQL User>
+        password: <MySQL Password>
 
-All results will be written to a central database.
-This database needs to be set up once on the server.
-MySQL can be installed with the information [here](https://dev.mysql.com/doc/refman/8.0/en/linux-installation.html).
-
-
-Documentation at https://AutoML.github.io/SMACBenchmarking/main
+    Connection:
+        Standard:
+            server: apollo
+        Ssh:
+            server: 127.0.0.1
+            address: apollo
+            ssh_keypass: <SSH Key Password>
+    ```
 
 ## Minimal Example
 
@@ -53,7 +145,7 @@ python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_
 python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
-## Containerization
+### Containerization
 To run benchmarking with containers, both the optimizer and benchmark have to be wrapped separately. 
 We use Singularity/ Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
@@ -71,7 +163,7 @@ export SINGULARITY_TMPDIR=/dev/shm/intexml<X>
 mkdir /dev/shm/intexml<X> -p
 ```
 
-### Optimizer
+#### Optimizer
 A Singularity recipe has to be created for the optimizer, which should be saved in the folder `container_recipes`.
 This recipe has the purpose of setting up a container in which the optimizer can be run, e.g., installing the 
 required packages, setting environment variables, copying files and so on.
@@ -82,17 +174,17 @@ The optimizer then has to be built to an image named after the optimizer id, e.g
 `DummyOptimizer` using the following command:
 
 ```bash
-singularity build DUMMY_Optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
+singularity build containers/optimizers/DUMMY_Optimizer.sif container_recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
 To facilitate this process, a short script is provided for this purpose, which is however system-specific to Noctua2.
 It can be run as follows:
 
 ```bash
-./compile_noctua2.sh DUMMY_Optimizer.sif container_recipes/DUMMY_Optimizer/DUMMY_Optimizer.recipe
+./compile_noctua2.sh containers/optimizers/DUMMY_Optimizer.sif container_recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
-### Benchmark
+#### Benchmark
 Like for the optimizer, a Singularity recipe has to be created for the benchmark, which should be saved in the folder
 `container_recipes` as well.
 
@@ -102,27 +194,27 @@ using
 the following command:
 
 ```bash
-singularity build DUMMY_Problem.sif container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
+singularity build containers/benchmarks/DUMMY_Problem.sif container_recipes/benchmarks/DUMMY_Problem/DUMMY_Problem.recipe
 ```
 
 Command for Noctua2:
 
 ```bash
-./compile_noctua2.sh DUMMY_Problem.sif container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
+./compile_noctua2.sh containers/benchmarks/DUMMY_Problem.sif container_recipes/benchmarks/DUMMY_Problem/DUMMY_Problem.recipe
 ```
 
-### Running
+#### Running
 A third container is needed that handles the hydra config. It does not need to be adjusted for each optimizer or
 benchmark, but can be used as is. It can be built as follows:
 
 ```bash
-singularity build hydra_initializer.sif container_recipes/hydra_initializer.recipe
+singularity build containers/general/runner.sif container_recipes/general/runner.recipe
 ```
 
 Command for Noctua2:
 
 ```bash
-./compile_noctua2.sh hydra_initializer.sif container_recipes/hydra_initializer.recipe
+./compile_noctua2.sh containers/general/runner.sif container_recipes/general/runner.recipe
 ```
 
 Running the containerized benchmarking system is also system-dependent. An example for Noctua2 is provided in the
@@ -144,48 +236,19 @@ This will pull a job from the database and run it (database needs to be initiali
 To be efficient, this command should eventually be integrated into a SLURM script, which can be submitted to the
 cluster (e.g. with job arrays).
 
-### Example SLURM script
-# TODO
+## Adding a new Optimizer or Benchmark 🆕
+To add a new optimizer or benchmark to the repository you need to
+1. Implement the optimizer or benchmark according to the corresponding interface
+    - **Optimizer**
+       - [Optimizer Interface](smacbenchmarking/optimizers/optimizer.py) <br> 
+          put implementation in [optimizers](smacbenchmarking/optimizers)
+       - [Benchmark Interface](smacbenchmarking/benchmarks/problem.py); put implementation in folder [benchmarks](smacbenchmarking/benchmarks)
+2. Add requirements for the optimizer or benchmark to the [setup.py](setup.py) under `extras-require`. 
+   Please specify exact versions of all requirements! This is very important for reproducibility.
+3. Add the configs
+4. Add a howto
 
-### Overview of the whole process
-
-![Overview of the whole process](images/smac_benchmarking_containers.drawio.png)
-
-
-The overall benchmarking system works as follows: 
-
-We have three different containers wrapping different functionality and a shell script controlling these containers. 
-The `HydraInitializer` container is responsible for constructing the Hydra configuration, 
-which is required to initialize the `Optimizer` and the `Benchmark` container. 
-The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
-First, it allows to get the search space associated with the benchmark. 
-Second, it answers requests providing a configuration to be evaluated with the corresponding evaluation result.
-The `Optimizer` container wraps the optimizer to be benchmarked and interacts with the `Benchmark` container.
-Any information required to boot the containers is written to the hard drive by the `HydraInitializer` container. 
-
-Note that we provide wrappers for the optimizer and the benchmark interfaces such that when you implement an 
-optimizer or a benchmark within our benchmarking framework, 
-you can ignore all aspects of the system just described and simply follow the simple API. 
-
-## Open Questions
-
-- How to aggregate and save data?
-    - Performance data
-        - trajectory: sorted by cost and time
-- What metadata do we need?
-    - General
-        - Timestamp
-        - Machine
-    - Optimizer
-        - Name
-        - Repo
-        - Commit
-        - Version
-    - SMACBenchmarking
-        - Version
-        - Commit
-
-## Installation Instructions
+### Installation Instructions
 Just temporary notes on how to install the respective Benchmarks and Optimizers.
 
 - Benchmarks
@@ -195,10 +258,3 @@ Just temporary notes on how to install the respective Benchmarks and Optimizers.
       - Install specific requirements by `pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt`
   
 - Optimizers
-
-## Open Todos
-- [ ] Containerize benchmarks / find solutions for requirements. Each optimizer could query a container during "run".
-- [ ] Add budget under `task` as time AND number of function evaluations
-    - If we use time as a budget, we need to check whether the hardware is the same.
-- [ ] Create `dispatch.py` checking if run already exists
-- [ ] Add slurm config
