@@ -35,10 +35,10 @@ From: continuumio/anaconda3:2022.05
    cd /benchmarking/smacbenchmarking
    git clone https://github.com/automl/HPOBench.git
    cd HPOBench
-   git checkout master
+   git checkout 47bf141f79e6bdfb26d1f1218b5d5aac09d7d2ce
    pip install .
-   pip install ConfigSpace==0.6.1
-   pip install ".[ml_mfbb]"
+   pip install -r /benchmarking/container_recipes/benchmarks/hpobench/hpobench_requirements.txt
+
 
    chmod -R 755 /benchmarking
    mkdir /var/lib/hpobench
@@ -47,4 +47,10 @@ From: continuumio/anaconda3:2022.05
    mkdir /var/lib/hpobench/data
    mkdir /var/lib/hpobench/cache
 
-   echo "Successfully installed all features"
+  # log package versions and git commit
+  GIT_COMMIT=$(git rev-parse HEAD)
+  echo "git_commit $GIT_COMMIT" >> "$SINGULARITY_LABELS"
+  SMACBENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+  echo "smacbenchmarking_version $SMACBENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
+
+  echo "Successfully installed all features"
