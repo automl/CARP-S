@@ -66,47 +66,6 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
     optimizer = instantiate(optimizer_cfg)(problem=problem)
     return optimizer
 
-
-def save_run(cfg: DictConfig, optimizer: Optimizer, metadata: dict | None = None) -> None:
-    """Save Run Data
-
-    Save run to global database.
-
-    Parameters
-    ----------
-    cfg : DictConfig
-        Global configuration of run.
-    optimizer : Optimizer
-        Optimizer, needed to extract the trajectories.
-    metadata : dict | None
-        Optional metadata, by default None.
-    """
-    cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
-    # cfg_dict = pd.json_normalize(cfg_dict, sep=".").iloc[0].to_dict()  # flatten cfg
-
-    trajectory_data = {}
-    for sort_by in ["trials", "walltime"]:
-        try:
-            X, Y = optimizer.get_trajectory(sort_by=sort_by)
-            trajectory_data[sort_by] = {"X": X, "Y": Y}
-        except NotSupportedError:
-            continue
-
-    if metadata is None:
-        metadata = {}
-
-    data = {
-        "cfg": cfg_dict,
-        "metadata": metadata,
-        "rundata": {
-            "trajectory": trajectory_data,
-        },
-    }
-
-    filename = "rundata.json"
-    dump_logs(log_data=data, filename=filename)
-
-
 def optimize(cfg: DictConfig) -> None:
     """Run optimizer on problem.
 
