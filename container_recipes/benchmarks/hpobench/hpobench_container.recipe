@@ -36,14 +36,14 @@ From: python:3.9-slim
     pip install ../benchmarking
     pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
-    # benchmark-specific commands go here
-    cd /benchmarking/smacbenchmarking
-    git clone https://github.com/automl/HPOBench.git
-    cd HPOBench
-    git checkout master
-    pip install .
-    pip install ConfigSpace==0.6.1
-    pip install ".[ml_mfbb]"
+   # benchmark-specific commands go here
+   cd /benchmarking/smacbenchmarking
+   git clone https://github.com/automl/HPOBench.git
+   cd HPOBench
+   git checkout 47bf141f79e6bdfb26d1f1218b5d5aac09d7d2ce
+   pip install .
+   pip install -r /benchmarking/container_recipes/benchmarks/hpobench/hpobench_requirements.txt
+
 
     chmod -R 755 /benchmarking
     mkdir /var/lib/hpobench
@@ -52,4 +52,10 @@ From: python:3.9-slim
     mkdir /var/lib/hpobench/data
     mkdir /var/lib/hpobench/cache
 
-    echo "Successfully installed all features"
+  # log package versions and git commit
+  GIT_COMMIT=$(git rev-parse HEAD)
+  echo "git_commit $GIT_COMMIT" >> "$SINGULARITY_LABELS"
+  SMACBENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+  echo "smacbenchmarking_version $SMACBENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
+
+  echo "Successfully installed all features"
