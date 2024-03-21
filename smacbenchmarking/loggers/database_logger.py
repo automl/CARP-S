@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import asdict
 
 from smacbenchmarking.database.result_processor import ResultProcessor
@@ -14,11 +15,10 @@ class DatabaseLogger(AbstractLogger):
 
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = str(
-            list(dict(info["trial_info"]["config"]).values())
-        )  # TODO beautify serialization
+        info["trial_info"]["config"] = json.dumps(asdict(trial_info)['config'].get_dictionary())
         info["trial_value"]["status"] = info["trial_value"]["status"].name
-        info["trial_value"]["additional_info"] = str(info["trial_value"]["additional_info"])
+        info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"])
+        info["trial_value"]["cost"] = json.dumps({'cost': json.dumps(info["trial_value"]["cost"])})
         keys = ["trial_info", "trial_value"]
         for key in keys:
             D = info.pop(key)
@@ -35,18 +35,17 @@ class DatabaseLogger(AbstractLogger):
 
         log = {"trials": info}
 
-        # log = {
-        #     "trials":
-        #         {
-        #             "trial_info__config": str([0, 1]),
-        #             "trial_info__instance": 0,
-        #             "trial_info__seed": 0,
-        #             "trial_info__budget": 0,
-        #             "trial_value__cost": str(100),
-        #             "trial_value__time": 3,
-        #             "trial_value__starttime": 12345,
-        #             "trial_value__starttime": 12348,
-        #             "trial_value__status": "OK",
-        #         }
-        # }
-        self.result_processor.process_logs(log)
+        info_2 = {
+            'trial_info__config': info['trial_info__config'],
+            'trial_info__instance': info['trial_info__instance'] if 'trial_info__instance' in info else None,
+            'trial_info__seed': info['trial_info__seed'] if 'trial_info__seed' in info else None,
+            'trial_info__budget': info['trial_info__budget'] if 'trial_info__budget' in info else None,
+            'trial_value__cost': info['trial_value__cost'],
+            'trial_value__time': info['trial_value__time'],
+            'trial_value__status': info['trial_value__status'],
+            'trial_value__starttime': info['trial_value__starttime'],
+            'trial_value__endtime': info['trial_value__endtime'],
+            'trial_value__additional_info': info['trial_value__additional_info'] if 'trial_value__additional_info' in info else None,
+        }
+
+        self.result_processor.process_logs({"trials": info_2})

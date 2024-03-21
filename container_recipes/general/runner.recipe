@@ -22,4 +22,5 @@ From: python:3.10-slim
     echo "Successfully installed all features"
 
 %runscript
-    python /benchmarking/smacbenchmarking/container/run_containers.py "$@"
+    python /benchmarking/smacbenchmarking/container/container_script_runner.py
+

@@ -22,7 +22,7 @@ From: continuumio/miniconda3
     pip install wheel
     pip install -r /benchmarking/requirements.txt
     pip install /benchmarking
-    pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
+    pip install -r /benchmarking/container_recipes/general/general_requirements_container_optimizer.txt
 
     # benchmark-specific commands go here
     pip install -r /benchmarking/container_recipes/optimizers/smac20/smac20_requirements.txt
