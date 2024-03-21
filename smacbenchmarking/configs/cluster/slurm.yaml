@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /hydra/launcher: submitit_slurm
+
+## Adapt to your needs
+# hydra:
+#   launcher:
+#     partition: normal
+#     cpus_per_task: 1
+#     name: expl2
+#     timeout_min: 40
+#     mem_gb: 8

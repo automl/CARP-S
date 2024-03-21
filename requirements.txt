@@ -1,6 +1,8 @@
 ConfigSpace~=0.7.1
 hydra-core
 hydra-colorlog
+hydra-submitit-launcher
+hydra-joblib-launcher
 rich~=13.4.2
 pandas
 omegaconf~=2.3.0
