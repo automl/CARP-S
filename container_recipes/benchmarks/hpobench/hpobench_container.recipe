@@ -7,7 +7,7 @@ From: python:3.9-slim
 
 %environment
     # this is necessary to start the benchmarking server
-    export FLASK_APP=/benchmarking/smacbenchmarking/container/container_app.py
+    export FLASK_APP=/benchmarking/smacbenchmarking/container/container_script_problem.py
 
     export XDG_CONFIG_HOME=/benchmarking/container_recipes/benchmarks/hpobench
     export XDG_CACHE_HOME=/benchmarking/.cache/hpobench

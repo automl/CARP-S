@@ -5,7 +5,7 @@ From: continuumio/miniconda3
     flask run
 
 %environment
-    export FLASK_APP=smacbenchmarking/container/container_app.py
+    export FLASK_APP=smacbenchmarking/container/container_script_optimizer.py
 
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking
