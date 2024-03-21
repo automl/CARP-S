@@ -34,7 +34,8 @@ def main(cfg: DictConfig) -> None:
                                   name="smacbenchmarking",
                                   database_credential_file_path=database_credential_file,
                                   log_level=logging.INFO,
-                                  use_ssh_tunnel=True,)
+                                  use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel
+                                  )
 
     cfg_json = OmegaConf.to_container(cfg, resolve=True)
 

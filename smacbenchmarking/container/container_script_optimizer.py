@@ -41,7 +41,7 @@ if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
         name="example_notebook",
         database_credential_file_path=database_credential_file,
         log_file=f"logs/{slurm_job_id}.log",
-        use_ssh_tunnel=True
+        use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel
     )
 
     experimenter.unpause_experiment(experiment_id, optimizer_experiment)
