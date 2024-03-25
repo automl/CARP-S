@@ -12,8 +12,14 @@ SearchSpace = Any
 
 
 class Optimizer(ABC):
-    def __init__(self, problem: Problem) -> None:
+    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None) -> None:
         self.problem = problem
+        if n_trials is None and time_budget is None:
+            raise ValueError("Please specify either `n_trials` or `time_budget` "
+                             "as the optimization budget.")
+        self.n_trials: int | None = n_trials
+        self.time_budget: float | None = time_budget
+        
         super().__init__()
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
