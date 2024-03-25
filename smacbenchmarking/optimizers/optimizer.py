@@ -6,7 +6,7 @@ from typing import Any
 from ConfigSpace import ConfigurationSpace
 
 from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.utils.trials import TrialInfo
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 SearchSpace = Any
 
@@ -78,4 +78,34 @@ class Optimizer(ABC):
     @abstractmethod
     def _run(self) -> None:
         """Run Optimizer on Problem"""
+        raise NotImplementedError
+    
+    @abstractmethod
+    def ask(self) -> TrialInfo:
+        """Ask the optimizer for a new trial to evaluate.
+
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
+
+        Returns
+        -------
+        TrialInfo
+            trial info (config, seed, instance, budget)
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def tell(self, trial_value: TrialValue) -> None:
+        """Tell the optimizer a new trial.
+
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
+
+        Parameters
+        ----------
+        TrialValue
+            trial value (cost, time, ...)
+        """
         raise NotImplementedError
