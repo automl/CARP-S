@@ -24,6 +24,23 @@ class Optimizer(ABC):
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
 
+        self._solver: Any = None
+
+    @property
+    def solver(self) -> Any:
+        return self._solver
+    
+    @solver.setter
+    def solver(self, value: Any) -> None:
+        self._solver = value
+
+    def setup_optimizer(self):
+        self.solver = self._setup_optimizer()
+
+    @abstractmethod
+    def _setup_optimizer(self) -> Any:
+        raise NotImplementedError
+
     @abstractmethod
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         """Convert ConfigSpace configuration space to search space from optimizer.
@@ -52,8 +69,13 @@ class Optimizer(ABC):
             Trial info containing configuration, budget, seed, instance.
         """
         raise NotImplementedError
+    
+    def run(self) -> None:
+        if self.solver is None:
+            self.setup_optimizer()
+        self._run()
 
     @abstractmethod
-    def run(self) -> None:
+    def _run(self) -> None:
         """Run Optimizer on Problem"""
         raise NotImplementedError
