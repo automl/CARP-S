@@ -4,7 +4,7 @@ from ConfigSpace import Configuration, ConfigurationSpace
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
-from smacbenchmarking.utils.trials import TrialInfo
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class RandomSearchOptimizer(Optimizer):
@@ -19,9 +19,14 @@ class RandomSearchOptimizer(Optimizer):
 
     def convert_to_trial(self, config: Configuration) -> TrialInfo:  # type: ignore[override]
         return TrialInfo(config=config)
+    
+    def ask(self) -> TrialInfo:
+        config = self.problem.configspace.sample_configuration()
+        return self.convert_to_trial(config=config)
+    
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+        pass
 
-    def run(self) -> None:
-        for i in range(self.n_trials):
-            trial = self.problem.configspace.sample_configuration()
-            trial = self.convert_to_trial(trial)
-            _ = self.problem.evaluate(trial)
+    def _setup_optimizer(self) -> None:
+        return None
+
