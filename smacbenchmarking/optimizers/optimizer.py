@@ -102,7 +102,7 @@ class Optimizer(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def tell(self, trial_value: TrialValue) -> None:
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
 
         If the optimizer does not support ask and tell,
