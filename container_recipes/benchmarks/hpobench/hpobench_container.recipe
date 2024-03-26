@@ -36,14 +36,17 @@ From: python:3.9-slim
     pip install ../benchmarking
     pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
 
-   # benchmark-specific commands go here
-   cd /benchmarking/smacbenchmarking
-   git clone https://github.com/automl/HPOBench.git
-   cd HPOBench
-   git checkout 47bf141f79e6bdfb26d1f1218b5d5aac09d7d2ce
-   pip install .
-   pip install -r /benchmarking/container_recipes/benchmarks/hpobench/hpobench_requirements.txt
+    # log benchmarking version
+    BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+    echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
+    # benchmark-specific commands go here
+    cd /benchmarking/smacbenchmarking
+    git clone https://github.com/automl/HPOBench.git
+    cd HPOBench
+    git checkout 47bf141f79e6bdfb26d1f1218b5d5aac09d7d2ce
+    pip install .
+    pip install -r /benchmarking/container_recipes/benchmarks/hpobench/hpobench_requirements.txt
 
     chmod -R 755 /benchmarking
     mkdir /var/lib/hpobench
@@ -51,9 +54,5 @@ From: python:3.9-slim
     mkdir /var/lib/hpobench/socket
     mkdir /var/lib/hpobench/data
     mkdir /var/lib/hpobench/cache
-
-  # log benchmarking version
-  BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
-  echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
   echo "Successfully installed all features"
