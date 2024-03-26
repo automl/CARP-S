@@ -52,8 +52,8 @@ From: python:3.9-slim
     mkdir /var/lib/hpobench/data
     mkdir /var/lib/hpobench/cache
 
-  # log package versions and git commit
-  SMACBENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
-  echo "smacbenchmarking_version $SMACBENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
+  # log benchmarking version
+  BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+  echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
   echo "Successfully installed all features"
