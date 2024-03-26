@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from time import time
 from typing import Any
 
 from ConfigSpace import ConfigurationSpace
@@ -75,10 +76,15 @@ class Optimizer(ABC):
             self.setup_optimizer()
         self._run()
 
-    @abstractmethod
     def _run(self) -> None:
         """Run Optimizer on Problem"""
-        raise NotImplementedError
+        timeout = self.cfg.timeout
+
+        start_time = time()
+        while time() - start_time < timeout:
+            trial = self.ask()
+            result = self.problem.evaluate(trial)
+            self.tell(result)
     
     @abstractmethod
     def ask(self) -> TrialInfo:
@@ -105,7 +111,7 @@ class Optimizer(ABC):
 
         Parameters
         ----------
-        TrialValue
+        trial_value : TrialValue
             trial value (cost, time, ...)
         """
         raise NotImplementedError
