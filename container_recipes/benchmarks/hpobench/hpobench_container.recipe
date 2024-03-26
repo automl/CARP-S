@@ -53,8 +53,6 @@ From: python:3.9-slim
     mkdir /var/lib/hpobench/cache
 
   # log package versions and git commit
-  GIT_COMMIT=$(git rev-parse HEAD)
-  echo "git_commit $GIT_COMMIT" >> "$SINGULARITY_LABELS"
   SMACBENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
   echo "smacbenchmarking_version $SMACBENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
