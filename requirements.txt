@@ -1,8 +1,6 @@
 ConfigSpace~=0.7.1
 hydra-core
 hydra-colorlog
-hydra-submitit-launcher
-hydra-joblib-launcher
 rich~=13.4.2
 pandas
 omegaconf~=2.3.0
@@ -10,4 +8,4 @@ dataclasses-json~=0.5.9
 pymysql
 cryptography
 domdf_python_tools
-py-experimenter>=1.4.1
+py-experimenter @ git+https://github.com/tornede/py_experimenter@feature-pause-experiment-execution
