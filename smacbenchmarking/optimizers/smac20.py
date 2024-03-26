@@ -12,7 +12,7 @@ from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.trials import TrialInfo
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class SMAC3Optimizer(Optimizer):
@@ -21,7 +21,7 @@ class SMAC3Optimizer(Optimizer):
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
-        self._smac: AbstractFacade | None = None
+        self._solver: AbstractFacade | None = None
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
@@ -92,7 +92,7 @@ class SMAC3Optimizer(Optimizer):
         trial_value = self.problem.evaluate(trial_info=trial_info)
         return trial_value.cost
 
-    def setup_smac(self) -> AbstractFacade:
+    def _setup_optimizer(self) -> AbstractFacade:
         """
         Setup SMAC.
 
@@ -183,14 +183,30 @@ class SMAC3Optimizer(Optimizer):
 
         return smac
 
-    def run(self) -> None:
-        """Run SMAC on Problem.
+    def ask(self) -> TrialInfo:
+        """Ask the optimizer for a new trial to evaluate.
 
-        If SMAC is not instantiated, instantiate.
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
+
+        Returns
+        -------
+        TrialInfo
+            trial info (config, seed, instance, budget)
         """
-        if self._smac is None:
-            self._smac = self.setup_smac()
+        return self.solver.ask()
+    
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+        """Tell the optimizer a new trial.
 
-        incumbent = self._smac.optimize()  # noqa: F841
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
 
-        return None
+        Parameters
+        ----------
+        trial_value : TrialValue
+            trial value (cost, time, ...)
+        """
+        self.solver.tell(trial_info=trial_info, trial_value=trial_value)
