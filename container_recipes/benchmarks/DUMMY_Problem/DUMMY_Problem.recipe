@@ -31,8 +31,12 @@ From: continuumio/anaconda3
     pip install -r /benchmarking/requirements.txt
     pip install ../benchmarking
     pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
-    
+
+    # log benchmarking version
+    BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+    echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
+
     # benchmark-specific commands go here
     pip install -r /benchmarking/container_recipes/benchmarks/DUMMY_Problem/DUMMY_Problem_requirements.txt
-    
+
     echo "Successfully installed all features"
