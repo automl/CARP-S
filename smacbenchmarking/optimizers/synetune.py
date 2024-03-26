@@ -105,7 +105,7 @@ class SynetuneOptimizer(Optimizer):
         self.max_budget = max_budget
 
         self.optimizer_name = optimizer_name
-        self._optimizer: SyneTrialScheduler | None = None
+        self._solver: SyneTrialScheduler | None = None
 
         if num_trials is None and wallclock_times is None:
             raise ValueError("either num_trials or wallclock_times must be given!")
@@ -137,7 +137,7 @@ class SynetuneOptimizer(Optimizer):
         return configspace_st
 
     def convert_to_trial(  # type: ignore[override]
-        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
+        self, trial: SyneTrial
     ) -> TrialInfo:
         """Convert proposal from SyneTune to TrialInfo.
 
@@ -157,76 +157,77 @@ class SynetuneOptimizer(Optimizer):
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
-        return trial_info
-
-    def ask(self) -> SyneTrial:
-        """
-        Ask the scheduler for new trial to run
-        :return: Trial to run
-        """
-        trial_suggestion = self._optimizer.suggest(self.trial_counter)
-        trial = SyneTrial(
-            trial_id=self.trial_counter,
-            config=trial_suggestion.config,
-            creation_time=datetime.datetime.now(),
-        )
-        return trial
-
-    def evaluate(self, trial: SyneTrial) -> float:
         configs = copy.deepcopy(trial.config)
         if self.budget_type is not None:
             budget = configs.pop(self.budget_type)
         else:
             budget = None
         configuration = Configuration(configuration_space=self.configspace, values=configs)
-        cost = self.target_function(config=configuration, budget=budget)
-        return cost
+        trial_info = TrialInfo(config=configuration, seed=None, budget=budget, instance=None)
+        return trial_info
 
-    def tell(self, trial: SyneTrial, cost: float):
-        """
-        Feed experiment results back to the Scheduler
+    def ask(self) -> TrialInfo:
+        """Ask the optimizer for a new trial to evaluate.
 
-        :param trial: SyneTrial that was run
-        :param cost: float, cost values
-        """
-        experiment_result = {self.metric: cost}
-        self.trial_counter += 1
-        self._optimizer.on_trial_complete(trial=trial, result=experiment_result)
-
-    def target_function(
-        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
-    ) -> float:
-        """Target Function
-
-        Interface for the Problem.
-
-        Parameters
-        ----------
-        config : Configuration
-            Configuration
-        seed : int | None, optional
-            Seed, by default None
-        budget : float | None, optional
-            Budget, by default None
-        instance : str | None, optional
-            Instance, by default None
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
 
         Returns
         -------
-        float
-            cost
+        TrialInfo
+            trial info (config, seed, instance, budget)
         """
-        trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        trial_value = self.problem.evaluate(trial_info=trial_info)
-        if self.wallclock_times is not None:
-            if trial_value.endtime - self.start_time > self.wallclock_times:
-                # In this case, it is actually timed out. We will simply ignore that
-                return trial_value.cost
-        self.completed_experiments[self.trial_counter] = (trial_value, trial_info)
-        return trial_value.cost
+        trial_suggestion = self._solver.suggest(self.trial_counter)
+        trial = SyneTrial(
+            trial_id=self.trial_counter,
+            config=trial_suggestion.config,
+            creation_time=datetime.datetime.now(),
+        )
+        trial_info = self.convert_to_trial(trial=trial)
+        return trial_info
+    
+    def convert_to_synetrial(self, trial_info: TrialInfo) -> SyneTrial:
+        """Convert a trial info to the syne tune format.
 
-    def setup_optimizer(self) -> SyneTrialScheduler:
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Trial info.
+
+        Returns
+        -------
+        SyneTrial
+            Synetune format
+        """
+        trial = SyneTrial(
+            trial_id=self.trial_counter,
+            config=trial_info.config.values(),
+            creation_time=datetime.datetime.now(),
+        )
+        return trial
+
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue):
+        """Tell the optimizer a new trial.
+
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            trial info (config, seed, instance, budget)
+        trial_value : TrialValue
+            trial value (cost, time, ...)
+        """
+        cost = trial_value.cost
+        trial = self.convert_to_synetrial(trial_info=trial_info)
+        experiment_result = {self.metric: cost}
+        self.trial_counter += 1
+        self._solver.on_trial_complete(trial=trial, result=experiment_result)
+
+    def _setup_optimizer(self) -> SyneTrialScheduler:
         """
         Setup Optimizer.
 
@@ -249,25 +250,3 @@ class SynetuneOptimizer(Optimizer):
 
         bscheduler = optimizers_dict[self.optimizer_name](**optimizer_kwargs)
         return bscheduler
-
-    def run(self) -> None:
-        """Run SyneTune on Problem.
-
-        If SyneTune is not instantiated, instantiate.
-        """
-        if self._optimizer is None:
-            self._optimizer = self.setup_optimizer()
-        self.start_time = time.time()
-        while True:
-            if self.max_num_trials is not None:
-                if self.trial_counter >= self.max_num_trials:
-                    break
-            if self.wallclock_times is not None:
-                if time.time() - self.start_time > self.wallclock_times:
-                    break
-
-            syne_trial = self.ask()
-            cost = self.evaluate(syne_trial)
-            self.tell(syne_trial, cost)
-
-        return None
