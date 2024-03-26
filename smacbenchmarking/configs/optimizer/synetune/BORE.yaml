@@ -5,12 +5,6 @@ optimizer:
   _partial_: true
 
   optimizer_name: 'BORE'
+  optimizer_kwargs:
+    random_seed: ${seed}
   # max_budget: ${task.max_budget}
-  num_trials: 100
-  wallclock_times: 3600
-
-
-
-#      walltime_limit: 60,  # After 60 seconds, we stop the hyperparameter optimization
-#      n_trials: 500,  # Evaluate max 500 different trials
-#      n_workers: 8,

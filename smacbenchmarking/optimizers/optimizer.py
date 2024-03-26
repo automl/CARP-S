@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from time import time
+import time
 from typing import Any
 
 from ConfigSpace import ConfigurationSpace
@@ -13,13 +13,14 @@ SearchSpace = Any
 
 
 class Optimizer(ABC):
-    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None) -> None:
+    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None = None) -> None:
         self.problem = problem
         if n_trials is None and time_budget is None:
             raise ValueError("Please specify either `n_trials` or `time_budget` "
                              "as the optimization budget.")
         self.n_trials: int | None = n_trials
         self.time_budget: float | None = time_budget
+        self.trial_counter: int = 0
         
         super().__init__()
         # This indicates if the optimizer can deal with multi-fidelity optimization
@@ -76,15 +77,23 @@ class Optimizer(ABC):
             self.setup_optimizer()
         self._run()
 
+    def continue_optimization(self, start_time) -> bool:
+        cont = True
+        if self.time_budget is not None and time.time() - start_time < self.time_budget:
+            cont = False
+        if self.trial_counter >= self.n_trials:
+            cont = False
+
+        return cont
+
     def _run(self) -> None:
         """Run Optimizer on Problem"""
-        timeout = self.cfg.timeout
-
-        start_time = time()
-        while time() - start_time < timeout:
-            trial = self.ask()
-            result = self.problem.evaluate(trial)
-            self.tell(result)
+        start_time = time.time()
+        while self.continue_optimization(start_time=start_time):
+            trial_info = self.ask()
+            trial_value = self.problem.evaluate(trial_info=trial_info)
+            self.tell(trial_info=trial_info, trial_value=trial_value)
+            self.trial_counter += 1
     
     @abstractmethod
     def ask(self) -> TrialInfo:

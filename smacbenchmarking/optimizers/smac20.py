@@ -16,8 +16,8 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class SMAC3Optimizer(Optimizer):
-    def __init__(self, problem: Problem, smac_cfg: DictConfig) -> None:
-        super().__init__(problem)
+    def __init__(self, problem: Problem, smac_cfg: DictConfig, n_trials: int | None, time_budget: float | None) -> None:
+        super().__init__(problem, n_trials, time_budget)
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg

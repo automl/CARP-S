@@ -8,8 +8,8 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class RandomSearchOptimizer(Optimizer):
-    def __init__(self, problem: Problem, n_trials: int) -> None:
-        super().__init__(problem)
+    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None) -> None:
+        super().__init__(problem, n_trials, time_budget)
 
         self.configspace: ConfigurationSpace = self.problem.configspace
         self.n_trials: int = n_trials

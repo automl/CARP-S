@@ -63,7 +63,7 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
         Instantiated optimizer.
     """
     optimizer_cfg = cfg.optimizer
-    optimizer = instantiate(optimizer_cfg)(problem=problem)
+    optimizer = instantiate(optimizer_cfg)(problem=problem, n_trials=cfg.task.n_trials, time_budget=cfg.task.time_budget)
     if "optimizer_wrappers" in cfg:
         for wrapper in cfg.optimizer_wrappers:
             optimizer = wrapper(optimizer)

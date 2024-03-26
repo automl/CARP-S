@@ -81,11 +81,12 @@ class SynetuneOptimizer(Optimizer):
         self,
         problem: Problem,
         optimizer_name: "str",
+        n_trials: int | None, 
+        time_budget: float | None = None,
         max_budget: float | None = None,
-        num_trials: int | None = None,
-        wallclock_times: float | None = None,
+        optimizer_kwargs: dict | None = None
     ) -> None:
-        super().__init__(problem)
+        super().__init__(problem, n_trials, time_budget)
         self.fidelity_enabled = False
 
         self.configspace = self.problem.configspace
@@ -105,13 +106,9 @@ class SynetuneOptimizer(Optimizer):
         self.max_budget = max_budget
 
         self.optimizer_name = optimizer_name
-        self._solver: SyneTrialScheduler | None = None
+        self._solver: SyneTrialScheduler | None = None 
 
-        if num_trials is None and wallclock_times is None:
-            raise ValueError("either num_trials or wallclock_times must be given!")
-        self.max_num_trials = num_trials
-        self.start_time = time.time()
-        self.wallclock_times = wallclock_times
+        self.optimizer_kwargs = optimizer_kwargs
 
         self.completed_experiments: OrderedDict[int, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
@@ -202,7 +199,7 @@ class SynetuneOptimizer(Optimizer):
         """
         trial = SyneTrial(
             trial_id=self.trial_counter,
-            config=trial_info.config.values(),
+            config=dict(trial_info.config),
             creation_time=datetime.datetime.now(),
         )
         return trial
@@ -239,14 +236,18 @@ class SynetuneOptimizer(Optimizer):
             Instance of a SyneTune.
 
         """
-        optimizer_kwargs = dict(
+        if self.optimizer_kwargs is None:
+            self.optimizer_kwargs = {}
+        _optimizer_kwargs = dict(
             config_space=self.syne_tune_configspace,
             metric=getattr(self.problem, "metric", "cost"),
             mode="min",
         )
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
-            optimizer_kwargs["resource_attr"] = self.problem.budget_type
-            optimizer_kwargs["max_t"] = self.max_budget
+            _optimizer_kwargs["resource_attr"] = self.problem.budget_type
+            _optimizer_kwargs["max_t"] = self.max_budget
 
-        bscheduler = optimizers_dict[self.optimizer_name](**optimizer_kwargs)
+        self.optimizer_kwargs.update(_optimizer_kwargs)
+
+        bscheduler = optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
         return bscheduler

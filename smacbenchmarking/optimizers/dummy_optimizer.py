@@ -14,8 +14,8 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 class DummyOptimizer(Optimizer):
 
-    def __init__(self, problem: Problem, dummy_cfg: DictConfig) -> None:
-        super().__init__(problem)
+    def __init__(self, problem: Problem, dummy_cfg: DictConfig, n_trials: int | None, time_budget: float | None) -> None:
+        super().__init__(problem, n_trials, time_budget)
         self.cfg = dummy_cfg
         self.trajectory = []
         if "budget" in self.cfg.keys():
