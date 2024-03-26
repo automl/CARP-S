@@ -40,7 +40,7 @@ class DummyOptimizer(Optimizer):
         trial = self.convert_to_trial(trial, budget=self.budget)
         return trial
 
-    def tell(self, trial_value: TrialValue) -> None:
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         self.trajectory.append(float(trial_value.cost))
 
 
