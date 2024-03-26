@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 
-from smacbenchmarking.database.result_processor import ResultProcessor
+from py_experimenter.result_processor import ResultProcessor
+
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
@@ -33,19 +34,17 @@ class DatabaseLogger(AbstractLogger):
 
         info["n_trials"] = n_trials
 
-        log = {"trials": info}
+        #info_2 = {
+        #    'trial_info__config': info['trial_info__config'],
+        #    'trial_info__instance': info['trial_info__instance'] if 'trial_info__instance' in info else None,
+        #    'trial_info__seed': info['trial_info__seed'] if 'trial_info__seed' in info else None,
+        #    'trial_info__budget': info['trial_info__budget'] if 'trial_info__budget' in info else None,
+        #    'trial_value__cost': info['trial_value__cost'],
+        #    'trial_value__time': info['trial_value__time'],
+        #    'trial_value__status': info['trial_value__status'],
+        #    'trial_value__starttime': info['trial_value__starttime'],
+        #    'trial_value__endtime': info['trial_value__endtime'],
+        #    'trial_value__additional_info': info['trial_value__additional_info'] if 'trial_value__additional_info' in info else None,
+        #}
 
-        info_2 = {
-            'trial_info__config': info['trial_info__config'],
-            'trial_info__instance': info['trial_info__instance'] if 'trial_info__instance' in info else None,
-            'trial_info__seed': info['trial_info__seed'] if 'trial_info__seed' in info else None,
-            'trial_info__budget': info['trial_info__budget'] if 'trial_info__budget' in info else None,
-            'trial_value__cost': info['trial_value__cost'],
-            'trial_value__time': info['trial_value__time'],
-            'trial_value__status': info['trial_value__status'],
-            'trial_value__starttime': info['trial_value__starttime'],
-            'trial_value__endtime': info['trial_value__endtime'],
-            'trial_value__additional_info': info['trial_value__additional_info'] if 'trial_value__additional_info' in info else None,
-        }
-
-        self.result_processor.process_logs({"trials": info_2})
+        self.result_processor.process_logs({"trials": info})
