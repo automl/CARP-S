@@ -4,6 +4,3 @@ optimizer_container_id: HEBO
 optimizer:
   _target_: smacbenchmarking.optimizers.hebo.HEBOOptimizer
   _partial_: true
-
-  num_trials: ${task.n_trials}
-  max_wallclock_time: 3600
