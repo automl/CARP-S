@@ -1,3 +1,14 @@
+"""Implementation of HEBO Optimizer.
+
+[2024-03-27]
+Note that running `python smacbenchmarking/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1 task.n_trials=25`
+raises following error:
+"linear_operator.utils.errors.NanError: cholesky_cpu: 4 of 4 elements of the torch.Size([2, 2]) tensor are NaN."
+
+This is related to this issue: https://github.com/huawei-noah/HEBO/issues/61.
+
+For non-dummy problems HEBO works fine.
+"""
 from __future__ import annotations
 
 import time
@@ -131,7 +142,7 @@ def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
 
 class HEBOOptimizer(Optimizer):
     def __init__(
-        self, problem: Problem, num_trials: int | None = None, max_wallclock_time: float | None = None
+        self, problem: Problem, n_trials: int | None = None, time_budget: float | None = None
     ) -> None:
         """
         Parameters
@@ -148,7 +159,7 @@ class HEBOOptimizer(Optimizer):
         ValueError
             If neither `num_trials` nor `max_wallclock_time` is specified.
         """
-        super().__init__(problem)
+        super().__init__(problem, n_trials, time_budget)
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace
@@ -158,13 +169,7 @@ class HEBOOptimizer(Optimizer):
         self.budget_type = getattr(self.problem, "budget_type", None)
         self.trial_counter = 0
 
-        self._optimizer: HEBO | None = None
-
-        if num_trials is None and max_wallclock_time is None:
-            raise ValueError("Specify either `num_trials` or `max_wallclock_time`!")
-        self.max_num_trials = num_trials
-        self.start_time = time.time()
-        self.max_wallclock_time = max_wallclock_time
+        self._solver: HEBO | None = None
 
         self.completed_experiments: OrderedDict[int, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
@@ -230,7 +235,7 @@ class HEBOOptimizer(Optimizer):
         TrialInfo
             Configuration, instance, seed, budget
         """
-        rec = self._optimizer.suggest(1)
+        rec = self._solver.suggest(1)
         trial_info = self.convert_to_trial(rec=rec)
         return trial_info
 
@@ -252,7 +257,9 @@ class HEBOOptimizer(Optimizer):
             cost = np.asarray([cost])
         else:
             cost = np.asarray(cost)
-        self._optimizer.observe(suggestion, np.asarray([cost]))
+
+        print(suggestion, np.asarray([cost]).shape, np.asarray([cost]))
+        self._solver.observe(suggestion, np.asarray([cost]))
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate target function.
@@ -273,7 +280,7 @@ class HEBOOptimizer(Optimizer):
         self.completed_experiments[self.trial_counter] = (trial_value, trial_info)
         return trial_value
 
-    def setup_optimizer(self) -> HEBO:
+    def _setup_optimizer(self) -> HEBO:
         """Setup Optimizer
 
         Returns
@@ -323,25 +330,3 @@ class HEBOOptimizer(Optimizer):
                 Y.append(cost)
 
         return X, Y
-
-    def run(self) -> None:
-        """Run HEBO on Problem.
-
-        If HEBO is not instantiated, instantiate.
-        """
-        if self._optimizer is None:
-            self._optimizer = self.setup_optimizer()
-        self.start_time = time.time()
-        while True:
-            if self.max_num_trials is not None:
-                if self.trial_counter >= self.max_num_trials:
-                    break
-            if self.max_wallclock_time is not None:
-                if time.time() - self.start_time > self.max_wallclock_time:
-                    break
-
-            trial_info = self.ask()
-            trial_value = self.evaluate(trial_info)
-            self.tell(trial_info=trial_info, trial_value=trial_value)
-
-        return None
