@@ -209,4 +209,4 @@ class SMAC3Optimizer(Optimizer):
         trial_value : TrialValue
             trial value (cost, time, ...)
         """
-        self.solver.tell(trial_info=trial_info, trial_value=trial_value)
+        self.solver.tell(info=trial_info, value=trial_value)
