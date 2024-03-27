@@ -25,13 +25,16 @@ export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
 # SMAC3-1.4
 ./compile_noctua2.sh ${CONT_OPT_PATH}/SMAC3-1.4.sif ${CONT_OPT_RECIPE_PATH}/smac14/smac14.recipe 
 
+# HEBO
+./compile_noctua2.sh ${CONT_OPT_PATH}/HEBO.sif ${CONT_OPT_RECIPE_PATH}/HEBO/HEBO.recipe 
+
 # --------------------------------------------------------------------------------------------
 # PROBLEMS
 # --------------------------------------------------------------------------------------------
 # Dummy Problem
-./compile_noctua2.sh ${CONT_BENCH_PATH}/DUMMY_Problem.sif ${CONT_BENCH_RECIPE_PATH}/container_recipes/DUMMY_Problem/DUMMY_Problem.recipe
+./compile_noctua2.sh ${CONT_BENCH_PATH}/DUMMY_Problem.sif ${CONT_BENCH_RECIPE_PATH}/DUMMY_Problem/DUMMY_Problem.recipe
 
 # HPOB
-./compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/hpob/hpob_container.recipe
+./compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/hpob/hpob_container.recipe ${CONT_BENCH_RECIPE_PATH}/hpob/download_data.sh
 
 
