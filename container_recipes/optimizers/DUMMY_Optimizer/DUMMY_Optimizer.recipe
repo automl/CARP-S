@@ -25,6 +25,10 @@ From: continuumio/anaconda3
    pip install ../benchmarking
    pip install -r /benchmarking/container_recipes/general/general_requirements_container_optimizer.txt
 
+   # log benchmarking version
+   BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+   echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
+
    # benchmark-specific commands go here
    pip install -r benchmarking/container_recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer_requirements.txt
 
