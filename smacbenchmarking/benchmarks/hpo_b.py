@@ -205,7 +205,10 @@ HPOB_SEARCH_SPACE_DIMS = {
 
 class HPOBProblem(Problem):
     def __init__(
-        self, dataset_id: tuple[str, int], model_id: tuple[str, int], surrogates_dir: Path = Path("saved-surrogates")
+        self, 
+        dataset_id: tuple[str, int], 
+        model_id: tuple[str, int], 
+        surrogates_dir: Path = Path("smacbenchmarking/benchmark_data/HPO-B/saved-surrogates")
     ):
         """
         Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset is not generated
@@ -225,6 +228,10 @@ class HPOBProblem(Problem):
 
         surrogates_dir = Path(surrogates_dir)
         surrogates_file = surrogates_dir / "summary-stats.json"
+        if not surrogates_file.is_file():
+            raise RuntimeError("It seems that the surrogate files have not been downloaded. Please run "\
+                               "'bash container_recipes/benchmarks/hpob/download_data.sh' to download the "\
+                               "surrogates.")
         with open(str(surrogates_file)) as f:
             self.surrogates_stats = json.load(f)
         self.surrogate_dir = surrogates_dir
