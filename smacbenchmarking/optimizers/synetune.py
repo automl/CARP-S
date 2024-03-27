@@ -245,7 +245,7 @@ class SynetuneOptimizer(Optimizer):
         )
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
             _optimizer_kwargs["resource_attr"] = self.problem.budget_type
-            _optimizer_kwargs["max_t"] = self.max_budget
+            _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit for synetune
 
         self.optimizer_kwargs.update(_optimizer_kwargs)
 
