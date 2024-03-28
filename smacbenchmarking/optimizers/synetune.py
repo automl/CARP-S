@@ -53,7 +53,7 @@ optimizers_dict = {
     "DEHB": DEHB,
 }
 
-mf_optimizer_dicts = {"with_mf": {"ASHA", "DEHB", "MOBSTER"}, "without_mf": {"BORE", "BayesianOptimization", "KDE"}}
+mf_optimizer_dicts = {"with_mf": {"ASHA", "DEHB", "MOBSTER", "BOHB"}, "without_mf": {"BORE", "BayesianOptimization", "KDE"}}
 
 
 def configspaceHP2syneTuneHP(hp: Hyperparameter) -> Callable:
