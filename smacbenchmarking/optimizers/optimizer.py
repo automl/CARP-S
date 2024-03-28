@@ -3,14 +3,16 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import time
 from typing import Any
+import numpy as np
 
-from ConfigSpace import ConfigurationSpace
+from ConfigSpace import ConfigurationSpace, Configuration
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 SearchSpace = Any
-
+Cost = np.ndarray | float
+Incumbent = tuple[Configuration, Cost] | list[tuple[Configuration, Cost]] | None
 
 class Optimizer(ABC):
     def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None = None) -> None:
@@ -72,10 +74,21 @@ class Optimizer(ABC):
         """
         raise NotImplementedError
     
-    def run(self) -> None:
+    @abstractmethod
+    def extract_incumbent(self) -> Incumbent:
+        """Extract the incumbent config and cost after run.
+
+        Returns
+        -------
+        Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
+            The incumbent configuration with associated cost.
+        """
+        raise NotImplementedError
+    
+    def run(self) -> Incumbent:
         if self.solver is None:
             self.setup_optimizer()
-        self._run()
+        return self._run()
 
     def continue_optimization(self, start_time) -> bool:
         cont = True
@@ -86,7 +99,7 @@ class Optimizer(ABC):
 
         return cont
 
-    def _run(self) -> None:
+    def _run(self) -> Incumbent:
         """Run Optimizer on Problem"""
         start_time = time.time()
         while self.continue_optimization(start_time=start_time):
@@ -94,6 +107,8 @@ class Optimizer(ABC):
             trial_value = self.problem.evaluate(trial_info=trial_info)
             self.tell(trial_info=trial_info, trial_value=trial_value)
             self.trial_counter += 1
+
+        return self.extract_incumbent()
     
     @abstractmethod
     def ask(self) -> TrialInfo:

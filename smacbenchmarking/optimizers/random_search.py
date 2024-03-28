@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ConfigSpace import Configuration, ConfigurationSpace
+import numpy as np
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
@@ -13,6 +14,7 @@ class RandomSearchOptimizer(Optimizer):
 
         self.configspace: ConfigurationSpace = self.problem.configspace
         self.n_trials: int = n_trials
+        self.history: list[tuple[Configuration,float]] = []
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
@@ -25,8 +27,16 @@ class RandomSearchOptimizer(Optimizer):
         return self.convert_to_trial(config=config)
     
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        pass
+        self.history.append((trial_info.config, trial_value.cost))
 
     def _setup_optimizer(self) -> None:
         return None
+    
+    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        configs = [h[0] for h in self.history]
+        costs = [h[1] for h in self.history]
+        idx = np.argmin(costs)
+        config = configs[idx]
+        cost = costs[idx]
+        return (config, cost)
 

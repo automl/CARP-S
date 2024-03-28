@@ -18,6 +18,7 @@ from ConfigSpace.hyperparameters import (
     OrdinalHyperparameter,
 )
 from syne_tune.backend.trial_status import Trial as SyneTrial
+from syne_tune.backend.trial_status import TrialResult, Status
 from syne_tune.config_space import (
     choice,
     lograndint,
@@ -223,6 +224,26 @@ class SynetuneOptimizer(Optimizer):
         experiment_result = {self.metric: cost}
         self.trial_counter += 1
         self._solver.on_trial_complete(trial=trial, result=experiment_result)
+        trial_result = trial.add_results(
+            metrics=experiment_result,
+            status=Status.completed,
+            training_end_time=datetime.datetime.now(),
+        )
+        self.completed_experiments[trial_result.trial_id] = trial_result
+
+    def best_trial(self, metric: str) -> TrialResult:
+        """
+        Return the best trial according to the provided metric
+        """
+        if self.solver.mode == "max":
+            sign = 1.0
+        else:
+            sign = -1.0
+
+        return max(
+            [value for key, value in self.completed_experiments.items()],
+            key=lambda trial: sign * trial.metrics[metric],
+        )
 
     def _setup_optimizer(self) -> SyneTrialScheduler:
         """
@@ -251,3 +272,9 @@ class SynetuneOptimizer(Optimizer):
 
         bscheduler = optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
         return bscheduler
+    
+    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        trial_result = self.best_trial(metric=self.metric)
+        config = self.convert_to_trial(trial=trial_result).config
+        cost = trial_result.metrics[self.metric]
+        return (config, cost)

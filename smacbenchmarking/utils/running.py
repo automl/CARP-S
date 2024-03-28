@@ -92,7 +92,8 @@ def optimize(cfg: DictConfig) -> None:
     inspect(optimizer)
 
     try:
-        optimizer.run()
+        inc_tuple = optimizer.run()
+        printr("Solution found: ", inc_tuple)
     except NotSupportedError:
         print("Not supported. Skipping.")
     except Exception as e:

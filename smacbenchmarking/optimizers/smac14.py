@@ -194,4 +194,7 @@ class SMAC314Optimizer(Optimizer):
         """Run SMAC on Problem.
         """
         incumbent = self.solver.optimize()  # noqa: F841
-        return None
+        return self.extract_incumbent()
+    
+    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        return (self.solver.solver.incumbent, self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))

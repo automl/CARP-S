@@ -11,7 +11,6 @@ For non-dummy problems HEBO works fine.
 """
 from __future__ import annotations
 
-import time
 from collections import abc, OrderedDict
 
 import pandas as pd
@@ -258,7 +257,6 @@ class HEBOOptimizer(Optimizer):
         else:
             cost = np.asarray(cost)
 
-        print(suggestion, np.asarray([cost]).shape, np.asarray([cost]))
         self._solver.observe(suggestion, np.asarray([cost]))
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
@@ -330,3 +328,11 @@ class HEBOOptimizer(Optimizer):
                 Y.append(cost)
 
         return X, Y
+    
+    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        best_x = self.solver.best_x
+        best_y = self.solver.best_y
+        config = HEBOcfg2ConfigSpacecfg(
+            hebo_suggestion=best_x, design_space=self.hebo_configspace, config_space=self.problem.configspace
+        )
+        return (config, best_y)
