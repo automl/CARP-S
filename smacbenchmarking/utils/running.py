@@ -8,7 +8,7 @@ from rich import print as printr
 
 from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
 from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.file_logger import FileLogger, dump_logs
+from smacbenchmarking.loggers.file_logger import FileLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.exceptions import NotSupportedError
 
@@ -68,6 +68,7 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
         for wrapper in cfg.optimizer_wrappers:
             optimizer = wrapper(optimizer)
     return optimizer
+
 
 def optimize(cfg: DictConfig) -> None:
     """Run optimizer on problem.
