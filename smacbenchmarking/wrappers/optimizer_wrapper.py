@@ -40,11 +40,33 @@ class OptimizerWrapper(Optimizer):
         return self.optimizer.unwrapped
     
     def ask(self) -> TrialInfo:
-        # TODO Copy docstring
+        """Ask the optimizer for a new trial to evaluate.
+
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
+
+        Returns
+        -------
+        TrialInfo
+            trial info (config, seed, instance, budget)
+        """
         return self.optimizer.ask()
     
     def tell(self, trial_value: TrialValue) -> None:
-        # TODO Copy docstring
+        """Tell the optimizer a new trial.
+
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            trial info (config, seed, instance, budget)
+        trial_value : TrialValue
+            trial value (cost, time, ...)
+        """
         self.optimizer.tell(trial_value=trial_value)
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
