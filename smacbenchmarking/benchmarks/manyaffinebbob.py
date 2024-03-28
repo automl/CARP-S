@@ -33,7 +33,8 @@ scale_factors = [
 
 
 class ManyAffine:
-    def __init__(self, weights, instances, opt_loc=1, dim=5, sf_type="min_max"):
+    def __init__(self, weights, instances, opt_loc=1, dim=5, sf_type="min_max", budget_type: str | None = None):
+        super().__init__(budget_type=budget_type)
         self.weights = weights / np.sum(weights)
         self.fcts = [ioh.get_problem(fid, int(iid), dim) for fid, iid in zip(range(1, 25), instances)]
         self.opts = [f.optimum.y for f in self.fcts]

@@ -208,7 +208,8 @@ class HPOBProblem(Problem):
         self, 
         dataset_id: tuple[str, int], 
         model_id: tuple[str, int], 
-        surrogates_dir: Path = Path("smacbenchmarking/benchmark_data/HPO-B/saved-surrogates")
+        surrogates_dir: Path = Path("smacbenchmarking/benchmark_data/HPO-B/saved-surrogates"),
+        budget_type: str | None = None,
     ):
         """
         Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset is not generated
@@ -222,7 +223,7 @@ class HPOBProblem(Problem):
             surrogates_dir: Path
                 path to directory with surrogates models.
         """
-        super().__init__()
+        super().__init__(budget_type=budget_type)
         self.model_id = str(model_id)
         self.dataset_id = str(dataset_id)
 
