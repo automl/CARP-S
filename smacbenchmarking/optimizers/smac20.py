@@ -132,7 +132,7 @@ class SMAC3Optimizer(Optimizer):
         scenario_kwargs = dict(
             configspace=self.configspace,
             # output_directory=Path(self.config.hydra.sweep.dir)
-            # / "smac3_output",  # TODO document that output directory is automatically set
+            # / "smac3_output",  # output directory is automatically set via config file
         )
         # We always expect scenario kwargs from the user
         _scenario_kwargs = OmegaConf.to_container(self.smac_cfg.scenario, resolve=True)
@@ -162,7 +162,6 @@ class SMAC3Optimizer(Optimizer):
                 smac_kwargs["acquisition_maximizer"] = smac_kwargs["acquisition_maximizer"](
                     configspace=self.configspace, acquisition_function=smac_kwargs["acquisition_function"]
                 )
-                # TODO Fix this custom init
                 if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(
                     smac_kwargs["acquisition_maximizer"].selector, "expl2callback"
                 ):
