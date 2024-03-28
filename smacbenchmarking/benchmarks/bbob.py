@@ -15,8 +15,8 @@ register_many_affine_functions()
 
 
 class BBOBProblem(Problem):
-    def __init__(self, fid: int, instance: int, dimension: int, seed: int):
-        super().__init__()
+    def __init__(self, fid: int, instance: int, dimension: int, seed: int, budget_type: str | None = None):
+        super().__init__(budget_type=budget_type)
 
         self._configspace, self._problem = get_bbob_problem(fid=fid, instance=instance, dimension=dimension, seed=seed)
 

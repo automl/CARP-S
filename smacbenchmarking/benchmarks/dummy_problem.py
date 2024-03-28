@@ -12,6 +12,7 @@ class DummyProblem(Problem):
                 "a": Float("a", bounds=(-1, 1)),
             }
         )
+        super().__init__(**kwargs)
 
     @property
     def configspace(self) -> ConfigurationSpace:

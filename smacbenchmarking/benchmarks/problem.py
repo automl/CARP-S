@@ -10,7 +10,8 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 class Problem(ABC):
     """Problem to optimize."""
 
-    def __init__(self) -> None:
+    def __init__(self, budget_type: str | None = None) -> None:
+        self.budget_type = budget_type
         super().__init__()
 
     @property
