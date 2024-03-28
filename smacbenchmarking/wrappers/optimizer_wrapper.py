@@ -29,7 +29,7 @@ class OptimizerWrapper(Optimizer):
         if name in ["optimizer"]:
             return object.__getattribute__(self, name)
         else:
-            return getattr(self.env, name)
+            return getattr(self.optimizer, name)
 
     @property
     def unwrapped(self) -> Optimizer:
