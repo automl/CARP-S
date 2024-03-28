@@ -26,10 +26,10 @@ class OptimizerWrapper(Optimizer):
             Value of given name
 
         """
-        if name in ["optimizer"]:
+        if name in ["optimizer", "unwrapped", "ask", "tell", "convert_configspace", "convert_to_trial", "run"]:
             return object.__getattribute__(self, name)
         else:
-            return getattr(self.env, name)
+            return getattr(self.optimizer, name)
 
     @property
     def unwrapped(self) -> Optimizer:

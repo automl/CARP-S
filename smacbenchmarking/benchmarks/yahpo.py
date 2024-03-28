@@ -29,7 +29,7 @@ class YahpoProblem(Problem):
         budget_type : Optional[str] Budget type for the multifidelity setting. Should be None for the blackbox setting.
         lower_is_better: bool Whether the metric is to be minimized or maximized.
         """
-        super().__init__(budget_type=budget_type)
+        super().__init__()
 
         assert bench in list_scenarios(), f"The scenario {bench} you choose is not available."
 
@@ -45,6 +45,7 @@ class YahpoProblem(Problem):
         self.fidelity_space = self._problem.get_fidelity_space()
         self.fidelity_dims = list(self._problem.get_fidelity_space()._hyperparameters.keys())
 
+        self.budget_type = budget_type
         self.lower_is_better = lower_is_better
 
         assert self.budget_type in self.fidelity_dims + [None], (
