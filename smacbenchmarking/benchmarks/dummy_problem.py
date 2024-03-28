@@ -5,7 +5,8 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class DummyProblem(Problem):
-    def __init__(self, return_value=0, **kwargs):
+    def __init__(self, return_value=0, budget_type: str | None = "dummy"):
+        self.budget_type = budget_type
         self._return_value = return_value
         self._configspace = ConfigurationSpace(
             space={
