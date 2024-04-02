@@ -1,6 +1,17 @@
 #!/bin/bash
+CONTAINER_PATH=$1
+CONTAINER_RECIPE_PATH=$2
+PREBUILD_SCRIPT=$3
+
 module load tools Apptainer
 TMP_BINDPATH=$SINGULARITY_BINDPATH
 SINGULARITY_BINDPATH=
-apptainer build $1 $2
+if [ -z "$PREBUILD_SCRIPT" ]
+then
+      echo "No precompile step"
+else
+      echo "Precompilation: $PREBUILD_SCRIPT"
+      bash $PREBUILD_SCRIPT
+fi
+apptainer build $CONTAINER_PATH $CONTAINER_RECIPE_PATH
 SINGULARITY_BINDPATH=$TMP_BINDPATH

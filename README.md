@@ -153,6 +153,9 @@ The following example illustrates the principle based on a `DummyOptimizer` and 
 💡 You can check the location of the log files of your singularity instances with `singularity instance list -l`.
 ⚠ When creating recipes, take care that the paths are correct. In particular, check relative vs. absolute paths (e.g. benchmarking/... ❌ vs /benchmarking/... ✔).
 
+💡 You can check the creation time and benchmarking version of a container with `singularity inspect <container>`. 
+   To check the versions of the installed packages, you can use `singularity exec <container> pip freeze`.
+
 #### Noctua2 Setup Before Compilation
 
 Include the following lines in your `~/.bashrc`:
