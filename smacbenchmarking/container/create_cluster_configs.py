@@ -3,10 +3,14 @@ import logging
 import os
 import sys
 from configparser import ConfigParser
+import hashlib
+import logging
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from py_experimenter.experimenter import PyExperimenter
+
+logger = logging.getLogger("create experiments")
 
 
 @hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
@@ -39,8 +43,23 @@ def main(cfg: DictConfig) -> None:
 
     cfg_json = OmegaConf.to_container(cfg, resolve=True)
 
+    # This value will always be unique so it 
+    # disables duplicate checking when adding entries to the database.
+    # Py_experimenter will add a creation date so the information
+    # is not lost.
+    if "timestamp" in cfg_json:
+        del cfg_json["timestamp"]
+
+    # Compute hash to efficiently compare configs.
+    # In MySQL json objects are reordered to improve performance.
+    # This means that there is no guarantee of the json strings
+    # to be equal.
+    cfg_str = json.dumps(cfg_json)
+    cfg_hash = hashlib.sha256(cfg_str.encode()).hexdigest()
+
     rows = [{
-        "config": json.dumps(cfg_json),
+        "config": cfg_str,
+        "config_hash": cfg_hash,
         "benchmark_id": cfg_dict["benchmark_id"],
         "problem_id": cfg_dict["problem_id"],
         "optimizer_id": cfg_dict["optimizer_id"],
@@ -49,9 +68,20 @@ def main(cfg: DictConfig) -> None:
         "task__n_trials": cfg_dict["task"]["n_trials"],
     }]
 
-    experimenter.fill_table_with_rows(rows)
+    column_names = list(experimenter.db_connector.database_configuration.keyfields.keys())
+    existing_rows = experimenter.db_connector._get_existing_rows(column_names)
 
-    # TODO: Return array info
+    # Check if experiment exists
+    # Compare by hash only
+    exists = False
+    for e in existing_rows:
+        if e["config_hash"] == cfg_hash:
+            exists = True
+            logger.info("Experiment not added to the database because config hash already exists!")
+
+    if not exists:
+        experimenter.fill_table_with_rows(rows)
+
     return None
 
 
