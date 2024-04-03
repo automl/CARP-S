@@ -1,14 +1,16 @@
 # @package _global_
 benchmark_id: YAHPO
-problem_id: yahpo/so/rbv2_super/15/None
+problem_id: yahpo/so/lcbench/189873/None
 problem:
   _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
-  bench: rbv2_super
-  instance: '15'
+  bench: lcbench
+  instance: '189873'
   budget_type: null
-  metric: acc
+  metric:
+  - val_accuracy
+  - val_cross_entropy
 task:
-  n_trials: 267
+  n_trials: 126
   n_objectives: 1
   min_budget: null
   max_budget: null

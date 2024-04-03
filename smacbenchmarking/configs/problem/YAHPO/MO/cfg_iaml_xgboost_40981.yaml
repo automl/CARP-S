@@ -1,14 +1,18 @@
 # @package _global_
 benchmark_id: YAHPO
-problem_id: yahpo/so/rbv2_super/15/None
+problem_id: yahpo/so/iaml_xgboost/40981/None
 problem:
   _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
-  bench: rbv2_super
-  instance: '15'
+  bench: iaml_xgboost
+  instance: '40981'
   budget_type: null
-  metric: acc
+  metric:
+  - mmce
+  - nf
+  - ias
+  - rammodel
 task:
-  n_trials: 267
+  n_trials: 165
   n_objectives: 1
   min_budget: null
   max_budget: null

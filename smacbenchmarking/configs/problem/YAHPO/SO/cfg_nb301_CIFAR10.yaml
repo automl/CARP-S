@@ -6,7 +6,6 @@ problem:
   bench: nb301
   instance: CIFAR10
   budget_type: null
-  lower_is_better: false
   metric: val_accuracy
 task:
   n_trials: 250
