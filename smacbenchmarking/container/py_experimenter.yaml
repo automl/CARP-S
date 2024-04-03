@@ -2,7 +2,7 @@ PY_EXPERIMENTER:
   n_jobs: 1
 
   Database:
-    use_ssh_tunnel: true
+    use_ssh_tunnel: false
     provider: mysql
     database: smacbenchmarking
     table:
@@ -10,6 +10,8 @@ PY_EXPERIMENTER:
       keyfields:
         config:
           type: JSON
+        config_hash:
+          type: VARCHAR(64)
         benchmark_id:
           type: VARCHAR(50)
         problem_id:
