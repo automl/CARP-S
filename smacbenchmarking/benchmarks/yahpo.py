@@ -77,7 +77,7 @@ class YahpoProblem(Problem):
     # FIXME: see caro's message:
     #  the idea is somehow to overwrite the optimizer/multifidelity attributes for
     #  budget_variable and min_budget, max_budget with a FidelitiySpace class without interpolation
-    #  that is based on the problem instance / config file. Similarily find out how to deal with
+    #  that is based on the problem instance / config file. Similarly find out how to deal with
     #  the metrics.
     # def fidelity_space(self):
     #     return FidelitySpace(self.fidelity_dims)

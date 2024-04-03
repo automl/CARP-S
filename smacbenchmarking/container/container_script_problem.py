@@ -18,7 +18,7 @@ problem = make_problem(cfg=cfg)
 # TODO Check that problem container and problem match
 
 app = Flask(__name__)
-
+app.run()
 
 @app.route("/configspace", methods=["GET"])
 def _request_configspace() -> str:
