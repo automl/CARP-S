@@ -9,6 +9,7 @@ import logging
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from py_experimenter.experimenter import PyExperimenter
+from py_experimenter.exceptions import DatabaseConnectionError
 
 logger = logging.getLogger("create experiments")
 
@@ -65,19 +66,28 @@ def main(cfg: DictConfig) -> None:
         "optimizer_id": cfg_dict["optimizer_id"],
         "optimizer_container_id": cfg_dict["optimizer_container_id"],
         "seed": cfg_dict["seed"],
-        "task__n_trials": cfg_dict["task"]["n_trials"],
+        "n_trials": cfg_dict["task"]["n_trials"],
+        "time_budget": cfg_dict["task"]["time_budget"],
     }]
 
     column_names = list(experimenter.db_connector.database_configuration.keyfields.keys())
-    existing_rows = experimenter.db_connector._get_existing_rows(column_names)
 
-    # Check if experiment exists
-    # Compare by hash only
     exists = False
-    for e in existing_rows:
-        if e["config_hash"] == cfg_hash:
-            exists = True
-            logger.info("Experiment not added to the database because config hash already exists!")
+
+    try:
+        existing_rows = experimenter.db_connector._get_existing_rows(column_names)
+
+        # Check if experiment exists
+        # Compare by hash only
+        for e in existing_rows:
+            if e["config_hash"] == cfg_hash:
+                exists = True
+                logger.info("Experiment not added to the database because config hash already exists!")
+    except DatabaseConnectionError as e:
+        if "1146" in e.args[0]:
+            logger.info("Database empty, will fill.:)")
+        else:
+            raise e
 
     if not exists:
         experimenter.fill_table_with_rows(rows)
