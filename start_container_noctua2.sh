@@ -5,6 +5,19 @@ module load system singularity
 # the BENCHMARKING_JOB_ID has to be set to a unique id for each run
 export BENCHMARKING_JOB_ID=$SLURM_JOB_ID
 
+# for script cleanup
+cleanup_files() {
+  echo "Cleaning up temporary files and containers"
+  rm "${BENCHMARKING_JOB_ID}_hydra_config.yaml"
+  rm "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt"
+  rm "${BENCHMARKING_JOB_ID}_problem_container.txt"
+  rm "${BENCHMARKING_JOB_ID}_optimizer_container.txt"
+
+  singularity instance stop problem
+}
+
+trap "cleanup_files" EXIT
+
 # Start the runner container - gets the hydra config and writes environment vars
 echo "Starting runner container"
 singularity run containers/general/runner.sif
@@ -46,12 +59,3 @@ echo "Starting optimizer container"
 singularity exec "containers/optimizers/${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_script_optimizer.py
 
 echo "Run Finished"
-
-# Remove temporary files
-rm "${BENCHMARKING_JOB_ID}_hydra_config.yaml"
-rm "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt"
-rm "${BENCHMARKING_JOB_ID}_problem_container.txt"
-rm "${BENCHMARKING_JOB_ID}_optimizer_container.txt"
-
-# Stop the problem container
-singularity instance stop problem
