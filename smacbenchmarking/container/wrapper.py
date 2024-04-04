@@ -3,12 +3,16 @@ from ConfigSpace import ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class ContainerizedProblemClient(Problem):
-    def __init__(self):
-        super().__init__()
+    def __init__(
+            self,
+            loggers: list[AbstractLogger] | None = None
+    ):
+        super().__init__(loggers=loggers)
         self._configspace = None
 
     @property
