@@ -35,7 +35,7 @@ class BBOBProblem(Problem):
         """
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters

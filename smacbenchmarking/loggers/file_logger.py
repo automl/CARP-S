@@ -9,6 +9,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
+from smacbenchmarking.optimizers.optimizer import Incumbent
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
@@ -53,19 +54,13 @@ class FileLogger(AbstractLogger):
         """
         super().__init__()
 
-        # self.logger = logging.getLogger("filelogger")
-        # formatter = logging.Formatter('%(message)s')
-        # # format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-        # fh = logging.FileHandler('trial_logs.jsonl')
-        # fh.setLevel(logging.DEBUG)
-        # fh.setFormatter(formatter)
-        # self.logger.addHandler(fh)
-
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
 
         Parameters
         ----------
+        n_trials : int
+            Number of trials that have been run so far.
         trial_info : TrialInfo
             Trial info.
         trial_value : TrialValue
@@ -77,3 +72,9 @@ class FileLogger(AbstractLogger):
         logging.info(info_str)
 
         dump_logs(log_data=info, filename="trial_logs.jsonl")
+
+    def log_incumbent(self, incumbent: Incumbent) -> None:
+        pass
+
+    def log_arbitrary(self, data: dict, entity: str) -> None:
+        pass

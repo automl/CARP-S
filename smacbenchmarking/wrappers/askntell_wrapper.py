@@ -4,6 +4,7 @@ import time
 
 from smacbenchmarking.wrappers.optimizer_wrapper import OptimizerWrapper
 
+
 class AskAndTellWrapper(OptimizerWrapper):
     def run(self) -> None:
         """Run Ask and Tell Optimization

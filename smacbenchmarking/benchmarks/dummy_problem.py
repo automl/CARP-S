@@ -20,6 +20,6 @@ class DummyProblem(Problem):
     def configspace(self) -> ConfigurationSpace:
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         start_time = time.time()
         return TrialValue(cost=self._return_value, time=1, starttime=start_time, endtime=start_time + 1,virtual_time=1)

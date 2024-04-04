@@ -20,7 +20,7 @@ class ContainerizedProblemClient(Problem):
 
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         # ask server about evaluation
         response = requests.post("http://localhost:5000/evaluate", json=trial_info.to_json())
         return TrialValue.from_json(response.json())

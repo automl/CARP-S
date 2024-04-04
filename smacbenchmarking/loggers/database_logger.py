@@ -6,10 +6,12 @@ from dataclasses import asdict
 from py_experimenter.result_processor import ResultProcessor
 
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
+from smacbenchmarking.optimizers.optimizer import Incumbent
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class DatabaseLogger(AbstractLogger):
+
     def __init__(self, result_processor: ResultProcessor) -> None:
         super().__init__()
         self.result_processor = result_processor
@@ -35,3 +37,10 @@ class DatabaseLogger(AbstractLogger):
         info["n_trials"] = n_trials
 
         self.result_processor.process_logs({"trials": info})
+
+    def log_incumbent(self, incumbent: Incumbent) -> None:
+        pass
+
+    def log_arbitrary(self, data: dict, entity: str) -> None:
+        pass
+

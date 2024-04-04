@@ -8,6 +8,7 @@ import numpy as np
 from ConfigSpace import ConfigurationSpace, Configuration
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 SearchSpace = Any
@@ -16,22 +17,30 @@ Incumbent = tuple[Configuration, Cost] | list[tuple[Configuration, Cost]] | None
 
 
 class Optimizer(ABC):
-    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None = None) -> None:
+    def __init__(
+            self,
+            problem: Problem,
+            n_trials: int | None,
+            time_budget: float | None = None,
+            loggers: list[AbstractLogger] | None = None
+    ) -> None:
+        super().__init__()
         self.problem = problem
         if n_trials is None and time_budget is None:
             raise ValueError("Please specify either `n_trials` or `time_budget` "
                              "as the optimization budget.")
         self.n_trials: int | None = n_trials
         self.time_budget: float | None = time_budget
+        self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
+
         self.virtual_time_elapsed_seconds: float | None = 0.0
         self.trial_counter: int = 0
 
-        super().__init__()
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
 
         self._solver: Any = None
-        self._last_incumbent: (TrialInfo, TrialValue) | None = None
+        self._last_incumbent: tuple[TrialInfo, TrialValue] | None = None
 
     @property
     def solver(self) -> Any:
@@ -118,7 +127,8 @@ class Optimizer(ABC):
 
             if self.current_incumbent != self._last_incumbent:
                 self._last_incumbent = self.current_incumbent
-                self.problem.log_incumbent(self.current_incumbent)
+                for logger in self.loggers:
+                    logger.log_incumbent(self.current_incumbent)
 
         return self.current_incumbent
 

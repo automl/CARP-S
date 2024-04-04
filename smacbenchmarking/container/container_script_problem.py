@@ -20,6 +20,7 @@ problem = make_problem(cfg=cfg)
 app = Flask(__name__)
 app.run()
 
+
 @app.route("/configspace", methods=["GET"])
 def _request_configspace() -> str:
     return json.dumps(cs_json.write(problem.configspace))

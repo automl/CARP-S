@@ -117,7 +117,7 @@ class YahpoProblem(Problem):
     # def fidelity_space(self):
     #     return FidelitySpace(self.fidelity_dims)
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters

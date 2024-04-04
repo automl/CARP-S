@@ -15,7 +15,7 @@ class LoggingProblemWrapper(Problem):
         self.loggers = list()
         self.n_calls: int = 0
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters
@@ -35,7 +35,7 @@ class LoggingProblemWrapper(Problem):
                 - additional_info : dict[str, Any], defaults to {}
         """
         self.n_calls += 1
-        trial_value = self.problem.evaluate(trial_info)
+        trial_value = self.problem._evaluate(trial_info)
         for logger in self.loggers:
             logger.log_trial(n_trials=self.n_calls - 1, trial_info=trial_info, trial_value=trial_value)
         return trial_value
