@@ -45,7 +45,7 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
     "BayesianOptimization": BayesianOptimization,
-    "ASHA": ASHA,  # TODO Add ASHA and DEHB options back in
+    "ASHA": ASHA,
     "MOBSTER": MOBSTER,
     "BOHB": BOHB,
     "KDE": KDE,

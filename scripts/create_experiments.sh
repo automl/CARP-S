@@ -6,6 +6,13 @@ SMAC20='+optimizer/smac20=blackbox'
 SMAC14='+optimizer/smac14=blackbox'
 RANDOMSEARCH='+optimizer/randomsearch=config'
 HEBO='+optimizer/hebo=config'
+STBO='+optimizer/synetune=BO'
+
+# MF
+SMAC20MF='+optimizer/smac20=multifidelity'
+STBOHB='+optimizer/synetune=BOHB'
+STDEHB='+optimizer/synetune=DEHB'
+STASHA='+optimizer/synetune=ASHA'
 
 ##############################################
 # Blackbox 
