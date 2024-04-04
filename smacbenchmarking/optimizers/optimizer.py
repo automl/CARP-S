@@ -32,6 +32,7 @@ class Optimizer(ABC):
                              "as the optimization budget.")
         self.n_trials: int | None = n_trials
         self.time_budget: float | None = time_budget
+        self.n_workers: int = n_workers
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
         self.virtual_time_elapsed_seconds: float | None = 0.0
