@@ -4,7 +4,7 @@ from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 
-from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
+from smacbenchmarking.wrappers.loggingproblemwrapper import LoggingProblemWrapper
 from smacbenchmarking.container.wrapper import ContainerizedProblemClient
 from smacbenchmarking.loggers.database_logger import DatabaseLogger
 from smacbenchmarking.loggers.file_logger import FileLogger

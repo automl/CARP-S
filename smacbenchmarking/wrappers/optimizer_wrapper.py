@@ -7,6 +7,7 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 SearchSpace = Any
 
+
 class OptimizerWrapper(Optimizer):
     def __init__(self, optimizer: Optimizer) -> None:
         self.optimizer = optimizer
@@ -35,10 +36,11 @@ class OptimizerWrapper(Optimizer):
     def unwrapped(self) -> Optimizer:
         """Returns the base optimizer of the wrapper.
 
-        This will be the bare :class:`smacbenchmarking.optimizers.optimizer.Optimizer`, underneath all layers of wrappers.
+        This will be the bare :class:`smacbenchmarking.optimizers.optimizer.Optimizer`, underneath all layers of
+        wrappers.
         """
         return self.optimizer.unwrapped
-    
+
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
 
@@ -52,8 +54,8 @@ class OptimizerWrapper(Optimizer):
             trial info (config, seed, instance, budget)
         """
         return self.optimizer.ask()
-    
-    def tell(self, trial_value: TrialValue) -> None:
+
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
 
         If the optimizer does not support ask and tell,
@@ -83,7 +85,7 @@ class OptimizerWrapper(Optimizer):
             Optimizer's search space.
         """
         return self.optimizer.convert_configspace(configspace)
-    
+
     def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
         """Convert proposal by optimizer to TrialInfo.
 
@@ -95,7 +97,7 @@ class OptimizerWrapper(Optimizer):
             Trial info containing configuration, budget, seed, instance.
         """
         return self.optimizer.convert_to_trial(*args, **kwargs)
-    
+
     def run(self) -> None:
         """Run Optimizer on Problem"""
         return self.optimizer.run()

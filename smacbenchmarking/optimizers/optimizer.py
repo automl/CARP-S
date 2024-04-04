@@ -31,6 +31,7 @@ class Optimizer(ABC):
         self.fidelity_enabled = False
 
         self._solver: Any = None
+        self._last_incumbent: (TrialInfo, TrialValue) | None = None
 
     @property
     def solver(self) -> Any:
@@ -77,8 +78,9 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def extract_incumbent(self) -> Incumbent:
-        """Extract the incumbent config and cost after run.
+    @property
+    def current_incumbent(self) -> Incumbent:
+        """Extract the incumbent config and cost. May only be available after a complete run.
 
         Returns
         -------
@@ -114,7 +116,11 @@ class Optimizer(ABC):
             self.tell(trial_info=trial_info, trial_value=trial_value)
             self.trial_counter += 1
 
-        return self.extract_incumbent()
+            if self.current_incumbent != self._last_incumbent:
+                self._last_incumbent = self.current_incumbent
+                self.problem.log_incumbent(self.current_incumbent)
+
+        return self.current_incumbent
 
     @abstractmethod
     def ask(self) -> TrialInfo:
