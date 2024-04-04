@@ -9,14 +9,22 @@ from ConfigSpace import ConfigurationSpace, Float
 
 from smacbenchmarking.benchmarks.manyaffinebbob import register_many_affine_functions
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 register_many_affine_functions()
 
 
 class BBOBProblem(Problem):
-    def __init__(self, fid: int, instance: int, dimension: int, seed: int):
-        super().__init__()
+    def __init__(
+            self,
+            fid: int,
+            instance: int,
+            dimension: int,
+            seed: int,
+            loggers: list[AbstractLogger] | None = None
+    ):
+        super().__init__(loggers)
 
         self._configspace, self._problem = get_bbob_problem(fid=fid, instance=instance, dimension=dimension, seed=seed)
 

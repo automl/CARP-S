@@ -77,4 +77,4 @@ class FileLogger(AbstractLogger):
         pass
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
-        pass
+        dump_logs(log_data=data, filename=f"{entity}.jsonl")

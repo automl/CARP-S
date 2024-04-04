@@ -4,13 +4,21 @@ from ConfigSpace import Configuration, ConfigurationSpace
 import numpy as np
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class RandomSearchOptimizer(Optimizer):
-    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None) -> None:
-        super().__init__(problem, n_trials, time_budget)
+    def __init__(
+            self,
+            problem: Problem,
+            n_trials: int | None,
+            time_budget: float | None,
+            n_workers: int = 1,
+            loggers: list[AbstractLogger] | None = None,
+    ) -> None:
+        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
 
         self.configspace: ConfigurationSpace = self.problem.configspace
         self.n_trials: int = n_trials

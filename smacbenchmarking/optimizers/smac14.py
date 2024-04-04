@@ -8,6 +8,7 @@ from omegaconf import DictConfig, OmegaConf
 from smac.facade.smac_ac_facade import SMAC4AC
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
@@ -19,8 +20,16 @@ class NotSupportedError(Exception):
 
 
 class SMAC314Optimizer(Optimizer):
-    def __init__(self, problem: Problem, smac_cfg: DictConfig, n_trials: int | None, time_budget: float | None) -> None:
-        super().__init__(problem, n_trials, time_budget)
+    def __init__(
+            self,
+            problem: Problem,
+            smac_cfg: DictConfig,
+            n_trials: int | None,
+            time_budget: float | None,
+            n_workers: int = 1,
+            loggers: list[AbstractLogger] | None = None,
+    ) -> None:
+        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg

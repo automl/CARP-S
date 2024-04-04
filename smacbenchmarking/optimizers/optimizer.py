@@ -22,6 +22,7 @@ class Optimizer(ABC):
             problem: Problem,
             n_trials: int | None,
             time_budget: float | None = None,
+            n_workers: int = 1,
             loggers: list[AbstractLogger] | None = None
     ) -> None:
         super().__init__()

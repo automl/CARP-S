@@ -39,6 +39,7 @@ from syne_tune.optimizer.baselines import (
 from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
@@ -84,10 +85,12 @@ class SynetuneOptimizer(Optimizer):
         optimizer_name: "str",
         n_trials: int | None, 
         time_budget: float | None = None,
+        n_workers: int = 1,
         max_budget: float | None = None,
-        optimizer_kwargs: dict | None = None
+        optimizer_kwargs: dict | None = None,
+        loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        super().__init__(problem, n_trials, time_budget)
+        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
         self.fidelity_enabled = False
         self.max_budget = max_budget
 

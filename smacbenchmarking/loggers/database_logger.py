@@ -24,14 +24,14 @@ class DatabaseLogger(AbstractLogger):
         info["trial_value"]["cost"] = json.dumps({'cost': json.dumps(info["trial_value"]["cost"])})
         keys = ["trial_info", "trial_value"]
         for key in keys:
-            D = info.pop(key)
-            for k, v in D.items():
+            d = info.pop(key)
+            for k, v in d.items():
                 if v is not None:
                     k_new = f"{key}__{k}"
                     info[k_new] = v
                 else:
                     # If v is None, we omit it from the dict.
-                    # Missing keys will automatically filled with NULL in MySQL.
+                    # Missing keys will automatically be filled with NULL in MySQL.
                     pass
 
         info["n_trials"] = n_trials
@@ -42,5 +42,4 @@ class DatabaseLogger(AbstractLogger):
         pass
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
-        pass
-
+        self.result_processor.process_logs({entity: data})

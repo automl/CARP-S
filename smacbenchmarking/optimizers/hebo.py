@@ -28,6 +28,7 @@ from ConfigSpace.hyperparameters import (
 from hebo.optimizers.hebo import HEBO
 from hebo.design_space.design_space import DesignSpace
 
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 from smacbenchmarking.benchmarks.problem import Problem
@@ -141,7 +142,12 @@ def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
 
 class HEBOOptimizer(Optimizer):
     def __init__(
-        self, problem: Problem, n_trials: int | None = None, time_budget: float | None = None
+        self,
+        problem: Problem,
+        n_trials: int | None = None,
+        time_budget: float | None = None,
+        n_workers: int = 1,
+        loggers: list[AbstractLogger] | None = None
     ) -> None:
         """
         Parameters
@@ -158,7 +164,7 @@ class HEBOOptimizer(Optimizer):
         ValueError
             If neither `num_trials` nor `max_wallclock_time` is specified.
         """
-        super().__init__(problem, n_trials, time_budget)
+        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace
