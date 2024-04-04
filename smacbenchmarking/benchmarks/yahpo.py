@@ -10,6 +10,7 @@ from ConfigSpace import ConfigurationSpace
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 LOWER_IS_BETTER = {
@@ -17,7 +18,7 @@ LOWER_IS_BETTER = {
     "f1": False,
     "auc": False,
     "logloss": True,
-    "nf": True, # number of features used
+    "nf": True,  # number of features used
     "ias": True,  # interaction strength of features  # TODO check
     "rammodel": True,  # model size
     "val_accuracy": False,
@@ -31,6 +32,7 @@ LOWER_IS_BETTER = {
     "mec": True,  # main effect complexity of features
 }
 
+
 def maybe_invert(value: float, target: str) -> float:
     sign = 1
     if not LOWER_IS_BETTER[target]:
@@ -42,8 +44,14 @@ class YahpoProblem(Problem):
     """Yahpo Problem."""
 
     def __init__(
-        self, bench: str, instance: str, metric: str | list[str], budget_type: Optional[str] = None, lower_is_better: bool = True,
-        yahpo_data_path: str = "data/yahpo_data"
+            self,
+            bench: str,
+            instance: str,
+            metric: str | list[str],
+            budget_type: Optional[str] = None,
+            lower_is_better: bool = True,
+            yahpo_data_path: str = "data/yahpo_data",
+            loggers: list[AbstractLogger] | None = None,
     ):
         """Initialize a Yahpo problem.
 
@@ -62,7 +70,7 @@ class YahpoProblem(Problem):
         yahpo_data_path : str
             Path to yahpo data, defaults to 'data/yahpo_data'.
         """
-        super().__init__()
+        super().__init__(loggers)
 
         assert bench in list_scenarios(), f"The scenario {bench} you choose is not available."
 
@@ -117,7 +125,7 @@ class YahpoProblem(Problem):
     # def fidelity_space(self):
     #     return FidelitySpace(self.fidelity_dims)
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters

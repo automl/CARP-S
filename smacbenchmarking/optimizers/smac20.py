@@ -12,13 +12,22 @@ from smac.facade.abstract_facade import AbstractFacade
 from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class SMAC3Optimizer(Optimizer):
-    def __init__(self, problem: Problem, smac_cfg: DictConfig, n_trials: int | None, time_budget: float | None) -> None:
-        super().__init__(problem, n_trials, time_budget)
+    def __init__(
+            self,
+            problem: Problem,
+            smac_cfg: DictConfig,
+            n_trials: int | None,
+            time_budget: float | None,
+            n_workers: int = 1,
+            loggers: list[AbstractLogger] | None = None,
+    ) -> None:
+        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
@@ -211,7 +220,7 @@ class SMAC3Optimizer(Optimizer):
         """
         self.solver.tell(info=trial_info, value=trial_value)
 
-    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
         if self.solver.scenario.count_objectives() == 1:
             inc = self.solver.intensifier.get_incumbent()
             cost = self.solver.runhistory.get_cost(config=inc)

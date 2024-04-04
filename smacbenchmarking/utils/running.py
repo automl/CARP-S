@@ -6,7 +6,7 @@ from omegaconf import DictConfig, OmegaConf
 from rich import inspect
 from rich import print as printr
 
-from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
+from smacbenchmarking.wrappers.loggingproblemwrapper import LoggingProblemWrapper
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.file_logger import FileLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer

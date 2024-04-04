@@ -4,7 +4,7 @@ from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 
-from smacbenchmarking.benchmarks.loggingproblemwrapper import LoggingProblemWrapper
+from smacbenchmarking.wrappers.loggingproblemwrapper import LoggingProblemWrapper
 from smacbenchmarking.container.wrapper import ContainerizedProblemClient
 from smacbenchmarking.loggers.database_logger import DatabaseLogger
 from smacbenchmarking.loggers.file_logger import FileLogger
@@ -12,12 +12,10 @@ from smacbenchmarking.utils.running import make_optimizer
 
 
 def optimizer_experiment(parameters: dict, result_processor: ResultProcessor, custom_config: dict):
-    problem = ContainerizedProblemClient()
-    logging_problem_wrapper = LoggingProblemWrapper(problem=problem)
+    loggers = [DatabaseLogger(result_processor), FileLogger()]
+    problem = ContainerizedProblemClient(loggers)
 
-    logging_problem_wrapper.add_logger(DatabaseLogger(result_processor))
-    logging_problem_wrapper.add_logger(FileLogger())
-    optimizer = make_optimizer(cfg=cfg, problem=logging_problem_wrapper)
+    optimizer = make_optimizer(cfg=cfg, problem=problem)
 
     optimizer.run()
 

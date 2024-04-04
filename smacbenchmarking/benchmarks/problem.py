@@ -4,14 +4,17 @@ from abc import ABC, abstractmethod
 
 from ConfigSpace import ConfigurationSpace
 
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class Problem(ABC):
     """Problem to optimize."""
 
-    def __init__(self) -> None:
+    def __init__(self, loggers: list[AbstractLogger] | None = None) -> None:
         super().__init__()
+
+        self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
     @property
     def f_min(self) -> float | None:
@@ -41,7 +44,7 @@ class Problem(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters
@@ -61,3 +64,12 @@ class Problem(ABC):
                 - additional_info : dict[str, Any], defaults to {}
         """
         raise NotImplementedError
+
+    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+        trial_value = self._evaluate(trial_info=trial_info)
+
+        for logger in self.loggers:
+            logger.log_trial(trial_info=trial_info, trial_value=trial_value)
+
+        return trial_value
+
