@@ -1,0 +1,53 @@
+PY_EXPERIMENTER:
+  n_jobs: 1
+
+  Database:
+    use_ssh_tunnel: false
+    provider: mysql
+    database: smacbenchmarking
+    table:
+      name: results
+      keyfields:
+        config:
+          type: JSON
+        config_hash:
+          type: VARCHAR(64)
+        benchmark_id:
+          type: VARCHAR(50)
+        problem_id:
+          type: VARCHAR(50)
+        optimizer_id:
+          type: VARCHAR(50)
+        optimizer_container_id:
+          type: VARCHAR(50)
+        seed:
+          type: INT
+        n_trials:
+          type: INT
+        time_budget:
+          type: INT
+      resultfields:
+        slurm_job_id: VARCHAR(50)
+      resultfields.timestamps: false
+
+    logtables:
+      trials:
+        trial_info__config: JSON
+        trial_info__instance: INT
+        trial_info__seed: INT
+        trial_info__budget: DOUBLE
+        trial_value__cost: JSON
+        trial_value__time: DOUBLE
+        trial_value__virtual_time: DOUBLE
+        trial_value__status: VARCHAR(50)
+        trial_value__starttime: DOUBLE
+        trial_value__endtime: DOUBLE
+        trial_value__additional_info: JSON
+
+  CodeCarbon:
+    measure_power_secs: 15
+    tracking_mode: machine
+    log_level: error
+    save_to_file: False
+    output_dir: output/CodeCarbon
+    offline_mode: False

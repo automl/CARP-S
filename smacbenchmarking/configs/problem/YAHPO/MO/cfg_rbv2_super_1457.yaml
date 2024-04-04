@@ -1,0 +1,16 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/so/rbv2_super/1457/None
+problem:
+  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  bench: rbv2_super
+  instance: '1457'
+  budget_type: null
+  metric:
+  - acc
+  - memory
+task:
+  n_trials: 267
+  n_objectives: 1
+  min_budget: null
+  max_budget: null

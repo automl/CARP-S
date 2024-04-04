@@ -9,7 +9,9 @@ from smac.facade.smac_ac_facade import SMAC4AC
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.trials import TrialInfo
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+
+from smacbenchmarking.utils.exceptions import AskAndTellNotSupportedError
 
 
 class NotSupportedError(Exception):
@@ -17,12 +19,12 @@ class NotSupportedError(Exception):
 
 
 class SMAC314Optimizer(Optimizer):
-    def __init__(self, problem: Problem, smac_cfg: DictConfig) -> None:
-        super().__init__(problem)
+    def __init__(self, problem: Problem, smac_cfg: DictConfig, n_trials: int | None, time_budget: float | None) -> None:
+        super().__init__(problem, n_trials, time_budget)
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
-        self._smac: SMAC4AC | None = None
+        self._solver: SMAC4AC | None = None
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
@@ -93,7 +95,7 @@ class SMAC314Optimizer(Optimizer):
         trial_value = self.problem.evaluate(trial_info=trial_info)
         return trial_value.cost
 
-    def setup_smac(self) -> SMAC4AC:
+    def _setup_optimizer(self) -> SMAC4AC:
         """
         Setup SMAC.
 
@@ -181,15 +183,18 @@ class SMAC314Optimizer(Optimizer):
         )
 
         return smac
+    
+    def ask(self) -> TrialInfo:
+        raise AskAndTellNotSupportedError
+    
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+        raise AskAndTellNotSupportedError
 
-    def run(self) -> None:
+    def _run(self) -> None:
         """Run SMAC on Problem.
-
-        If SMAC is not instantiated, instantiate.
         """
-        if self._smac is None:
-            self._smac = self.setup_smac()
-
-        incumbent = self._smac.optimize()  # noqa: F841
-
-        return None
+        incumbent = self.solver.optimize()  # noqa: F841
+        return self.extract_incumbent()
+    
+    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        return (self.solver.solver.incumbent, self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))

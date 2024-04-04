@@ -5,9 +5,9 @@ optimizer:
   _partial_: true
 
   optimizer_name: 'BayesianOptimization'
+  optimizer_kwargs:
+    random_seed: ${seed}
   # max_budget: ${task.max_budget}
-  num_trials: 100
-  wallclock_times: 3600
 
 
 

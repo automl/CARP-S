@@ -72,7 +72,7 @@ class FileLogger(AbstractLogger):
             Trial value.
         """
         info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())  # TODO beautify serialization
+        info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
         info_str = json.dumps(info) + "\n"
         logging.info(info_str)
 

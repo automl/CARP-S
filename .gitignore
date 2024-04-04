@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+.idea
 
 # Distribution / packaging
 .Python
@@ -141,7 +142,7 @@ runs
 /.idea/.gitignore
 /.codecarbon.config
 
-/smacbenchmarking.db
+/smacbenchmarking/container/credentials.yaml
 smacbenchmarking.db
 *.jsonl
 *.sif

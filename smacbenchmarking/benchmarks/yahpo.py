@@ -12,22 +12,55 @@ from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
+LOWER_IS_BETTER = {
+    "mmce": True,  # classification error
+    "f1": False,
+    "auc": False,
+    "logloss": True,
+    "nf": True, # number of features used
+    "ias": True,  # interaction strength of features  # TODO check
+    "rammodel": True,  # model size
+    "val_accuracy": False,
+    "val_cross_entropy": False,
+    "acc": False,
+    "bac": False,  # balanced acc
+    "brier": True,
+    "memory": True,
+    "timetrain": True,
+    "runtime": True,
+    "mec": True,  # main effect complexity of features
+}
+
+def maybe_invert(value: float, target: str) -> float:
+    sign = 1
+    if not LOWER_IS_BETTER[target]:
+        sign = -1
+    return sign * value
+
 
 class YahpoProblem(Problem):
     """Yahpo Problem."""
 
     def __init__(
-        self, bench: str, instance: str, metric: str, budget_type: Optional[str] = None, lower_is_better: bool = True
+        self, bench: str, instance: str, metric: str | list[str], budget_type: Optional[str] = None, lower_is_better: bool = True,
+        yahpo_data_path: str = "data/yahpo_data"
     ):
         """Initialize a Yahpo problem.
 
         Parameters
         ----------
-        bench: str Benchmark name.
-        instance : str Instance name.
-        metric : str Metric to optimize for (depends on the Benchmark instance e.g. lcbench).
-        budget_type : Optional[str] Budget type for the multifidelity setting. Should be None for the blackbox setting.
-        lower_is_better: bool Whether the metric is to be minimized or maximized.
+        bench: str
+            Benchmark name.
+        instance : str
+            Instance name.
+        metric : str 
+            Metric(s) to optimize for (depends on the Benchmark instance e.g. lcbench).
+        budget_type : Optional[str]
+            Budget type for the multifidelity setting. Should be None for the blackbox setting.
+        lower_is_better: bool
+            Whether the metric is to be minimized or maximized.
+        yahpo_data_path : str
+            Path to yahpo data, defaults to 'data/yahpo_data'.
         """
         super().__init__()
 
@@ -35,7 +68,7 @@ class YahpoProblem(Problem):
 
         # setting up meta data for surrogate benchmarks
         local_config.init_config()
-        local_config.set_data_path("data/yahpo_data")
+        local_config.set_data_path(yahpo_data_path)
 
         self.scenario = bench
         self.instance = str(instance)
@@ -60,7 +93,9 @@ class YahpoProblem(Problem):
             for fidelity in other_fidelities:
                 self.max_other_fidelities[fidelity] = self.fidelity_space.get_hyperparameter(fidelity).upper
 
-        self.metric = metric
+        if type(metric) != list:
+            metric = [metric]
+        self.metrics = metric
 
     @property
     def configspace(self) -> ConfigurationSpace:
@@ -77,7 +112,7 @@ class YahpoProblem(Problem):
     # FIXME: see caro's message:
     #  the idea is somehow to overwrite the optimizer/multifidelity attributes for
     #  budget_variable and min_budget, max_budget with a FidelitiySpace class without interpolation
-    #  that is based on the problem instance / config file. Similarily find out how to deal with
+    #  that is based on the problem instance / config file. Similarly find out how to deal with
     #  the metrics.
     # def fidelity_space(self):
     #     return FidelitySpace(self.fidelity_dims)
@@ -113,13 +148,13 @@ class YahpoProblem(Problem):
 
         # Benchmarking suite returns a list of results (as potentially more than one config can be passed),
         # as we only pass one config we need to select the first one
-        if self.lower_is_better:
-            cost = self._problem.objective_function(xs)[0][self.metric]
-        else:
-            cost = -self._problem.objective_function(xs)[0][self.metric]
+        ret = self._problem.objective_function(xs)[0]
+        costs = [maybe_invert(ret[target], target) for target in self.metrics]
+        if len(costs) == 1:
+            costs = costs[0]
 
         endtime = time.time()
         T = endtime - starttime
 
-        trial_value = TrialValue(cost=float(cost), time=T, starttime=starttime, endtime=endtime)
+        trial_value = TrialValue(cost=costs, time=T, starttime=starttime, endtime=endtime)
         return trial_value

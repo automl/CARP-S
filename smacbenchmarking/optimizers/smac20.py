@@ -4,6 +4,7 @@ from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
+import numpy as np
 
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
@@ -12,16 +13,16 @@ from smac.scenario import Scenario
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.trials import TrialInfo
+from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class SMAC3Optimizer(Optimizer):
-    def __init__(self, problem: Problem, smac_cfg: DictConfig) -> None:
-        super().__init__(problem)
+    def __init__(self, problem: Problem, smac_cfg: DictConfig, n_trials: int | None, time_budget: float | None) -> None:
+        super().__init__(problem, n_trials, time_budget)
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
-        self._smac: AbstractFacade | None = None
+        self._solver: AbstractFacade | None = None
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
@@ -92,8 +93,9 @@ class SMAC3Optimizer(Optimizer):
         trial_value = self.problem.evaluate(trial_info=trial_info)
         return trial_value.cost
 
-    def setup_smac(self) -> AbstractFacade:
-        """Setup SMAC.
+    def _setup_optimizer(self) -> AbstractFacade:
+        """
+        Setup SMAC.
 
         Retrieve defaults and instantiate SMAC.
 
@@ -130,7 +132,7 @@ class SMAC3Optimizer(Optimizer):
         scenario_kwargs = dict(
             configspace=self.configspace,
             # output_directory=Path(self.config.hydra.sweep.dir)
-            # / "smac3_output",  # TODO document that output directory is automatically set
+            # / "smac3_output",  # output directory is automatically set via config file
         )
         # We always expect scenario kwargs from the user
         _scenario_kwargs = OmegaConf.to_container(self.smac_cfg.scenario, resolve=True)
@@ -160,7 +162,6 @@ class SMAC3Optimizer(Optimizer):
                 smac_kwargs["acquisition_maximizer"] = smac_kwargs["acquisition_maximizer"](
                     configspace=self.configspace, acquisition_function=smac_kwargs["acquisition_function"]
                 )
-                # TODO Fix this custom init
                 if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(
                     smac_kwargs["acquisition_maximizer"].selector, "expl2callback"
                 ):
@@ -182,56 +183,42 @@ class SMAC3Optimizer(Optimizer):
 
         return smac
 
-    def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
-        """List of x and y values of the incumbents over time. x depends on ``sort_by``.
+    def ask(self) -> TrialInfo:
+        """Ask the optimizer for a new trial to evaluate.
 
-        Parameters
-        ----------
-        sort_by: str
-            Can be "trials" or "walltime".
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
 
         Returns
         -------
-        tuple[list[float], list[float]]
-
+        TrialInfo
+            trial info (config, seed, instance, budget)
         """
-        # if len(self.task.objectives) > 1:
-        #     raise NotSupportedError
+        return self.solver.ask()
+    
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+        """Tell the optimizer a new trial.
 
-        assert self._smac is not None
-        rh = self._smac.runhistory
-        trajectory = self._smac.intensifier.trajectory
-        X: list[int | float] = []
-        Y: list[float] = []
+        If the optimizer does not support ask and tell,
+        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        in child class.
 
-        for traj in trajectory:
-            assert len(traj.config_ids) == 1
-            config_id = traj.config_ids[0]
-            config = rh.get_config(config_id)
-
-            cost = rh.get_cost(config)
-            if cost > 1e6:
-                continue
-
-            if sort_by == "trials":
-                X.append(traj.trial)
-            elif sort_by == "walltime":
-                X.append(traj.walltime)
-            else:
-                raise RuntimeError("Unknown sort_by.")
-
-            Y.append(cost)
-
-        return X, Y
-
-    def run(self) -> None:
-        """Run SMAC on Problem.
-
-        If SMAC is not instantiated, instantiate.
+        Parameters
+        ----------
+        trial_value : TrialValue
+            trial value (cost, time, ...)
         """
-        if self._smac is None:
-            self._smac = self.setup_smac()
+        self.solver.tell(info=trial_info, value=trial_value)
 
-        incumbent = self._smac.optimize()  # noqa: F841
+    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        if self.solver.scenario.count_objectives() == 1:
+            inc = self.solver.intensifier.get_incumbent()
+            cost = self.solver.runhistory.get_cost(config=inc)
+            incumbent_tuple = (inc, cost)
+        else:
+            incs = self.solver.intensifier.get_incumbents()
+            costs = [self.solver.runhistory.get_cost(config=c) for c in incs]
+            incumbent_tuple = list(zip(incs, costs))
 
-        return None
+        return incumbent_tuple

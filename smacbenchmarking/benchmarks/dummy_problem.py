@@ -1,3 +1,5 @@
+import time
+
 from ConfigSpace import ConfigurationSpace, Float
 
 from smacbenchmarking.benchmarks.problem import Problem
@@ -5,7 +7,8 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 
 class DummyProblem(Problem):
-    def __init__(self, return_value=0, **kwargs):
+    def __init__(self, return_value=0, budget_type: str | None = "dummy"):
+        self.budget_type = budget_type
         self._return_value = return_value
         self._configspace = ConfigurationSpace(
             space={
@@ -18,4 +21,5 @@ class DummyProblem(Problem):
         return self._configspace
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        return TrialValue(cost=self._return_value, time=0, starttime=0, endtime=0)
+        start_time = time.time()
+        return TrialValue(cost=self._return_value, time=1, starttime=start_time, endtime=start_time + 1,virtual_time=1)

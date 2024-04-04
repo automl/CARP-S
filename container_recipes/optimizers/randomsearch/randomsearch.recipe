@@ -22,6 +22,10 @@ From: python:3.10-slim
     pip install wheel
     pip install -r /benchmarking/requirements.txt
     pip install ../benchmarking
-    pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
+    pip install -r /benchmarking/container_recipes/general/general_requirements_container_optimizer.txt
+
+    # log benchmarking version
+    BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+    echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
     echo "Successfully installed all features"

@@ -10,6 +10,7 @@ seed: 1
 problem: ???
 task:
   n_trials: ???  # Optimization budget as number of evaluations.
+  time_budget: null  # Optimization budget as time in seconds
 
   # Multi-fidelity
   min_budget: null

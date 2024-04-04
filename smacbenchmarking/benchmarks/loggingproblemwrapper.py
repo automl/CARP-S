@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ConfigSpace import ConfigurationSpace
+from typing import Any
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
@@ -64,3 +65,23 @@ class LoggingProblemWrapper(Problem):
             Logger that should be used for logging.
         """
         self.loggers.append(logger)
+
+    def __getattribute__(self, name: str) -> Any:
+        """
+        Get attribute value of wrapper if available and of optimizer if not.
+
+        Parameters
+        ----------
+        name : str
+            Attribute to get
+
+        Returns
+        -------
+        value
+            Value of given name
+
+        """
+        if name in ["add_logger", "configspace", "f_min", "evaluate", "loggers", "problem", "n_calls"]:
+            return object.__getattribute__(self, name)
+        else:
+            return getattr(self.problem, name)

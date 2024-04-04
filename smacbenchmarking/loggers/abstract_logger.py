@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod
 
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
-# TODO log optimizer's execution time
-
 
 class AbstractLogger(ABC):
     def __init__(self) -> None:
