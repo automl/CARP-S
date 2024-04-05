@@ -6,23 +6,24 @@ from omegaconf import DictConfig, OmegaConf
 from rich import inspect
 from rich import print as printr
 
-from smacbenchmarking.wrappers.loggingproblemwrapper import LoggingProblemWrapper
+from py_experimenter.result_processor import ResultProcessor
+
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.file_logger import FileLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.exceptions import NotSupportedError
 
 
-def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
+def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> Problem:
     """Make Problem
 
     Parameters
     ----------
     cfg : DictConfig
         Global configuration.
-    logging : bool
-        By default False, whether the problem should be wrapped in possibly
-        specified loggers.
+    result_processor : ResultProcessor
+        Py experimenter result processor, important for logging. Necessary to 
+        instantiate database logger.
 
     Returns
     -------
@@ -30,20 +31,16 @@ def make_problem(cfg: DictConfig, logging: bool = False) -> Problem:
         Target problem.
     """
     problem_cfg = cfg.problem
-    problem = instantiate(problem_cfg)
-
-    if logging:
-        # if logging and "loggers" in cfg and cfg.loggers is not None:
-        #     for logger in cfg.loggers:
-        #         loggercls = instantiate(logger)
-        #         problem = loggercls(problem=problem, cfg=cfg)
-
-        logging_problem_wrapper = LoggingProblemWrapper(problem=problem)
-
-        # logging_problem_wrapper.add_logger(DatabaseLogger(result_processor))
-        logging_problem_wrapper.add_logger(FileLogger())
-        problem = logging_problem_wrapper
-
+    loggers = []
+    if "loggers" in cfg:
+        for logger in cfg.loggers:
+            if "DatabaseLogger" in logger._target_:
+                kwargs = dict(result_processor=result_processor)
+            else:
+                kwargs = dict()
+            logger = instantiate(logger)(**kwargs)
+            loggers.append(logger)
+    problem = instantiate(problem_cfg, loggers=loggers)
     return problem
 
 
@@ -70,7 +67,7 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
     return optimizer
 
 
-def optimize(cfg: DictConfig) -> None:
+def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> None:
     """Run optimizer on problem.
 
     Save trajectory and metadata to database.
@@ -79,14 +76,17 @@ def optimize(cfg: DictConfig) -> None:
     ----------
     cfg : DictConfig
         Global configuration.
+    result_processor : ResultProcessor
+        Py experimenter result processor, important for logging. Necessary to 
+        instantiate database logger.
 
     """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
-    hydra_cfg = HydraConfig.instance().get()
-    printr(hydra_cfg.run.dir)
+    # hydra_cfg = HydraConfig.instance().get()
+    # printr(hydra_cfg.run.dir)
 
-    problem = make_problem(cfg=cfg, logging=True)
+    problem = make_problem(cfg=cfg, result_processor=result_processor)
     inspect(problem)
 
     optimizer = make_optimizer(cfg=cfg, problem=problem)
