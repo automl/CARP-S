@@ -18,7 +18,7 @@ def py_experimenter_evaluate(parameters: dict,
         config = parameters['config']
         cfg_dict = json.loads(config)
 
-        job_id = os.environ["BENCHMARKING_JOB_ID"]
+        job_id = os.environ["SLURM_JOB_ID"]
 
         result_processor.process_results({"slurm_job_id": job_id})
 
@@ -36,7 +36,7 @@ def py_experimenter_evaluate(parameters: dict,
 
 
 def main() -> None:
-    slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
+    slurm_job_id = os.environ["SLURM_JOB_ID"]
     experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
 
     if os.path.exists("smacbenchmarking/container/credentials.yaml"):
