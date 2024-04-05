@@ -5,6 +5,7 @@ import sys
 from configparser import ConfigParser
 import hashlib
 import logging
+from pathlib import Path
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -28,16 +29,15 @@ def main(cfg: DictConfig) -> None:
     """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
 
-    experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
+    experiment_configuration_file_path = Path(__file__).parent / "py_experimenter.yaml"
 
-    if os.path.exists("smacbenchmarking/container/credentials.yaml"):
-        database_credential_file = "smacbenchmarking/container/credentials.yaml"
-    else:
-        database_credential_file = None
+    database_credential_file_path = Path(__file__).parent / "credentials.yaml"
+    if not database_credential_file_path.exists():
+        database_credential_file_path = None
 
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name="smacbenchmarking",
-                                  database_credential_file_path=database_credential_file,
+                                  database_credential_file_path=database_credential_file_path,
                                   log_level=logging.INFO,
                                   use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel
                                   )
