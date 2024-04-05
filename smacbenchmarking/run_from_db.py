@@ -37,7 +37,7 @@ def py_experimenter_evaluate(parameters: dict,
     return status
 
 
-@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
+@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
     slurm_job_id = os.environ["SLURM_JOB_ID"]
     experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
