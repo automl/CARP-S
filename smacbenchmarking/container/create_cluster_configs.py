@@ -29,10 +29,10 @@ def main(cfg: DictConfig) -> None:
     """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
 
-    experiment_configuration_file_path = Path(__file__).parent / "py_experimenter.yaml"
+    experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "py_experimenter.yaml"
 
-    database_credential_file_path = Path(__file__).parent / "credentials.yaml"
-    if not database_credential_file_path.exists():
+    database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "credentials.yaml"
+    if database_credential_file_path is not None and not database_credential_file_path.exists():
         database_credential_file_path = None
 
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
