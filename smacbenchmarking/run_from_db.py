@@ -2,8 +2,10 @@ import os
 import json
 from inspect import getsourcefile
 from os.path import abspath
+import hydra
+from pathlib import Path
 
-from omegaconf import OmegaConf
+from omegaconf import OmegaConf, DictConfig
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
@@ -35,13 +37,15 @@ def py_experimenter_evaluate(parameters: dict,
     return status
 
 
-def main() -> None:
+@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
+def main(cfg: DictConfig) -> None:
     slurm_job_id = os.environ["SLURM_JOB_ID"]
     experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
 
-    if os.path.exists("smacbenchmarking/container/credentials.yaml"):
-        database_credential_file_path = "smacbenchmarking/container/credentials.yaml"
-    else:
+    experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "py_experimenter.yaml"
+
+    database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "credentials.yaml"
+    if database_credential_file_path is not None and not database_credential_file_path.exists():
         database_credential_file_path = None
 
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
