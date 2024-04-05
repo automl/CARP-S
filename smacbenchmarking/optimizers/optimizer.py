@@ -83,9 +83,8 @@ class Optimizer(ABC):
         """
         raise NotImplementedError
 
-    @property
     @abstractmethod
-    def current_incumbent(self) -> Incumbent:
+    def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
         Returns
@@ -122,12 +121,12 @@ class Optimizer(ABC):
             self.tell(trial_info=trial_info, trial_value=trial_value)
             self.trial_counter += 1
 
-            if self.current_incumbent != self._last_incumbent:
-                self._last_incumbent = self.current_incumbent
+            if self.get_current_incumbent() != self._last_incumbent:
+                self._last_incumbent = self.get_current_incumbent()
                 for logger in self.loggers:
-                    logger.log_incumbent(self.current_incumbent)
+                    logger.log_incumbent(self.get_current_incumbent())
 
-        return self.current_incumbent
+        return self.get_current_incumbent()
 
     @abstractmethod
     def ask(self) -> TrialInfo:

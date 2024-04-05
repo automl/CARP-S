@@ -220,7 +220,7 @@ class SMAC3Optimizer(Optimizer):
         """
         self.solver.tell(info=trial_info, value=trial_value)
 
-    def current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
         if self.solver.scenario.count_objectives() == 1:
             inc = self.solver.intensifier.get_incumbent()
             cost = self.solver.runhistory.get_cost(config=inc)
