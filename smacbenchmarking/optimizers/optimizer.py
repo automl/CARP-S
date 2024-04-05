@@ -3,34 +3,41 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import time
 from typing import Any
-import numpy as np
 
-from ConfigSpace import ConfigurationSpace, Configuration
+from ConfigSpace import ConfigurationSpace
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-
-SearchSpace = Any
-Cost = np.ndarray | float
-Incumbent = tuple[Configuration, Cost] | list[tuple[Configuration, Cost]] | None
+from smacbenchmarking.utils.types import Incumbent, SearchSpace
 
 
 class Optimizer(ABC):
-    def __init__(self, problem: Problem, n_trials: int | None, time_budget: float | None = None) -> None:
+    def __init__(
+            self,
+            problem: Problem,
+            n_trials: int | None,
+            time_budget: float | None = None,
+            n_workers: int = 1,
+            loggers: list[AbstractLogger] | None = None
+    ) -> None:
+        super().__init__()
         self.problem = problem
         if n_trials is None and time_budget is None:
             raise ValueError("Please specify either `n_trials` or `time_budget` "
                              "as the optimization budget.")
         self.n_trials: int | None = n_trials
         self.time_budget: float | None = time_budget
+        self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
+
         self.virtual_time_elapsed_seconds: float | None = 0.0
         self.trial_counter: int = 0
 
-        super().__init__()
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
 
         self._solver: Any = None
+        self._last_incumbent: tuple[TrialInfo, TrialValue] | None = None
 
     @property
     def solver(self) -> Any:
@@ -77,8 +84,8 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def extract_incumbent(self) -> Incumbent:
-        """Extract the incumbent config and cost after run.
+    def get_current_incumbent(self) -> Incumbent:
+        """Extract the incumbent config and cost. May only be available after a complete run.
 
         Returns
         -------
@@ -114,7 +121,12 @@ class Optimizer(ABC):
             self.tell(trial_info=trial_info, trial_value=trial_value)
             self.trial_counter += 1
 
-        return self.extract_incumbent()
+            if self.get_current_incumbent() != self._last_incumbent:
+                self._last_incumbent = self.get_current_incumbent()
+                for logger in self.loggers:
+                    logger.log_incumbent(self.get_current_incumbent())
+
+        return self.get_current_incumbent()
 
     @abstractmethod
     def ask(self) -> TrialInfo:

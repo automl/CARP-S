@@ -39,13 +39,14 @@ from syne_tune.optimizer.baselines import (
 from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
     "BayesianOptimization": BayesianOptimization,
-    "ASHA": ASHA,  # TODO Add ASHA and DEHB options back in
+    "ASHA": ASHA,
     "MOBSTER": MOBSTER,
     "BOHB": BOHB,
     "KDE": KDE,
@@ -84,10 +85,12 @@ class SynetuneOptimizer(Optimizer):
         optimizer_name: "str",
         n_trials: int | None, 
         time_budget: float | None = None,
+        n_workers: int = 1,
         max_budget: float | None = None,
-        optimizer_kwargs: dict | None = None
+        optimizer_kwargs: dict | None = None,
+        loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        super().__init__(problem, n_trials, time_budget)
+        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
         self.fidelity_enabled = False
         self.max_budget = max_budget
 
@@ -278,7 +281,7 @@ class SynetuneOptimizer(Optimizer):
         bscheduler = optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
         return bscheduler
     
-    def extract_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
         trial_result = self.best_trial(metric=self.metric)
         config = self.convert_to_trial(trial=trial_result).config
         cost = trial_result.metrics[self.metric]

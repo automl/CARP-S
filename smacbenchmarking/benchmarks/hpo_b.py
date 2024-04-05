@@ -21,6 +21,7 @@ import xgboost as xgb
 from ConfigSpace import ConfigurationSpace
 
 from smacbenchmarking.benchmarks.problem import Problem
+from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 HPOB_SEARCH_SPACE_DIMS = {
@@ -208,7 +209,8 @@ class HPOBProblem(Problem):
         self, 
         dataset_id: tuple[str, int], 
         model_id: tuple[str, int], 
-        surrogates_dir: Path = Path("smacbenchmarking/benchmark_data/HPO-B/saved-surrogates")
+        surrogates_dir: Path = Path("smacbenchmarking/benchmark_data/HPO-B/saved-surrogates"),
+        loggers: list[AbstractLogger] | None = None,
     ):
         """
         Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset is not generated
@@ -222,7 +224,7 @@ class HPOBProblem(Problem):
             surrogates_dir: Path
                 path to directory with surrogates models.
         """
-        super().__init__()
+        super().__init__(loggers)
         self.model_id = str(model_id)
         self.dataset_id = str(dataset_id)
 
@@ -274,7 +276,7 @@ class HPOBProblem(Problem):
         """
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters
