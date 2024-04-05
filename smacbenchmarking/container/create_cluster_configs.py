@@ -84,7 +84,7 @@ def main(cfg: DictConfig) -> None:
                 exists = True
                 logger.info("Experiment not added to the database because config hash already exists!")
     except DatabaseConnectionError as e:
-        if "1146" in e.args[0]:
+        if "1146" in e.args[0] or "no such table" in e.args[0]:
             logger.info("Database empty, will fill.:)")
         else:
             raise e
