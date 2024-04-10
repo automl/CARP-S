@@ -6,7 +6,7 @@
 # Include individual files
 include LICENSE.txt
 include requirements.txt
-include smacbenchmarking/py.typed  # This file is to export types
+include carps/py.typed  # This file is to export types
 
 prune tests
 prune examples

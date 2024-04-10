@@ -3,7 +3,7 @@ From: python:3.10-slim
 
 %files
 
-    ./smacbenchmarking /benchmarking/smacbenchmarking
+    ./carps /benchmarking/carps
     ./container_recipes /benchmarking/container_recipes
     requirements.txt /benchmarking/requirements.txt
     setup.py /benchmarking/setup.py
@@ -25,7 +25,7 @@ From: python:3.10-slim
     pip install -r /benchmarking/container_recipes/general/general_requirements_container_optimizer.txt
 
     # log benchmarking version
-    BENCHMARKING_VERSION=$(python -c "import smacbenchmarking; print(smacbenchmarking.version)")
+    BENCHMARKING_VERSION=$(python -c "import carps; print(carps.version)")
     echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
     echo "Successfully installed all features"

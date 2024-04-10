@@ -4,13 +4,13 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]             # path to the test directory
 minversion = "3.8"
-addopts = "--cov=smacbenchmarking" # Should be package name
+addopts = "--cov=carps" # Should be package name
 
 [tool.coverage.run]
 branch = true
-context = "smacbenchmarking" # Should be package name
+context = "carps" # Should be package name
 omit = [
-    "smacbenchmarking/__init__.py", # Has variables only needed for setup.py
+    "carps/__init__.py", # Has variables only needed for setup.py
 ]
 
 [tool.coverage.report]
@@ -30,10 +30,10 @@ line-length = 120
 [tool.isort]
 py_version = "38"
 profile = "black" # Play nicely with black
-src_paths = ["smacbenchmarking", "tests"]
+src_paths = ["carps", "tests"]
 known_types = ["typing", "abc"] # We put these in their own section "types"
 known_test = ["tests"]
-known_first_party = ["smacbenchmarking"]
+known_first_party = ["carps"]
 sections = [
     "FUTURE",
     "TYPES",

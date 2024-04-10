@@ -56,6 +56,6 @@ echo "Host Found"
 
 # Start the optimizer container
 echo "Starting optimizer container"
-singularity exec "containers/optimizers/${OPTIMIZER_CONTAINER}.sif" python smacbenchmarking/container/container_script_optimizer.py
+singularity exec "containers/optimizers/${OPTIMIZER_CONTAINER}.sif" python carps/container/container_script_optimizer.py
 
 echo "Run Finished"

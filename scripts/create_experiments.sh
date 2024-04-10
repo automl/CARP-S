@@ -18,19 +18,19 @@ STASHA='+optimizer/synetune=ASHA'
 # Blackbox 
 YAHPO_SO='+problem/YAHPO/SO=glob("cfg_*")'
 
-python smacbenchmarking/container/create_cluster_configs.py $SMAC20 $YAHPO_SO $SEED --multirun
-python smacbenchmarking/container/create_cluster_configs.py $SMAC14 $YAHPO_SO $SEED --multirun
-python smacbenchmarking/container/create_cluster_configs.py $OPTIMIZER $YAHPO_SO $SEED --multirun
-python smacbenchmarking/container/create_cluster_configs.py $HEBO $YAHPO_SO $SEED --multirun
+python carps/container/create_cluster_configs.py $SMAC20 $YAHPO_SO $SEED --multirun
+python carps/container/create_cluster_configs.py $SMAC14 $YAHPO_SO $SEED --multirun
+python carps/container/create_cluster_configs.py $OPTIMIZER $YAHPO_SO $SEED --multirun
+python carps/container/create_cluster_configs.py $HEBO $YAHPO_SO $SEED --multirun
 
 ##############################################
 # Multi-objective blackbox
 YAHPO_MO='+problem/YAHPO/MO=glob("cfg_*")'
 
-python smacbenchmarking/container/create_cluster_configs.py $SMAC20 $YAHPO_MO $SEED --multirun
-python smacbenchmarking/container/create_cluster_configs.py $SMAC14 $YAHPO_MO $SEED --multirun
-python smacbenchmarking/container/create_cluster_configs.py $OPTIMIZER $YAHPO_MO $SEED --multirun
-python smacbenchmarking/container/create_cluster_configs.py $HEBO $YAHPO_MO $SEED --multirun
+python carps/container/create_cluster_configs.py $SMAC20 $YAHPO_MO $SEED --multirun
+python carps/container/create_cluster_configs.py $SMAC14 $YAHPO_MO $SEED --multirun
+python carps/container/create_cluster_configs.py $OPTIMIZER $YAHPO_MO $SEED --multirun
+python carps/container/create_cluster_configs.py $HEBO $YAHPO_MO $SEED --multirun
 
 
 ##############################################

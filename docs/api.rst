@@ -6,4 +6,4 @@ API References
    :toctree: api
    :recursive:
 
-   smacbenchmarking
+   carps

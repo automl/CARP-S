@@ -2,7 +2,7 @@
 # are usually completed in github actions.
 
 NAME := SMACBenchmarking
-PACKAGE_NAME := smacbenchmarking
+PACKAGE_NAME := carps
 
 DIR := "${CURDIR}"
 SOURCE_DIR := ${PACKAGE_NAME}

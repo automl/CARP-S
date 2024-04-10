@@ -22,7 +22,7 @@ on:
 
 env:
 
-  package-name: smacbenchmarking
+  package-name: carps
   test-dir: tests
   extra-requires: "[dev]"  # "" for no extra_requires
 

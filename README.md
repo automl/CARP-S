@@ -29,8 +29,8 @@ Create a conda environment and install the package.
 ```bash
 git clone https://github.com/AutoML/SMACBenchmarking.git
 cd SMACBenchmarking
-conda create -n smacbenchmarking python=3.11
-conda activate smacbenchmarking
+conda create -n carps python=3.11
+conda activate carps
 
 # Install for usage
 pip install .
@@ -56,10 +56,10 @@ one of the following minimal examples to benchmark `SMAC2.0` on `BBOB` directly 
 
 ```bash
 # Run SMAC BlackBoxFacade on certain BBOB problem
-python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
+python carps/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
 
 # Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+python carps/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
 ```
 
 Note that in this case, no logging is done.
@@ -93,17 +93,17 @@ Setup Database if you want to log to database (mysql)
 ### Database
 Using SQLite vs. MySQL has some slight differences. Using SQLite is straightforward; you get a local database file but
 parallel execution is not efficient at all. You configure the used database in the 
-[pyexperimenter.yaml](smacbenchmarking/container/py_experimenter.yaml) file by changing the `provider` to `mysql` or 
+[pyexperimenter.yaml](carps/container/py_experimenter.yaml) file by changing the `provider` to `mysql` or 
 `sqlite`. 
 
 In any case, before you can start any jobs, the jobs need to be dispatched to the database.
 To this end, call the file `create_cluster_configs.py` with the desired hydra arguments.
 This can be done locally or on the server if you can execute python there directly.
-If you execute it locally, the database file `smacbenchmarking.db` will be created in the current directory and 
+If you execute it locally, the database file `carps.db` will be created in the current directory and 
 needs to be transferred to the cluster.
 
 ```bash
-python smacbenchmarking/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
+python carps/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
 ```
 
 In the case of MySQL, you need to authenticate yourself to the database. In our case, the MySQL server running on
@@ -118,7 +118,7 @@ apollo. For this, you need
     IdentityFile ~/.ssh/ssh_apollo
     AddKeysToAgent yes
     ```
-- a credentials file for pyexperimenter in `smacbenchmarking/container/credentials.yaml` with the following content:
+- a credentials file for pyexperimenter in `carps/container/credentials.yaml` with the following content:
     ```yaml
     CREDENTIALS:
     Database:
@@ -139,10 +139,10 @@ apollo. For this, you need
 
 ```bash
 # Run SMAC BlackBoxFacade on certain BBOB problem
-python smacbenchmarking/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
+python carps/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
 
 # Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python smacbenchmarking/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
+python carps/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
 ### Containerization
@@ -243,9 +243,9 @@ cluster (e.g. with job arrays).
 To add a new optimizer or benchmark to the repository you need to
 1. Implement the optimizer or benchmark according to the corresponding interface
     - **Optimizer**
-       - [Optimizer Interface](smacbenchmarking/optimizers/optimizer.py) <br> 
-          put implementation in [optimizers](smacbenchmarking/optimizers)
-       - [Benchmark Interface](smacbenchmarking/benchmarks/problem.py); put implementation in folder [benchmarks](smacbenchmarking/benchmarks)
+       - [Optimizer Interface](carps/optimizers/optimizer.py) <br> 
+          put implementation in [optimizers](carps/optimizers)
+       - [Benchmark Interface](carps/benchmarks/problem.py); put implementation in folder [benchmarks](carps/benchmarks)
 2. Add requirements for the optimizer or benchmark to the [setup.py](setup.py) under `extras-require`. 
    Please specify exact versions of all requirements! This is very important for reproducibility.
 3. Add the configs
