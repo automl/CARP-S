@@ -20,9 +20,9 @@ import numpy as np
 import xgboost as xgb
 from ConfigSpace import ConfigurationSpace
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
 
 HPOB_SEARCH_SPACE_DIMS = {
     "151": 1,
@@ -209,7 +209,7 @@ class HPOBProblem(Problem):
         self, 
         dataset_id: tuple[str, int], 
         model_id: tuple[str, int], 
-        surrogates_dir: Path = Path("smacbenchmarking/benchmark_data/HPO-B/saved-surrogates"),
+        surrogates_dir: Path = Path("carps/benchmark_data/HPO-B/saved-surrogates"),
         loggers: list[AbstractLogger] | None = None,
     ):
         """

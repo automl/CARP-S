@@ -37,10 +37,10 @@ def py_experimenter_evaluate(parameters: dict,
 
 def main() -> None:
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
+    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
 
-    if os.path.exists("smacbenchmarking/container/credentials.yaml"):
-        database_credential_file_path = "smacbenchmarking/container/credentials.yaml"
+    if os.path.exists("carps/container/credentials.yaml"):
+        database_credential_file_path = "carps/container/credentials.yaml"
     else:
         database_credential_file_path = None
 

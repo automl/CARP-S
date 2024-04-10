@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/rbv2_ranger/14/trainsize
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: rbv2_ranger
   instance: '14'
   budget_type: trainsize

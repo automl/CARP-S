@@ -3,8 +3,8 @@ PY_EXPERIMENTER:
 
   Database:
     use_ssh_tunnel: false
-    provider: mysql
-    database: smacbenchmarking
+    provider: sqlite
+    database: carps
     table:
       name: results
       keyfields:

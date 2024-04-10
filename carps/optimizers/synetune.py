@@ -38,10 +38,10 @@ from syne_tune.optimizer.baselines import (
 )
 from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.optimizers.optimizer import Optimizer
+from carps.utils.trials import TrialInfo, TrialValue
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -173,7 +173,7 @@ class SynetuneOptimizer(Optimizer):
         """Ask the optimizer for a new trial to evaluate.
 
         If the optimizer does not support ask and tell,
-        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
         Returns
@@ -217,7 +217,7 @@ class SynetuneOptimizer(Optimizer):
         """Tell the optimizer a new trial.
 
         If the optimizer does not support ask and tell,
-        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
         Parameters

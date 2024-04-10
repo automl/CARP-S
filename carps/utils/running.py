@@ -8,10 +8,10 @@ from rich import print as printr
 
 from py_experimenter.result_processor import ResultProcessor
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.file_logger import FileLogger
-from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.exceptions import NotSupportedError
+from carps.benchmarks.problem import Problem
+from carps.loggers.file_logger import FileLogger
+from carps.optimizers.optimizer import Optimizer
+from carps.utils.exceptions import NotSupportedError
 
 
 def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> Problem:

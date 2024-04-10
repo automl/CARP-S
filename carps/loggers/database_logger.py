@@ -5,9 +5,9 @@ from dataclasses import asdict
 
 from py_experimenter.result_processor import ResultProcessor
 
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.optimizers.optimizer import Incumbent
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.optimizers.optimizer import Incumbent
+from carps.utils.trials import TrialInfo, TrialValue
 
 
 class DatabaseLogger(AbstractLogger):

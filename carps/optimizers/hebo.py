@@ -1,7 +1,7 @@
 """Implementation of HEBO Optimizer.
 
 [2024-03-27]
-Note that running `python smacbenchmarking/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1 task.n_trials=25`
+Note that running `python carps/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1 task.n_trials=25`
 raises following error:
 "linear_operator.utils.errors.NanError: cholesky_cpu: 4 of 4 elements of the torch.Size([2, 2]) tensor are NaN."
 
@@ -28,11 +28,11 @@ from ConfigSpace.hyperparameters import (
 from hebo.optimizers.hebo import HEBO
 from hebo.design_space.design_space import DesignSpace
 
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.optimizers.optimizer import Optimizer
+from carps.benchmarks.problem import Problem
+from carps.optimizers.optimizer import Optimizer
 
 
 def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:

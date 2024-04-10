@@ -4,11 +4,11 @@ from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 
-from smacbenchmarking.wrappers.loggingproblemwrapper import LoggingProblemWrapper
-from smacbenchmarking.container.wrapper import ContainerizedProblemClient
-from smacbenchmarking.loggers.database_logger import DatabaseLogger
-from smacbenchmarking.loggers.file_logger import FileLogger
-from smacbenchmarking.utils.running import make_optimizer
+from carps.wrappers.loggingproblemwrapper import LoggingProblemWrapper
+from carps.container.wrapper import ContainerizedProblemClient
+from carps.loggers.database_logger import DatabaseLogger
+from carps.loggers.file_logger import FileLogger
+from carps.utils.running import make_optimizer
 
 
 def optimizer_experiment(parameters: dict, result_processor: ResultProcessor, custom_config: dict):
@@ -27,10 +27,10 @@ if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
     cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")
 
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
+    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
 
-    if os.path.exists('smacbenchmarking/container/credentials.yaml'):
-        database_credential_file = 'smacbenchmarking/container/credentials.yaml'
+    if os.path.exists('carps/container/credentials.yaml'):
+        database_credential_file = 'carps/container/credentials.yaml'
     else:
         database_credential_file = None
 

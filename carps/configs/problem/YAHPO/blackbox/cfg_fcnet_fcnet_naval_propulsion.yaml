@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/fcnet/fcnet_naval_propulsion/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: fcnet
   instance: fcnet_naval_propulsion
   budget_type: null

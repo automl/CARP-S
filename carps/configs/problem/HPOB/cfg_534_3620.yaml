@@ -2,10 +2,10 @@
 benchmark_id: HPOB
 problem_id: hpob/534/3620
 problem:
-  _target_: smacbenchmarking.benchmarks.hpo_b.HPOBProblem
+  _target_: carps.benchmarks.hpo_b.HPOBProblem
   model_id: '534'
   dataset_id: '3620'
-  surrogates_dir: smacbenchmarking/benchmark_data/HPO-B/saved-surrogates
+  surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
 task:
   n_trials: 100
   n_objectives: 1

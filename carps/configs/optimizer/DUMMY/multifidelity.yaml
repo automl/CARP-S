@@ -2,7 +2,7 @@
 optimizer_id: DUMMY_Optimizer-MultiFidelity
 optimizer_container_id: DUMMY_Optimizer
 optimizer:
-  _target_: smacbenchmarking.optimizers.dummy_optimizer.DummyOptimizer
+  _target_: carps.optimizers.dummy_optimizer.DummyOptimizer
   _partial_: true
 
   dummy_cfg:

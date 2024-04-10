@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/rbv2_aknn/41162/repl
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: rbv2_aknn
   instance: '41162'
   budget_type: repl

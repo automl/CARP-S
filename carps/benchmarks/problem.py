@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 from ConfigSpace import ConfigurationSpace
 
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
 
 
 class Problem(ABC):

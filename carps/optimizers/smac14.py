@@ -7,12 +7,12 @@ from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig, OmegaConf
 from smac.facade.smac_ac_facade import SMAC4AC
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.optimizers.optimizer import Optimizer
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.optimizers.optimizer import Optimizer
+from carps.utils.trials import TrialInfo, TrialValue
 
-from smacbenchmarking.utils.exceptions import AskAndTellNotSupportedError
+from carps.utils.exceptions import AskAndTellNotSupportedError
 
 
 class NotSupportedError(Exception):

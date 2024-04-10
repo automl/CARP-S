@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/so/rbv2_super/1063/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: rbv2_super
   instance: '1063'
   budget_type: null

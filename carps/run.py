@@ -3,7 +3,7 @@ from __future__ import annotations
 import hydra
 from omegaconf import DictConfig
 
-from smacbenchmarking.utils.running import optimize
+from carps.utils.running import optimize
 
 
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]

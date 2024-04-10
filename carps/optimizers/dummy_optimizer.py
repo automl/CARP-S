@@ -8,11 +8,11 @@ from time import sleep
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-from smacbenchmarking.utils.types import Cost
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.optimizers.optimizer import Optimizer, SearchSpace
+from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Cost
 
 
 class DummyOptimizer(Optimizer):

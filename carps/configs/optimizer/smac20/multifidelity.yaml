@@ -2,7 +2,7 @@
 optimizer_id: SMAC3-MultiFidelityFacade
 optimizer_container_id: SMAC3
 optimizer:
-  _target_: smacbenchmarking.optimizers.smac20.SMAC3Optimizer
+  _target_: carps.optimizers.smac20.SMAC3Optimizer
   _partial_: true
 
   smac_cfg:

@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/iaml_ranger/1067/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: iaml_ranger
   instance: '1067'
   budget_type: null

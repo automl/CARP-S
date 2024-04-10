@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/so/nb301/CIFAR10/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: nb301
   instance: CIFAR10
   budget_type: null

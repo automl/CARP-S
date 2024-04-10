@@ -2,7 +2,7 @@
 optimizer_id: RandomSearch
 optimizer_container_id: RandomSearch
 optimizer:
-  _target_: smacbenchmarking.optimizers.random_search.RandomSearchOptimizer
+  _target_: carps.optimizers.random_search.RandomSearchOptimizer
   _partial_: true
 
   n_trials: ${task.n_trials}

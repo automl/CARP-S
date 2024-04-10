@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/iaml_xgboost/41146/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: iaml_xgboost
   instance: '41146'
   budget_type: null

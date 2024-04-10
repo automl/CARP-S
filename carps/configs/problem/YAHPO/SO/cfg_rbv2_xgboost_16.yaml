@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/so/rbv2_xgboost/16/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: rbv2_xgboost
   instance: '16'
   budget_type: null

@@ -2,9 +2,9 @@ import time
 
 from ConfigSpace import ConfigurationSpace, Float
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
 
 
 class DummyProblem(Problem):

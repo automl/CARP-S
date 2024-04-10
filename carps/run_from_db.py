@@ -10,7 +10,7 @@ from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 
-from smacbenchmarking.utils.running import optimize
+from carps.utils.running import optimize
 
 
 def py_experimenter_evaluate(parameters: dict,
@@ -40,7 +40,7 @@ def py_experimenter_evaluate(parameters: dict,
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
     slurm_job_id = os.environ["SLURM_JOB_ID"]
-    experiment_configuration_file_path = "smacbenchmarking/container/py_experimenter.yaml"
+    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
 
     experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "py_experimenter.yaml"
 

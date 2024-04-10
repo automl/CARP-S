@@ -2,7 +2,7 @@
 benchmark_id: DUMMY_Problem
 problem_id: dummy
 problem:
-  _target_: smacbenchmarking.benchmarks.dummy_problem.DummyProblem
+  _target_: carps.benchmarks.dummy_problem.DummyProblem
   return_value: 42
   budget_type: epochs
 task:

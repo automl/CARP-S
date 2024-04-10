@@ -6,10 +6,10 @@ from typing import Any
 
 from ConfigSpace import ConfigurationSpace
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-from smacbenchmarking.utils.types import Incumbent, SearchSpace
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent, SearchSpace
 
 
 class Optimizer(ABC):
@@ -133,7 +133,7 @@ class Optimizer(ABC):
         """Ask the optimizer for a new trial to evaluate.
 
         If the optimizer does not support ask and tell,
-        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
         Returns
@@ -148,7 +148,7 @@ class Optimizer(ABC):
         """Tell the optimizer a new trial.
 
         If the optimizer does not support ask and tell,
-        raise `smacbenchmarking.utils.exceptions.AskAndTellNotSupportedError`
+        raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
         Parameters

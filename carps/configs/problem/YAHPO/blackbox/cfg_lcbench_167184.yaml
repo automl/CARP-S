@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/lcbench/167184/None
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: lcbench
   instance: '167184'
   budget_type: null

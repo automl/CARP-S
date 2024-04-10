@@ -9,9 +9,9 @@ import time
 from ConfigSpace import ConfigurationSpace
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.loggers.abstract_logger import AbstractLogger
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
 
 LOWER_IS_BETTER = {
     "mmce": True,  # classification error

@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/fcnet/fcnet_slice_localization/epoch
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: fcnet
   instance: fcnet_slice_localization
   budget_type: epoch

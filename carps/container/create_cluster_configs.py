@@ -36,7 +36,7 @@ def main(cfg: DictConfig) -> None:
         database_credential_file_path = None
 
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
-                                  name="smacbenchmarking",
+                                  name="carps",
                                   database_credential_file_path=database_credential_file_path,
                                   log_level=logging.INFO,
                                   use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel

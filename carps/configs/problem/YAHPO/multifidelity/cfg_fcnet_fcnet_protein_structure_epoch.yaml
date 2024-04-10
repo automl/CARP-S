@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 problem_id: yahpo/fcnet/fcnet_protein_structure/epoch
 problem:
-  _target_: smacbenchmarking.benchmarks.yahpo.YahpoProblem
+  _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: fcnet
   instance: fcnet_protein_structure
   budget_type: epoch
