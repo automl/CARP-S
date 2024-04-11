@@ -40,11 +40,10 @@ def py_experimenter_evaluate(parameters: dict,
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
     slurm_job_id = os.environ["SLURM_JOB_ID"]
-    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
 
-    experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "py_experimenter.yaml"
+    experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "container/py_experimenter.yaml"
 
-    database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "credentials.yaml"
+    database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "container/credentials.yaml"
     if database_credential_file_path is not None and not database_credential_file_path.exists():
         database_credential_file_path = None
 
