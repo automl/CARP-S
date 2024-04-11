@@ -1,3 +1,5 @@
+# If you want to use yahpo locally and do not want to change to an old ConfigSpace version
+# run this :)
 pip install yahpo-gym
 cd carps
 mkdir benchmark_data
