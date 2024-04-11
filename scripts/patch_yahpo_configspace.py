@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 print("Fixing yahpo configspace files.")
-path = Path("smacbenchmarking/benchmark_data/yahpo_data")
+path = Path("carps/benchmark_data/yahpo_data")
 configspace_paths = list(path.glob("**/config_space.json"))
 for p in configspace_paths:
     print("\t", p)
