@@ -39,8 +39,8 @@ From: continuumio/anaconda3
    # benchmark-specific commands go here
    pip install -r /benchmarking/container_recipes/benchmarks/yahpo/yahpo_requirements.txt
    cd /benchmarking/carps
-   mkdir data
-   cd data
+   mkdir benchmark_data
+   cd benchmark_data
    git clone https://github.com/slds-lmu/yahpo_data.git
 
    echo "Successfully installed all features"

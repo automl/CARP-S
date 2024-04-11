@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Optional
 
 import time
+from pathlib import Path
 
 from ConfigSpace import ConfigurationSpace
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
@@ -50,7 +51,7 @@ class YahpoProblem(Problem):
             metric: str | list[str],
             budget_type: Optional[str] = None,
             lower_is_better: bool = True,
-            yahpo_data_path: str = "data/yahpo_data",
+            yahpo_data_path: str | None = None,
             loggers: list[AbstractLogger] | None = None,
     ):
         """Initialize a Yahpo problem.
@@ -67,12 +68,14 @@ class YahpoProblem(Problem):
             Budget type for the multifidelity setting. Should be None for the blackbox setting.
         lower_is_better: bool
             Whether the metric is to be minimized or maximized.
-        yahpo_data_path : str
-            Path to yahpo data, defaults to 'data/yahpo_data'.
+        yahpo_data_path : str | None
+            Path to yahpo data, defaults to '../benchmark_data/yahpo_data' (relative to this file).
         """
         super().__init__(loggers)
 
         assert bench in list_scenarios(), f"The scenario {bench} you choose is not available."
+
+        yahpo_data_path = yahpo_data_path or Path(__file__).parent.parent / "benchmark_data/yahpo_data"
 
         # setting up meta data for surrogate benchmarks
         local_config.init_config()
