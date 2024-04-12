@@ -4,6 +4,9 @@ from inspect import getsourcefile
 from os.path import abspath
 import hydra
 from pathlib import Path
+import logging
+from rich.logging import RichHandler
+from smac.utils.logging import get_logger
 
 from omegaconf import OmegaConf, DictConfig
 from py_experimenter.experiment_status import ExperimentStatus
@@ -11,6 +14,11 @@ from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 
 from carps.utils.running import optimize
+
+FORMAT = "%(message)s"
+logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+
+logger = get_logger("Run from DB")
 
 
 def py_experimenter_evaluate(parameters: dict,
@@ -20,7 +28,7 @@ def py_experimenter_evaluate(parameters: dict,
         config = parameters['config']
         cfg_dict = json.loads(config)
 
-        job_id = os.environ["SLURM_JOB_ID"]
+        job_id = getattr(os.environ, "SLURM_JOB_ID", None)
 
         result_processor.process_results({"slurm_job_id": job_id})
 
@@ -39,7 +47,7 @@ def py_experimenter_evaluate(parameters: dict,
 
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
-    slurm_job_id = os.environ["SLURM_JOB_ID"]
+    slurm_job_id = getattr(os.environ, "SLURM_JOB_ID", None)
 
     experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "container/py_experimenter.yaml"
 
