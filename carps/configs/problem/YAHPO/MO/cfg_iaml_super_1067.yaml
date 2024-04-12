@@ -12,6 +12,6 @@ problem:
   - ias
 task:
   n_trials: 232
-  n_objectives: 1
+  n_objectives: 3
   min_budget: null
   max_budget: null

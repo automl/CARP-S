@@ -9,6 +9,6 @@ problem:
   metric: acc
 task:
   n_trials: 170
-  n_objectives: 1
+  n_objectives: 3
   min_budget: null
   max_budget: null

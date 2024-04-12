@@ -13,6 +13,6 @@ problem:
   - rammodel
 task:
   n_trials: 165
-  n_objectives: 1
+  n_objectives: 4
   min_budget: null
   max_budget: null

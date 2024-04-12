@@ -11,6 +11,6 @@ problem:
   - memory
 task:
   n_trials: 134
-  n_objectives: 1
+  n_objectives: 2
   min_budget: null
   max_budget: null

@@ -11,6 +11,6 @@ problem:
   - val_cross_entropy
 task:
   n_trials: 126
-  n_objectives: 1
+  n_objectives: 2
   min_budget: null
   max_budget: null

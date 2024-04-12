@@ -9,6 +9,6 @@ problem:
   metric: val_accuracy
 task:
   n_trials: 126
-  n_objectives: 1
+  n_objectives: 12
   min_budget: null
   max_budget: null
