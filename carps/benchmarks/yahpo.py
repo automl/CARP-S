@@ -31,6 +31,7 @@ LOWER_IS_BETTER = {
     "timetrain": True,
     "runtime": True,
     "mec": True,  # main effect complexity of features
+    "valid_mse": True,
 }
 
 
