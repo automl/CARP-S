@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
+import logging
+from rich.logging import RichHandler
+from smac.utils.logging import get_logger
 
 from py_experimenter.result_processor import ResultProcessor
 
@@ -9,12 +12,19 @@ from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent
 from carps.utils.trials import TrialInfo, TrialValue
 
+FORMAT = "%(message)s"
+logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+
+logger = get_logger("DatabaseLogger")
+
 
 class DatabaseLogger(AbstractLogger):
 
-    def __init__(self, result_processor: ResultProcessor) -> None:
+    def __init__(self, result_processor: ResultProcessor | None = None) -> None:
         super().__init__()
         self.result_processor = result_processor
+        if self.result_processor is None:
+            logger.info("Not logging to database (result processor is None).")
 
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
@@ -36,10 +46,12 @@ class DatabaseLogger(AbstractLogger):
 
         info["n_trials"] = n_trials
 
-        self.result_processor.process_logs({"trials": info})
+        if self.result_processor:
+            self.result_processor.process_logs({"trials": info})
 
     def log_incumbent(self, incumbent: Incumbent) -> None:
         pass
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
-        self.result_processor.process_logs({entity: data})
+        if self.result_processor:
+            self.result_processor.process_logs({entity: data})
