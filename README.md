@@ -135,6 +135,9 @@ apollo. For this, you need
             ssh_keypass: <SSH Key Password>
     ```
 
+#### Reset Experiments
+Experiments with error status (or any other status) can be reset via `python -m carps.utils.database.reset_experiments`.
+
 ## Minimal Example
 
 ```bash
@@ -261,3 +264,17 @@ Just temporary notes on how to install the respective Benchmarks and Optimizers.
       - Install specific requirements by `pip install -r benchmarking/container_recipes/yahpo/yahpo_requirements.txt`
   
 - Optimizers
+
+
+### Generate Class Diagrams
+```bash
+pip install pylint
+sudo apt-get install graphviz 
+pyreverse -o png carps --colorized --color-palette "#648FFF, #785EF0, #DC267F, #FE6100, #FFB000"
+pyreverse -o svg carps --colorized --color-palette "#648FFF, #785EF0, #DC267F, #FE6100, #FFB000"
+
+
+# Different color palettes
+"#332288, #117733, #44AA99, #88CCEE, #DDCC77, #CC6677, #AA4499, #882255"
+"#648FFF, #785EF0, #DC267F, #FE6100, #FFB000"
+```

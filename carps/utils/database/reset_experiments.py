@@ -17,7 +17,7 @@ def main(pyexperimenter_configuration_file_path: str | None = None, database_cre
     experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
                                   name="remove_error_rows",
                                   database_credential_file_path=database_credential_file_path,
-                                  log_file="logs/delete_error.log",
+                                  log_file="logs/reset_experiments.log",
                                   use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel
     )
     experimenter.db_connector.reset_experiments(ExperimentStatus.ERROR.value)
