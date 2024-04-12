@@ -6,7 +6,6 @@ problem:
   bench: iaml_super
   instance: '40981'
   budget_type: null
-  lower_is_better: false
   metric: f1
 task:
   n_trials: 100

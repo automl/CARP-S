@@ -6,7 +6,6 @@ problem:
   bench: lcbench
   instance: '167152'
   budget_type: null
-  lower_is_better: false
   metric: val_accuracy
 task:
   n_trials: 100

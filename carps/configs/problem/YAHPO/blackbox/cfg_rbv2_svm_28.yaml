@@ -6,7 +6,6 @@ problem:
   bench: rbv2_svm
   instance: '28'
   budget_type: null
-  lower_is_better: false
   metric: acc
 task:
   n_trials: 100
