@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import fire
 
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
@@ -23,4 +24,4 @@ def main(pyexperimenter_configuration_file_path: str | None = None, database_cre
     experimenter.db_connector.reset_experiments(ExperimentStatus.ERROR.value)
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
