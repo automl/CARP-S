@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+from py_experimenter.result_processor import ResultProcessor
 from rich import inspect
 from rich import print as printr
 
-from py_experimenter.result_processor import ResultProcessor
-
 from carps.benchmarks.problem import Problem
-from carps.loggers.file_logger import FileLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import NotSupportedError
 

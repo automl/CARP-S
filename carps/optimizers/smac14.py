@@ -10,9 +10,8 @@ from smac.facade.smac_ac_facade import SMAC4AC
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.trials import TrialInfo, TrialValue
-
 from carps.utils.exceptions import AskAndTellNotSupportedError
+from carps.utils.trials import TrialInfo, TrialValue
 
 
 class NotSupportedError(Exception):
@@ -177,7 +176,8 @@ class SMAC314Optimizer(Optimizer):
             intensifier = None
         else:
             if self.smac_cfg.intensifier == "successive_halving":
-                from smac.intensification.successive_halving import SuccessiveHalving
+                from smac.intensification.successive_halving import \
+                    SuccessiveHalving
 
                 intensifier = SuccessiveHalving
             else:

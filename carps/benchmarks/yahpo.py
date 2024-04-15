@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 import time
 from pathlib import Path
+from typing import Optional
 
 from ConfigSpace import ConfigurationSpace
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config

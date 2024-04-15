@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Optional, Any
-import numpy as np
-
 from time import sleep
+from typing import Any, Optional
 
+import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
 

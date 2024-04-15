@@ -11,28 +11,22 @@ For non-dummy problems HEBO works fine.
 """
 from __future__ import annotations
 
-from collections import abc, OrderedDict
+from collections import OrderedDict, abc
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
-from ConfigSpace.hyperparameters import (
-    CategoricalHyperparameter,
-    Constant,
-    Hyperparameter,
-    OrdinalHyperparameter,
-    IntegerHyperparameter,
-    FloatHyperparameter,
-)
-
-from hebo.optimizers.hebo import HEBO
+from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
+                                         FloatHyperparameter, Hyperparameter,
+                                         IntegerHyperparameter,
+                                         OrdinalHyperparameter)
 from hebo.design_space.design_space import DesignSpace
-
-from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.trials import TrialInfo, TrialValue
+from hebo.optimizers.hebo import HEBO
 
 from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.trials import TrialInfo, TrialValue
 
 
 def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:

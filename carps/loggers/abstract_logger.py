@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from carps.utils.types import Incumbent
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
 
 
 class AbstractLogger(ABC):

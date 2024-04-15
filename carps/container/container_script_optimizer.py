@@ -4,7 +4,6 @@ from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 
-from carps.wrappers.loggingproblemwrapper import LoggingProblemWrapper
 from carps.container.wrapper import ContainerizedProblemClient
 from carps.loggers.database_logger import DatabaseLogger
 from carps.loggers.file_logger import FileLogger

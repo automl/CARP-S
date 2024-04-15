@@ -1,17 +1,15 @@
-import os
 import json
-from inspect import getsourcefile
-from os.path import abspath
-import hydra
-from pathlib import Path
 import logging
-from rich.logging import RichHandler
-from smac.utils.logging import get_logger
+import os
+from pathlib import Path
 
-from omegaconf import OmegaConf, DictConfig
+import hydra
+from omegaconf import DictConfig, OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
+from rich.logging import RichHandler
+from smac.utils.logging import get_logger
 
 from carps.utils.running import optimize
 

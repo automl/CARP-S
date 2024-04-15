@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
-import numpy as np
-
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
@@ -127,7 +126,6 @@ class SMAC3Optimizer(Optimizer):
 
         # Select SMAC Facade
         smac_class = get_class(self.smac_cfg.smac_class)
-        from smac.facade.multi_fidelity_facade import MultiFidelityFacade
 
         if smac_class == get_class("smac.facade.multi_fidelity_facade.MultiFidelityFacade"):
             self.fidelity_enabled = True

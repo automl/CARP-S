@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 import logging
-from rich.logging import RichHandler
-from smac.utils.logging import get_logger
+from dataclasses import asdict
 
 from py_experimenter.result_processor import ResultProcessor
+from rich.logging import RichHandler
+from smac.utils.logging import get_logger
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent

@@ -1,7 +1,5 @@
-import os
 import json
-from inspect import getsourcefile
-from os.path import abspath
+import os
 
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from ConfigSpace import Configuration, ConfigurationSpace
 import numpy as np
+from ConfigSpace import Configuration, ConfigurationSpace
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger

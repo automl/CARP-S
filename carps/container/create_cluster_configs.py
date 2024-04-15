@@ -1,16 +1,12 @@
-import json
-import logging
-import os
-import sys
-from configparser import ConfigParser
 import hashlib
+import json
 import logging
 from pathlib import Path
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.exceptions import DatabaseConnectionError
+from py_experimenter.experimenter import PyExperimenter
 
 logger = logging.getLogger("create experiments")
 

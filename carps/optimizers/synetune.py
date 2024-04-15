@@ -1,41 +1,23 @@
 from __future__ import annotations
 
-from typing import Any, Callable
-
 import copy
 import datetime
-import time
 from collections import OrderedDict
+from typing import Any, Callable
 
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
-from ConfigSpace.hyperparameters import (
-    CategoricalHyperparameter,
-    Constant,
-    FloatHyperparameter,
-    Hyperparameter,
-    IntegerHyperparameter,
-    OrdinalHyperparameter,
-)
+from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
+                                         FloatHyperparameter, Hyperparameter,
+                                         IntegerHyperparameter,
+                                         OrdinalHyperparameter)
+from syne_tune.backend.trial_status import Status
 from syne_tune.backend.trial_status import Trial as SyneTrial
-from syne_tune.backend.trial_status import TrialResult, Status
-from syne_tune.config_space import (
-    choice,
-    lograndint,
-    loguniform,
-    ordinal,
-    randint,
-    uniform,
-)
-from syne_tune.optimizer.baselines import (
-    ASHA,
-    BOHB,
-    BORE,
-    DEHB,
-    KDE,
-    MOBSTER,
-    BayesianOptimization,
-)
+from syne_tune.backend.trial_status import TrialResult
+from syne_tune.config_space import (choice, lograndint, loguniform, ordinal,
+                                    randint, uniform)
+from syne_tune.optimizer.baselines import (ASHA, BOHB, BORE, DEHB, KDE,
+                                           MOBSTER, BayesianOptimization)
 from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
 
 from carps.benchmarks.problem import Problem
