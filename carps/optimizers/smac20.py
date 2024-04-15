@@ -31,6 +31,7 @@ class SMAC3Optimizer(Optimizer):
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
         self._solver: AbstractFacade | None = None
+        self._cb_on_start_called: bool = False
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
@@ -202,6 +203,10 @@ class SMAC3Optimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
+        if not self._cb_on_start_called:
+            self._cb_on_start_called = True
+            for callback in self.solver.optimizer._callbacks:
+                callback.on_start(self.solver.optimizer)
         return self.solver.ask()
     
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
