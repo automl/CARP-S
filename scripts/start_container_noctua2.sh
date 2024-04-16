@@ -47,6 +47,19 @@ if [ "$response" = "200" ]; then
     echo "API is up and running!"
     break
 else
+    # get the path to the error files
+    LOG_ERR_PATH=$(singularity instance list -j |
+     python -c "import sys, json;\
+     output = json.load(sys.stdin)['instances'];\
+     print(next(item['logErrPath'] for item in output if item.get('instance', None) == 'problem'))"
+    )
+
+    printf "#%.0s" {1..100}; echo
+    echo "Run fails because"
+    tail -n 100  $LOG_ERR_PATH
+    printf "#%.0s" {1..100}; echo
+    echo "For further information, please refer to the error logs under $LOG_ERR_PATH"
+
     echo "API is not yet ready (HTTP status: $response). Retrying in 5 seconds..."
     sleep 5
 fi
