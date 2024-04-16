@@ -44,7 +44,7 @@ then
 fi
 
 # Create env
-ENV_NAME="automlsuite_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}"
+ENV_NAME="carps_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}"
 CREATE_COMMAND="${CONDA_COMMAND} create python=${PYTHON_VERSION} -n ${ENV_NAME} -c conda-forge -y"
 echo "Creating environment:"
 echo $CREATE_COMMAND
