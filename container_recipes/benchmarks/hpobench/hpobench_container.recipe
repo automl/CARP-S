@@ -9,11 +9,6 @@ From: python:3.9-slim
     # this is necessary to start the benchmarking server
     export FLASK_APP=/benchmarking/smacbenchmarking/container/container_script_problem.py
 
-    export XDG_CONFIG_HOME=/benchmarking/container_recipes/benchmarks/hpobench
-    export XDG_CACHE_HOME=/benchmarking/.cache/hpobench
-    export XDG_DATA_HOME=/benchmarking/.local/share/hpobench
-    export TMPDIR=/benchmarking/tmp/hpobench_socket/
-
 %files
     ./smacbenchmarking /benchmarking/smacbenchmarking
     ./container_recipes /benchmarking/container_recipes
@@ -48,11 +43,11 @@ From: python:3.9-slim
     pip install .
     pip install -r /benchmarking/container_recipes/benchmarks/hpobench/hpobench_requirements.txt
 
+    # Create symlinks
     chmod -R 755 /benchmarking
     mkdir /var/lib/hpobench
-    chmod -R 755 /var/lib/hpobench
-    mkdir /var/lib/hpobench/socket
-    mkdir /var/lib/hpobench/data
-    mkdir /var/lib/hpobench/cache
+    ln -s /tmp/socket /var/lib/hpobench
+    ln -s /tmp/hpobench/data /var/lib/hpobench
+    ln -s /tmp/hpobench/cache /var/lib/hpobench
 
   echo "Successfully installed all features"
