@@ -33,7 +33,8 @@ def _check(p: str | Path) -> None:
         except pkg_resources.DistributionNotFound as error:
             error_msg = str(error)
             msg = f"{error_msg}. Please install all necessary requirements with\n"\
-                    f"\t>>>>>>>>>> pip install -r {p}"
+                    f"\t>>>>>>>>>> pip install -r {p}\n"\
+                    "You can also build an env for that specific combination, check `CARP-S/scripts/build_env(s).sh`."
             raise RuntimeError(msg)
         except pkg_resources.VersionConflict as error:
             error_msg = str(error)
