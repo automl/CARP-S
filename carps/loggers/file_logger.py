@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-import shutil
+import os
 from dataclasses import asdict
 from pathlib import Path
 
@@ -43,7 +43,7 @@ def get_run_directory() -> str:
     return directory
 
 
-def dump_logs(log_data: dict, filename: str):
+def dump_logs(log_data: dict, filename: str, directory: str | None = None):
     """Dump log dict in jsonl format
 
     This appends one json dict line to the filename.
@@ -57,16 +57,18 @@ def dump_logs(log_data: dict, filename: str):
         current working directory or if it is called during
         a hydra session, the hydra run dir will be the log
         dir.
+    directory: str | None, defaults to None
+        Directory to log to. If None, either use hydra run dir or current dir.
     """
     log_data_str = json.dumps(log_data) + "\n"
-    directory = get_run_directory()
+    directory = directory or get_run_directory()
     filename = Path(directory) / filename
     with open(filename, mode="a") as file:
         file.writelines([log_data_str])
 
 
 class FileLogger(AbstractLogger):
-    def __init__(self, overwrite: bool = False) -> None:
+    def __init__(self, overwrite: bool = False, directory: str | None = None) -> None:
         """File logger.
 
         For each trial/function evaluate, write one line to the file.
@@ -78,19 +80,27 @@ class FileLogger(AbstractLogger):
         overwrite: bool, defaults to True
             Delete previous logs in that directory if True.
             If false, raise an error message.
+        directory: str | None, defaults to None
+            Directory to log to. If None, either use hydra run dir or current dir.
 
         """
         super().__init__()
 
-        directory = Path(get_run_directory())
+        directory = directory or get_run_directory()
+        directory = Path(directory)
+        self.directory = directory
         if (directory / "trial_logs.jsonl").is_file():
             if overwrite:
                 logger.info(f"Found previous run. Removing '{directory}'.")
-                shutil.rmtree(directory)
+                for root, dirs, files in os.walk(directory):
+                    for f in files:
+                        full_fn = os.path.join(root, f)
+                        if ".hydra" not in full_fn:
+                            os.remove(full_fn)
+                            logger.debug(f"Removed {full_fn}")
             else:
                 raise RuntimeError(f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
                    
-
 
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
@@ -109,10 +119,10 @@ class FileLogger(AbstractLogger):
         info_str = json.dumps(info) + "\n"
         logging.info(info_str)
 
-        dump_logs(log_data=info, filename="trial_logs.jsonl")
+        dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
 
     def log_incumbent(self, incumbent: Incumbent) -> None:
         pass
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
-        dump_logs(log_data=data, filename=f"{entity}.jsonl")
+        dump_logs(log_data=data, filename=f"{entity}.jsonl", directory=self.directory)
