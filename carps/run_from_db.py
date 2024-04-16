@@ -11,6 +11,7 @@ from py_experimenter.result_processor import ResultProcessor
 from rich.logging import RichHandler
 from smac.utils.logging import get_logger
 
+from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
 
 FORMAT = "%(message)s"
@@ -31,6 +32,8 @@ def py_experimenter_evaluate(parameters: dict,
         result_processor.process_results({"slurm_job_id": job_id})
 
         cfg = OmegaConf.create(cfg_dict)
+
+        check_requirements(cfg=cfg)
         
         optimize(cfg, result_processor=result_processor)
 
