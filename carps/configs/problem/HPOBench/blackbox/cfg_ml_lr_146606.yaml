@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: ml/lr/146606
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  model: lr
+  task_id: 146606
+  budget_type: null
+  seed: ${seed}
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: null
+  max_budget: null

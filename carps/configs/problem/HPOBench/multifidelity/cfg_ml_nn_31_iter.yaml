@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: ml/nn/31
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  model: nn
+  task_id: 31
+  budget_type: iter
+  seed: ${seed}
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: 3
+  max_budget: 243

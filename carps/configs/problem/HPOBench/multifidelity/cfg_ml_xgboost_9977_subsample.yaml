@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: ml/xgboost/9977
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  model: xgboost
+  task_id: 9977
+  budget_type: subsample
+  seed: ${seed}
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: 0.1
+  max_budget: 1.0
