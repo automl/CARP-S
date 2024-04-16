@@ -51,7 +51,7 @@ class Problem(ABC):
         Parameters
         ----------
         trial_info : TrialInfo
-            Dataclass with configuration, seed, budget, instance.
+            Dataclass with configuration, seed, budget, instance, name, checkpoint.
 
         Returns
         -------
