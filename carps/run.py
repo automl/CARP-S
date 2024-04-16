@@ -4,6 +4,7 @@ import hydra
 from omegaconf import DictConfig
 
 from carps.utils.running import optimize
+from carps.utils.requirements import check_requirements
 
 
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
@@ -18,6 +19,7 @@ def main(cfg: DictConfig) -> None:
         Global configuration.
 
     """
+    check_requirements(cfg=cfg)
     optimize(cfg=cfg)
 
     return None
