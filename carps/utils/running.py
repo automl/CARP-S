@@ -33,7 +33,7 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
     loggers = []
     if "loggers" in cfg:
         for logger in cfg.loggers:
-            if "DatabaseLogger" in logger._target_:
+            if "DatabaseLogger" in logger._target_ and False:
                 kwargs = dict(result_processor=result_processor)
             else:
                 kwargs = dict()

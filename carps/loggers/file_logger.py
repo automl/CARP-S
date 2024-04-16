@@ -83,12 +83,12 @@ class FileLogger(AbstractLogger):
         super().__init__()
 
         directory = Path(get_run_directory())
-        if any(Path(directory).iterdir()):
+        if (directory / "trial_logs.jsonl").is_file():
             if overwrite:
-                logger.info(f"Found previous run. Removing {directory}.")
+                logger.info(f"Found previous run. Removing '{directory}'.")
                 shutil.rmtree(directory)
             else:
-                raise RuntimeError(f"Found previous run at {directory}. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
+                raise RuntimeError(f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
                    
 
 

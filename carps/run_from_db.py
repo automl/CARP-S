@@ -3,8 +3,8 @@ import logging
 import os
 from pathlib import Path
 
-import hydra
-from omegaconf import DictConfig, OmegaConf
+import fire
+from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
@@ -34,6 +34,8 @@ def py_experimenter_evaluate(parameters: dict,
         cfg = OmegaConf.create(cfg_dict)
 
         check_requirements(cfg=cfg)
+
+        os.chdir(cfg.outdir)
         
         optimize(cfg, result_processor=result_processor)
 
@@ -46,13 +48,12 @@ def py_experimenter_evaluate(parameters: dict,
     return status
 
 
-@hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
-def main(cfg: DictConfig) -> None:
+def main(pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | None = None) -> None:
     slurm_job_id = getattr(os.environ, "SLURM_JOB_ID", None)
 
-    experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "container/py_experimenter.yaml"
+    experiment_configuration_file_path = pyexperimenter_configuration_file_path or Path(__file__).parent / "container/py_experimenter.yaml"
 
-    database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "container/credentials.yaml"
+    database_credential_file_path = database_credential_file_path or Path(__file__).parent / "container/credentials.yaml"
     if database_credential_file_path is not None and not database_credential_file_path.exists():
         database_credential_file_path = None
 
@@ -67,4 +68,5 @@ def main(cfg: DictConfig) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
+
