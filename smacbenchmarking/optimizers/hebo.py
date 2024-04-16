@@ -335,7 +335,7 @@ class HEBOOptimizer(Optimizer):
 
         return X, Y
     
-    def current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
         best_x = self.solver.best_x
         best_y = self.solver.best_y
         config = HEBOcfg2ConfigSpacecfg(

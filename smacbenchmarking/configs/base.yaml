@@ -24,6 +24,9 @@ optimizer: ???
 optimizer_id: ???
 optimizer_container_id: ???
 
+pyexperimenter_configuration_file_path: null
+database_credential_file_path: null
+
 timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from smacbenchmarking.optimizers.optimizer import Incumbent
+from smacbenchmarking.utils.types import Incumbent
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
 

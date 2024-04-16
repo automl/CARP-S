@@ -15,6 +15,7 @@ class Problem(ABC):
         super().__init__()
 
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
+        self.n_trials: int = 0
 
     @property
     def f_min(self) -> float | None:
@@ -67,9 +68,10 @@ class Problem(ABC):
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         trial_value = self._evaluate(trial_info=trial_info)
+        self.n_trials += 1
 
         for logger in self.loggers:
-            logger.log_trial(trial_info=trial_info, trial_value=trial_value)
+            logger.log_trial(n_trials=self.n_trials, trial_info=trial_info, trial_value=trial_value)
 
         return trial_value
 

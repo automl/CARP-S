@@ -40,7 +40,7 @@ class RandomSearchOptimizer(Optimizer):
     def _setup_optimizer(self) -> None:
         return None
     
-    def current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
         configs = [h[0] for h in self.history]
         costs = [h[1] for h in self.history]
         idx = np.argmin(costs)

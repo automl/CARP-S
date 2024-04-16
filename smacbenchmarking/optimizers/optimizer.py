@@ -3,17 +3,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import time
 from typing import Any
-import numpy as np
 
-from ConfigSpace import ConfigurationSpace, Configuration
+from ConfigSpace import ConfigurationSpace
 
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
-
-SearchSpace = Any
-Cost = np.ndarray | float
-Incumbent = tuple[Configuration, Cost] | list[tuple[Configuration, Cost]] | None
+from smacbenchmarking.utils.types import Incumbent, SearchSpace
 
 
 class Optimizer(ABC):
@@ -89,8 +85,7 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    @property
-    def current_incumbent(self) -> Incumbent:
+    def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
         Returns
@@ -127,12 +122,12 @@ class Optimizer(ABC):
             self.tell(trial_info=trial_info, trial_value=trial_value)
             self.trial_counter += 1
 
-            if self.current_incumbent != self._last_incumbent:
-                self._last_incumbent = self.current_incumbent
+            if self.get_current_incumbent() != self._last_incumbent:
+                self._last_incumbent = self.get_current_incumbent()
                 for logger in self.loggers:
-                    logger.log_incumbent(self.current_incumbent)
+                    logger.log_incumbent(self.get_current_incumbent())
 
-        return self.current_incumbent
+        return self.get_current_incumbent()
 
     @abstractmethod
     def ask(self) -> TrialInfo:

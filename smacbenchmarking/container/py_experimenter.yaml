@@ -32,6 +32,7 @@ PY_EXPERIMENTER:
 
     logtables:
       trials:
+        n_trials: INT
         trial_info__config: JSON
         trial_info__instance: INT
         trial_info__seed: INT

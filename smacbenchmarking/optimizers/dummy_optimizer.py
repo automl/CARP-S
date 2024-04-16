@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional, Any
+import numpy as np
 
 from time import sleep
 
@@ -11,6 +12,7 @@ from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.loggers.abstract_logger import AbstractLogger
 from smacbenchmarking.optimizers.optimizer import Optimizer, SearchSpace
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from smacbenchmarking.utils.types import Cost
 
 
 class DummyOptimizer(Optimizer):
@@ -26,7 +28,7 @@ class DummyOptimizer(Optimizer):
     ) -> None:
         super().__init__(problem, n_trials, time_budget, n_workers, loggers)
         self.cfg = dummy_cfg
-        self.trajectory = []
+        self.history: list[Configuration, Cost] = []
         if "budget" in self.cfg.keys():
             self.fidelity_enabled = True
             self.budget = self.cfg.budget
@@ -45,12 +47,15 @@ class DummyOptimizer(Optimizer):
 
     def ask(self) -> TrialInfo:
         sleep(1)
-        trial = self.problem.configspace.sample_configuration()
-        trial = self.convert_to_trial(trial, budget=self.budget)
+        config = self.problem.configspace.sample_configuration()
+        trial = self.convert_to_trial(config, budget=self.budget)
         return trial
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        self.trajectory.append(float(trial_value.cost))
+        self.history.append((trial_info.config, trial_value.cost))
+
+    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+        return self.history[np.array([v[1] for v in self.history]).argmin()]
 
 
 
