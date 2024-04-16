@@ -1,0 +1,24 @@
+# @package _global_
+optimizer_id: SMAC3-1.4-BlackBoxFacade
+optimizer_container_id: SMAC3-1.4
+optimizer:
+  _target_: carps.optimizers.smac14.SMAC314Optimizer  
+  _partial_: true
+
+  smac_cfg:
+    scenario:
+      seed: ${seed}
+      deterministic: true
+      n_workers: 1
+      # output_dir: ${outdir}/${seed}/smac3_output
+
+      run_obj: quality  # we optimize quality (alternatively runtime)
+      runcount_limit: ${task.n_trials}  # max. number of function evaluations
+      wallclock_limit: null
+      min_budget: ${task.min_budget}
+      max_budget: ${task.max_budget}
+    smac_kwargs:
+      dask_client: null
+    optimization_type: bb
+    max_config_calls: 1
+    intensifier: null

@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/rbv2_glmnet/1067/repl
+problem:
+  _target_: carps.benchmarks.yahpo.YahpoProblem
+  bench: rbv2_glmnet
+  instance: '1067'
+  budget_type: repl
+  metric: acc
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: 1
+  max_budget: 10

@@ -1,130 +1,81 @@
-# These have been configured to only really run short tasks. Longer form tasks
-# are usually completed in github actions.
+.PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install check format
+.DEFAULT_GOAL := help
 
-NAME := SMACBenchmarking
-PACKAGE_NAME := smacbenchmarking
+define BROWSER_PYSCRIPT
+import os, webbrowser, sys
 
-DIR := "${CURDIR}"
-SOURCE_DIR := ${PACKAGE_NAME}
-DIST := dist
-DOCDIR := docs
-INDEX_HTML := "file://${DIR}/docs/build/html/index.html"
-EXAMPLES_DIR := examples
-TESTS_DIR := tests
+from urllib.request import pathname2url
 
-.PHONY: help install-dev check format pre-commit clean docs clean-doc examples clean-build build publish test
+webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
+endef
+export BROWSER_PYSCRIPT
+
+define PRINT_HELP_PYSCRIPT
+import re, sys
+
+for line in sys.stdin:
+	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+	if match:
+		target, help = match.groups()
+		print("%-20s %s" % (target, help))
+endef
+export PRINT_HELP_PYSCRIPT
+
+BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
 help:
-	@echo "Makefile ${NAME}"
-	@echo "* install-dev      to install all dev requirements and install pre-commit"
-	@echo "* clean            to clean any doc or build files"
-	@echo "* check            to check the source code for issues"
-	@echo "* format           to format the code with black and isort"
-	@echo "* pre-commit       to run the pre-commit check"
-	@echo "* build            to build a dist"
-	@echo "* docs             to generate and view the html files, checks links"
-	@echo "* examples         to run and generate the examples"
-	@echo "* publish          to help publish the current branch to pypi"
-	@echo "* test             to run the tests"
+	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-PYTHON ?= python
-PYTEST ?= python -m pytest
-PIP ?= python -m pip
-MAKE ?= make
-BLACK ?= black
-ISORT ?= isort
-PYDOCSTYLE ?= pydocstyle
-MYPY ?= mypy
-PRECOMMIT ?= pre-commit
-FLAKE8 ?= flake8
+clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
-install-dev:
-	$(PIP) install -e ".[dev]"
-	pre-commit install
+clean-build: ## remove build artifacts
+	rm -fr build/
+	rm -fr dist/
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
 
-check-black:
-	$(BLACK) ${SOURCE_DIR} --check || :
-	$(BLACK) ${EXAMPLES_DIR} --check || :
-	$(BLACK) ${TESTS_DIR} --check || :
+clean-pyc: ## remove Python file artifacts
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
 
-check-isort:
-	$(ISORT) ${SOURCE_DIR} --check || :
-	$(ISORT) ${TESTS_DIR} --check || :
+clean-test: ## remove test and coverage artifacts
+	rm -fr .tox/
+	rm -f .coverage
+	rm -fr htmlcov/
+	rm -fr .pytest_cache
+ruff: ## run ruff as a formatter
+	python -m ruff check --exit-zero carps
+	python -m ruff check --silent --exit-zero --no-cache --fix carps
+isort:
+	python -m isort carps tests
 
-check-pydocstyle:
-	$(PYDOCSTYLE) ${SOURCE_DIR} || :
+test: ## run tests quickly with the default Python
+	python -m pytest tests
+cov-report:
+	coverage html -d coverage_html
 
-check-mypy:
-	$(MYPY) ${SOURCE_DIR} || :
+coverage: ## check code coverage quickly with the default Python
+	coverage run --source carps -m pytest
+	coverage report -m
+	coverage html
+	$(BROWSER) htmlcov/index.html
 
-check-flake8:
-	$(FLAKE8) ${SOURCE_DIR} || :
-	$(FLAKE8) ${TESTS_DIR} || :
+docs: ## generate Sphinx HTML documentation, including API docs
+	rm -f docs/carps.rst
+	rm -f docs/modules.rst
+	sphinx-apidoc -o docs/ carps
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	$(BROWSER) docs/_build/html/index.html
+install: clean ## install the package to the active Python's site-packages
+	pip install -e ".[dev]"
 
-check: check-black check-isort check-mypy check-flake8 check-pydocstyle
+check:
+	pre-commit run --all-files
 
-pre-commit:
-	$(PRECOMMIT) run --all-files
-
-format-black:
-	$(BLACK) ${SOURCE_DIR}
-	$(BLACK) ${TESTS_DIR}
-	$(BLACK) ${EXAMPLES_DIR}
-
-format-isort:
-	$(ISORT) ${SOURCE_DIR}
-	$(ISORT) ${TESTS_DIR}
-
-format: format-black format-isort
-
-test:
-	$(PYTEST) ${TESTS_DIR}
-
-clean-doc:
-	$(MAKE) -C ${DOCDIR} clean
-
-docs:
-	$(MAKE) -C ${DOCDIR} docs
-	@echo
-	@echo "View docs at:"
-	@echo ${INDEX_HTML}
-
-examples:
-	$(MAKE) -C ${DOCDIR} examples
-	@echo
-	@echo "View docs at:"
-	@echo ${INDEX_HTML}
-
-clean-build:
-	$(PYTHON) setup.py clean
-	rm -rf ${DIST}
-
-# Build a distribution in ./dist
-build:
-	$(PYTHON) setup.py sdist
-
-# Publish to testpypi
-# Will echo the commands to actually publish to be run to publish to actual PyPi
-# This is done to prevent accidental publishing but provide the same conveniences
-publish: clean build
-	read -p "Did you update the version number?"
-	
-	$(PIP) install twine
-	$(PYTHON) -m twine upload --repository testpypi ${DIST}/*
-	@echo
-	@echo "Test with the following:"
-	@echo "* Create a new virtual environment to install the uplaoded distribution into"
-	@echo "* Run the following:"
-	@echo
-	@echo "        pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${NAME}"
-	@echo
-	@echo "* Run this to make sure it can import correctly, plus whatever else you'd like to test:"
-	@echo
-	@echo "        python -c 'import ${PACKAGE_NAME}'"
-	@echo
-	@echo "Once you have decided it works, publish to actual pypi with"
-	@echo
-	@echo "    python -m twine upload dist/*"
-
-# Clean up any builds in ./dist as well as doc, if present
-clean: clean-build clean-doc
+format:
+	make ruff
+	make isort

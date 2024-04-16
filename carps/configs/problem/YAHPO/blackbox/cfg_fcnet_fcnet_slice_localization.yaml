@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/fcnet/fcnet_slice_localization/None
+problem:
+  _target_: carps.benchmarks.yahpo.YahpoProblem
+  bench: fcnet
+  instance: fcnet_slice_localization
+  budget_type: null
+  metric: valid_mse
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: null
+  max_budget: null

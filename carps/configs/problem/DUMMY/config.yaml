@@ -1,0 +1,13 @@
+# @package _global_
+benchmark_id: DUMMY_Problem
+problem_id: dummy
+problem:
+  _target_: carps.benchmarks.dummy_problem.DummyProblem
+  return_value: 42
+  budget_type: epochs
+task:
+  n_trials: 10
+  n_objectives: 1
+  min_budget: 1
+  max_budget: 10
+  time_budget: null

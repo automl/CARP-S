@@ -1,0 +1,6 @@
+# @package _global_
+optimizer_id: HEBO
+optimizer_container_id: HEBO
+optimizer:
+  _target_: carps.optimizers.hebo.HEBOOptimizer
+  _partial_: true

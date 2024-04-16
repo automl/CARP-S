@@ -1,0 +1,18 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/so/iaml_xgboost/1489/None
+problem:
+  _target_: carps.benchmarks.yahpo.YahpoProblem
+  bench: iaml_xgboost
+  instance: '1489'
+  budget_type: null
+  metric:
+  - mmce
+  - nf
+  - ias
+  - rammodel
+task:
+  n_trials: 165
+  n_objectives: 4
+  min_budget: null
+  max_budget: null

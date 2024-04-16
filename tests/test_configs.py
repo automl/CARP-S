@@ -8,8 +8,8 @@ from omegaconf import OmegaConf
 @pytest.mark.parametrize(
     ("path", "key"),
     [
-        ("smacbenchmarking/configs/optimizer", "optimizer_id"),
-        ("smacbenchmarking/configs/problem", "problem_id"),
+        ("carps/configs/optimizer", "optimizer_id"),
+        ("carps/configs/problem", "problem_id"),
     ],
 )
 def test_unique_ids(path, key):
