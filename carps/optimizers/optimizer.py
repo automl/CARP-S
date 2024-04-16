@@ -9,7 +9,7 @@ from ConfigSpace import ConfigurationSpace
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent, SearchSpace
+from carps.utils.types import Incumbent, SearchSpace, Cost
 
 
 class Optimizer(ABC):

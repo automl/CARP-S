@@ -7,6 +7,7 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer, SearchSpace
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
 
 
 class RandomSearchOptimizer(Optimizer):
@@ -22,7 +23,7 @@ class RandomSearchOptimizer(Optimizer):
 
         self.configspace: ConfigurationSpace = self.problem.configspace
         self.n_trials: int = n_trials
-        self.history: list[tuple[Configuration,float]] = []
+        self.history: list[tuple[TrialInfo, TrialValue]] = []
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
@@ -35,16 +36,10 @@ class RandomSearchOptimizer(Optimizer):
         return self.convert_to_trial(config=config)
     
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        self.history.append((trial_info.config, trial_value.cost))
+        self.history.append((trial_info, trial_value))
 
     def _setup_optimizer(self) -> None:
         return None
     
-    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
-        configs = [h[0] for h in self.history]
-        costs = [h[1] for h in self.history]
-        idx = np.argmin(costs)
-        config = configs[idx]
-        cost = costs[idx]
-        return (config, cost)
-
+    def get_current_incumbent(self) -> Incumbent:
+        return min(self.history, key=lambda x: x[1].cost)

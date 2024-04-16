@@ -263,7 +263,8 @@ class SynetuneOptimizer(Optimizer):
         bscheduler = optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
         return bscheduler
     
-    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) \
+            -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
         trial_result = self.best_trial(metric=self.metric)
         config = self.convert_to_trial(trial=trial_result).config
         cost = trial_result.metrics[self.metric]

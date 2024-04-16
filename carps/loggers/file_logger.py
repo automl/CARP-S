@@ -88,9 +88,8 @@ class FileLogger(AbstractLogger):
                 logger.info(f"Found previous run. Removing '{directory}'.")
                 shutil.rmtree(directory)
             else:
-                raise RuntimeError(f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
-                   
-
+                raise RuntimeError(
+                    f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
 
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
