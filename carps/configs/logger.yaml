@@ -2,6 +2,7 @@
 loggers:
   - _target_: carps.loggers.file_logger.FileLogger
     _partial_: True
+    overwrite: False
     # outdir: ${outdir}/${seed}
   - _target_: carps.loggers.database_logger.DatabaseLogger
     _partial_: True
