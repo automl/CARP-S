@@ -3,6 +3,7 @@ from __future__ import annotations
 import hydra
 from omegaconf import DictConfig
 
+from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
 
 
@@ -18,6 +19,7 @@ def main(cfg: DictConfig) -> None:
         Global configuration.
 
     """
+    check_requirements(cfg=cfg)
     optimize(cfg=cfg)
 
     return None

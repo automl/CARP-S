@@ -1,5 +1,6 @@
 # @package _global_
 optimizer_id: SyneTune-BOHB
+optimizer_container_id: SyneTune
 optimizer:
   _target_: carps.optimizers.synetune.SynetuneOptimizer
   _partial_: true

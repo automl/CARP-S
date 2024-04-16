@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from py_experimenter.result_processor import ResultProcessor
@@ -78,6 +80,8 @@ def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -
         instantiate database logger.
 
     """
+    os.environ["HYDRA_FULL_ERROR"] = "1"
+
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
     printr(cfg_dict)
     # hydra_cfg = HydraConfig.instance().get()
