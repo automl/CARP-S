@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
-
 import time
+from typing import Any, Optional
 
 from ConfigSpace import ConfigurationSpace
 from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
@@ -13,7 +12,6 @@ from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
 from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
-
 from smacbenchmarking.benchmarks.problem import Problem
 from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 
@@ -21,7 +19,9 @@ from smacbenchmarking.utils.trials import TrialInfo, TrialValue
 class HPOBenchProblem(Problem):
     """HPOBench problem."""
 
-    def __init__(self, model: str, task_id: int, seed: int, budget_type: Optional[str] = None):
+    def __init__(
+        self, model: str, task_id: int, seed: int, budget_type: Optional[str] = None
+    ):
         """Initialize a HPOBench problem.
 
         Parameters
@@ -35,7 +35,9 @@ class HPOBenchProblem(Problem):
         super().__init__()
 
         self.budget_type = budget_type
-        self._problem = get_hpobench_problem(task_id=task_id, model=model, seed=seed, budget_type=self.budget_type)
+        self._problem = get_hpobench_problem(
+            task_id=task_id, model=model, seed=seed, budget_type=self.budget_type
+        )
         self._configspace = self._problem.get_configuration_space(seed=seed)
 
     @property
@@ -66,7 +68,11 @@ class HPOBenchProblem(Problem):
         starttime = time.time()
 
         if trial_info.budget is not None:
-            budget_value = float(trial_info.budget) if self.budget_type == "subsample" else round(trial_info.budget)
+            budget_value = (
+                float(trial_info.budget)
+                if self.budget_type == "subsample"
+                else round(trial_info.budget)
+            )
             fidelity = {self.budget_type: budget_value}
         else:
             fidelity = None
@@ -77,11 +83,18 @@ class HPOBenchProblem(Problem):
         endtime = time.time()
         T = endtime - starttime
         # function_value is 1 - accuracy on the validation set
-        trial_value = TrialValue(cost=result_dict["function_value"], time=T, starttime=starttime, endtime=endtime)
+        trial_value = TrialValue(
+            cost=result_dict["function_value"],
+            time=T,
+            starttime=starttime,
+            endtime=endtime,
+        )
         return trial_value
 
 
-def get_hpobench_problem(model: str, task_id: int, seed: int, budget_type: Optional[str] = None) -> Any:
+def get_hpobench_problem(
+    model: str, task_id: int, seed: int, budget_type: Optional[str] = None
+) -> Any:
     """Get HPOBench problem.
 
     Parameters
@@ -99,18 +112,34 @@ def get_hpobench_problem(model: str, task_id: int, seed: int, budget_type: Optio
     """
     common_args = {"rng": seed, "task_id": task_id}
     if model == "lr":
-        problem = TabularBenchmark(model="lr", **common_args) if budget_type is None else LRBenchmark(**common_args)
+        problem = (
+            TabularBenchmark(model="lr", **common_args)
+            if budget_type is None
+            else LRBenchmark(**common_args)
+        )
     elif model == "nn":
-        problem = TabularBenchmark(model="nn", **common_args) if budget_type is None else NNBenchmark(**common_args)
+        problem = (
+            TabularBenchmark(model="nn", **common_args)
+            if budget_type is None
+            else NNBenchmark(**common_args)
+        )
     elif model == "rf":
         problem = (
-            TabularBenchmark(model="rf", **common_args) if budget_type is None else RandomForestBenchmark(**common_args)
+            TabularBenchmark(model="rf", **common_args)
+            if budget_type is None
+            else RandomForestBenchmark(**common_args)
         )
     elif model == "svm":
-        problem = TabularBenchmark(model="svm", **common_args) if budget_type is None else SVMBenchmark(**common_args)
+        problem = (
+            TabularBenchmark(model="svm", **common_args)
+            if budget_type is None
+            else SVMBenchmark(**common_args)
+        )
     elif model == "xgboost":
         problem = (
-            TabularBenchmark(model="xgb", **common_args) if budget_type is None else XGBoostBenchmark(**common_args)
+            TabularBenchmark(model="xgb", **common_args)
+            if budget_type is None
+            else XGBoostBenchmark(**common_args)
         )
     else:
         raise ValueError(f"Unknown model {model} for HPOBench.")
