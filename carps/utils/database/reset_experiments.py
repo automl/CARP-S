@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-import fire
 
+import fire
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
