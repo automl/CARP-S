@@ -1,0 +1,10 @@
+# @package _global_
+optimizer_id: DUMMY_Optimizer-MultiFidelity
+optimizer_container_id: DUMMY_Optimizer
+optimizer:
+  _target_: carps.optimizers.dummy_optimizer.DummyOptimizer
+  _partial_: true
+
+  dummy_cfg:
+   timeout: 10
+   budget: ${task.max_budget}

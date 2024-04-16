@@ -6,8 +6,8 @@ repos:
     rev: 5.12.0
     hooks:
       - id: isort
-        name: isort imports smacbenchmarking
-        files: smacbenchmarking
+        name: isort imports carps
+        files: carps
 
       - id: isort
         name: isort imports tests
@@ -17,8 +17,8 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        name: black formatter smacbenchmarking
-        files: smacbenchmarking
+        name: black formatter carps
+        files: carps
 
       - id: black
         name: black formatter tests
@@ -32,22 +32,22 @@ repos:
     rev: 6.3.0
     hooks:
       - id: pydocstyle
-        files: smacbenchmarking
+        files: carps
         additional_dependencies: ["toml"] # Needed to parse pyproject.toml
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.4.1
     hooks:
       - id: mypy
-        name: mypy smacbenchmarking
-        files: smacbenchmarking
+        name: mypy carps
+        files: carps
 
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
       - id: flake8
-        name: flake8 smacbenchmarking
-        files: smacbenchmarking
+        name: flake8 carps
+        files: carps
 
       - id: flake8
         name: flake8 tests

@@ -1,0 +1,38 @@
+defaults:
+  - _self_
+  - logger
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+
+seed: 1
+
+# Set in problem cfg
+problem: ???
+task:
+  n_trials: ???  # Optimization budget as number of evaluations.
+  time_budget: null  # Optimization budget as time in seconds
+
+  # Multi-fidelity
+  min_budget: null
+  max_budget: null
+
+benchmark_id: ??? # Set in problem cfg.
+problem_id: ???  # Set in problem cfg. Can be directory.
+
+# Set in optimizer cfg
+optimizer: ???
+optimizer_id: ???
+optimizer_container_id: ???
+
+pyexperimenter_configuration_file_path: null
+database_credential_file_path: null
+
+timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}
+hydra:
+  run:
+    dir: ${outdir}/${seed}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: runs  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${optimizer_id}/${benchmark_id}/${problem_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir

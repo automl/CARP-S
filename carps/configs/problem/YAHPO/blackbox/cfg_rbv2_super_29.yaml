@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/rbv2_super/29/None
+problem:
+  _target_: carps.benchmarks.yahpo.YahpoProblem
+  bench: rbv2_super
+  instance: '29'
+  budget_type: null
+  metric: acc
+task:
+  n_trials: 100
+  n_objectives: 1
+  min_budget: null
+  max_budget: null

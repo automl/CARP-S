@@ -1,0 +1,11 @@
+# @package _global_
+optimizer_id: SyneTune-BORE
+optimizer_container_id: SyneTune
+optimizer:
+  _target_: carps.optimizers.synetune.SynetuneOptimizer
+  _partial_: true
+
+  optimizer_name: 'BORE'
+  optimizer_kwargs:
+    random_seed: ${seed}
+  # max_budget: ${task.max_budget}

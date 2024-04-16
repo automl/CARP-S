@@ -148,8 +148,8 @@ runs
 /.idea/.gitignore
 /.codecarbon.config
 
-/smacbenchmarking/container/credentials.yaml
-smacbenchmarking.db
+/carps/container/credentials.yaml
+carps.db
 *.jsonl
 *.sif
 logs

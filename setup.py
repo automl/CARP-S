@@ -2,7 +2,7 @@ import os
 
 import setuptools
 
-from smacbenchmarking import (
+from carps import (
     author,
     author_email,
     description,

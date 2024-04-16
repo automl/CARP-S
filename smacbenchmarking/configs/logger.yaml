@@ -1,8 +1,0 @@
-# @package _global_
-loggers:
-  - _target_: smacbenchmarking.loggers.file_logger.FileLogger
-    _partial_: True
-    outdir: ${outdir}/${seed}
-  - _target_: smacbenchmarking.loggers.database_logger.DatabaseLogger
-    _partial_: True
-
