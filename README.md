@@ -56,10 +56,10 @@ one of the following minimal examples to benchmark `SMAC2.0` on `BBOB` directly 
 
 ```bash
 # Run SMAC BlackBoxFacade on certain BBOB problem
-python carps/run.py +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
+python -m carps.run +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
 
 # Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python carps/run.py +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)'
+python -m carps.run +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
 Note that in this case, no logging is done.
