@@ -47,6 +47,7 @@ PY_EXPERIMENTER:
         trial_value__endtime: DOUBLE
         trial_value__additional_info: JSON
       trajectory:
+        n_trials: INT
         trial_info__config: JSON
         trial_info__instance: INT
         trial_info__seed: INT
