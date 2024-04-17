@@ -24,6 +24,8 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
+
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -264,8 +266,14 @@ class SynetuneOptimizer(Optimizer):
         return bscheduler
     
     def get_current_incumbent(self) \
-            -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+            -> Incumbent:
         trial_result = self.best_trial(metric=self.metric)
-        config = self.convert_to_trial(trial=trial_result).config
+        trial_info = self.convert_to_trial(trial=trial_result)
         cost = trial_result.metrics[self.metric]
-        return (config, cost)
+        trial_value = TrialValue(
+            cost=cost,
+            time=trial_result.seconds,
+            virtual_time=trial_result.seconds,
+            additional_info=trial_result.metrics
+        )
+        return (trial_info, trial_value)

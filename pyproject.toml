@@ -16,6 +16,7 @@ dependencies = [
   "ConfigSpace",
   "rich",
   "pandas",
+  "fire",
   "omegaconf",
   "dataclasses-json",
   "pymysql",
