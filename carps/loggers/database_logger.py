@@ -53,7 +53,7 @@ class DatabaseLogger(AbstractLogger):
         if self.result_processor:
             self.result_processor.process_logs({"trials": info})
 
-    def log_incumbent(self, n_trials: int, time: float, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
         if incumbent is None:
             return
 
@@ -63,7 +63,6 @@ class DatabaseLogger(AbstractLogger):
         for inc in incumbent:
             info = convert_trial_info(inc[0], inc[1])
             info["n_trials"] = n_trials
-            info["time"] = time
 
             if self.result_processor:
                 self.result_processor.process_logs({"trajectory": info})
