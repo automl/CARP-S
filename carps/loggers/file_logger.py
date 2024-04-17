@@ -138,7 +138,7 @@ class FileLogger(AbstractLogger):
 
         for inc in incumbent:
             info = convert_trials(n_trials, inc[0], inc[1])
-            dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
+            dump_logs(log_data=info, filename="trajectory_logs.jsonl", directory=self.directory)
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
         dump_logs(log_data=data, filename=f"{entity}.jsonl", directory=self.directory)
