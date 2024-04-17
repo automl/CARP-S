@@ -73,6 +73,9 @@ def convert_trials(n_trials, trial_info, trial_value):
 
 
 class FileLogger(AbstractLogger):
+    _filename: str = "trial_logs.jsonl"
+    _filename_trajectory: str = "trajectory_logs.jsonl"
+
     def __init__(self, overwrite: bool = False, directory: str | None = None) -> None:
         """File logger.
 
@@ -94,7 +97,7 @@ class FileLogger(AbstractLogger):
         directory = directory or get_run_directory()
         directory = Path(directory)
         self.directory = directory
-        if (directory / "trial_logs.jsonl").is_file():
+        if (directory / self._filename).is_file():
             if overwrite:
                 logger.info(f"Found previous run. Removing '{directory}'.")
                 for root, dirs, files in os.walk(directory):
@@ -128,7 +131,7 @@ class FileLogger(AbstractLogger):
             info_str = f"n_trials: {info['n_trials']}, config: {info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
             logger.info(info_str)
 
-        dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
+        dump_logs(log_data=info, filename=self._filename, directory=self.directory)
 
     def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
         if incumbent is None:
@@ -138,7 +141,7 @@ class FileLogger(AbstractLogger):
 
         for inc in incumbent:
             info = convert_trials(n_trials, inc[0], inc[1])
-            dump_logs(log_data=info, filename="trajectory_logs.jsonl", directory=self.directory)
+            dump_logs(log_data=info, filename=self._filename_trajectory, directory=self.directory)
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
         dump_logs(log_data=data, filename=f"{entity}.jsonl", directory=self.directory)
