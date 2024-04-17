@@ -12,6 +12,7 @@ from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import AskAndTellNotSupportedError
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
 
 
 class NotSupportedError(Exception):
@@ -205,5 +206,7 @@ class SMAC314Optimizer(Optimizer):
         incumbent = self.solver.optimize()  # noqa: F841
         return self.get_current_incumbent()()
     
-    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
-        return (self.solver.solver.incumbent, self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))
+    def get_current_incumbent(self) -> Incumbent:
+        trial_info = TrialInfo(config=self.solver.solver.incumbent)
+        trial_value = TrialValue(cost=self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))
+        return (trial_info, trial_value)
