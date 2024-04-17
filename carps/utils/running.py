@@ -9,6 +9,7 @@ from rich import inspect
 from rich import print as printr
 
 from carps.benchmarks.problem import Problem
+from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import NotSupportedError
 
@@ -50,6 +51,8 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
 
     Parameters
     ----------
+    loggers : list[AbstractLogger]
+        List of loggers to use.
     cfg : DictConfig
         Global configuration
     problem : Problem
@@ -61,7 +64,10 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
         Instantiated optimizer.
     """
     optimizer_cfg = cfg.optimizer
-    optimizer = instantiate(optimizer_cfg)(problem=problem, n_trials=cfg.task.n_trials, time_budget=cfg.task.time_budget)
+    optimizer = instantiate(optimizer_cfg)(problem=problem,
+                                           n_trials=cfg.task.n_trials,
+                                           time_budget=cfg.task.time_budget,
+                                           loggers=problem.loggers)
     if "optimizer_wrappers" in cfg:
         for wrapper in cfg.optimizer_wrappers:
             optimizer = wrapper(optimizer)
