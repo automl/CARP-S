@@ -2,9 +2,9 @@ PY_EXPERIMENTER:
   n_jobs: 1
 
   Database:
-    use_ssh_tunnel: false
-    provider: sqlite
-    database: carps
+    use_ssh_tunnel: true
+    provider: mysql
+    database: Helena_carps
     table:
       name: results
       keyfields:
