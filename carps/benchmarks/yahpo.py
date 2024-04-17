@@ -159,7 +159,7 @@ class YahpoProblem(Problem):
 
         # Benchmarking suite returns a list of results (as potentially more than one config can be passed),
         # as we only pass one config we need to select the first one
-        ret = self._problem.objective_function(xs)[0]
+        ret = self._problem.objective_function(configuration=xs, seed=trial_info.seed)[0]
         costs = [maybe_invert(ret[target], target) for target in self.metrics]
         if len(costs) == 1:
             costs = costs[0]

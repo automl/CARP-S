@@ -28,14 +28,14 @@ def py_experimenter_evaluate(parameters: dict,
         cfg_dict = json.loads(config)
 
         job_id = getattr(os.environ, "SLURM_JOB_ID", None)
-
-        result_processor.process_results({"slurm_job_id": job_id})
+        if job_id is not None:
+            result_processor.process_results({"slurm_job_id": job_id})
 
         cfg = OmegaConf.create(cfg_dict)
 
         check_requirements(cfg=cfg)
 
-        os.chdir(cfg.outdir)
+        # os.chdir(cfg.outdir)
         
         optimize(cfg, result_processor=result_processor)
 
