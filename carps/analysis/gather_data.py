@@ -159,16 +159,16 @@ def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:
 def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     # logs= logs.drop(columns=["config"])
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
-    logs["cost_norm"] = logs.groupby("problem_id")["cost"].transform(normalize)
-    logs["cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["cost"].transform("cummin")
-    logs["cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["cost_norm"].transform("cummin")
+    logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
+    logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")
+    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
     return logs
 
 def interpolate_trials(logs: pd.DataFrame) -> pd.DataFrame:
     x = np.linspace(0, 1, 21)
 
     x_column = "n_trials_norm"
-    interpolation_columns = ["cost", "cost_norm", "cost_inc", "cost_inc_norm"]
+    interpolation_columns = ["trial_value__cost", "trial_value__cost_norm", "trial_value__cost_inc", "trial_value__cost_inc_norm"]
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
     group_keys = ["benchmark_id", "optimizer_id", "problem_id", "seed"]
