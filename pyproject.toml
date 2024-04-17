@@ -17,6 +17,7 @@ dependencies = [
   "rich",
   "pandas",
   "fire",
+  "seaborn",
   "omegaconf",
   "dataclasses-json",
   "pymysql",
