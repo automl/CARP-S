@@ -27,6 +27,7 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
 
 
 def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
@@ -329,10 +330,12 @@ class HEBOOptimizer(Optimizer):
 
         return X, Y
     
-    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) -> Incumbent:
         best_x = self.solver.best_x
         best_y = self.solver.best_y
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=best_x, design_space=self.hebo_configspace, config_space=self.problem.configspace
         )
-        return (config, best_y)
+        trial_info = TrialInfo(config=config)
+        trial_value = TrialValue(cost=best_y)
+        return (trial_info, trial_value)
