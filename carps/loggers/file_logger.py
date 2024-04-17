@@ -67,6 +67,12 @@ def dump_logs(log_data: dict, filename: str, directory: str | None = None):
         file.writelines([log_data_str])
 
 
+def convert_trials(n_trials, trial_info, trial_value):
+    info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+    info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
+    return info
+
+
 class FileLogger(AbstractLogger):
     def __init__(self, overwrite: bool = False, directory: str | None = None) -> None:
         """File logger.
@@ -100,7 +106,8 @@ class FileLogger(AbstractLogger):
                             logger.debug(f"Removed {full_fn}")
             else:
                 raise RuntimeError(
-                    f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
+                    f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite "
+                    f"for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
 
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
@@ -114,15 +121,21 @@ class FileLogger(AbstractLogger):
         trial_value : TrialValue
             Trial value.
         """
-        info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
+        info = convert_trials(n_trials, trial_info, trial_value)
         info_str = json.dumps(info) + "\n"
         logging.info(info_str)
 
         dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
 
     def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
-        pass
+        if incumbent is None:
+            return
+        if not isinstance(incumbent, list):
+            incumbent = [incumbent]
+
+        for inc in incumbent:
+            info = convert_trials(n_trials, inc[0], inc[1])
+            dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
         dump_logs(log_data=data, filename=f"{entity}.jsonl", directory=self.directory)
