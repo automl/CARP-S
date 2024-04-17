@@ -121,7 +121,7 @@ class FileLogger(AbstractLogger):
 
         dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
 
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int, time: float, incumbent: Incumbent) -> None:
         pass
 
     def log_arbitrary(self, data: dict, entity: str) -> None:

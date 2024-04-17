@@ -30,7 +30,7 @@ class AbstractLogger(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int, time: float, incumbent: Incumbent) -> None:
         """Log the incumbents.
 
         Parameters
