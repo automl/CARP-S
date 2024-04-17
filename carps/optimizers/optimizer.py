@@ -120,13 +120,13 @@ class Optimizer(ABC):
             trial_value = self.problem.evaluate(trial_info=trial_info)
             self.virtual_time_elapsed_seconds += trial_value.virtual_time
             self.tell(trial_info=trial_info, trial_value=trial_value)
-            self.trial_counter += 1
 
             if self.get_current_incumbent() != self._last_incumbent:
                 self._last_incumbent = self.get_current_incumbent()
                 for logger in self.loggers:
-                    logger.log_incumbent(self.get_current_incumbent())
+                    logger.log_incumbent(self.trial_counter, self.get_current_incumbent())
 
+            self.trial_counter += 1
         return self.get_current_incumbent()
 
     @abstractmethod
