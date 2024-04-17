@@ -8,16 +8,15 @@ from pathlib import Path
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
-from rich.logging import RichHandler
-from smac.utils.logging import get_logger
+
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.logging import setup_logging
+from smac.utils.logging import get_logger
 
-FORMAT = "%(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
-
+setup_logging()
 logger = get_logger("FileLogger")
 
 
@@ -122,8 +121,12 @@ class FileLogger(AbstractLogger):
             Trial value.
         """
         info = convert_trials(n_trials, trial_info, trial_value)
-        info_str = json.dumps(info) + "\n"
-        logging.info(info_str)
+        if logging.DEBUG <= logger.level:
+            info_str = json.dumps(info) + "\n"
+            logger.debug(info_str)
+        else:
+            info_str = f"n_trials: {info['n_trials']}, config: {info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
+            logger.info(info_str)
 
         dump_logs(log_data=info, filename="trial_logs.jsonl", directory=self.directory)
 

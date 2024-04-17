@@ -16,6 +16,9 @@ from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
 
+from carps.utils.logging import setup_logging
+
+setup_logging()
 
 class SMAC3Optimizer(Optimizer):
     def __init__(
