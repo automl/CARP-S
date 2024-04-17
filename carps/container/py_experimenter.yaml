@@ -52,6 +52,8 @@ PY_EXPERIMENTER:
         trial_info__instance: INT
         trial_info__seed: INT
         trial_info__budget: DOUBLE
+        trial_info__name: VARCHAR(100)
+        trial_info__checkpoint: VARCHAR(250)
         trial_value__cost: JSON
         trial_value__time: DOUBLE
         trial_value__virtual_time: DOUBLE
