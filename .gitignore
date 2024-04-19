@@ -148,3 +148,5 @@ carps.db
 *.sif
 logs
 /*.db
+*.pdf
+*.pickle
