@@ -15,7 +15,8 @@ from rliable import library as rly
 from rliable import metrics, plot_utils
 
 from carps.analysis.utils import savefig
-from carps.utils.logging import get_logger, setup_logging
+from carps.utils.loggingutils import get_logger, setup_logging
+from carps.utils.overridefinder import find_override, merge_overrides
 
 setup_logging()
 logger = get_logger(__file__)
@@ -47,31 +48,54 @@ def get_final_performance_dict(
     dict[str, Any]
         Dict with method as keys and performance values with shape [n seeds x m instances]
     """
-    performance_data = performance_data[performance_data[budget_var]==max_budget]
+    performance_data = performance_data[np.isclose(performance_data[budget_var], max_budget)]
     perf_dict = {}
     dropped: list = []
     seeds = set(performance_data["seed"].unique())
     instances = set(performance_data[key_instance].unique())
+    override_commands: list[str] = []
     for gid, gdf in performance_data.groupby(key_method):
         gdf = gdf.reset_index()
         n_seeds = gdf["seed"].nunique()
         n_instances = gdf[key_instance].nunique()
         P = gdf[key_performance].to_numpy()
 
-        if len(P) == n_seeds * n_instances:
-            P = P.reshape((n_seeds, n_instances))
-            perf_dict[gid] = P
-        else:
-            missing_seeds = seeds.difference(set(gdf["seeds"].unique()))
-            missing_instances = instances.difference(set(gdf[key_instance].unique()))
+        missing_seeds = seeds.difference(set(gdf["seed"].unique()))
+        missing_seeds = [int(s) for s in list(missing_seeds)]
+        missing_instances = list(instances.difference(set(gdf[key_instance].unique())))
+
+        if len(missing_instances) > 0 or len(missing_seeds) > 0:
             dropped.append({
                 "method": gid,
                 "missing_seeds": missing_seeds,
                 "missing_instances": missing_instances
             })
+            optimizer_override = find_override(optimizer_id=gid)
+
+            if len(missing_instances) > 0:
+                problem_overrides = [find_override(problem_id=p) for p in missing_instances]
+                problem_overrides = [p for p in problem_overrides if p is not None]
+                problem_override = merge_overrides(problem_overrides)
+            else:
+                problem_overrides = [find_override(problem_id=p) for p in instances]
+                problem_overrides = [p for p in problem_overrides if p is not None]
+                problem_override = merge_overrides(problem_overrides)
+            if len(missing_seeds) > 0:
+                seed_override = f"seed={','.join([str(s) for s in missing_seeds])}"
+            else:
+                seed_override = f"seed={','.join([str(s) for s in seeds])}"
+            override_cmd = f"{seed_override} {problem_override} {optimizer_override}"
+            print(override_cmd)
+            override_commands.append(override_cmd)
+        else:
+            # if len(P) == n_seeds * n_instances:
+            P = P.reshape((n_seeds, n_instances))
+            perf_dict[gid] = P
     if len(dropped) > 0:
         logger.info("Dropped following incomplete methods:")
         logger.info(json.dumps({"incomplete": dropped}, indent="\t"))
+        logger.info(f"Overrides: ")
+        logger.info(override_commands)
     return perf_dict
 
 
@@ -89,6 +113,9 @@ def calculate_interval_estimates(final_performance_dict: pd.DataFrame, metrics: 
         pickle.dump(aggregate_scores, handle, protocol=pickle.HIGHEST_PROTOCOL)
     with open('aggregate_score_cis.pickle', 'wb') as handle:
         pickle.dump(aggregate_score_cis, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    print(final_performance_dict)
+    print(aggregate_scores)
 
     return aggregate_scores, aggregate_score_cis
 
