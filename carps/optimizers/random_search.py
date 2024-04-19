@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 
 from carps.benchmarks.problem import Problem

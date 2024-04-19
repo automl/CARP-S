@@ -3,15 +3,14 @@ from __future__ import annotations
 from time import sleep
 from typing import Any, Optional
 
-import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer, SearchSpace
-from carps.utils.trials import TrialInfo, TrialValue, StatusType
-from carps.utils.types import Cost, Incumbent
+from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
 
 
 class DummyOptimizer(Optimizer):

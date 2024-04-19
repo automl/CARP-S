@@ -9,7 +9,6 @@ from rich import inspect
 from rich import print as printr
 
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import NotSupportedError
 

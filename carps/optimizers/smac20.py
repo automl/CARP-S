@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
@@ -13,10 +12,9 @@ from smac.scenario import Scenario
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.logging import setup_logging
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
-
-from carps.utils.logging import setup_logging
 
 setup_logging()
 
