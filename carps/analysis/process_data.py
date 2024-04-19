@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from carps.utils.logging import get_logger, setup_logging
+from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__file__)

@@ -12,7 +12,7 @@ from smac.scenario import Scenario
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.logging import setup_logging
+from carps.utils.loggingutils import setup_logging
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
 

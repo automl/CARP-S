@@ -12,7 +12,7 @@ from smac.utils.logging import get_logger
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent
-from carps.utils.logging import setup_logging
+from carps.utils.loggingutils import setup_logging
 from carps.utils.trials import TrialInfo, TrialValue
 
 setup_logging()
