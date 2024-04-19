@@ -9,7 +9,7 @@ from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
 from rich.logging import RichHandler
-from smac.utils.logging import get_logger
+from carps.utils.logging import get_logger
 
 from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
