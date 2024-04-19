@@ -12,8 +12,7 @@ from carps.utils.running import make_optimizer
 
 def optimizer_experiment(parameters: dict, result_processor: ResultProcessor, custom_config: dict):
     loggers = [DatabaseLogger(result_processor), FileLogger()]
-    problem = ContainerizedProblemClient(loggers)
-
+    problem = ContainerizedProblemClient(loggers=loggers)
     optimizer = make_optimizer(cfg=cfg, problem=problem)
 
     optimizer.run()

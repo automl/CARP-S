@@ -5,6 +5,8 @@ from typing import Any, TypeAlias
 import numpy as np
 from ConfigSpace import Configuration
 
-SearchSpace: TypeAlias  = Any
-Cost: TypeAlias  = np.ndarray | float
-Incumbent: TypeAlias  = tuple[Configuration, Cost] | list[tuple[Configuration, Cost]] | None
+from carps.utils.trials import TrialInfo, TrialValue
+
+SearchSpace: TypeAlias = Any
+Cost: TypeAlias = np.ndarray | float
+Incumbent: TypeAlias = tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None

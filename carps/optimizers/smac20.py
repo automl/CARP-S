@@ -14,7 +14,11 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.types import Incumbent
 
+from carps.utils.logging import setup_logging
+
+setup_logging()
 
 class SMAC3Optimizer(Optimizer):
     def __init__(
@@ -223,14 +227,18 @@ class SMAC3Optimizer(Optimizer):
         """
         self.solver.tell(info=trial_info, value=trial_value)
 
-    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
+    def get_current_incumbent(self) -> Incumbent:
         if self.solver.scenario.count_objectives() == 1:
             inc = self.solver.intensifier.get_incumbent()
             cost = self.solver.runhistory.get_cost(config=inc)
-            incumbent_tuple = (inc, cost)
+            trial_info = TrialInfo(config=inc)
+            trial_value = TrialValue(cost=cost)
+            incumbent_tuple = (trial_info, trial_value)
         else:
             incs = self.solver.intensifier.get_incumbents()
             costs = [self.solver.runhistory.get_cost(config=c) for c in incs]
-            incumbent_tuple = list(zip(incs, costs))
+            tis = [TrialInfo(config=i) for i in incs]
+            tvs = [TrialValue(cost=c) for c in costs]
+            incumbent_tuple = list(zip(tis, tvs))
 
         return incumbent_tuple

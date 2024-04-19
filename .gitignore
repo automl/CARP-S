@@ -147,3 +147,4 @@ carps.db
 *.jsonl
 *.sif
 logs
+/*.db

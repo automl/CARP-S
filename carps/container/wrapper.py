@@ -10,9 +10,11 @@ from carps.utils.trials import TrialInfo, TrialValue
 class ContainerizedProblemClient(Problem):
     def __init__(
             self,
+            n_workers: int = 1,
             loggers: list[AbstractLogger] | None = None
     ):
         super().__init__(loggers=loggers)
+        self.n_workers = n_workers
         self._configspace = None
 
     @property

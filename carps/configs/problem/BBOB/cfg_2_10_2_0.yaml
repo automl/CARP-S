@@ -1,0 +1,13 @@
+# @package _global_
+benchmark_id: BBOB
+problem_id: noiseless/2/10/0
+problem:
+  _target_: carps.benchmarks.bbob.BBOBProblem
+  dimension: 2
+  fid: 10
+  instance: 0
+  seed: ${seed}
+task:
+  n_trials: 50
+  n_objectives: 1
+  n_initial_design: 6
