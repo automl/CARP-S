@@ -23,16 +23,18 @@ setup_logging()
 class SMAC3Optimizer(Optimizer):
     def __init__(
             self,
-            problem: Problem,
-            smac_cfg: DictConfig,
-            n_trials: int | None,
-            time_budget: float | None,
+            smac_cfg: DictConfig = None,
+            problem: Problem | None = None,
+            n_trials: int | None = None,
+            time_budget: float | None = None,
             n_workers: int = 1,
             loggers: list[AbstractLogger] | None = None,
     ) -> None:
         super().__init__(problem, n_trials, time_budget, n_workers, loggers)
 
-        self.configspace = self.problem.configspace
+        self.configspace: ConfigurationSpace | None = None
+        if self.problem is not None:
+            self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg
         self._solver: AbstractFacade | None = None
         self._cb_on_start_called: bool = False

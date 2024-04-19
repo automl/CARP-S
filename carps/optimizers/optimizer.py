@@ -10,22 +10,29 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent, SearchSpace, Cost
+from carps.utils.logging import setup_logging, get_logger
 
+setup_logging()
+logger = get_logger("Optimizer")
 
+def maybe_warn_problem(problem: Problem | None) -> None:
+    if problem is None:
+        logger.warn("problem is None. Optimizer only usable via ask and tell, not via run.")
+
+def maybe_error_budget(n_trials: int | None, time_budget: float | None) -> None:
+    if n_trials is None and time_budget is None:
+            raise ValueError("Please specify either `n_trials` or `time_budget` "
+                             "as the optimization budget.")
 class Optimizer(ABC):
     def __init__(
             self,
-            problem: Problem,
-            n_trials: int | None,
+            problem: Problem | None = None,
+            n_trials: int | None = None,
             time_budget: float | None = None,
             n_workers: int = 1,
             loggers: list[AbstractLogger] | None = None
     ) -> None:
         super().__init__()
-        self.problem = problem
-        if n_trials is None and time_budget is None:
-            raise ValueError("Please specify either `n_trials` or `time_budget` "
-                             "as the optimization budget.")
         self.n_trials: int | None = n_trials
         self.time_budget: float | None = time_budget
         self.n_workers: int = n_workers
@@ -37,8 +44,22 @@ class Optimizer(ABC):
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
 
+        self._problem: Problem | None = None
         self._solver: Any = None
         self._last_incumbent: tuple[TrialInfo, TrialValue] | None = None
+
+
+        self.problem = problem
+        maybe_warn_problem(problem)
+
+    @property
+    def problem(self) -> Problem | None:
+        maybe_warn_problem(self._problem)
+        return self._problem
+    
+    @problem.setter
+    def problem(self, problem: Problem | None) -> None:
+        self._problem = problem
 
     @property
     def solver(self) -> Any:
@@ -96,6 +117,7 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     def run(self) -> Incumbent:
+        maybe_error_budget(self.n_trials, self.time_budget)
         if self.solver is None:
             self.setup_optimizer()
         return self._run()
