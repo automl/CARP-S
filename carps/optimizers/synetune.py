@@ -5,7 +5,6 @@ import datetime
 from collections import OrderedDict
 from typing import Any, Callable
 
-import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
                                          FloatHyperparameter, Hyperparameter,
@@ -25,7 +24,6 @@ from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
-
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {

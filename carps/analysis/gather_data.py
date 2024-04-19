@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import argparse
 import json
 import logging
 import multiprocessing
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-import fire
 
+import fire
 import numpy as np
 import pandas as pd
 from ConfigSpace import Configuration
@@ -153,40 +152,6 @@ def filelogs_to_df(rundir: str) -> None:
     df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
     return None
 
-def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:
-    return (S - S.min()) / (S.max() - S.min() + epsilon)
-
-def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
-    # logs= logs.drop(columns=["config"])
-    logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
-    logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
-    logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")
-    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
-    return logs
-
-def interpolate_trials(logs: pd.DataFrame) -> pd.DataFrame:
-    x = np.linspace(0, 1, 21)
-
-    x_column = "n_trials_norm"
-    interpolation_columns = ["trial_value__cost", "trial_value__cost_norm", "trial_value__cost_inc", "trial_value__cost_inc_norm"]
-    # interpolation_columns = [
-    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
-    group_keys = ["benchmark_id", "optimizer_id", "problem_id", "seed"]
-    D = []
-    for gid, gdf in logs.groupby(by=group_keys):
-        print(gid)
-        metadata = dict(zip(group_keys, gid, strict=False))
-        performance_data = {}
-        performance_data[x_column] = x
-        for icol in interpolation_columns:
-            if icol in gdf:
-                xp = gdf[x_column].to_numpy()
-                fp = gdf[icol].to_numpy()
-                y = np.interp(x=x, xp=xp, fp=fp)
-                performance_data[icol] = y
-        performance_data.update(metadata)
-        D.append(pd.DataFrame(performance_data))
-    return pd.concat(D).reset_index(drop=True)
 
 if __name__ == "__main__":
     fire.Fire(filelogs_to_df)
