@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
 from carps.analysis.utils import get_color_palette, savefig, setup_seaborn
 
@@ -33,8 +34,12 @@ def create_tables(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budge
     # Aggregate all
 
     # Calculate mean over seeds per optimizer and problem
-    df = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].mean()
-    print(df)
+    df_mean = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].mean()
+    df_mean.name = "mean"
+    df_var = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].var()
+    df_var.name = "var"
+
+    print(pd.concat((df_mean, df_var), axis=1))
 
     # Calculate mean over problems
 

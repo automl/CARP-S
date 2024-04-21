@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 import json
 import pickle
+from pathlib import Path
 
 import numpy as np
 import seaborn as sns
@@ -74,18 +75,16 @@ def get_final_performance_dict(
 
             if len(missing_instances) > 0:
                 problem_overrides = [find_override(problem_id=p) for p in missing_instances]
-                problem_overrides = [p for p in problem_overrides if p is not None]
                 problem_override = merge_overrides(problem_overrides)
             else:
-                problem_overrides = [find_override(problem_id=p) for p in instances]
-                problem_overrides = [p for p in problem_overrides if p is not None]
+                problem_overrides = [find_override(problem_id=p) for p in list(instances)]
                 problem_override = merge_overrides(problem_overrides)
+            
             if len(missing_seeds) > 0:
                 seed_override = f"seed={','.join([str(s) for s in missing_seeds])}"
             else:
                 seed_override = f"seed={','.join([str(s) for s in seeds])}"
             override_cmd = f"{seed_override} {problem_override} {optimizer_override}"
-            print(override_cmd)
             override_commands.append(override_cmd)
         else:
             # if len(P) == n_seeds * n_instances:
@@ -94,8 +93,14 @@ def get_final_performance_dict(
     if len(dropped) > 0:
         logger.info("Dropped following incomplete methods:")
         logger.info(json.dumps({"incomplete": dropped}, indent="\t"))
-        logger.info(f"Overrides: ")
-        logger.info(override_commands)
+        
+        base_command = "python -m carps.run {override} -m\n"
+        fn = Path(__file__).parent.parent.parent / "scripts/run_missing.sh"
+        with open(fn, "w") as file:
+            for override in override_commands:
+                file.write(base_command.format(override=override))
+
+        logger.info(f"Created override commands at {fn}")
     return perf_dict
 
 

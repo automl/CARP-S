@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import fire
 
 from carps.utils.loggingutils import get_logger, setup_logging
 
@@ -17,7 +18,20 @@ def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
+
+    # Add time
+    logs = logs.groupby(by=["problem_id", "optimizer_id", "seed"]).apply(calc_time).reset_index(drop=True)
+    logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
     return logs
+
+def calc_time(D: pd.DataFrame) -> pd.Series:
+    trialtime = D["trial_value__virtual_time"]
+    nulltime = D["trial_value__starttime"] - D["trial_value__starttime"].min()
+    trialtime_cum = trialtime.cumsum()
+    elapsed = nulltime + trialtime_cum
+    elapsed.name = "time"
+    D["time"] = elapsed
+    return D
 
 def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:
     return (S - S.min()) / (S.max() - S.min() + epsilon)
@@ -87,3 +101,6 @@ def load_logs(rundir: str):
     df = process_logs(df)
     df_cfg = pd.read_csv(logs_cfg_fn)
     return df, df_cfg
+
+if __name__ == "__main__":
+    fire.Fire(load_logs)
