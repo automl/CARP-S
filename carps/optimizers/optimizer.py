@@ -100,7 +100,7 @@ class Optimizer(ABC):
             self.setup_optimizer()
         return self._run()
 
-    def _time_left(self, start_time) -> float:
+    def _time_left(self, start_time) -> bool:
         return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
 
     def continue_optimization(self, start_time) -> bool:
