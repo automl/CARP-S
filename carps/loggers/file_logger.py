@@ -68,6 +68,7 @@ def dump_logs(log_data: dict, filename: str, directory: str | None = None):
 def convert_trials(n_trials, trial_info, trial_value):
     info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
     info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
+    info["trial_value"]["virtual_time"] = float(info["trial_value"]["virtual_time"])
     return info
 
 
