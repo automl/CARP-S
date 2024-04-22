@@ -138,9 +138,9 @@ def maybe_add_n_trials(df: pd.DataFrame, n_initial_design: int, counter_key: str
         df["n_trials"] = df[counter_key] + n_initial_design  # n_trials is 1-based
     return df
 
-def filelogs_to_df(rundir: str) -> None:
+def filelogs_to_df(rundir: str, n_processes: int = 4) -> None:
     rundirs = get_run_dirs(rundir)
-    results = map_multiprocessing(load_log, rundirs, n_processes=4)
+    results = map_multiprocessing(load_log, rundirs, n_processes=n_processes)
     df = pd.concat(results).reset_index(drop=True)
     df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v}  for k, v in df["cfg_str"].unique()])
     df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
