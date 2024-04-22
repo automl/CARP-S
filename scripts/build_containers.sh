@@ -42,6 +42,9 @@ mkdir -p $CONT_OPT_PATH
 ./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/DUMMY_Problem.sif ${CONT_BENCH_RECIPE_PATH}/DUMMY_Problem/DUMMY_Problem.recipe
 
 # HPOB
-./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/hpob/hpob_container.recipe ${CONT_BENCH_RECIPE_PATH}/hpob/download_data.sh
+./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/HPOB/HPOB.recipe ${CONT_BENCH_RECIPE_PATH}/HPOB/download_data.sh
+
+# YAHPO
+./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/YAHPO.sif ${CONT_BENCH_RECIPE_PATH}/YAHPO/YAHPO.recipe
 
 

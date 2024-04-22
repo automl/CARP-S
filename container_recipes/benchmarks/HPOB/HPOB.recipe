@@ -34,6 +34,6 @@ From: python:3.10-slim
    echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
    # benchmark-specific commands go here
-   pip install -r benchmarking/container_recipes/benchmarks/hpob/hpob_requirements.txt
+   pip install -r benchmarking/container_recipes/benchmarks/HPOB/HPOB_requirements.txt
 
    echo "Successfully installed all features"
