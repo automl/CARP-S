@@ -151,3 +151,5 @@ logs
 *.pdf
 *.pickle
 *.csv
+*.tex
+*run_missing.sh

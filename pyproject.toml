@@ -25,6 +25,7 @@ dependencies = [
   "cryptography",
   "domdf_python_tools",
   "py-experimenter>=1.4.1",
+  "critdd @ git+https://github.com/mirkobunse/critdd",
 ]
 
 requires-python = ">=3.9"
