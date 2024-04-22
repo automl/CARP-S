@@ -32,6 +32,9 @@ mkdir -p $CONT_OPT_PATH
 # HEBO
 ./scripts/compile_noctua2.sh ${CONT_OPT_PATH}/HEBO.sif ${CONT_OPT_RECIPE_PATH}/HEBO/HEBO.recipe 
 
+# SyneTune
+./scripts/compile_noctua2.sh ${CONT_OPT_PATH}/SyneTune.sif ${CONT_OPT_RECIPE_PATH}/SyneTune/SyneTune.recipe 
+
 # --------------------------------------------------------------------------------------------
 # PROBLEMS
 # --------------------------------------------------------------------------------------------
