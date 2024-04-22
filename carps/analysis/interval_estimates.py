@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
-    import pandas as pd
+import pandas as pd
 
 import json
 import pickle
 from pathlib import Path
+import itertools
 
 import numpy as np
 import seaborn as sns
@@ -54,6 +54,7 @@ def get_final_performance_dict(
     dropped: list = []
     seeds = set(performance_data["seed"].unique())
     instances = set(performance_data[key_instance].unique())
+    combos = set(itertools.product(seeds, instances))
     override_commands: list[str] = []
     for gid, gdf in performance_data.groupby(key_method):
         gdf = gdf.reset_index()
@@ -61,38 +62,30 @@ def get_final_performance_dict(
         n_instances = gdf[key_instance].nunique()
         P = gdf[key_performance].to_numpy()
 
-        missing_seeds = seeds.difference(set(gdf["seed"].unique()))
-        missing_seeds = [int(s) for s in list(missing_seeds)]
-        missing_instances = list(instances.difference(set(gdf[key_instance].unique())))
+        _combos = gdf.loc[:, ["seed", "problem_id"]].to_numpy()
+        _combos = set(list(map(tuple, _combos)))
 
-        if len(missing_instances) > 0 or len(missing_seeds) > 0:
+        missing = list(combos.difference(_combos))
+
+        if len(missing) > 0:
             dropped.append({
                 "method": gid,
-                "missing_seeds": missing_seeds,
-                "missing_instances": missing_instances
+                "missing": missing,
             })
-            optimizer_override = find_override(optimizer_id=gid)
+            optimizer_override = find_override(optimizer_id=gid) or f"+optimizer={gid}"
 
-            if len(missing_instances) > 0:
-                problem_overrides = [find_override(problem_id=p) for p in missing_instances]
-                problem_override = merge_overrides(problem_overrides)
-            else:
-                problem_overrides = [find_override(problem_id=p) for p in list(instances)]
-                problem_override = merge_overrides(problem_overrides)
-            
-            if len(missing_seeds) > 0:
-                seed_override = f"seed={','.join([str(s) for s in missing_seeds])}"
-            else:
-                seed_override = f"seed={','.join([str(s) for s in seeds])}"
-            override_cmd = f"{seed_override} {problem_override} {optimizer_override}"
-            override_commands.append(override_cmd)
+            for _missing in missing:
+                problem_override = find_override(problem_id=_missing[1])
+                seed_override = f"seed={_missing[0]}"
+                override_cmd = f"{seed_override} {problem_override} {optimizer_override}"
+                override_commands.append(override_cmd)
         else:
             # if len(P) == n_seeds * n_instances:
             P = P.reshape((n_seeds, n_instances))
             perf_dict[gid] = P
     if len(dropped) > 0:
         logger.info("Dropped following incomplete methods:")
-        logger.info(json.dumps({"incomplete": dropped}, indent="\t"))
+        logger.info(dropped)
         
         base_command = "python -m carps.run {override} -m\n"
         fn = Path(__file__).parent.parent.parent / "scripts/run_missing.sh"
