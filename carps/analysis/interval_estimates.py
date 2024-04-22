@@ -54,7 +54,7 @@ def get_final_performance_dict(
     dropped: list = []
     seeds = set(performance_data["seed"].unique())
     instances = set(performance_data[key_instance].unique())
-    combos = set(itertools.product(seeds, instances))
+    combos = set(itertools.product(instances, seeds))
     override_commands: list[str] = []
     for gid, gdf in performance_data.groupby(key_method):
         gdf = gdf.reset_index()
@@ -62,7 +62,7 @@ def get_final_performance_dict(
         n_instances = gdf[key_instance].nunique()
         P = gdf[key_performance].to_numpy()
 
-        _combos = gdf.loc[:, ["seed", "problem_id"]].to_numpy()
+        _combos = gdf.loc[:, ["problem_id", "seed"]].to_numpy()
         _combos = set(list(map(tuple, _combos)))
 
         missing = list(combos.difference(_combos))
@@ -75,8 +75,8 @@ def get_final_performance_dict(
             optimizer_override = find_override(optimizer_id=gid) or f"+optimizer={gid}"
 
             for _missing in missing:
-                problem_override = find_override(problem_id=_missing[1])
-                seed_override = f"seed={_missing[0]}"
+                problem_override = find_override(problem_id=_missing[0]) or f"+problem={_missing[0]}"
+                seed_override = f"seed={_missing[1]}"
                 override_cmd = f"{seed_override} {problem_override} {optimizer_override}"
                 override_commands.append(override_cmd)
         else:
@@ -87,8 +87,9 @@ def get_final_performance_dict(
         logger.info("Dropped following incomplete methods:")
         logger.info(dropped)
         
-        base_command = "python -m carps.run {override} -m\n"
-        fn = Path(__file__).parent.parent.parent / "scripts/run_missing.sh"
+        base_command = "python -m carps.run {override}\n"
+        fn = Path(__file__).parent.parent.parent / "scripts/missing/run_missing.sh"
+        fn.parent.mkdir(exist_ok=True, parents=True)
         with open(fn, "w") as file:
             for override in override_commands:
                 file.write(base_command.format(override=override))
@@ -159,3 +160,7 @@ def plot_interval_estimates(performance_data: pd.DataFrame, load_from_pickle: bo
     #     xlabel_y_coordinate=0.025
     # )
     # fig.savefig("plot_rliable_all.pdf", dpi=300, bbox_inches="tight")
+
+if __name__ == "__main__":
+    perf = pd.read_csv("/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/analysis/perf.csv")
+    plot_interval_estimates(performance_data=perf)
