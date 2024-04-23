@@ -89,12 +89,14 @@ class HPOBenchProblem(Problem):
         )
         endtime = time.time()
         T = endtime - starttime
+        virtual_time = result_dict["cost"] if trial_info.budget is None else 0.0
         # function_value is 1 - accuracy on the validation set
         trial_value = TrialValue(
             cost=result_dict["function_value"],
             time=T,
             starttime=starttime,
             endtime=endtime,
+            virtual_time=virtual_time,
         )
         return trial_value
 
