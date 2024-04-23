@@ -12,18 +12,22 @@ from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
 from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
+
 from carps.benchmarks.problem import Problem
-from carps.utils.trials import TrialInfo, TrialValue
 from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.trials import TrialInfo, TrialValue
 
 
 class HPOBenchProblem(Problem):
     """HPOBench problem."""
 
     def __init__(
-            self, model: str, task_id: int, seed: int, budget_type: Optional[str] = None,
-            loggers: list[AbstractLogger] | None = None
-
+        self,
+        model: str,
+        task_id: int,
+        seed: int,
+        budget_type: Optional[str] = None,
+        loggers: list[AbstractLogger] | None = None,
     ):
         """Initialize a HPOBench problem.
 
