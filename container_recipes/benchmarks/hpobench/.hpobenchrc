@@ -1,8 +1,0 @@
-cache_dir: /benchmarking/.cache/hpobench
-container_dir: /benchmarking/.cache/hpobench/hpobench-1000
-container_source: oras://gitlab.tf.uni-freiburg.de:5050/muelleph/hpobench-registry
-data_dir: /benchmarking/.local/share/hpobench
-pyro_connect_max_wait: 400
-socket_dir: /tmp/hpobench_socket
-verbosity: 0
-version: 0.0.10
