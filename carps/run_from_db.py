@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from pathlib import Path
 
@@ -8,15 +7,12 @@ from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
 from py_experimenter.result_processor import ResultProcessor
-from rich.logging import RichHandler
-from smac.utils.logging import get_logger
+from carps.utils.loggingutils import setup_logging, get_logger
 
 from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
 
-FORMAT = "%(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
-
+setup_logging()
 logger = get_logger("Run from DB")
 
 
@@ -28,14 +24,14 @@ def py_experimenter_evaluate(parameters: dict,
         cfg_dict = json.loads(config)
 
         job_id = getattr(os.environ, "SLURM_JOB_ID", None)
-
-        result_processor.process_results({"slurm_job_id": job_id})
+        if job_id is not None:
+            result_processor.process_results({"slurm_job_id": job_id})
 
         cfg = OmegaConf.create(cfg_dict)
 
         check_requirements(cfg=cfg)
 
-        os.chdir(cfg.outdir)
+        # os.chdir(cfg.outdir)
         
         optimize(cfg, result_processor=result_processor)
 

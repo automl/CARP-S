@@ -3,7 +3,6 @@ from __future__ import annotations
 from time import sleep
 from typing import Any, Optional
 
-import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig
 
@@ -11,7 +10,7 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer, SearchSpace
 from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Cost
+from carps.utils.types import Incumbent
 
 
 class DummyOptimizer(Optimizer):
@@ -27,7 +26,7 @@ class DummyOptimizer(Optimizer):
     ) -> None:
         super().__init__(problem, n_trials, time_budget, n_workers, loggers)
         self.cfg = dummy_cfg
-        self.history: list[Configuration, Cost] = []
+        self.history: list[TrialInfo, TrialValue] = []
         if "budget" in self.cfg.keys():
             self.fidelity_enabled = True
             self.budget = self.cfg.budget
@@ -51,10 +50,7 @@ class DummyOptimizer(Optimizer):
         return trial
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        self.history.append((trial_info.config, trial_value.cost))
+        self.history.append((trial_info, trial_value))
 
-    def get_current_incumbent(self) -> tuple[Configuration, np.ndarray | float] | list[tuple[Configuration, np.ndarray | float]] | None:
-        return self.history[np.array([v[1] for v in self.history]).argmin()]
-
-
-
+    def get_current_incumbent(self) -> Incumbent:
+        return min(self.history, key=lambda x: x[1].cost)

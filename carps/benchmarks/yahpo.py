@@ -161,11 +161,12 @@ class YahpoProblem(Problem):
         # as we only pass one config we need to select the first one
         ret = self._problem.objective_function(configuration=xs, seed=trial_info.seed)[0]
         costs = [maybe_invert(ret[target], target) for target in self.metrics]
+        virtual_time = ret.get("time", 0.)
         if len(costs) == 1:
             costs = costs[0]
 
         endtime = time.time()
         T = endtime - starttime
 
-        trial_value = TrialValue(cost=costs, time=T, starttime=starttime, endtime=endtime)
+        trial_value = TrialValue(cost=costs, time=T, starttime=starttime, endtime=endtime, virtual_time=virtual_time)
         return trial_value

@@ -28,6 +28,7 @@ class Optimizer(ABC):
                              "as the optimization budget.")
         self.n_trials: int | None = n_trials
         self.time_budget: float | None = time_budget
+        self.n_workers: int = n_workers
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
         self.virtual_time_elapsed_seconds: float | None = 0.0
@@ -99,7 +100,7 @@ class Optimizer(ABC):
             self.setup_optimizer()
         return self._run()
 
-    def _time_left(self, start_time) -> float:
+    def _time_left(self, start_time) -> bool:
         return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
 
     def continue_optimization(self, start_time) -> bool:
@@ -119,13 +120,14 @@ class Optimizer(ABC):
             trial_value = self.problem.evaluate(trial_info=trial_info)
             self.virtual_time_elapsed_seconds += trial_value.virtual_time
             self.tell(trial_info=trial_info, trial_value=trial_value)
-            self.trial_counter += 1
 
-            if self.get_current_incumbent() != self._last_incumbent:
-                self._last_incumbent = self.get_current_incumbent()
+            new_incumbent = self.get_current_incumbent()
+            if new_incumbent != self._last_incumbent:
+                self._last_incumbent = new_incumbent
                 for logger in self.loggers:
-                    logger.log_incumbent(self.get_current_incumbent())
+                    logger.log_incumbent(self.trial_counter, new_incumbent)
 
+            self.trial_counter += 1
         return self.get_current_incumbent()
 
     @abstractmethod

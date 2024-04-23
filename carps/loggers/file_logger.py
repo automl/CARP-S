@@ -2,22 +2,19 @@ from __future__ import annotations
 
 import json
 import logging
-import shutil
+import os
 from dataclasses import asdict
 from pathlib import Path
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
-from rich.logging import RichHandler
-from smac.utils.logging import get_logger
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent
+from carps.utils.loggingutils import setup_logging, get_logger
 from carps.utils.trials import TrialInfo, TrialValue
 
-FORMAT = "%(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
-
+setup_logging()
 logger = get_logger("FileLogger")
 
 
@@ -43,7 +40,7 @@ def get_run_directory() -> str:
     return directory
 
 
-def dump_logs(log_data: dict, filename: str):
+def dump_logs(log_data: dict, filename: str, directory: str | None = None):
     """Dump log dict in jsonl format
 
     This appends one json dict line to the filename.
@@ -57,16 +54,28 @@ def dump_logs(log_data: dict, filename: str):
         current working directory or if it is called during
         a hydra session, the hydra run dir will be the log
         dir.
+    directory: str | None, defaults to None
+        Directory to log to. If None, either use hydra run dir or current dir.
     """
     log_data_str = json.dumps(log_data) + "\n"
-    directory = get_run_directory()
+    directory = directory or get_run_directory()
     filename = Path(directory) / filename
     with open(filename, mode="a") as file:
         file.writelines([log_data_str])
 
 
+def convert_trials(n_trials, trial_info, trial_value):
+    info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+    info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
+    info["trial_value"]["virtual_time"] = float(info["trial_value"]["virtual_time"])
+    return info
+
+
 class FileLogger(AbstractLogger):
-    def __init__(self, overwrite: bool = False) -> None:
+    _filename: str = "trial_logs.jsonl"
+    _filename_trajectory: str = "trajectory_logs.jsonl"
+
+    def __init__(self, overwrite: bool = False, directory: str | None = None) -> None:
         """File logger.
 
         For each trial/function evaluate, write one line to the file.
@@ -78,19 +87,28 @@ class FileLogger(AbstractLogger):
         overwrite: bool, defaults to True
             Delete previous logs in that directory if True.
             If false, raise an error message.
+        directory: str | None, defaults to None
+            Directory to log to. If None, either use hydra run dir or current dir.
 
         """
         super().__init__()
 
-        directory = Path(get_run_directory())
-        if (directory / "trial_logs.jsonl").is_file():
+        directory = directory or get_run_directory()
+        directory = Path(directory)
+        self.directory = directory
+        if (directory / self._filename).is_file():
             if overwrite:
                 logger.info(f"Found previous run. Removing '{directory}'.")
-                shutil.rmtree(directory)
+                for root, dirs, files in os.walk(directory):
+                    for f in files:
+                        full_fn = os.path.join(root, f)
+                        if ".hydra" not in full_fn:
+                            os.remove(full_fn)
+                            logger.debug(f"Removed {full_fn}")
             else:
-                raise RuntimeError(f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
-                   
-
+                raise RuntimeError(
+                    f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite "
+                    f"for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
 
     def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Evaluate the problem and log the trial.
@@ -104,15 +122,25 @@ class FileLogger(AbstractLogger):
         trial_value : TrialValue
             Trial value.
         """
-        info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
-        info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
-        info_str = json.dumps(info) + "\n"
-        logging.info(info_str)
+        info = convert_trials(n_trials, trial_info, trial_value)
+        if logging.DEBUG <= logger.level:
+            info_str = json.dumps(info) + "\n"
+            logger.debug(info_str)
+        else:
+            info_str = f"n_trials: {info['n_trials']}, config: {info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
+            logger.info(info_str)
 
-        dump_logs(log_data=info, filename="trial_logs.jsonl")
+        dump_logs(log_data=info, filename=self._filename, directory=self.directory)
 
-    def log_incumbent(self, incumbent: Incumbent) -> None:
-        pass
+    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+        if incumbent is None:
+            return
+        if not isinstance(incumbent, list):
+            incumbent = [incumbent]
+
+        for inc in incumbent:
+            info = convert_trials(n_trials, inc[0], inc[1])
+            dump_logs(log_data=info, filename=self._filename_trajectory, directory=self.directory)
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
-        dump_logs(log_data=data, filename=f"{entity}.jsonl")
+        dump_logs(log_data=data, filename=f"{entity}.jsonl", directory=self.directory)

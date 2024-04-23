@@ -38,14 +38,22 @@ BENCHMARK_ID=$2
 # HPOB
 
 PYTHON_VERSION=$3
-if [ -z "$PYTHON_VERSION" ]
+# if [ -z "$PYTHON_VERSION" ]
+# then
+#       PYTHON_VERSION="3.10"
+# fi
+
+ENV_LOCATION=$4
+if [ -z "$ENV_LOCATION" ]
 then
-      PYTHON_VERSION="3.10"
+    ENV_LOCATION=""
+else
+    ENV_LOCATION="-p ${ENV_LOCATION}"
 fi
 
 # Create env
 ENV_NAME="carps_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}"
-CREATE_COMMAND="${CONDA_COMMAND} create python=${PYTHON_VERSION} -n ${ENV_NAME} -c conda-forge -y"
+CREATE_COMMAND="${CONDA_COMMAND} create python=${PYTHON_VERSION} -n ${ENV_NAME} -c conda-forge ${ENV_LOCATION} -y"
 echo "Creating environment:"
 echo $CREATE_COMMAND
 $CREATE_COMMAND

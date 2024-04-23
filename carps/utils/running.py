@@ -33,8 +33,10 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
     loggers = []
     if "loggers" in cfg:
         for logger in cfg.loggers:
-            if "DatabaseLogger" in logger._target_ and False:
+            if "DatabaseLogger" in logger._target_:
                 kwargs = dict(result_processor=result_processor)
+            elif "FileLogger" in logger._target_:
+                kwargs = dict(directory=cfg.outdir)
             else:
                 kwargs = dict()
             logger = instantiate(logger)(**kwargs)
@@ -48,6 +50,8 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
 
     Parameters
     ----------
+    loggers : list[AbstractLogger]
+        List of loggers to use.
     cfg : DictConfig
         Global configuration
     problem : Problem
@@ -59,7 +63,10 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
         Instantiated optimizer.
     """
     optimizer_cfg = cfg.optimizer
-    optimizer = instantiate(optimizer_cfg)(problem=problem, n_trials=cfg.task.n_trials, time_budget=cfg.task.time_budget)
+    optimizer = instantiate(optimizer_cfg)(problem=problem,
+                                           n_trials=cfg.task.n_trials,
+                                           time_budget=cfg.task.time_budget,
+                                           loggers=problem.loggers)
     if "optimizer_wrappers" in cfg:
         for wrapper in cfg.optimizer_wrappers:
             optimizer = wrapper(optimizer)

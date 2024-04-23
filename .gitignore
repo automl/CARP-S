@@ -153,3 +153,9 @@ carps.db
 *.jsonl
 *.sif
 logs
+/*.db
+*.pdf
+*.pickle
+*.csv
+*.tex
+*run_missing.sh

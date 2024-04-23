@@ -34,6 +34,6 @@ From: continuumio/miniconda3
    echo "benchmarking_version $BENCHMARKING_VERSION" >> "$SINGULARITY_LABELS"
 
    # optimizer-specific commands go here
-   pip install -r benchmarking/container_recipes/optimizers/synetune/synetune_requirements.txt
+   pip install -r benchmarking/container_recipes/optimizers/SyneTune/SyneTune_requirements.txt
 
    echo "Successfully installed all features"
