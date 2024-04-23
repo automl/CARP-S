@@ -12,15 +12,18 @@ from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
 from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
-from smacbenchmarking.benchmarks.problem import Problem
-from smacbenchmarking.utils.trials import TrialInfo, TrialValue
+from carps.benchmarks.problem import Problem
+from carps.utils.trials import TrialInfo, TrialValue
+from carps.loggers.abstract_logger import AbstractLogger
 
 
 class HPOBenchProblem(Problem):
     """HPOBench problem."""
 
     def __init__(
-        self, model: str, task_id: int, seed: int, budget_type: Optional[str] = None
+            self, model: str, task_id: int, seed: int, budget_type: Optional[str] = None,
+            loggers: list[AbstractLogger] | None = None
+
     ):
         """Initialize a HPOBench problem.
 
@@ -32,7 +35,7 @@ class HPOBenchProblem(Problem):
         budget_type : Optional[str] Budget type for the multifidelity setting.
                       Should be None for the blackbox setting.
         """
-        super().__init__()
+        super().__init__(loggers)
 
         self.budget_type = budget_type
         self._problem = get_hpobench_problem(
@@ -51,7 +54,7 @@ class HPOBenchProblem(Problem):
         """
         return self._configspace
 
-    def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+    def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate problem.
 
         Parameters

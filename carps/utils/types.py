@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+from typing import Any, Union, Tuple, List, Optional
 
 import numpy as np
 from ConfigSpace import Configuration
 
-SearchSpace: TypeAlias  = Any
-Cost: TypeAlias  = np.ndarray | float
-Incumbent: TypeAlias  = tuple[Configuration, Cost] | list[tuple[Configuration, Cost]] | None
+SearchSpace = Any
+Cost = Union[np.ndarray, float]
+Incumbent = Optional[Union[Tuple[Configuration, Cost], List[Tuple[Configuration, Cost]]]]
