@@ -1,20 +1,16 @@
 from __future__ import annotations
 
 import json
-import logging
 from dataclasses import asdict
 
 from py_experimenter.result_processor import ResultProcessor
-from rich.logging import RichHandler
-from smac.utils.logging import get_logger
+from carps.utils.loggingutils import setup_logging, get_logger
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent
 from carps.utils.trials import TrialInfo, TrialValue
 
-FORMAT = "%(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
-
+setup_logging()
 logger = get_logger("DatabaseLogger")
 
 
