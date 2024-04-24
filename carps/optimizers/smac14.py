@@ -204,7 +204,7 @@ class SMAC314Optimizer(Optimizer):
         """Run SMAC on Problem.
         """
         incumbent = self.solver.optimize()  # noqa: F841
-        return self.get_current_incumbent()()
+        return self.get_current_incumbent()
     
     def get_current_incumbent(self) -> Incumbent:
         trial_info = TrialInfo(config=self.solver.solver.incumbent)
