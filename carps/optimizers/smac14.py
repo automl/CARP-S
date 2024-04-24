@@ -200,7 +200,7 @@ class SMAC314Optimizer(Optimizer):
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         raise AskAndTellNotSupportedError
 
-    def _run(self) -> None:
+    def _run(self) -> Incumbent:
         """Run SMAC on Problem.
         """
         incumbent = self.solver.optimize()  # noqa: F841
