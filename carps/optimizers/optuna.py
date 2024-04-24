@@ -92,7 +92,7 @@ class OptunaOptimizer(Optimizer):
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         super().__init__(problem, n_trials, time_budget, n_workers, loggers)
-        self._study: Study | None = None
+        self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
 
         configspace = problem.configspace
@@ -145,9 +145,9 @@ class OptunaOptimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
-        assert self._study is not None
+        assert self._solver is not None
 
-        optuna_trial: optuna.Trial = self._study.ask(self.optuna_space)
+        optuna_trial: optuna.Trial = self._solver.ask(self.optuna_space)
         config = optuna_trial.params
         trial_number = optuna_trial.number
         unique_name = f"{trial_number=}"
@@ -178,7 +178,7 @@ class OptunaOptimizer(Optimizer):
         unique_name = trial_info.name
         assert unique_name is not None
         assert unique_name in self.history
-        assert self._study is not None
+        assert self._solver is not None
 
         optuna_status = optuna_trial_states[trial_value.status]
 
@@ -194,7 +194,7 @@ class OptunaOptimizer(Optimizer):
         cost = trial_value.cost if optuna_status is OptunaTrialState.COMPLETE else None
         self.history[unique_name] = (optuna_trial, configspace_config, cost)
 
-        self._study.tell(trial=optuna_trial, values=cost, state=optuna_status)
+        self._solver.tell(trial=optuna_trial, values=cost, state=optuna_status)
 
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
@@ -213,7 +213,9 @@ class OptunaOptimizer(Optimizer):
 
         best_config, best_cost = min(non_none_entries, key=lambda x: x[1])
         assert not isinstance(best_cost, Iterable)
-        return (best_config, best_cost)
+        trial_info = TrialInfo(config=best_config)
+        trial_value = TrialValue(cost=best_cost)
+        return (trial_info, trial_value)
 
     # NOT really needed
     def convert_configspace(self, configspace: ConfigurationSpace) -> dict[str, BaseDistribution]:
