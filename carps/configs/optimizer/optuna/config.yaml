@@ -7,5 +7,5 @@ optimizer:
   optuna_cfg:
     sampler:
       seed: ${seed}
-      study:
+    study: {}
         
