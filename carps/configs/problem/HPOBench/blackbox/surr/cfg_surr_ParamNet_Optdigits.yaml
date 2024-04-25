@@ -1,0 +1,14 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: hpobench/bb/surr/ParamNet/Optdigits
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  problem:
+    _target_: hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetOptdigitsOnStepsBenchmark
+    rng: ${seed}
+  seed: ${seed}
+task:
+  n_trials: 240
+  n_objectives: 1
+  min_budget: null
+  max_budget: null

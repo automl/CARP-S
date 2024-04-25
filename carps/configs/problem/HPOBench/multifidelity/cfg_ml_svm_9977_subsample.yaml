@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: hpobench/ml/svm/9977
+problem_id: hpobench/mf/full/ml/svm/9977/subsample
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
   model: svm
