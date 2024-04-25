@@ -8,6 +8,8 @@ from rich import print as printr
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
 from smac.scenario import Scenario
+from smac.runhistory import TrialInfo as SmacTrialInfo
+from smac.runhistory import TrialValue as SmacTrialValue
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
@@ -209,7 +211,16 @@ class SMAC3Optimizer(Optimizer):
             self._cb_on_start_called = True
             for callback in self.solver.optimizer._callbacks:
                 callback.on_start(self.solver.optimizer)
-        return self.solver.ask()
+        smac_trial_info = self.solver.ask()
+        trial_info = TrialInfo(
+            config=smac_trial_info.config,
+            instance=smac_trial_info.instance,
+            budget=smac_trial_info.budget,
+            seed=smac_trial_info.seed,
+            name=None,
+            checkpoint=None,
+        )
+        return trial_info
     
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
@@ -223,7 +234,21 @@ class SMAC3Optimizer(Optimizer):
         trial_value : TrialValue
             trial value (cost, time, ...)
         """
-        self.solver.tell(info=trial_info, value=trial_value)
+        smac_trial_info = SmacTrialInfo(
+            config=trial_info.config,
+            instance=trial_info.instance,
+            budget=trial_info.budget,
+            seed=trial_info.seed
+        )
+        smac_trial_value = SmacTrialValue(
+            cost=trial_value.cost,
+            time=trial_value.time,
+            status=trial_value.status,
+            starttime=trial_value.starttime,
+            endtime=trial_value.endtime,
+            additional_info=trial_value.additional_info
+        )
+        self.solver.tell(info=smac_trial_info, value=smac_trial_value)
 
     def get_current_incumbent(self) -> Incumbent:
         if self.solver.scenario.count_objectives() == 1:
