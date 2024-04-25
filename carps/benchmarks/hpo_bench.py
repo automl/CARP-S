@@ -12,29 +12,35 @@ from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
 from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
+from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
-
 
 class HPOBenchProblem(Problem):
     """HPOBench problem."""
 
     def __init__(
         self,
-        model: str,
-        task_id: int,
         seed: int,
+        model: str | None = None,
+        task_id: int | None = None,
+        problem: AbstractBenchmarkClient | None = None,
         budget_type: Optional[str] = None,
         loggers: list[AbstractLogger] | None = None,
     ):
         """Initialize a HPOBench problem.
 
+        Either specify model and task_id for an ML problem or problem.
+
         Parameters
         ----------
         model : str Model name.
         task_id : str Task ID, see https://arxiv.org/pdf/2109.06716.pdf, page 22.
+        problem : AbstractBenchmarkClient
+            Instantiated benchmark problem, e.g.
+            `hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetAdultOnStepsBenchmark`.
         seed: int Random seed.
         budget_type : Optional[str] Budget type for the multifidelity setting.
                       Should be None for the blackbox setting.
@@ -42,7 +48,11 @@ class HPOBenchProblem(Problem):
         super().__init__(loggers)
 
         self.budget_type = budget_type
-        self._problem = get_hpobench_problem(
+
+        if problem is None and model is None and task_id is None:
+            raise ValueError("Please specify either problem or model and task_id.")
+
+        self._problem = problem if problem else get_hpobench_problem(
             task_id=task_id, model=model, seed=seed, budget_type=self.budget_type
         )
         self._configspace = self._problem.get_configuration_space(seed=seed)
