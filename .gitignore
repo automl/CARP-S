@@ -129,6 +129,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Yahpo data
+yahpo_data_r
+
+# Container
+containers
+
 data
 outputs
 runs

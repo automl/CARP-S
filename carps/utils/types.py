@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, TypeAlias
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 
 from carps.utils.trials import TrialInfo, TrialValue
 
-SearchSpace: TypeAlias = Any
-Cost: TypeAlias = np.ndarray | float
-Incumbent: TypeAlias = tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
+SearchSpace = Any
+Cost = Union[np.ndarray, float]
+Incumbent = Optional[
+    Union[Tuple[TrialInfo, TrialValue], List[Tuple[TrialInfo, TrialValue]]]
+]
