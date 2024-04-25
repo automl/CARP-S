@@ -50,7 +50,7 @@ def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
     data.to_csv("runstatus.csv", index=False)
     return data
 
-def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
+def regenerate_runcommands(rundir: str, from_cached: bool = True) -> None:
     if from_cached:
         logger.info("Loading experiment status data from 'runstatus.csv'...")
         data = pd.read_csv("runstatus.csv")
@@ -62,7 +62,7 @@ def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
 
     missing = data[data["status"].isin([RunStatus.MISSING.name])]#, RunStatus.TRUNCATED.name])]
     runcommands = []
-    for gid, gdf in missing.groupby(by=["problem_id", "optimizer_id"]):
+    for gid, gdf in missing.groupby(by=["optimizer_id", "problem_id"]):
         seeds = list(gdf["seed"].unique())
         seeds.sort()
         overrides = gdf["overrides"].iloc[0].split(" ")
