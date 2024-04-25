@@ -14,7 +14,7 @@ from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, OmegaConf
 from rich.logging import RichHandler
-from smac.runhistory.dataclasses import TrialInfo
+from carps.utils.trials import TrialInfo
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem

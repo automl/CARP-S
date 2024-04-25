@@ -26,7 +26,7 @@ class TrialInfo:
     Parameters
     ----------
     config : Configuration
-    instance : int | None, defaults to None, length 
+    instance : int | None, defaults to None, length
     seed : int | None, defaults to None
     budget : float | None, defaults to None
     name: str | None, defaults to None, arbitrary information, length 100

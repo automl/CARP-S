@@ -1,4 +1,20 @@
+#!/bin/bash
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'mamba init' !!
+export MAMBA_EXE='/scratch/hpc-prf-intexml/cbenjamins/SMACBenchmarking/bin/micromamba';
+#export MAMBA_ROOT_PREFIX='/pc2/users/i/intexml2/micromamba';
+export MAMBA_ROOT_PREFIX='/scratch/hpc-prf-intexml/cbenjamins/envs';
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell bash --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__mamba_setup"
+else
+    alias micromamba="$MAMBA_EXE"  # Fallback on help from mamba activate
+fi
+unset __mamba_setup
+# <<< mamba initialize <<<
+
 # Color
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -25,7 +41,7 @@ export CONT_BENCH_PATH=containers/benchmarks
 export CONT_BENCH_RECIPE_PATH=container_recipes/benchmarks
 export CONT_OPT_PATH=containers/optimizers
 export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
-export CONDA_COMMAND="conda"
+export CONDA_COMMAND="micromamba"
 
 OPTIMIZER_CONTAINER_ID=$1
 # DUMMY_Optimizer
@@ -44,21 +60,34 @@ PYTHON_VERSION=$3
 # fi
 
 ENV_LOCATION=$4
-if [ -z "$ENV_LOCATION" ]
-then
-    ENV_LOCATION=""
-else
-    ENV_LOCATION="-p ${ENV_LOCATION}"
-fi
+
+EXTRA_COMMAND=$5
+
 
 # Create env
 ENV_NAME="carps_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}"
-CREATE_COMMAND="${CONDA_COMMAND} create python=${PYTHON_VERSION} -n ${ENV_NAME} -c conda-forge ${ENV_LOCATION} -y"
-echo "Creating environment:"
-echo $CREATE_COMMAND
-$CREATE_COMMAND
+if [ -z "$ENV_LOCATION" ]
+then
+    ENV_LOCATION="-n ${ENV_NAME}"
+else
+    ENV_LOCATION="-p ${ENV_LOCATION}/${ENV_NAME}"
+fi
 
-RUN_COMMAND="${CONDA_COMMAND} run -n ${ENV_NAME}"
+find_in_conda_env(){
+    $CONDA_COMMAND env list | grep "${@}" >/dev/null 2>/dev/null
+}
+CREATE_COMMAND="${CONDA_COMMAND} create python=${PYTHON_VERSION} -c conda-forge ${ENV_LOCATION} -y"
+
+
+if find_in_conda_env ".*${ENV_NAME}.*" ; then
+   echo "Env already exists"
+else 
+    echo "Creating environment:"
+    echo $CREATE_COMMAND
+    $CREATE_COMMAND
+fi
+
+RUN_COMMAND="${CONDA_COMMAND} run ${ENV_LOCATION}"
 
 # General
 $RUN_COMMAND pip install wheel
@@ -67,8 +96,10 @@ $RUN_COMMAND pip install -r container_recipes/general/general_requirements_conta
 $RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_optimizer.txt
 
 # Optimizer and benchmark specific
-$RUN_COMMAND pip install -r container_recipes/optimizers/${OPTIMIZER_CONTAINER_ID}/${OPTIMIZER_CONTAINER_ID}_requirements.txt
-$RUN_COMMAND pip install -r container_recipes/benchmarks/${BENCHMARK_ID}/${BENCHMARK_ID}_requirements.txt
+$RUN_COMMAND pip install -r container_recipes/benchmarks/${OPTIMIZER_CONTAINER_ID}/${OPTIMIZER_CONTAINER_ID}_requirements.txt
+$RUN_COMMAND pip install -r container_recipes/optimizers/${BENCHMARK_ID}/${BENCHMARK_ID}_requirements.txt
+
+$RUN_COMMAND $EXTRA_COMMAND
 
 echo $(green "Done creating env! Activate with:")
-echo "${CONDA_COMMAND} activate ${ENV_NAME}"
+echo "${CONDA_COMMAND} activate ${ENV_LOCATION}"

@@ -1,0 +1,11 @@
+# @package _global_
+optimizer_id: Optuna
+optimizer_container_id: Optuna
+optimizer:
+  _target_: carps.optimizers.optuna.OptunaOptimizer
+  _partial_: true
+  optuna_cfg:
+    sampler:
+      seed: ${seed}
+    study: {}
+        
