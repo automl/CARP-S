@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: ml/xgboost/9981
+problem_id: hpobench/ml/xgboost/9981
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
   model: xgboost

@@ -75,9 +75,21 @@ def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
     else:
         raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
+def remove_value_for_inactive_hp(configuration: Configuration, configuration_space: ConfigurationSpace) -> Configuration:
+    vector = configuration.get_array()
+    active_hyperparameters = configuration_space.get_active_hyperparameters(configuration)
+
+    for hp_name, hyperparameter in configuration_space._hyperparameters.items():
+        hp_value = vector[configuration_space._hyperparameter_idx[hp_name]]
+        active = hp_name in active_hyperparameters
+
+        if not active and not np.isnan(hp_value):
+            vector[configuration_space._hyperparameter_idx[hp_name]] = np.nan
+    return Configuration(configuration_space=configuration_space, vector=vector)            
 
 def HEBOcfg2ConfigSpacecfg(
-    hebo_suggestion: pd.DataFrame, design_space: DesignSpace, config_space: ConfigurationSpace
+    hebo_suggestion: pd.DataFrame, design_space: DesignSpace, config_space: ConfigurationSpace,
+    allow_inactive_with_values: bool = True
 ) -> Configuration:
     """Convert HEBO config to ConfigSpace config
 
@@ -105,14 +117,16 @@ def HEBOcfg2ConfigSpacecfg(
     hyp = hebo_suggestion.iloc[0].to_dict()
     for k in hyp:
         hp_type = design_space.paras[k]
-        if hp_type.is_numeric and hp_type.is_discrete:
+        if hp_type.is_numeric and hp_type.is_discrete and not np.isnan(hyp[k]):
             hyp[k] = int(hyp[k])
             # Now we need to check if it is an ordinal hp
             hp_k = config_space.get_hyperparameter(k)
             if isinstance(hp_k, OrdinalHyperparameter):
                 hyp[k] = hp_k.sequence[hyp[k]]
 
-    return Configuration(configuration_space=config_space, values=hyp)
+    configuration = Configuration(configuration_space=config_space, values=hyp, allow_inactive_with_values=allow_inactive_with_values)
+    configuration = remove_value_for_inactive_hp(configuration, config_space)
+    return configuration
 
 
 def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
@@ -145,6 +159,13 @@ class HEBOOptimizer(Optimizer):
         loggers: list[AbstractLogger] | None = None
     ) -> None:
         """
+        Interface to HEBO (https://github.com/huawei-noah/HEBO) [1].
+
+        [1] Cowen-Rivers, Alexander I., et al. "An Empirical Study of Assumptions in Bayesian Optimisation." arXiv preprint arXiv:2012.03826 (2021).
+
+        HEBO does not support conditional configuration spaces as well as priors for hyperparameters.
+
+
         Parameters
         ----------
         problem : Problem
@@ -163,6 +184,10 @@ class HEBOOptimizer(Optimizer):
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace
+
+        # if len(self.configspace.get_conditions()) > 0:
+        #     msg = "HEBO does not support conditional search spaces."
+        #     raise RuntimeError(msg)
 
         self.hebo_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, "metric", "cost")
@@ -333,8 +358,10 @@ class HEBOOptimizer(Optimizer):
     def get_current_incumbent(self) -> Incumbent:
         best_x = self.solver.best_x
         best_y = self.solver.best_y
+        print(best_x)
         config = HEBOcfg2ConfigSpacecfg(
-            hebo_suggestion=best_x, design_space=self.hebo_configspace, config_space=self.problem.configspace
+            hebo_suggestion=best_x, design_space=self.hebo_configspace, config_space=self.problem.configspace,
+            allow_inactive_with_values=False
         )
         trial_info = TrialInfo(config=config)
         trial_value = TrialValue(cost=best_y)

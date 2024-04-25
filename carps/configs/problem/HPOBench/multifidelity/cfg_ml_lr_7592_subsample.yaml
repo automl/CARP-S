@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: ml/lr/7592
+problem_id: hpobench/ml/lr/7592
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
   model: lr
