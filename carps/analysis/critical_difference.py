@@ -2,8 +2,10 @@
 from critdd import Diagram
 import pandas as pd
 import numpy as np
+import fire
 
 from carps.utils.loggingutils import setup_logging, get_logger
+from carps.analysis.process_data import load_logs
 
 logger = get_logger(__file__)
 
@@ -46,10 +48,10 @@ Groups: {diagram.get_groups(alpha=.05, adjustment='holm')}
 
     )
 
-
-if __name__ == "__main__":
-    from carps.analysis.process_data import get_interpolated_performance_df, load_logs
-    rundir = "runs"
-
+def calc(rundir: str) -> None:
     df, df_cfg = load_logs(rundir=rundir)
     calc_critical_difference(df=df)
+
+
+if __name__ == "__main__":
+    fire.Fire(calc)
