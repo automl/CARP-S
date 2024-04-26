@@ -27,6 +27,7 @@ def _check(p: str | Path) -> None:
         with open(p, "r") as file:
             requirements = file.readlines()
         requirements = [r.strip() for r in requirements]
+        requirements = [r for r in requirements if "git+" not in r]
 
         try:
             pkg_resources.require(requirements)
