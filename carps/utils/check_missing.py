@@ -50,7 +50,7 @@ def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
     data.to_csv("runstatus.csv", index=False)
     return data
 
-def regenerate_runcommands(rundir: str, from_cached: bool = True) -> None:
+def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
     if from_cached:
         logger.info("Loading experiment status data from 'runstatus.csv'...")
         data = pd.read_csv("runstatus.csv")
