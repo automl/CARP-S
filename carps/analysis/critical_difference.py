@@ -7,9 +7,12 @@ from carps.utils.loggingutils import setup_logging, get_logger
 
 logger = get_logger(__file__)
 
-def calc_critical_difference(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1,):
+def calc_critical_difference(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True):
     perf_col: str = "trial_value__cost_inc"
-    df = df[np.isclose(df[budget_var], max_budget)]
+    if not soft:
+        df = df[np.isclose(df[budget_var], max_budget)]
+    else:
+        df = df[df.groupby(["optimizer_id", "problem_id", "seed"])[budget_var].transform(lambda x: x == x.max())]
     df_crit = df.groupby(["optimizer_id", "problem_id"])[perf_col].apply(np.nanmean).reset_index()
        
     df_crit = df_crit.pivot(
@@ -42,3 +45,11 @@ Groups: {diagram.get_groups(alpha=.05, adjustment='holm')}
         axis_options = {"title": "Critical Difference"},
 
     )
+
+
+if __name__ == "__main__":
+    from carps.analysis.process_data import get_interpolated_performance_df, load_logs
+    rundir = "runs"
+
+    df, df_cfg = load_logs(rundir=rundir)
+    calc_critical_difference(df=df)
