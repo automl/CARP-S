@@ -1,3 +1,4 @@
+git+https://github.com/automl/HPOBench.git
 tqdm
 pandas==1.2.4
 scikit-learn==0.24.2
