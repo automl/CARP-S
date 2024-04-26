@@ -9,3 +9,5 @@ hydra:
     name: carps
     timeout_min: 120
     # mem_gb: 8
+    setup:
+      - module load system singularity
