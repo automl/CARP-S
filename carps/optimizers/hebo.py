@@ -185,9 +185,9 @@ class HEBOOptimizer(Optimizer):
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace
 
-        # if len(self.configspace.get_conditions()) > 0:
-        #     msg = "HEBO does not support conditional search spaces."
-        #     raise RuntimeError(msg)
+        if len(self.configspace.get_conditions()) > 0:
+            msg = "HEBO does not support conditional search spaces."
+            raise RuntimeError(msg)
 
         self.hebo_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, "metric", "cost")
