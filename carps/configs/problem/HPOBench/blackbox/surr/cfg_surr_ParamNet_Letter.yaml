@@ -7,6 +7,7 @@ problem:
     _target_: hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetLetterOnStepsBenchmark
     rng: ${seed}
   seed: ${seed}
+  budget_type: null
 task:
   n_trials: 240
   n_objectives: 1
