@@ -84,7 +84,7 @@ class HPOBenchProblem(Problem):
         configuration = trial_info.config
         starttime = time.time()
 
-        if trial_info.budget is not None:
+        if trial_info.budget is not None and self.budget_type is not None:
             budget_value = (
                 float(trial_info.budget)
                 if self.budget_type == "subsample"
