@@ -1,0 +1,11 @@
+# @package _global_
+benchmark_id: HPOB
+problem_id: hpob/all/2073/125968
+problem:
+  _target_: carps.benchmarks.hpo_b.HPOBProblem
+  model_id: '2073'
+  dataset_id: '125968'
+  surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
+task:
+  n_trials: 100
+  n_objectives: 1
