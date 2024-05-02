@@ -4,7 +4,7 @@ PY_EXPERIMENTER:
   Database:
     use_ssh_tunnel: true
     provider: mysql
-    database: test_caro
+    database: smacbenchmarking
     table:
       name: results
       keyfields:
