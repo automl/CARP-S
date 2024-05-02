@@ -1,17 +1,5 @@
 #!/bin/bash
-# >>> mamba initialize >>>
-# !! Contents within this block are managed by 'mamba init' !!
-export MAMBA_EXE='/scratch/hpc-prf-intexml/cbenjamins/SMACBenchmarking/bin/micromamba';
-#export MAMBA_ROOT_PREFIX='/pc2/users/i/intexml2/micromamba';
-export MAMBA_ROOT_PREFIX='/scratch/hpc-prf-intexml/cbenjamins/envs';
-__mamba_setup="$("$MAMBA_EXE" shell hook --shell bash --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__mamba_setup"
-else
-    alias micromamba="$MAMBA_EXE"  # Fallback on help from mamba activate
-fi
-unset __mamba_setup
-# <<< mamba initialize <<<
+ml lang/Anaconda3/2022.05
 
 # Color
 
@@ -41,7 +29,7 @@ export CONT_BENCH_PATH=containers/benchmarks
 export CONT_BENCH_RECIPE_PATH=container_recipes/benchmarks
 export CONT_OPT_PATH=containers/optimizers
 export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
-export CONDA_COMMAND="micromamba"
+export CONDA_COMMAND="conda"
 
 OPTIMIZER_CONTAINER_ID=$1
 # DUMMY_Optimizer
@@ -91,6 +79,8 @@ RUN_COMMAND="${CONDA_COMMAND} run ${ENV_LOCATION}"
 
 # General
 $RUN_COMMAND pip install wheel
+$RUN_COMMAND pip install swig
+$RUN_COMMAND pip install -e .
 $RUN_COMMAND pip install -r requirements.txt
 $RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_problem.txt
 $RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_optimizer.txt
@@ -102,4 +92,4 @@ $RUN_COMMAND pip install -r container_recipes/optimizers/${BENCHMARK_ID}/${BENCH
 $RUN_COMMAND $EXTRA_COMMAND
 
 echo $(green "Done creating env! Activate with:")
-echo "${CONDA_COMMAND} activate ${ENV_LOCATION}"
+echo "${CONDA_COMMAND} activate ${ENV_NAME}"
