@@ -8,7 +8,6 @@ problem:
   budget_type: repl
   metric: acc
 task:
-  dimensions: 7
   n_trials: null
   time_budget: 720
   n_workers: 1
@@ -23,7 +22,11 @@ task:
   domain: ML
   objective_function_approximation: surrogate
   has_virtual_time: true
+  dimensions: 6
+  search_space_n_categoricals: 2
+  search_space_n_ordinals: 0
+  search_space_n_integers: 1
+  search_space_n_floats: 3
   search_space_has_conditionals: true
-  search_space_has_categoricals: true
   search_space_has_forbiddens: false
   search_space_has_priors: false
