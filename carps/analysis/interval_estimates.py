@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pandas as pd
 
-import json
 import pickle
 from pathlib import Path
 import itertools
@@ -17,7 +16,7 @@ from rliable import metrics, plot_utils
 
 from carps.analysis.utils import savefig
 from carps.utils.loggingutils import get_logger, setup_logging
-from carps.utils.overridefinder import find_override, merge_overrides
+from carps.utils.overridefinder import find_override
 
 setup_logging()
 logger = get_logger(__file__)
