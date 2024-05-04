@@ -8,13 +8,7 @@ seed: 1
 
 # Set in problem cfg
 problem: ???
-task:
-  n_trials: ???  # Optimization budget as number of evaluations.
-  time_budget: null  # Optimization budget as time in seconds
-
-  # Multi-fidelity
-  min_budget: null
-  max_budget: null
+task: ???
 
 benchmark_id: ??? # Set in problem cfg.
 problem_id: ???  # Set in problem cfg. Can be directory.
@@ -26,6 +20,9 @@ optimizer_container_id: ???
 
 pyexperimenter_configuration_file_path: null
 database_credential_file_path: null
+
+use_special_conda_env: false
+conda_env_name: carps_${benchmark_id}_${optimizer_container_id}
 
 timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
