@@ -25,5 +25,5 @@ task:
   has_virtual_time: false
   search_space_has_conditionals: false
   search_space_has_categoricals: false
-  search_space_has_constraints: false
+  search_space_has_forbiddens: false
   search_space_has_priors: false
