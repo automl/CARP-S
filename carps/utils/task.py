@@ -62,6 +62,80 @@ def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
 @dataclass_json
 @dataclass(frozen=True)
 class Task():
+    """Task information
+
+    Parameters
+    ----------
+    # General
+    n_trials : int
+        The number of trials aka calls to the objective function.
+        Specify this for classic blackbox problems.
+        Either `n_trials´ or `time_budget` needs to be specified.
+    time_budget : float
+        The time budget for optimization.
+        Specify this for multi-fidelity problems.
+        Either `n_trials´ or `time_budget` needs to be specified.
+    n_workers : int = 1
+        The number of workers allowed for this task. Not every optimizer
+        allows parallelism.
+
+    # Multi-objective
+    n_objectives : int = 1
+        The number of optimization objectives.
+    objectives : list[str]
+        Optional names of objectives.
+
+    # Multi-fidelity
+    is_multifidelity : bool
+        Whether the task is a multi-fidelity problem.
+    fidelity_type : str
+        The kind of fidelity used.
+    min_budget : float
+        Minimum fidelity. Not used by every optimizer.
+    max_budget : float
+        Maximum fidelity. Required for multi-fidelity.
+    
+    has_constraints : bool
+        Whether the task has any constraints.
+
+    # Objective Function Characteristics
+    domain : str
+        The task's domain, e.g. synethetic, ML, NAS.
+    objective_function_approximation : str
+        How the objective function is approximated / represented, e.g.
+        real, surrogate or tabular.
+    has_virtual_time : bool
+        Whether the task tracked evaluation time in the case of surrogate
+        or tabular objective functions.
+
+    # Search Space Information
+    dimensions: int
+        The dimensionality of the task.
+    search_space_n_categoricals: int
+        The number of categorical hyperparameters (HPs).
+    search_space_n_ordinals: int
+        The number of ordinal HPs.
+    search_space_n_integers: int
+        The number of integer HPs.
+    search_space_n_floats: int
+        The number of float HPs.
+    search_space_has_conditionals: bool
+        Whether the search space has conditions. Not every optimizer
+        supports conditional search spaces.
+    search_space_has_forbiddens: bool
+        Whether the search space has forbiddens/constraints.
+        Not every optimizer supports forbiddens.
+    search_space_has_priors: bool
+        Whether there are any priors on HPs, e.g. beta or normal.
+
+    Raises
+    ------
+    ValueError
+        When `is_multifidelity` is set and `max_budget` not specified.
+        In order to use multi-fidelity, both need to be specified.
+    ValueError
+        When neither `n_trials` nor `time_budget` are specified.
+    """
     # General
     n_trials: int | None = None
     time_budget: float | None = None  # 1 cpu, walltime budget in minutes
