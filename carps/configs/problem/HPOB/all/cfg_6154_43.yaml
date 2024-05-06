@@ -21,6 +21,7 @@ task:
   domain: ML
   objective_function_approximation: surrogate
   has_virtual_time: false
+  deterministic: true
   dimensions: 17
   search_space_n_categoricals: 0
   search_space_n_ordinals: 0
