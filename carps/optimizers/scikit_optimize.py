@@ -77,7 +77,7 @@ class SkoptOptimizer(Optimizer):
             self.seed = 0
         np.random.seed(self.seed)
 
-        self.configspace = self.problem.configspace
+        self.configspace = problem.configspace
 
         self.skopt_space = self.convert_configspace(self.configspace)
         self._solver: skopt.optimizer.Optimizer | None = None
