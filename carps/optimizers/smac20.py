@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
@@ -10,6 +12,7 @@ from smac.facade.abstract_facade import AbstractFacade
 from smac.scenario import Scenario
 from smac.runhistory import TrialInfo as SmacTrialInfo
 from smac.runhistory import TrialValue as SmacTrialValue
+from smac.multi_objective.parego import ParEGO
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
@@ -20,6 +23,11 @@ from carps.utils.types import Incumbent
 from carps.utils.task import Task
 
 setup_logging()
+
+def maybe_inst_add_scenario(smac_kwargs: dict[str, Any], key: str, scenario: Scenario) -> dict[str, Any]:
+    if key in smac_kwargs:
+        smac_kwargs[key] = smac_kwargs[key](scenario=scenario)
+    return smac_kwargs
 
 class SMAC3Optimizer(Optimizer):
     def __init__(
@@ -165,8 +173,7 @@ class SMAC3Optimizer(Optimizer):
 
         # If we have a custom intensifier we need to instantiate ourselves
         # because the helper methods in the facades expect a scenario.
-        if "intensifier" in smac_kwargs:
-            smac_kwargs["intensifier"] = smac_kwargs["intensifier"](scenario=scenario)
+        smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "intensifier", scenario)
 
         if "acquisition_function" in smac_kwargs and "acquisition_maximizer" in smac_kwargs:
             if "acquisition_maximizer" in smac_kwargs:
@@ -178,11 +185,9 @@ class SMAC3Optimizer(Optimizer):
                 ):
                     smac_kwargs["callbacks"].append(smac_kwargs["acquisition_maximizer"].selector.expl2callback)
 
-        if "config_selector" in smac_kwargs:
-            smac_kwargs["config_selector"] = smac_kwargs["config_selector"](scenario=scenario)
-
-        if "initial_design" in smac_kwargs:
-            smac_kwargs["initial_design"] = smac_kwargs["initial_design"](scenario=scenario)
+        smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "config_selector", scenario)
+        smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "initial_design", scenario)
+        smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "multi_objective_algorithm", scenario)
 
         printr(smac_class, smac_kwargs)
 
@@ -257,6 +262,10 @@ class SMAC3Optimizer(Optimizer):
             trial_value = TrialValue(cost=cost)
             incumbent_tuple = (trial_info, trial_value)
         else:
+            if (mo := self.solver._runhistory_encoder.multi_objective_algorithm) is not None:
+                if isinstance(mo, ParEGO) and mo._theta is None:
+                    # Initialize weights of ParEGO
+                    mo.update_on_iteration_start()
             incs = self.solver.intensifier.get_incumbents()
             costs = [self.solver.runhistory.get_cost(config=c) for c in incs]
             tis = [TrialInfo(config=i) for i in incs]
