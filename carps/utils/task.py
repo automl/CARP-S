@@ -117,6 +117,8 @@ class Task():
     has_virtual_time : bool
         Whether the task tracked evaluation time in the case of surrogate
         or tabular objective functions.
+    deterministic : bool
+        Whether the objective function is deterministic.
 
     # Search Space Information
     dimensions: int
@@ -170,6 +172,7 @@ class Task():
     domain: str | None = None  # e.g. synthetic, ML, NAS, x
     objective_function_approximation: str | None = None  # real, surrogate, tabular
     has_virtual_time: bool | None = None
+    deterministic: bool | None = None
     
     # Search Space
     dimensions: int | None = None
