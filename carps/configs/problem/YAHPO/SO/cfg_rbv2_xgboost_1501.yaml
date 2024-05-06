@@ -6,9 +6,28 @@ problem:
   bench: rbv2_xgboost
   instance: '1501'
   budget_type: null
-  metric: acc
+  metric:
+  - acc
 task:
-  n_trials: 170
-  n_objectives: 3
+  n_trials: 100
+  time_budget: null
+  n_workers: 1
+  n_objectives: 1
+  objectives:
+  - acc
+  is_multifidelity: false
+  fidelity_type: null
   min_budget: null
   max_budget: null
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: surrogate
+  has_virtual_time: true
+  dimensions: 14
+  search_space_n_categoricals: 2
+  search_space_n_ordinals: 0
+  search_space_n_integers: 2
+  search_space_n_floats: 10
+  search_space_has_conditionals: true
+  search_space_has_forbiddens: false
+  search_space_has_priors: false

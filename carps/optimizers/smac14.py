@@ -13,6 +13,7 @@ from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import AskAndTellNotSupportedError
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
+from carps.utils.task import Task
 
 
 class NotSupportedError(Exception):
@@ -24,12 +25,10 @@ class SMAC314Optimizer(Optimizer):
             self,
             problem: Problem,
             smac_cfg: DictConfig,
-            n_trials: int | None,
-            time_budget: float | None,
-            n_workers: int = 1,
+            task: Task,
             loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
+        super().__init__(problem, task, loggers)
 
         self.configspace = self.problem.configspace
         self.smac_cfg = smac_cfg

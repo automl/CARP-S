@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import fire
 
-from carps.utils.loggingutils import setup_logging, get_logger
+from carps.utils.loggingutils import get_logger
 from carps.analysis.process_data import load_logs
 
 logger = get_logger(__file__)

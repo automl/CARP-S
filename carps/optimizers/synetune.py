@@ -24,6 +24,7 @@ from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
+from carps.utils.task import Task
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -65,31 +66,28 @@ class SynetuneOptimizer(Optimizer):
         self,
         problem: Problem,
         optimizer_name: "str",
-        n_trials: int | None, 
-        time_budget: float | None = None,
-        n_workers: int = 1,
-        max_budget: float | None = None,
+        task: Task,
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
+        super().__init__(problem, task, loggers)
         self.fidelity_enabled = False
-        self.max_budget = max_budget
+        self.max_budget = task.max_budget
 
         self.configspace = self.problem.configspace
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts["with_mf"]:
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
             self.fidelity_enabled = True
-            if not hasattr(problem, "budget_type"):
-                raise ValueError("To run multi-fidelity optimizer, the problem must have a budget_type!")
-            if max_budget is None:
+            if self.task.fidelity_type is None:
+                raise ValueError("To run multi-fidelity optimizer, the problem must define a fidelity type!")
+            if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, "metric", "cost")
-        self.budget_type = getattr(self.problem, "budget_type", None)
-        self.trial_counter = 0
+        self.fidelity_type: str = self.task.fidelity_type
+        self.trial_counter: int = 0
 
         self.optimizer_name = optimizer_name
         self._solver: SyneTrialScheduler | None = None 
@@ -118,7 +116,7 @@ class SynetuneOptimizer(Optimizer):
         for k, v in configspace.items():
             configspace_st[k] = configspaceHP2syneTuneHP(v)
         if self.fidelity_enabled:
-            configspace_st[self.problem.budget_type] = self.max_budget
+            configspace_st[self.problem.fidelity_type] = self.max_budget
         return configspace_st
 
     def convert_to_trial(  # type: ignore[override]
@@ -143,8 +141,8 @@ class SynetuneOptimizer(Optimizer):
             Trial info containing configuration, budget, seed, instance.
         """
         configs = copy.deepcopy(trial.config)
-        if self.budget_type is not None:
-            budget = configs.pop(self.budget_type)
+        if self.fidelity_type is not None:
+            budget = configs.pop(self.fidelity_type)
         else:
             budget = None
         configuration = Configuration(configuration_space=self.configspace, values=configs)
@@ -187,7 +185,7 @@ class SynetuneOptimizer(Optimizer):
         """
         syne_config = dict(trial_info.config)
         if self.fidelity_enabled:
-            syne_config[self.problem.budget_type] = trial_info.budget
+            syne_config[self.fidelity_type] = trial_info.budget
         trial = SyneTrial(
             trial_id=self.trial_counter,
             config=syne_config,
@@ -255,7 +253,7 @@ class SynetuneOptimizer(Optimizer):
             mode="min",
         )
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
-            _optimizer_kwargs["resource_attr"] = self.problem.budget_type
+            _optimizer_kwargs["resource_attr"] = self.fidelity_type
             # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit for synetune
 
         self.optimizer_kwargs.update(_optimizer_kwargs)
