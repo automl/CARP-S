@@ -64,6 +64,14 @@ def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
 class Task():
     """Task information
 
+    For general optimization, only `n_trials` or `time_budget` needs
+    to be defined. The optimizers receive the search space.
+    For multi-fidelity, at least `is_multifidelity` and `max_budget´
+    need to be specified.
+    For multi-objecitve, at least `n_objectives` needs to be specified.
+    The remaining parameters are meta-data and not necessarily needed
+    by the optimizer but useful to order tasks.
+
     Parameters
     ----------
     # General
@@ -75,12 +83,14 @@ class Task():
         The time budget for optimization.
         Specify this for multi-fidelity problems.
         Either `n_trials´ or `time_budget` needs to be specified.
+
+    # Parallelism
     n_workers : int = 1
         The number of workers allowed for this task. Not every optimizer
         allows parallelism.
 
     # Multi-objective
-    n_objectives : int = 1
+    n_objectives : int
         The number of optimization objectives.
     objectives : list[str]
         Optional names of objectives.
@@ -136,7 +146,7 @@ class Task():
     ValueError
         When neither `n_trials` nor `time_budget` are specified.
     """
-    # General
+    # General (REQUIRED)
     n_trials: int | None = None
     time_budget: float | None = None  # 1 cpu, walltime budget in minutes
     
