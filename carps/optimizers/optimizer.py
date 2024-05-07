@@ -37,6 +37,8 @@ class Optimizer(ABC):
         self.task: Task = task
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
+        # Convert min to seconds
+        self.time_budget = self.task.time_budget * 60 if self.task.time_budget is not None else None
         self.virtual_time_elapsed_seconds: float | None = 0.0
         self.trial_counter: int = 0
 
@@ -107,11 +109,11 @@ class Optimizer(ABC):
         return self._run()
 
     def _time_left(self, start_time) -> bool:
-        return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.task.time_budget
+        return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
 
     def continue_optimization(self, start_time) -> bool:
         cont = True
-        if self.task.time_budget is not None and not self._time_left(start_time):
+        if self.time_budget is not None and not self._time_left(start_time):
             cont = False
         if self.trial_counter >= self.task.n_trials:
             cont = False

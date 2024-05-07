@@ -80,7 +80,7 @@ class Task():
         Specify this for classic blackbox problems.
         Either `n_trials´ or `time_budget` needs to be specified.
     time_budget : float
-        The time budget for optimization.
+        The time budget in minutes for optimization.
         Specify this for multi-fidelity problems.
         Either `n_trials´ or `time_budget` needs to be specified.
 
