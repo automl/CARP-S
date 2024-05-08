@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING, Any
 
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
+import numpy as np
 import skopt
 from skopt.space.space import Categorical, Integer, Real, Space
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
-import numpy as np
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
@@ -49,7 +49,9 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
             weights = hp.weights / hp.weights.sum()
         return Categorical(hp.choices, name=hp.name, weights=weights)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
-        raise ValueError("Ordinal hyperparameters are not supported by Scikit-Optimize!")
+        raise ValueError(
+            "Ordinal hyperparameters are not supported by Scikit-Optimize!"
+        )
     elif isinstance(hp, CSH.Constant):
         return Categorical(list(hp.value), name=hp.name)
     else:
@@ -127,7 +129,9 @@ class SkoptOptimizer(Optimizer):
                 for hp, value in zip(self.configspace.get_hyperparameters(), config)
             },
         )
-        assert list(configuration.keys()) == list(self.configspace.get_hyperparameter_names())
+        assert list(configuration.keys()) == list(
+            self.configspace.get_hyperparameter_names()
+        )
         assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]
         trial_info = TrialInfo(
             config=configuration, seed=self.seed, budget=None, instance=None
@@ -138,9 +142,7 @@ class SkoptOptimizer(Optimizer):
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
         opt = skopt.optimizer.Optimizer(
-            dimensions=self.skopt_space, 
-            random_state = self.seed, 
-            **self.optimizer_kwargs
+            dimensions=self.skopt_space, random_state=self.seed, **self.optimizer_kwargs
         )
         return opt
 
