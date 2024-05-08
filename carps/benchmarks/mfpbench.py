@@ -2,6 +2,7 @@
 
 * HOW TO USE:
 * ------------
+* MF-Prior-Bench Documentation: https://automl.github.io/mf-prior-bench/latest/setup/
 * 1. Install MF-Prior-Bench using `pip install mf-prior-bench`
 * 2. Download the data for the respective benchmarks using
 *    `python -m mfpbench download --benchmark <benchmark_name> --datadir <data_dir_path>`
@@ -37,8 +38,6 @@ benchmarks = [
     "cifar100_wideresnet_2048",
     "imagenet_resnet_512",
     # MFHartmann
-    "mfh3",
-    "mfh6",
     "mfh3_terrible",
     "mfh3_bad",
     "mfh3_moderate",
