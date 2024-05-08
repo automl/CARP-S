@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING, Any
 
 import ConfigSpace as CS
 import ConfigSpace.hyperparameters as CSH
-import numpy as np
 import skopt
 from skopt.space.space import Categorical, Integer, Real, Space
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
+import numpy as np
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
@@ -43,9 +43,13 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
         else:
             return Integer(hp.lower, hp.upper, name=hp.name)
     elif isinstance(hp, CSH.CategoricalHyperparameter):
-        return Categorical(hp.choices, name=hp.name)
+        weights = None
+        if hp.weights is not None:
+            hp.weights = np.array(hp.weights)
+            weights = hp.weights / hp.weights.sum()
+        return Categorical(hp.choices, name=hp.name, weights=weights)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
-        return Categorical(hp.sequence, name=hp.name)
+        raise ValueError("Ordinal hyperparameters are not supported by Scikit-Optimize!")
     elif isinstance(hp, CSH.Constant):
         return Categorical(list(hp.value), name=hp.name)
     else:
@@ -75,7 +79,6 @@ class SkoptOptimizer(Optimizer):
         self.seed = skopt_cfg.seed
         if self.seed is None:
             self.seed = 0
-        np.random.seed(self.seed)
 
         self.configspace = problem.configspace
 
@@ -124,6 +127,8 @@ class SkoptOptimizer(Optimizer):
                 for hp, value in zip(self.configspace.get_hyperparameters(), config)
             },
         )
+        assert list(configuration.keys()) == list(self.configspace.get_hyperparameter_names())
+        assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]
         trial_info = TrialInfo(
             config=configuration, seed=self.seed, budget=None, instance=None
         )
@@ -133,7 +138,9 @@ class SkoptOptimizer(Optimizer):
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
         opt = skopt.optimizer.Optimizer(
-            dimensions=self.skopt_space, **self.optimizer_kwargs
+            dimensions=self.skopt_space, 
+            random_state = self.seed, 
+            **self.optimizer_kwargs
         )
         return opt
 
@@ -167,7 +174,7 @@ class SkoptOptimizer(Optimizer):
         trial_value : TrialValue
             trial value (cost, time, ...)
         """
-        _ = self.solver.tell(list(trial_info.config.get_array()), trial_value.cost)
+        _ = self.solver.tell(list(trial_info.config.values()), trial_value.cost)
 
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
