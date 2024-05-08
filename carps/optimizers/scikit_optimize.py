@@ -45,8 +45,7 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
     elif isinstance(hp, CSH.CategoricalHyperparameter):
         weights = None
         if hp.weights is not None:
-            hp.weights = np.array(hp.weights)
-            weights = hp.weights / hp.weights.sum()
+            weights = np.asarray(hp.weights) / np.sum(hp.weights)
         return Categorical(hp.choices, name=hp.name, weights=weights)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
         raise ValueError(
