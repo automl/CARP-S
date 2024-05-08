@@ -73,8 +73,6 @@ class SynetuneOptimizer(Optimizer):
         super().__init__(problem, task, loggers)
         self.fidelity_enabled = False
         self.max_budget = task.max_budget
-
-        self.configspace = self.problem.configspace
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts["with_mf"]:
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
@@ -83,10 +81,11 @@ class SynetuneOptimizer(Optimizer):
                 raise ValueError("To run multi-fidelity optimizer, the problem must define a fidelity type!")
             if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
-
+        
+        self.fidelity_type: str = self.task.fidelity_type
+        self.configspace = self.problem.configspace
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, "metric", "cost")
-        self.fidelity_type: str = self.task.fidelity_type
         self.trial_counter: int = 0
 
         self.optimizer_name = optimizer_name
@@ -116,7 +115,7 @@ class SynetuneOptimizer(Optimizer):
         for k, v in configspace.items():
             configspace_st[k] = configspaceHP2syneTuneHP(v)
         if self.fidelity_enabled:
-            configspace_st[self.problem.fidelity_type] = self.max_budget
+            configspace_st[self.fidelity_type] = self.max_budget
         return configspace_st
 
     def convert_to_trial(  # type: ignore[override]
