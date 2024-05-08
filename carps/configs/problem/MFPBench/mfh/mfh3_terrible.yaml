@@ -19,5 +19,7 @@ problem:
 task:
   n_trials: 100
   n_objectives: 1
+  is_multifidelity: true
+  fidelity_type: "z"
   min_budget: 3
   max_budget: 100
