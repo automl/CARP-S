@@ -20,6 +20,8 @@ def savefig(fig: plt.Figure, filename: str) -> None:
     figure_filename.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figure_filename, dpi=300, bbox_inches="tight")
 
-def setup_seaborn() -> None:
+def setup_seaborn(font_scale: float | None = None) -> None:
+    if font_scale is not None:
+        sns.set_theme(font_scale=font_scale)
     sns.set_style("whitegrid")
     sns.set_palette("colorblind")
