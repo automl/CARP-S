@@ -6,9 +6,29 @@ problem:
   bench: nb301
   instance: CIFAR10
   budget_type: null
-  metric: val_accuracy
+  metric:
+  - val_accuracy
 task:
-  n_trials: 250
-  n_objectives: 12
+  n_trials: 100
+  time_budget: null
+  n_workers: 1
+  n_objectives: 1
+  objectives:
+  - val_accuracy
+  is_multifidelity: false
+  fidelity_type: null
   min_budget: null
   max_budget: null
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: surrogate
+  has_virtual_time: true
+  deterministic: true
+  dimensions: 34
+  search_space_n_categoricals: 34
+  search_space_n_ordinals: 0
+  search_space_n_integers: 0
+  search_space_n_floats: 0
+  search_space_has_conditionals: true
+  search_space_has_forbiddens: false
+  search_space_has_priors: false

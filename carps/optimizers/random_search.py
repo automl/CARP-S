@@ -5,6 +5,7 @@ from ConfigSpace import Configuration, ConfigurationSpace
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer, SearchSpace
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
 
@@ -13,15 +14,12 @@ class RandomSearchOptimizer(Optimizer):
     def __init__(
             self,
             problem: Problem,
-            n_trials: int | None,
-            time_budget: float | None,
-            n_workers: int = 1,
+            task: Task,
             loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
+        super().__init__(problem, task, loggers)
 
         self.configspace: ConfigurationSpace = self.problem.configspace
-        self.n_trials: int = n_trials
         self.history: list[tuple[TrialInfo, TrialValue]] = []
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:

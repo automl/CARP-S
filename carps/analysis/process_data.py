@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import fire
 import numpy as np
 import pandas as pd
-import fire
 
 from carps.utils.loggingutils import get_logger, setup_logging
 
@@ -14,6 +14,13 @@ logger = get_logger(__file__)
 def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Processing raw logs. Normalize n_trials and costs. Calculate trajectory (incumbent cost).")
     # logs= logs.drop(columns=["config"])
+    # Filter MO costs
+    logs = logs[~logs["problem_id"].str.startswith("DUMMY")]
+    logs = logs[~logs["benchmark_id"].str.startswith("DUMMY")]
+    logs = logs[~logs["optimizer_id"].str.startswith("DUMMY")]
+    logs["trial_value__cost"] = logs["trial_value__cost"].apply(lambda x: x if isinstance(x, float) else eval(x))
+    logs = logs[logs["trial_value__cost"].apply(lambda x: isinstance(x, float))]
+    logs["trial_value__cost"] = logs["trial_value__cost"].apply(float)
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")

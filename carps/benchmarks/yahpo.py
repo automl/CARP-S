@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from ConfigSpace import ConfigurationSpace
+from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
 from carps.benchmarks.problem import Problem
@@ -104,7 +105,7 @@ class YahpoProblem(Problem):
             for fidelity in other_fidelities:
                 self.max_other_fidelities[fidelity] = self.fidelity_space.get_hyperparameter(fidelity).upper
 
-        if type(metric) != list:
+        if not isinstance(metric, (list, ListConfig)):
             metric = [metric]
         self.metrics = metric
 

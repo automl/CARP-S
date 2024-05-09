@@ -5,9 +5,11 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from ConfigSpace import ConfigurationSpace
+from omegaconf import DictConfig, OmegaConf
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent, SearchSpace
 
@@ -16,21 +18,26 @@ class Optimizer(ABC):
     def __init__(
             self,
             problem: Problem,
-            n_trials: int | None,
-            time_budget: float | None = None,
-            n_workers: int = 1,
+            task: Task | dict | DictConfig,
             loggers: list[AbstractLogger] | None = None
     ) -> None:
         super().__init__()
         self.problem = problem
-        if n_trials is None and time_budget is None:
-            raise ValueError("Please specify either `n_trials` or `time_budget` "
-                             "as the optimization budget.")
-        self.n_trials: int | None = n_trials
-        self.time_budget: float | None = time_budget
-        self.n_workers: int = n_workers
+
+        if isinstance(task, dict):
+            task = Task(**task)
+        elif isinstance(task, DictConfig):
+            task = Task(**OmegaConf.to_container(cfg=task, resolve=True))
+        elif isinstance(task, Task):
+            pass
+        else:
+            raise ValueError("task must be either `Task`, `dict` or `DictConfig`.")
+
+        self.task: Task = task
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
+        # Convert min to seconds
+        self.time_budget = self.task.time_budget * 60 if self.task.time_budget is not None else None
         self.virtual_time_elapsed_seconds: float | None = 0.0
         self.trial_counter: int = 0
 
@@ -107,7 +114,7 @@ class Optimizer(ABC):
         cont = True
         if self.time_budget is not None and not self._time_left(start_time):
             cont = False
-        if self.trial_counter >= self.n_trials:
+        if self.trial_counter >= self.task.n_trials:
             cont = False
 
         return cont
@@ -161,3 +168,10 @@ class Optimizer(ABC):
             trial value (cost, time, ...)
         """
         raise NotImplementedError
+    
+
+    # def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
+    # def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
+    # def ask(self) -> TrialInfo:
+    # def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    # def get_current_incumbent(self) -> Incumbent:

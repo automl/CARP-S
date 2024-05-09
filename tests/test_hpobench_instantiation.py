@@ -1,8 +1,14 @@
+# ml system singularity
+
 from omegaconf import OmegaConf
+
+from carps.benchmarks.hpo_bench import HPOBenchProblem
 from carps.utils.running import make_problem
+from carps.utils.trials import TrialInfo
 
 fns = [
     "carps/configs/problem/HPOBench/blackbox/surr/cfg_surr_ParamNet_Adult.yaml",
+    "carps/configs/problem/HPOBench/blackbox/surr/cfg_surr_SVM_default.yaml",
     "carps/configs/problem/HPOBench/blackbox/tab/cfg_ml_rf_7592.yaml",
     "carps/configs/problem/HPOBench/multifidelity/cfg_ml_lr_9981_subsample.yaml",
 ]
@@ -17,4 +23,8 @@ for fn in fns:
     print(cfg)
     problem = make_problem(cfg=cfg)
     print(problem)
+
+    config = problem.configspace.sample_configuration()
+    res = [problem.evaluate(TrialInfo(config=config)).cost for _ in range(5)]
+    print(res)
     del problem

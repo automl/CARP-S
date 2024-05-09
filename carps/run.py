@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import hydra
-from omegaconf import DictConfig
 from hydra.core.hydra_config import HydraConfig
+from omegaconf import DictConfig
 
+from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
-from carps.utils.loggingutils import setup_logging, get_logger
 
 setup_logging()
 logger = get_logger(__file__)

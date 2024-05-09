@@ -26,6 +26,7 @@ from hebo.optimizers.hebo import HEBO
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
 
@@ -153,9 +154,7 @@ class HEBOOptimizer(Optimizer):
     def __init__(
         self,
         problem: Problem,
-        n_trials: int | None = None,
-        time_budget: float | None = None,
-        n_workers: int = 1,
+        task: Task,
         loggers: list[AbstractLogger] | None = None
     ) -> None:
         """
@@ -170,17 +169,15 @@ class HEBOOptimizer(Optimizer):
         ----------
         problem : Problem
             _description_
-        num_trials : int | None, optional
-            Number of trials after which the optimization is stopped, by default None
-        max_wallclock_time : float | None, optional
-            Time limit after which the optimization is stopped, by default None
+        task : Task
+            The task description.
 
         Raises
         ------
         ValueError
             If neither `num_trials` nor `max_wallclock_time` is specified.
         """
-        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
+        super().__init__(problem, task, loggers)
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace

@@ -9,7 +9,7 @@ optimizer:
   optimizer_kwargs:
     random_seed: ${seed}
     max_resource_attr: ${problem.budget_type}
-  max_budget: ${task.max_budget}
+  # max_budget: ${task.max_budget}
 
 
 

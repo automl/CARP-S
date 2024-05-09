@@ -4,10 +4,10 @@ import json
 from dataclasses import asdict
 
 from py_experimenter.result_processor import ResultProcessor
-from carps.utils.loggingutils import setup_logging, get_logger
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Incumbent
+from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.trials import TrialInfo, TrialValue
 
 setup_logging()

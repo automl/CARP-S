@@ -5,30 +5,27 @@
 from __future__ import annotations
 
 from typing import Iterable
+
+import optuna
+from ConfigSpace import Configuration, ConfigurationSpace
+from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
+                                         Hyperparameter, OrdinalHyperparameter,
+                                         UniformFloatHyperparameter,
+                                         UniformIntegerHyperparameter)
 from omegaconf import DictConfig
-from optuna.distributions import BaseDistribution
+from optuna.distributions import (BaseDistribution, CategoricalDistribution,
+                                  FloatDistribution, IntDistribution)
+from optuna.samplers import TPESampler
+from optuna.study import Study
+from optuna.trial import TrialState as OptunaTrialState
+from rich import print as printr
+
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.trials import TrialInfo, TrialValue, StatusType
+from carps.utils.task import Task
+from carps.utils.trials import StatusType, TrialInfo, TrialValue
 from carps.utils.types import Incumbent
-from rich import print as printr
-from ConfigSpace import Configuration, ConfigurationSpace
-from ConfigSpace.hyperparameters import (
-    CategoricalHyperparameter,
-    Hyperparameter,
-    Constant,
-    OrdinalHyperparameter,
-    UniformIntegerHyperparameter,
-    UniformFloatHyperparameter,
-)
-
-
-import optuna
-from optuna.study import Study
-from optuna.samplers import TPESampler
-from optuna.distributions import IntDistribution, FloatDistribution, CategoricalDistribution
-from optuna.trial import TrialState as OptunaTrialState
 
 # NOTE: Optuna has an extra OptunaTrialState.PRUNED, which indicates something
 # was halted during it's run and not progressed to the next budget. They fundamentally
@@ -86,12 +83,10 @@ class OptunaOptimizer(Optimizer):
         self,
         problem: Problem,
         optuna_cfg: DictConfig,
-        n_trials: int | None,
-        time_budget: float | None,
-        n_workers: int = 1,
+        task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
+        super().__init__(problem, task, loggers)
         self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
 
