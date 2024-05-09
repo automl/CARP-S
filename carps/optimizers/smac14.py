@@ -11,9 +11,9 @@ from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import AskAndTellNotSupportedError
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
-from carps.utils.task import Task
 
 
 class NotSupportedError(Exception):

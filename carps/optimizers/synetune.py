@@ -16,19 +16,25 @@ from syne_tune.backend.trial_status import TrialResult
 from syne_tune.config_space import (choice, lograndint, loguniform, ordinal,
                                     randint, uniform)
 from syne_tune.optimizer.baselines import (ASHA, BOHB, BORE, DEHB, KDE,
-                                           MOBSTER, BayesianOptimization)
+                                           MOBSTER, MOREA,
+                                           BayesianOptimization,
+                                           MOLinearScalarizationBayesOpt,
+                                           MORandomScalarizationBayesOpt)
 from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
-from carps.utils.task import Task
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
     "BayesianOptimization": BayesianOptimization,
+    "BO-MO-RS": MORandomScalarizationBayesOpt,
+    "BO-MO-LS": MOLinearScalarizationBayesOpt,
+    "MOREA": MOREA,
     "ASHA": ASHA,
     "MOBSTER": MOBSTER,
     "BOHB": BOHB,

@@ -5,9 +5,9 @@ from __future__ import annotations
 import time
 from pathlib import Path
 from typing import Optional
-from omegaconf import ListConfig
 
 from ConfigSpace import ConfigurationSpace
+from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
 from carps.benchmarks.problem import Problem

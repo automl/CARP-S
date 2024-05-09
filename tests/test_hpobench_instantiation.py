@@ -1,9 +1,10 @@
 # ml system singularity
 
 from omegaconf import OmegaConf
+
+from carps.benchmarks.hpo_bench import HPOBenchProblem
 from carps.utils.running import make_problem
 from carps.utils.trials import TrialInfo
-from carps.benchmarks.hpo_bench import HPOBenchProblem
 
 fns = [
     "carps/configs/problem/HPOBench/blackbox/surr/cfg_surr_ParamNet_Adult.yaml",

@@ -4,15 +4,14 @@ import time
 from abc import ABC, abstractmethod
 from typing import Any
 
-from omegaconf import DictConfig, OmegaConf
-
 from ConfigSpace import ConfigurationSpace
+from omegaconf import DictConfig, OmegaConf
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent, SearchSpace
-from carps.utils.task import Task
 
 
 class Optimizer(ABC):
@@ -37,6 +36,8 @@ class Optimizer(ABC):
         self.task: Task = task
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
+        # Convert min to seconds
+        self.time_budget = self.task.time_budget * 60 if self.task.time_budget is not None else None
         self.virtual_time_elapsed_seconds: float | None = 0.0
         self.trial_counter: int = 0
 
@@ -107,11 +108,11 @@ class Optimizer(ABC):
         return self._run()
 
     def _time_left(self, start_time) -> bool:
-        return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.task.time_budget
+        return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
 
     def continue_optimization(self, start_time) -> bool:
         cont = True
-        if self.task.time_budget is not None and not self._time_left(start_time):
+        if self.time_budget is not None and not self._time_left(start_time):
             cont = False
         if self.trial_counter >= self.task.n_trials:
             cont = False
@@ -167,3 +168,10 @@ class Optimizer(ABC):
             trial value (cost, time, ...)
         """
         raise NotImplementedError
+    
+
+    # def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
+    # def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
+    # def ask(self) -> TrialInfo:
+    # def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    # def get_current_incumbent(self) -> Incumbent:

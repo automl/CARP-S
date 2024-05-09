@@ -159,3 +159,4 @@ logs
 *.csv
 *.tex
 *run_missing.sh
+*.png
