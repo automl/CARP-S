@@ -67,7 +67,6 @@ class SkoptOptimizer(Optimizer):
         self,
         problem: Problem,
         skopt_cfg: DictConfig,
-        optimizer_kwargs: DictConfig,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
@@ -75,18 +74,16 @@ class SkoptOptimizer(Optimizer):
         super().__init__(problem, task, loggers)
 
         self.fidelity_enabled = False
-        self.skopt_cfg = skopt_cfg
-        self.seed = skopt_cfg.seed
 
         self.configspace = problem.configspace
 
         self.skopt_space = self.convert_configspace(self.configspace)
         self._solver: skopt.optimizer.Optimizer | None = None
 
-        self.optimizer_kwargs = optimizer_kwargs
-        assert self.optimizer_kwargs.base_estimator in base_estimators
-        assert self.optimizer_kwargs.acq_func in acq_funcs
-        assert self.optimizer_kwargs.acq_optimizer in acq_optimizers
+        self.skopt_cfg = skopt_cfg
+        assert self.skopt_cfg.base_estimator in base_estimators
+        assert self.skopt_cfg.acq_func in acq_funcs
+        assert self.skopt_cfg.acq_optimizer in acq_optimizers
 
     def convert_configspace(self, configspace: CS.ConfigurationSpace) -> list[Space]:
         """Convert ConfigSpace configuration space to Scikit-Optimize Space.
@@ -130,16 +127,17 @@ class SkoptOptimizer(Optimizer):
         )
         assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]
         trial_info = TrialInfo(
-            config=configuration, seed=self.seed, budget=None, instance=None
+            config=configuration,
+            seed=self.skopt_cfg.random_state,
+            budget=None,
+            instance=None,
         )
         return trial_info
 
     def _setup_optimizer(self) -> skopt.optimizer.Optimizer:
-        if self.optimizer_kwargs is None:
-            self.optimizer_kwargs = {}
-        opt = skopt.optimizer.Optimizer(
-            dimensions=self.skopt_space, random_state=self.seed, **self.optimizer_kwargs
-        )
+        if self.skopt_cfg is None:
+            self.skopt_cfg = {}
+        opt = skopt.optimizer.Optimizer(dimensions=self.skopt_space, **self.skopt_cfg)
         return opt
 
     def ask(self) -> TrialInfo:
