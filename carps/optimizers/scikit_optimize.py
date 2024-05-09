@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
     from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
 
@@ -65,21 +66,17 @@ class SkoptOptimizer(Optimizer):
     def __init__(
         self,
         problem: Problem,
-        n_trials: int | None,
         skopt_cfg: DictConfig,
         optimizer_kwargs: DictConfig,
-        time_budget: float | None = None,
-        n_workers: int = 1,
+        task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         """Initialize a Scikit-Optimize optimizer."""
-        super().__init__(problem, n_trials, time_budget, n_workers, loggers)
+        super().__init__(problem, task, loggers)
 
         self.fidelity_enabled = False
         self.skopt_cfg = skopt_cfg
         self.seed = skopt_cfg.seed
-        if self.seed is None:
-            self.seed = 0
 
         self.configspace = problem.configspace
 
