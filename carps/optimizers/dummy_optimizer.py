@@ -9,8 +9,8 @@ from omegaconf import DictConfig
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer, SearchSpace
-from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.task import Task
+from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
 
 

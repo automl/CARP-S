@@ -9,18 +9,18 @@ from rich import print as printr
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
-from smac.scenario import Scenario
+from smac.multi_objective.parego import ParEGO
 from smac.runhistory import TrialInfo as SmacTrialInfo
 from smac.runhistory import TrialValue as SmacTrialValue
-from smac.multi_objective.parego import ParEGO
+from smac.scenario import Scenario
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.loggingutils import setup_logging
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
-from carps.utils.task import Task
 
 setup_logging()
 

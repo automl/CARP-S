@@ -1,21 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json
-
-
-from ConfigSpace import ConfigurationSpace, CategoricalHyperparameter, OrdinalHyperparameter, Constant
-from ConfigSpace.hyperparameters import (
-    BetaIntegerHyperparameter,
-    NormalIntegerHyperparameter,
-    UniformIntegerHyperparameter,
-)
-from ConfigSpace.hyperparameters import (
-    BetaFloatHyperparameter,
-    NormalFloatHyperparameter,
-    UniformFloatHyperparameter,
-)
 from typing import Any
+
+from ConfigSpace import (CategoricalHyperparameter, ConfigurationSpace,
+                         Constant, OrdinalHyperparameter)
+from ConfigSpace.hyperparameters import (BetaFloatHyperparameter,
+                                         BetaIntegerHyperparameter,
+                                         NormalFloatHyperparameter,
+                                         NormalIntegerHyperparameter,
+                                         UniformFloatHyperparameter,
+                                         UniformIntegerHyperparameter)
+from dataclasses_json import dataclass_json
 
 
 def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:

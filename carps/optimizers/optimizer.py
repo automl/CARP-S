@@ -4,15 +4,14 @@ import time
 from abc import ABC, abstractmethod
 from typing import Any
 
-from omegaconf import DictConfig, OmegaConf
-
 from ConfigSpace import ConfigurationSpace
+from omegaconf import DictConfig, OmegaConf
 
 from carps.benchmarks.problem import Problem
 from carps.loggers.abstract_logger import AbstractLogger
+from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent, SearchSpace
-from carps.utils.task import Task
 
 
 class Optimizer(ABC):
@@ -169,3 +168,10 @@ class Optimizer(ABC):
             trial value (cost, time, ...)
         """
         raise NotImplementedError
+    
+
+    # def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
+    # def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
+    # def ask(self) -> TrialInfo:
+    # def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    # def get_current_incumbent(self) -> Incumbent:

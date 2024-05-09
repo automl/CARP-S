@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import numpy as np
 
 from carps.analysis.utils import get_color_palette, savefig, setup_seaborn
 
@@ -52,6 +52,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import numpy as np
     import pandas as pd
+
     from carps.analysis.process_data import load_logs
 
 

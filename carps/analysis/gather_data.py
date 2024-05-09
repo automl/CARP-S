@@ -12,8 +12,9 @@ import numpy as np
 import pandas as pd
 from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
-from omegaconf import DictConfig, OmegaConf, ListConfig
+from omegaconf import DictConfig, ListConfig, OmegaConf
 from rich.logging import RichHandler
+
 from carps.utils.trials import TrialInfo
 
 if TYPE_CHECKING:

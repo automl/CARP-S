@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import fire
 import numpy as np
 import pandas as pd
-import fire
 
 from carps.utils.loggingutils import get_logger, setup_logging
 
