@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, ListConfig
 from rich.logging import RichHandler
 from carps.utils.trials import TrialInfo
 
@@ -36,6 +36,8 @@ def annotate_with_cfg(df: pd.DataFrame, cfg: DictConfig, config_keys: list[str],
     flat_cfg = pd.json_normalize(cfg_resolved, sep=".").iloc[0].to_dict()
     for k, v in flat_cfg.items():
         if np.any([k.startswith(c) for c in config_keys]) and not np.any([c in k for c in config_keys_forbidden]):
+            if isinstance(v, (list, ListConfig)):
+                v = [v] * len(df)
             df[k] = v
     return df
 
