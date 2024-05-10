@@ -1,0 +1,15 @@
+# @package _global_
+be: "GP"
+acq_func: "gp_hedge"
+acq_optimizer: "auto"
+
+optimizer_id: Scikit_Optimize
+optimizer_container_id: Scikit_Optimize
+optimizer:
+  _target_: carps.optimizers.scikit_optimize.SkoptOptimizer
+  _partial_: true
+  skopt_cfg:
+    random_state: ${seed}
+    base_estimator: ${be}
+    acq_func: ${acq_func}
+    acq_optimizer: ${acq_optimizer}
