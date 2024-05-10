@@ -1,3 +1,5 @@
+mf-prior-bench
+
 # PD1
 xgboost>=1.7
 
