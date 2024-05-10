@@ -23,7 +23,7 @@ task:
   has_constraints: null
   domain: synthetic
   objective_function_approximation: surrogate
-  has_virtual_time: false
+  has_virtual_time: true
   deterministic: true
   dimensions: 6
   search_space_n_categoricals: 0
