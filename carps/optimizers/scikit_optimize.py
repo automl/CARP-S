@@ -61,7 +61,7 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
 
 
 class SkoptOptimizer(Optimizer):
-    """An optimizer that uses Scikit-Optimize to optimize a search space."""
+    """An optimizer that uses Scikit-Optimize to optimize an objective function."""
 
     def __init__(
         self,
