@@ -21,12 +21,16 @@ class RandomSearchOptimizer(Optimizer):
 
         self.configspace: ConfigurationSpace = self.problem.configspace
         self.history: list[tuple[TrialInfo, TrialValue]] = []
+        self.is_multifidelity = task.is_multifidelity
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
 
     def convert_to_trial(self, config: Configuration) -> TrialInfo:  # type: ignore[override]
-        return TrialInfo(config=config)
+        budget = None
+        if self.is_multifidelity:
+            budget = self.task.max_budget
+        return TrialInfo(config=config, budget=budget)
     
     def ask(self) -> TrialInfo:
         config = self.problem.configspace.sample_configuration()
