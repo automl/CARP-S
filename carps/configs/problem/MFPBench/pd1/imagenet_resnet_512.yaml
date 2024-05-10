@@ -1,0 +1,23 @@
+# @package _global_
+data_dir: "./data"
+prior: null
+perturb_prior: null
+
+benchmark_id: MFPBench
+problem_id: mfpbench/pd1/imagenet_resnet_512
+problem:
+  _target_: carps.benchmarks.mfpbench.MFPBenchProblem
+  benchmark_name: "pd1"
+  benchmark: "imagenet_resnet_512"
+  budget_type: "epoch"
+  prior: ${prior}
+  perturb_prior: ${perturb_prior}
+  benchmark_kwargs:
+    datadir: ${data_dir}
+task:
+  n_trials: 100
+  n_objectives: 1
+  is_multifidelity: true
+  fidelity_type: "epoch"
+  min_budget: 3
+  max_budget: 99

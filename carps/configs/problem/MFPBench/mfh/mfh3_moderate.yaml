@@ -1,0 +1,25 @@
+# @package _global_
+prior: null
+perturb_prior: null
+bias: null
+noise: null
+
+benchmark_id: MFPBench
+problem_id: mfpbench/mfh/mfh3_moderate
+problem:
+  _target_: carps.benchmarks.mfpbench.MFPBenchProblem
+  benchmark_name: "mfh"
+  benchmark: "mfh3_moderate"
+  budget_type: "z"
+  prior: ${prior}
+  perturb_prior: ${perturb_prior}
+  benchmark_kwargs:
+    bias: ${bias}
+    noise: ${noise}
+task:
+  n_trials: 100
+  n_objectives: 1
+  is_multifidelity: true
+  fidelity_type: "z"
+  min_budget: 3
+  max_budget: 100
