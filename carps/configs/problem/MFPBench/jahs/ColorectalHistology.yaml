@@ -1,8 +1,4 @@
 # @package _global_
-data_dir: "./data"
-prior: null
-perturb_prior: null
-
 benchmark_id: MFPBench
 problem_id: mfpbench/jahs/ColorectalHistology
 problem:
@@ -10,11 +6,11 @@ problem:
   benchmark_name: "jahs"
   benchmark: "jahs"
   budget_type: "epoch"
-  prior: ${prior}
-  perturb_prior: ${perturb_prior}
+  prior: null
+  perturb_prior: null
   benchmark_kwargs:
     task_id: "ColorectalHistology"
-    datadir: ${data_dir}
+    datadir: "./data"
 task:
   n_trials: 100
   n_objectives: 1

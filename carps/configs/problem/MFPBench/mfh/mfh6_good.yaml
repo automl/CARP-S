@@ -1,9 +1,4 @@
 # @package _global_
-prior: null
-perturb_prior:
-bias: null
-noise: null
-
 benchmark_id: MFPBench
 problem_id: mfpbench/mfh/mfh6_good
 problem:
@@ -11,11 +6,11 @@ problem:
   benchmark_name: "mfh"
   benchmark: "mfh6_good"
   budget_type: "z"
-  prior: ${prior}
-  perturb_prior: ${perturb_prior}
+  prior: null
+  perturb_prior: null
   benchmark_kwargs:
-    bias: ${bias}
-    noise: ${noise}
+    bias: null
+    noise: null
 task:
   n_trials: 100
   n_objectives: 1

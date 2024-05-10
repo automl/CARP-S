@@ -1,10 +1,10 @@
 # @package _global_
 benchmark_id: MFPBench
-problem_id: mfpbench/mfh/mfh3_bad
+problem_id: mfpbench/mfh/mfh6
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchProblem
   benchmark_name: "mfh"
-  benchmark: "mfh3_bad"
+  benchmark: "mfh6"
   budget_type: "z"
   prior: null
   perturb_prior: null

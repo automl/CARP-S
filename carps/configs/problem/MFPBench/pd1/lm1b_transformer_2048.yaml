@@ -1,8 +1,4 @@
 # @package _global_
-data_dir: "./data"
-prior: null
-perturb_prior: null
-
 benchmark_id: MFPBench
 problem_id: mfpbench/pd1/lm1b_transformer_2048
 problem:
@@ -10,10 +6,10 @@ problem:
   benchmark_name: "pd1"
   benchmark: "lm1b_transformer_2048"
   budget_type: "epoch"
-  prior: ${prior}
-  perturb_prior: ${perturb_prior}
+  prior: null
+  perturb_prior: null
   benchmark_kwargs:
-    datadir: ${data_dir}
+    datadir: "./data"
 task:
   n_trials: 100
   n_objectives: 1
