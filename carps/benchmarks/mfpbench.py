@@ -38,6 +38,8 @@ benchmarks = [
     "cifar100_wideresnet_2048",
     "imagenet_resnet_512",
     # MFHartmann
+    "mfh3",
+    "mfh6",
     "mfh3_terrible",
     "mfh3_bad",
     "mfh3_moderate",
@@ -77,7 +79,7 @@ class MFPBenchProblem(Problem):
         assert (
             self.benchmark_name in benchmarks_names
         ), f"benchmark_name must be one of {benchmarks_names}"
-        assert self.benchmark in benchmarks, f"benchmark must be one of {benchmarks}"
+        assert self.benchmark in benchmarks, f"benchmark '{benchmark}' must be one of {benchmarks}"
 
         if benchmark_kwargs is None:
             benchmark_kwargs = {}
