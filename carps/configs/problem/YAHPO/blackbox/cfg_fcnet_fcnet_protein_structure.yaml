@@ -8,7 +8,7 @@ problem:
   budget_type: null
   metric: valid_mse
 task:
-  n_trials: 100
+  n_trials: 147
   time_budget: null
   n_workers: 1
   n_objectives: 1

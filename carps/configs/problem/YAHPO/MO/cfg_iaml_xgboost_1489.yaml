@@ -12,7 +12,7 @@ problem:
   - ias
   - rammodel
 task:
-  n_trials: 100
+  n_trials: 165
   time_budget: null
   n_workers: 1
   n_objectives: 4

@@ -10,7 +10,7 @@ problem:
   - val_accuracy
   - val_cross_entropy
 task:
-  n_trials: 100
+  n_trials: 126
   time_budget: null
   n_workers: 1
   n_objectives: 2

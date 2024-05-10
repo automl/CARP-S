@@ -11,7 +11,7 @@ problem:
   - nf
   - ias
 task:
-  n_trials: 100
+  n_trials: 232
   time_budget: null
   n_workers: 1
   n_objectives: 3

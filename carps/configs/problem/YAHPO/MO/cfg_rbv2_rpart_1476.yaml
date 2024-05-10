@@ -10,7 +10,7 @@ problem:
   - acc
   - memory
 task:
-  n_trials: 100
+  n_trials: 110
   time_budget: null
   n_workers: 1
   n_objectives: 2

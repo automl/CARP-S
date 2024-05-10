@@ -9,7 +9,7 @@ problem:
   metric:
   - val_accuracy
 task:
-  n_trials: 100
+  n_trials: 250
   time_budget: null
   n_workers: 1
   n_objectives: 1

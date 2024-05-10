@@ -8,8 +8,8 @@ problem:
   budget_type: trainsize
   metric: acc
 task:
-  n_trials: null
-  time_budget: 720
+  n_trials: 110
+  time_budget: null
   n_workers: 1
   n_objectives: 1
   objectives:
