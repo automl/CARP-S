@@ -42,9 +42,27 @@ class DatabaseLogger(AbstractLogger):
         if self.result_processor is None:
             logger.info("Not logging to database (result processor is None).")
 
-    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None) -> None:
+        """Evaluate the problem and log the trial.
+
+        Parameters
+        ----------
+        n_trials : float
+            The number of trials that have been run so far.
+            For the case of multi-fidelity, a full trial
+            is a configuration evaluated on the maximum budget and
+            the counter is increased by `budget/max_budget` instead
+            of 1.
+        trial_info : TrialInfo
+            The trial info.
+        trial_value : TrialValue
+            The trial value.
+        n_function_calls: int | None, default None
+            The number of target function calls, no matter the budget.
+        """
         info = convert_trial_info(trial_info, trial_value)
         info["n_trials"] = n_trials
+        info["n_function_calls"] = n_function_calls if n_function_calls else n_trials
 
         if self.result_processor:
             self.result_processor.process_logs({"trials": info})

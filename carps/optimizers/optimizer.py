@@ -39,7 +39,7 @@ class Optimizer(ABC):
         # Convert min to seconds
         self.time_budget = self.task.time_budget * 60 if self.task.time_budget is not None else None
         self.virtual_time_elapsed_seconds: float | None = 0.0
-        self.trial_counter: int = 0
+        self.trial_counter: float = 0
 
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
@@ -114,7 +114,7 @@ class Optimizer(ABC):
         cont = True
         if self.time_budget is not None and not self._time_left(start_time):
             cont = False
-        if self.trial_counter >= self.task.n_trials:
+        if self.task.n_trials is not None and self.trial_counter >= self.task.n_trials:
             cont = False
 
         return cont
@@ -124,6 +124,16 @@ class Optimizer(ABC):
         start_time = time.time()
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()
+            if self.task.is_multifidelity:
+                trial_info = TrialInfo(
+                    config=trial_info.config,
+                    instance=trial_info.instance,
+                    seed=trial_info.seed,
+                    budget=trial_info.budget,
+                    normalized_budget=trial_info.budget / self.task.max_budget,
+                    checkpoint=trial_info.checkpoint,
+                    name=trial_info.name
+                )
             trial_value = self.problem.evaluate(trial_info=trial_info)
             self.virtual_time_elapsed_seconds += trial_value.virtual_time
             self.tell(trial_info=trial_info, trial_value=trial_value)
@@ -134,7 +144,10 @@ class Optimizer(ABC):
                 for logger in self.loggers:
                     logger.log_incumbent(self.trial_counter, new_incumbent)
 
-            self.trial_counter += 1
+            if not self.task.is_multifidelity:
+                self.trial_counter += 1
+            else:
+                self.trial_counter += trial_info.budget / self.task.max_budget
         return self.get_current_incumbent()
 
     @abstractmethod

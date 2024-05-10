@@ -64,8 +64,10 @@ def dump_logs(log_data: dict, filename: str, directory: str | None = None):
         file.writelines([log_data_str])
 
 
-def convert_trials(n_trials, trial_info, trial_value):
-    info = {"n_trials": n_trials, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+def convert_trials(n_trials, trial_info, trial_value, n_function_calls: int | None = None):
+    if n_function_calls is None:
+        n_function_calls = n_trials
+    info = {"n_trials": n_trials, "n_function_calls": n_function_calls, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
     info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
     info["trial_value"]["virtual_time"] = float(info["trial_value"]["virtual_time"])
     return info
@@ -110,19 +112,25 @@ class FileLogger(AbstractLogger):
                     f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite "
                     f"for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
 
-    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None) -> None:
         """Evaluate the problem and log the trial.
 
         Parameters
         ----------
-        n_trials : int
-            Number of trials that have been run so far.
+        n_trials : float
+            The number of trials that have been run so far.
+            For the case of multi-fidelity, a full trial
+            is a configuration evaluated on the maximum budget and
+            the counter is increased by `budget/max_budget` instead
+            of 1.
         trial_info : TrialInfo
-            Trial info.
+            The trial info.
         trial_value : TrialValue
-            Trial value.
+            The trial value.
+        n_function_calls: int | None, default None
+            The number of target function calls, no matter the budget.
         """
-        info = convert_trials(n_trials, trial_info, trial_value)
+        info = convert_trials(n_trials, trial_info, trial_value, n_function_calls)
         if logging.DEBUG <= logger.level:
             info_str = json.dumps(info) + "\n"
             logger.debug(info_str)

@@ -29,6 +29,8 @@ class TrialInfo:
     instance : int | None, defaults to None, length
     seed : int | None, defaults to None
     budget : float | None, defaults to None
+    normalized_budget: float | None, defaults to None
+        The budget normalized by max_budget. Mostly used for logging purposes.
     name: str | None, defaults to None, arbitrary information, length 100
     checkpoint: str | None, defaults to None, checkpoint path, length 250
 
@@ -39,6 +41,7 @@ class TrialInfo:
     instance: int | None = None
     seed: int | None = None
     budget: float | None = None
+    normalized_budget: float | None = None
     name: str | None = None
     checkpoint: str | None = None
 

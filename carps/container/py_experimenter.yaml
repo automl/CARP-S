@@ -32,11 +32,13 @@ PY_EXPERIMENTER:
 
     logtables:
       trials:
-        n_trials: INT
+        n_trials: DOUBLE
+        n_function_calls: INT
         trial_info__config: JSON
         trial_info__instance: INT
         trial_info__seed: INT
         trial_info__budget: DOUBLE
+        trial_info__normalized_budget: DOUBLE
         trial_info__name: TEXT
         trial_info__checkpoint: TEXT
         trial_value__cost: JSON
