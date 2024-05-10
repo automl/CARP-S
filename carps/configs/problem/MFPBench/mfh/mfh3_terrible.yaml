@@ -1,11 +1,10 @@
-# @package _global_
 benchmark_id: MFPBench
 problem_id: mfpbench/mfh/mfh3_terrible
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchProblem
-  benchmark_name: "mfh"
-  benchmark: "mfh3_terrible"
-  budget_type: "z"
+  benchmark_name: mfh
+  benchmark: mfh3_terrible
+  budget_type: z
   prior: null
   perturb_prior: null
   benchmark_kwargs:
@@ -13,8 +12,24 @@ problem:
     noise: null
 task:
   n_trials: 100
+  time_budget: null
+  n_workers: 1
   n_objectives: 1
+  objectives: null
   is_multifidelity: true
-  fidelity_type: "z"
+  fidelity_type: z
   min_budget: 3
   max_budget: 100
+  has_constraints: null
+  domain: synthetic
+  objective_function_approximation: surrogate
+  has_virtual_time: false
+  deterministic: true
+  dimensions: 3
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 0
+  search_space_n_integers: 0
+  search_space_n_floats: 3
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false
