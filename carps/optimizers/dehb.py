@@ -33,7 +33,7 @@ class DEHBOptimizer(Optimizer):
         loggers: List[AbstractLogger] | None = None,
     ) -> None:
         super().__init__(problem, task, loggers)
-        
+
         self.fidelity_enabled = True
         self.task = task
         self.dehb_cfg = dehb_cfg
