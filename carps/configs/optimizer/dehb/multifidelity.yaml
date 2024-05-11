@@ -1,0 +1,17 @@
+# @package _global_
+eta: 3
+mutation_factor: 0.5
+crossover_prob: 0.5
+
+optimizer_id: DEHB
+optimizer_container_id: DEHB
+optimizer:
+  _target_: carps.optimizers.dehb.DEHBOptimizer
+  _partial_: true
+
+  dehb_cfg:
+    mutation_factor: ${mutation_factor}
+    crossover_prob: ${crossover_prob}
+    seed: ${seed}
+    eta: ${eta}
+    output_path: ${outdir}/${seed}/dehb_output
