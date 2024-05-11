@@ -19,7 +19,7 @@ beautifulsoup4==4.12.3
 bleach==6.1.0
 boto3==1.34.69
 botocore==1.34.69
--e git+https://github.com/AutoML/SMACBenchmarking.git@d2c64e623125efe39ddd40f966fd37f3bbbd5b5c#egg=CARP_S
+-e git+https://github.com/AutoML/SMACBenchmarking.git@69a11e7ff541673a7438466122091f95e8e93a1c#egg=CARP_S
 certifi==2024.2.2
 cffi @ file:///croot/cffi_1714483155441/work
 cfgv==3.4.0
@@ -70,7 +70,6 @@ future==1.0.0
 google-pasta==0.2.0
 grapheme==0.6.0
 greenlet==3.0.1
-hpobench @ file:///home/soham/repos/HPOBench
 humanfriendly==10.0
 hydra-colorlog==1.2.0
 hydra-core==1.3.2
@@ -117,7 +116,7 @@ marshmallow==3.21.2
 matplotlib==3.8.1
 matplotlib-inline==0.1.7
 mdurl==0.1.2
--e git+https://github.com/Sohambasu07/mf-prior-bench.git@0cf25063ba35feebe0e4eb9aa0b0ee86688b6d27#egg=mf_prior_bench
+mf-prior-bench==1.9.0
 mistune==3.0.2
 mkl-fft @ file:///croot/mkl_fft_1695058164594/work
 mkl-random @ file:///croot/mkl_random_1695059800811/work
