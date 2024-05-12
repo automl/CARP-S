@@ -8,8 +8,9 @@ optimizer:
   optimizer_name: 'DEHB'
   optimizer_kwargs:
     random_seed: ${seed}
-    max_resource_attr: ${problem.budget_type}
-    max_resource_level: ${task.max_budget}
+    max_resource_attr: ${task.fidelity_type}
+    grace_period: ${task.min_budget}
+    #max_resource_level: ${task.max_budget}
   # max_budget: ${task.max_budget}
 
 
