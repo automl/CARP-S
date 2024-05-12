@@ -58,6 +58,9 @@ setuptools.setup(
         "numpy"
     ],
     extras_require=extras_require,
+    entry_points={
+        "console_scripts": ["carps = carps.cli:main"],
+    },
     test_suite="pytest",
     platforms=["Linux"],
     classifiers=[
