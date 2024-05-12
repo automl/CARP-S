@@ -74,7 +74,7 @@ def load_log(
 
     # df = maybe_add_bandit_log(df, rundir, n_initial_design=cfg.task.n_initial_design)
 
-    config_keys = ["benchmark", "problem", "seed", "optimizer_id"]
+    config_keys = ["benchmark", "problem", "seed", "optimizer_id", "task"]
     config_keys_forbidden = ["_target_", "_partial_"]
     df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
     if "problem.function.seed" in df:
