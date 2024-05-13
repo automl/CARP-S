@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: SMAC3-1.4-BlackBoxFacade
+optimizer_id: SMAC3-1.4-MultiFidelityFacade
 optimizer_container_id: SMAC3-1.4
 optimizer:
   _target_: carps.optimizers.smac14.SMAC314Optimizer  
