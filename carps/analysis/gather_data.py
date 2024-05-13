@@ -13,15 +13,13 @@ import pandas as pd
 from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
-from rich.logging import RichHandler
-
 from carps.utils.trials import TrialInfo
+from carps.utils.loggingutils import get_logger
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
 
-FORMAT = "%(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+logger = get_logger(__file__)
 
 
 setup_globals()
@@ -141,18 +139,23 @@ def maybe_add_n_trials(df: pd.DataFrame, n_initial_design: int, counter_key: str
         df["n_trials"] = df[counter_key] + n_initial_design  # n_trials is 1-based
     return df
 
-def filelogs_to_df(rundir: str, n_processes: int = 4) -> None:
+def filelogs_to_df(rundir: str, n_processes: int = 16) -> None:
+    logger.info(f"Get rundirs from {rundir}...")
     rundirs = get_run_dirs(rundir)
+    logger.info(f"Found {len(rundirs)} runs. Load data...")
     results = map_multiprocessing(load_log, rundirs, n_processes=n_processes)
     df = pd.concat(results).reset_index(drop=True)
+    logger.info("Done. Do some preprocessing...")
     df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v}  for k, v in df["cfg_str"].unique()])
     df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
     df_cfg.loc[:, "cfg_str"] = df_cfg["cfg_str"].apply(lambda x: x.replace("\n", "\\n"))
     df["experiment_id"] = df["cfg_fn"].apply(lambda x:  np.where(df_cfg["cfg_fn"].to_numpy()==x)[0][0])
     del df["cfg_str"]
     del df["cfg_fn"]
+    logger.info("Done. Saving to file...")
     df.to_csv(Path(rundir) / "logs.csv", index=False)
     df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
+    logger.info("Done. 😊")
     return None
 
 
