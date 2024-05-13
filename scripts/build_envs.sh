@@ -27,7 +27,7 @@ bash scripts/build_env.sh HPOBench SMAC3-1.4 3.11 $ENV_LOCATION
 bash scripts/build_env.sh HPOBench RandomSearch 3.11 $ENV_LOCATION
 bash scripts/build_env.sh HPOBench HEBO 3.11 $ENV_LOCATION
 bash scripts/build_env.sh HPOBench SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench DEHB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh HPOBench DEHB 3.9 $ENV_LOCATION
 bash scripts/build_env.sh BBOB SMAC3 3.11 $ENV_LOCATION
 bash scripts/build_env.sh BBOB SMAC3-1.4 3.11 $ENV_LOCATION
 bash scripts/build_env.sh BBOB RandomSearch 3.11 $ENV_LOCATION
@@ -38,6 +38,7 @@ bash scripts/build_env.sh MFPBench SMAC3-1.4 3.11 $ENV_LOCATION
 bash scripts/build_env.sh MFPBench RandomSearch 3.11 $ENV_LOCATION
 bash scripts/build_env.sh MFPBench HEBO 3.11 $ENV_LOCATION
 bash scripts/build_env.sh MFPBench SyneTune 3.11 $ENV_LOCATION
+bash scripts/build_env.sh MFPBench DEHB 3.11 $ENV_LOCATION
 
 # for benchmark in "HPOB" "YAHPO" "HPOBench" "BBOB" "MFPBench"
 # do
