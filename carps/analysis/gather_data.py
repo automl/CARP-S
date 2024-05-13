@@ -14,11 +14,12 @@ from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
 from carps.utils.trials import TrialInfo
-from carps.utils.loggingutils import get_logger
+from carps.utils.loggingutils import get_logger, setup_logging
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
 
+setup_logging()
 logger = get_logger(__file__)
 
 
