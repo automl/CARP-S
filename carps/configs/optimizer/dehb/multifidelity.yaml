@@ -1,8 +1,4 @@
 # @package _global_
-eta: 3
-mutation_factor: 0.5
-crossover_prob: 0.5
-
 optimizer_id: DEHB
 optimizer_container_id: DEHB
 optimizer:
@@ -10,8 +6,8 @@ optimizer:
   _partial_: true
 
   dehb_cfg:
-    mutation_factor: ${mutation_factor}
-    crossover_prob: ${crossover_prob}
+    mutation_factor: 0.5
+    crossover_prob: 0.5
     seed: ${seed}
-    eta: ${eta}
+    eta: 3
     output_path: ${outdir}/${seed}/dehb_output
