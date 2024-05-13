@@ -8,7 +8,7 @@ problem:
     rng: 1
   seed: ${seed}
 task:
-  n_trials: 60
+  n_trials: 77
   time_budget: null
   n_workers: 1
   n_objectives: 1

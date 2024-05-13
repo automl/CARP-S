@@ -1,3 +1,4 @@
+# @package _global_
 benchmark_id: MFPBench
 problem_id: mfpbench/pd1/cifar100_wideresnet_2048
 problem:

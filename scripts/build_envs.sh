@@ -33,9 +33,13 @@ bash scripts/build_env.sh BBOB SMAC3-1.4 3.11 $ENV_LOCATION
 bash scripts/build_env.sh BBOB RandomSearch 3.11 $ENV_LOCATION
 bash scripts/build_env.sh BBOB HEBO 3.11 $ENV_LOCATION
 bash scripts/build_env.sh BBOB SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh BBOB DEHB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh MFPBench SMAC3 3.11 $ENV_LOCATION
+bash scripts/build_env.sh MFPBench SMAC3-1.4 3.11 $ENV_LOCATION
+bash scripts/build_env.sh MFPBench RandomSearch 3.11 $ENV_LOCATION
+bash scripts/build_env.sh MFPBench HEBO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh MFPBench SyneTune 3.11 $ENV_LOCATION
 
-# for benchmark in "HPOB" "YAHPO" "HPOBench" "BBOB" 
+# for benchmark in "HPOB" "YAHPO" "HPOBench" "BBOB" "MFPBench"
 # do
 #     for optimizer in "SMAC3" "SMAC3-1.4" "RandomSearch" "HEBO" "SyneTune" "DEHB"
 #     do
