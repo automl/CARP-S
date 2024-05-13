@@ -1,8 +1,10 @@
 from __future__ import annotations
-import fire
-from omegaconf import OmegaConf
+
 from pathlib import Path
+
+import fire
 import pandas as pd
+from omegaconf import OmegaConf
 
 config_folder = Path(__file__).parent.parent /  "configs"
 config_folder_problem = config_folder / "problem"
