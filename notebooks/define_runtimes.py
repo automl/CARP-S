@@ -6,7 +6,6 @@ from pathlib import Path
 from carps.utils.running import make_problem
 from carps.utils.trials import TrialInfo
 import time
-from carps.benchmarks.problem import Problem
 from multiprocessing import Pool
 import pandas as pd
 
