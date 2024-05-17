@@ -305,3 +305,21 @@ python -m carps.utils.check_missing rundir
 # Gather logs from files
 python -m carps.analysis.gather_data rundir
 ```
+
+# Commands using Flags
+```bash
+# Fill database
+carps --create_cluster_configs --optimizer DUMMY/config --problem DUMMY/config
+
+# Run from database (with local env)
+carps --run_from_db
+
+# Run local with filelogging
+carps --run --optimizer DUMMY/config --problem DUMMY/config --seed 0
+
+# Check missing runs (creates runcommands_missing.sh)
+carps --check_missing
+
+# Gather logs from files
+carps --gather_data
+```

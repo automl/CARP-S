@@ -3,8 +3,8 @@ name = "CARP-S"
 version = "0.1.0"
 dependencies = [
   "typing_extensions", # Better typing
-  "tomli", 
-  "pre-commit", 
+  "tomli",
+  "pre-commit",
   "pytest==6.2.4",
   "coverage==4.5.4",
   "ruff",
@@ -44,6 +44,9 @@ classifiers = [
   'Programming Language :: Python :: 3',
 ]
 license = { file = "LICENSE" }
+
+[project.scripts]
+carps = "carps.cli:main"
 
 [project.optional-dependencies]
 dev = ["carps[doc, tooling, test, examples]"]
