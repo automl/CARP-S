@@ -153,8 +153,7 @@ class SMAC314Optimizer(Optimizer):
         elif self.smac_cfg.optimization_type == "mf":
             facade_object = SMAC4MF
 
-            n_seeds = self.smac_cfg.n_seeds
-            assert n_seeds is not None
+            n_seeds = self.smac_cfg.get("n_seeds", None)
             intensifier_kwargs["n_seeds"] = n_seeds
             intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_budget
             intensifier_kwargs["max_budget"] = self.smac_cfg.scenario.max_budget

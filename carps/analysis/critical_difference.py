@@ -9,7 +9,7 @@ from carps.utils.loggingutils import get_logger
 
 logger = get_logger(__file__)
 
-def calc_critical_difference(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True):
+def calc_critical_difference(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, identifier: str | None = None):
     perf_col: str = "trial_value__cost_inc"
     if not soft:
         df = df[np.isclose(df[budget_var], max_budget)]
@@ -38,9 +38,15 @@ Groups: {diagram.get_groups(alpha=.05, adjustment='holm')}
 """
     logger.info(summary)
 
+    if identifier is None:
+        identifier = ""
+    else:
+        identifier = "_" + identifier        
+    fn = f"criticaldifference{identifier}.tex"
+
     # export the diagram to a file
     diagram.to_file(
-        "criticaldifference.tex",
+        fn,
         alpha = .05,
         adjustment = "holm",
         reverse_x = True,

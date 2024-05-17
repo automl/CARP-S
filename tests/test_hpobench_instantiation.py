@@ -2,7 +2,6 @@
 
 from omegaconf import OmegaConf
 
-from carps.benchmarks.hpo_bench import HPOBenchProblem
 from carps.utils.running import make_problem
 from carps.utils.trials import TrialInfo
 

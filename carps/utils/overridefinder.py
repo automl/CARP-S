@@ -5,8 +5,8 @@ from pathlib import Path
 
 import fire
 import pandas as pd
-from omegaconf import OmegaConf
 
+from carps.utils.index_configs import index_configs
 from carps.utils.loggingutils import get_logger
 
 logger = get_logger(__file__)
@@ -29,7 +29,7 @@ def find_override(problem_id: str | None = None, optimizer_id: str | None = None
     
     index_fn = path / "index.csv"
     if not index_fn.is_file():
-        cache_config_info()
+        index_configs()
     table = pd.read_csv(index_fn)
 
     try:
@@ -59,22 +59,5 @@ def merge_overrides(overrides: list[str | None]) -> str:
         override = overrides[0]
     return override    
 
-def cache_config_info():
-    for key, path in zip(["problem_id", "optimizer_id"], [config_folder_problem, config_folder_optimizer]):
-        paths = list(path.glob("**/*.yaml"))
-
-        table = []
-        for p in paths:
-            cfg = OmegaConf.load(p)
-            value = cfg.get(key)
-            table.append({
-                "config_fn": str(p),
-                key: value,
-            })
-        table = pd.DataFrame(table)
-        table.to_csv(path / "index.csv", index=False)
-
-
 if __name__ == "__main__":
     fire.Fire(find_override)
-    # cache_config_info()
