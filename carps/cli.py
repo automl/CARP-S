@@ -34,6 +34,12 @@ flags.DEFINE_boolean(
     "providing a seed.",
 )
 flags.DEFINE_boolean(
+    "reset_experiments",
+    short_name="re",
+    default=False,
+    help="Reset status of experiments in the database.",
+)
+flags.DEFINE_boolean(
     "check_missing", short_name="cm", default=False, help="Check for missing runs."
 )
 flags.DEFINE_boolean(
@@ -93,6 +99,8 @@ def main(argv: Any) -> None:
                 f"seed={FLAGS.seed}",
             ]
         )
+    if FLAGS.reset_experiments:
+        subprocess.call(["python", "-m", "carps.utils.database.reset_experiments"])
     if FLAGS.check_missing:
         subprocess.call(["python", "-m", "carps.utils.check_missing", FLAGS.rundir])
     if FLAGS.gather_data:
