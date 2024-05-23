@@ -72,20 +72,28 @@ def load_log(rundir: str | Path) -> pd.DataFrame:
         raise NotImplementedError("No idea what should happen here!?")
 
     cfg = load_cfg(rundir)
-    config_fn = str(Path(rundir) / ".hydra/config.yaml")
-    cfg_str = OmegaConf.to_yaml(cfg=cfg)
-    df["cfg_fn"] = config_fn
-    df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
+    if cfg is not None:
+        config_fn = str(Path(rundir) / ".hydra/config.yaml")
+        cfg_str = OmegaConf.to_yaml(cfg=cfg)
+        df["cfg_fn"] = config_fn
+        df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
 
-    # df = maybe_add_bandit_log(df, rundir, n_initial_design=cfg.task.n_initial_design)
+        config_keys = ["benchmark", "problem", "seed", "optimizer_id", "task"]
+        config_keys_forbidden = ["_target_", "_partial_"]
+        df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
+        # df = maybe_add_bandit_log(df, rundir, n_initial_design=cfg.task.n_initial_design)
+    else:
+        config_fn = "no_hydra_config"
+        cfg_str = ""
+        df["cfg_fn"] = config_fn
+        df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
 
-    config_keys = ["benchmark", "problem", "seed", "optimizer_id", "task"]
-    config_keys_forbidden = ["_target_", "_partial_"]
-    df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
     if "problem.function.seed" in df:
         df = df.drop(columns=["problem.function.seed"])
+
     if "problem.function.dim" in df:
         df = df.rename(columns={"problem.function.dim": "dim"})
+
     return df
 
 
@@ -120,8 +128,11 @@ def read_trial_log(rundir: str | Path) -> pd.DataFrame | None:
     return df
 
 
-def load_cfg(rundir: str | Path) -> DictConfig:
+def load_cfg(rundir: str | Path) -> DictConfig | None:
     config_fn = Path(rundir) / ".hydra/config.yaml"
+    if not config_fn.exists():
+        return None
+
     return OmegaConf.load(config_fn)  # type: ignore
 
 
