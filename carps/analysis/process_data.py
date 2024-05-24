@@ -41,6 +41,8 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
 
     def load_task_cfg(problem_id: str) -> DictConfig:
         config_fn = problem_index["config_fn"][problem_index["problem_id"]==problem_id].iloc[0]
+        if not Path(config_fn).is_file():
+            raise ValueError("Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh.")
         cfg = OmegaConf.load(config_fn)
         task_cfg = cfg.task
         return task_cfg
