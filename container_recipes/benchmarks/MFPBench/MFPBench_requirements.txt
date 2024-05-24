@@ -2,8 +2,3 @@ mf-prior-bench
 
 # PD1
 xgboost>=1.7
-
-# JAHSBench
-# !!!Compatibility issues with certain core packages!!!
-# Uncomment to following line to install JAHSBench 1.1.0
-# jahsbench==1.1.0
