@@ -1,5 +1,5 @@
-# ⏱️ SMACBenchmarking 📐
-Welcome to SMACBenchmarking! 
+# CARP-S
+Welcome to CARP-S! 
 This repository contains a benchmarking framework for optimizers.
 It allows flexibly combining optimizers and benchmarks via a simple interface, and logging experiment results 
 and trajectories to a database.
@@ -10,25 +10,21 @@ There are two main ways to use this framework:
 The first options can allow for faster development, but the second option is more robust and flexible since python or 
 other package versions don't clash, and eases execution on e.g. a SLURM cluster.
 
-Documentation at https://AutoML.github.io/SMACBenchmarking/main
+Documentation at https://AutoML.github.io/CARP-S/main
 
 Main Topics of this README:
-- [Conceptual Overview 🗺](#conceptual-overview-🗺)
-- [Usage - Local Setup 📍](#usage---local-setup-📍)
-- [Usage - Cluster Setup 🤖](#usage---cluster-setup-🤖)
-- [Adding a new Optimizer or Benchmark 🆕](#adding-a-new-optimizer-or-benchmark-🆕)
+- [Usage - Local Setup](#usage---local-setup)
+- [Usage - Cluster Setup](#usage---cluster-setup)
+- [Adding a new Optimizer or Benchmark](#adding-a-new-optimizer-or-benchmark)
 
-## Conceptual Overview 🗺 
-[DO ONCE FINISHED]
-
-## Usage - Local Setup 📍
+## Usage - Local Setup
 
 ### Installation
 Create a conda environment and install the package.
 
 ```bash
-git clone https://github.com/AutoML/SMACBenchmarking.git
-cd SMACBenchmarking
+git clone https://github.com/AutoML/CARP-S.git
+cd CARP-S
 conda create -n carps python=3.11
 conda activate carps
 
@@ -64,7 +60,7 @@ python -m carps.run +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=ran
 
 Note that in this case, no logging is done.
 
-## Usage - Cluster Setup 🤖
+## Usage - Cluster Setup
 ![Overview of the whole process](images/smac_benchmarking_containers.drawio.png)
 
 
@@ -106,16 +102,16 @@ needs to be transferred to the cluster.
 python carps/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
 ```
 
-In the case of MySQL, you need to authenticate yourself to the database. In our case, the MySQL server running on
-apollo. For this, you need
+In the case of MySQL, you need to authenticate yourself to the database. E.g., if the MySQL server is running on
+`mysql-vm` and can only be reached via ssh. For this, you need
 - a user account on the MySQL server
-- an ssh certificate to authenticate yourself on apollo
+- an ssh certificate to authenticate yourself on `mysql-vm`
 - an entry in the `.ssh/config` file that configures the connection, e.g.
     ```
-    Host apollo
-    HostName apollo.ai.uni-hannover.de
-    User <Apollo User>
-    IdentityFile ~/.ssh/ssh_apollo
+    Host mysql-vm
+    HostName mysql-vm.my-domain.com
+    User <mysql-vm user>
+    IdentityFile ~/.ssh/ssh_mysql-vm
     AddKeysToAgent yes
     ```
 - a credentials file for pyexperimenter in `carps/container/credentials.yaml` with the following content:
@@ -128,10 +124,10 @@ apollo. For this, you need
 
     Connection:
         Standard:
-            server: apollo
+            server: mysql-vm
         Ssh:
             server: 127.0.0.1
-            address: apollo
+            address: mysql-vm
             ssh_keypass: <SSH Key Password>
     ```
 
@@ -242,7 +238,7 @@ This will pull a job from the database and run it (database needs to be initiali
 To be efficient, this command should eventually be integrated into a SLURM script, which can be submitted to the
 cluster (e.g. with job arrays).
 
-## Adding a new Optimizer or Benchmark 🆕
+## Adding a new Optimizer or Benchmark
 To add a new optimizer or benchmark to the repository you need to
 1. Implement the optimizer or benchmark according to the corresponding interface
     - **Optimizer**
