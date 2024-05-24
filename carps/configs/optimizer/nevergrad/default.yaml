@@ -1,12 +1,10 @@
 # @package _global_
-optimizer_name: "NGOpt"
-
-optimizer_id: Nevergrad
+optimizer_id: Nevergrad-NGOpt
 optimizer_container_id: Nevergrad
 optimizer:
   _target_: carps.optimizers.nevergrad.NevergradOptimizer
   _partial_: true
   nevergrad_cfg:
-    optimizer_name: ${optimizer_name}
+    optimizer_name: "NGOpt"
     seed: ${seed}
   optimizer_cfg: null
