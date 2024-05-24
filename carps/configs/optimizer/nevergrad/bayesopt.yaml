@@ -1,0 +1,17 @@
+# @package _global_
+optimizer_id: Nevergrad-BayesOpt
+optimizer_container_id: Nevergrad
+optimizer:
+  _target_: carps.optimizers.nevergrad.NevergradOptimizer
+  _partial_: true
+  nevergrad_cfg:
+    optimizer_name: "bayes_opt"
+    seed: ${seed}
+  optimizer_cfg:
+    initialization: null
+    init_budget: null
+    middle_point: false
+    utility_kind: ucb
+    utility_kappa: 2.576
+    utility_xi: 0.0
+    gp_parameters: null

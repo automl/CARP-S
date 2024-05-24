@@ -161,3 +161,4 @@ logs
 *.tex
 *run_missing.sh
 *.png
+runsold
