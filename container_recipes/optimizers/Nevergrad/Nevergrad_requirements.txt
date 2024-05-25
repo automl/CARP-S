@@ -1,0 +1,5 @@
+nevergrad
+hyperopt
+bayesian-optimization
+ioh==0.3.14
+# make sure that joblib is quite new >= 1.4.2

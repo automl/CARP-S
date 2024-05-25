@@ -1,0 +1,20 @@
+# @package _global_
+optimizer_id: Nevergrad-CMA-ES
+optimizer_container_id: Nevergrad
+optimizer:
+  _target_: carps.optimizers.nevergrad.NevergradOptimizer
+  _partial_: true
+  nevergrad_cfg:
+    optimizer_name: "CMA-ES"
+    seed: ${seed}
+  optimizer_cfg:
+    scale: 1.0
+    elitist: false
+    popsize: null
+    popsize_factor: 3.0
+    diagonal: false
+    zero: false
+    high_speed: false
+    fcmaes: false
+    random_init: false
+    inopts: null

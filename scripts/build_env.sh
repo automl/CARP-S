@@ -86,8 +86,8 @@ $RUN_COMMAND pip install -r container_recipes/general/general_requirements_conta
 $RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_optimizer.txt
 
 # Optimizer and benchmark specific
-$RUN_COMMAND pip install -r container_recipes/benchmarks/${OPTIMIZER_CONTAINER_ID}/${OPTIMIZER_CONTAINER_ID}_requirements.txt
-$RUN_COMMAND pip install -r container_recipes/optimizers/${BENCHMARK_ID}/${BENCHMARK_ID}_requirements.txt
+$RUN_COMMAND pip install -r container_recipes/optimizers/${OPTIMIZER_CONTAINER_ID}/${OPTIMIZER_CONTAINER_ID}_requirements.txt
+$RUN_COMMAND pip install -r container_recipes/benchmarks/${BENCHMARK_ID}/${BENCHMARK_ID}_requirements.txt
 
 $RUN_COMMAND $EXTRA_COMMAND
 

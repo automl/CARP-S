@@ -11,39 +11,52 @@ export ENV_LOCATION="/scratch/hpc-prf-intexml/carps-neurips24/envs"
 # bash ${CONT_BENCH_RECIPE_PATH}/HPOB/download_data.sh
 # bash scripts/prepare_yahpo.sh
 
-bash scripts/build_env.sh HPOB SMAC3-1.4 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOB RandomSearch 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOB HEBO 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOB SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOB DEHB 3.11 $ENV_LOCATION
-bash scripts/build_env.sh YAHPO SMAC3 3.11 $ENV_LOCATION
-bash scripts/build_env.sh YAHPO SMAC3-1.4 3.11 $ENV_LOCATION
-bash scripts/build_env.sh YAHPO RandomSearch 3.11 $ENV_LOCATION
-bash scripts/build_env.sh YAHPO HEBO 3.11 $ENV_LOCATION
-bash scripts/build_env.sh YAHPO SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh YAHPO DEHB 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench SMAC3 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench SMAC3-1.4 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench RandomSearch 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench HEBO 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh HPOBench DEHB 3.9 $ENV_LOCATION
-bash scripts/build_env.sh BBOB SMAC3 3.11 $ENV_LOCATION
-bash scripts/build_env.sh BBOB SMAC3-1.4 3.11 $ENV_LOCATION
-bash scripts/build_env.sh BBOB RandomSearch 3.11 $ENV_LOCATION
-bash scripts/build_env.sh BBOB HEBO 3.11 $ENV_LOCATION
-bash scripts/build_env.sh BBOB SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh MFPBench SMAC3 3.11 $ENV_LOCATION
-bash scripts/build_env.sh MFPBench SMAC3-1.4 3.11 $ENV_LOCATION
-bash scripts/build_env.sh MFPBench RandomSearch 3.11 $ENV_LOCATION
-bash scripts/build_env.sh MFPBench HEBO 3.11 $ENV_LOCATION
-bash scripts/build_env.sh MFPBench SyneTune 3.11 $ENV_LOCATION
-bash scripts/build_env.sh MFPBench DEHB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3 HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3 YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3 HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3 BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3 MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3-1.4 HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3-1.4 YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3-1.4 HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3-1.4 BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SMAC3-1.4 MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh RandomSearch HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh RandomSearch YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh RandomSearch HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh RandomSearch BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh RandomSearch MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh HEBO HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh HEBO YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh HEBO HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh HEBO BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh HEBO MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SyneTune HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SyneTune YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SyneTune HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh SyneTune BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh SyneTune MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh DEHB HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh DEHB YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh DEHB HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh DEHB BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh DEHB MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Optuna HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Optuna YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Optuna HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh Optuna BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Optuna MFPBench 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Nevergrad HPOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Nevergrad YAHPO 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Nevergrad HPOBench 3.9 $ENV_LOCATION
+bash scripts/build_env.sh Nevergrad BBOB 3.11 $ENV_LOCATION
+bash scripts/build_env.sh Nevergrad MFPBench 3.11 $ENV_LOCATION
 
-# for benchmark in "HPOB" "YAHPO" "HPOBench" "BBOB" "MFPBench"
+
+# for optimizer in "SMAC3" "SMAC3-1.4" "RandomSearch" "HEBO" "SyneTune" "DEHB" "Optuna" "Nevergrad"
 # do
-#     for optimizer in "SMAC3" "SMAC3-1.4" "RandomSearch" "HEBO" "SyneTune" "DEHB"
+#     for benchmark in "HPOB 3.11" "YAHPO 3.11" "HPOBench 3.9" "BBOB 3.11" "MFPBench 3.11"
 #     do
-#         echo "bash scripts/build_env.sh $benchmark $optimizer 3.11 \$ENV_LOCATION"
+#         echo "bash scripts/build_env.sh $optimizer $benchmark \$ENV_LOCATION"
 #     done
 # done

@@ -25,7 +25,7 @@ dependencies = [
   "cryptography",
   "domdf_python_tools",
   "py-experimenter>=1.4.1",
-  "critdd @ git+https://github.com/mirkobunse/critdd",
+  "autorank",
 ]
 
 requires-python = ">=3.9"
@@ -91,8 +91,9 @@ changelog_start_rev = "1.0.0"
 target-version = "py311"
 line-length = 120
 show-source = true
-src = ["src", "tests", "examples"]
+src = ["carps", "tests", "examples", "notebooks"]
 extend-safe-fixes = ["ALL"]
+extend-include = ["*.ipynb"]
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"

@@ -1,0 +1,21 @@
+# @package _global_
+optimizer_id: Nevergrad-DE
+optimizer_container_id: Nevergrad
+optimizer:
+  _target_: carps.optimizers.nevergrad.NevergradOptimizer
+  _partial_: true
+  nevergrad_cfg:
+    optimizer_name: "DE"
+    seed: ${seed}
+  optimizer_cfg:
+    initialization: parametrization
+    scale: 1.0
+    recommendation: optimistic
+    crossover: 0.5
+    F1: 0.8
+    F2: 0.8
+    popsize: standard
+    propagate_heritage: false
+    multiobjective_adaptation: true
+    high_speed: false
+    
