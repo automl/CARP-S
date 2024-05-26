@@ -8,7 +8,7 @@ problem:
   instance: 0
   seed: ${seed}
 task:
-  n_trials: 50
+  n_trials: 77
   time_budget: null
   n_workers: 1
   n_objectives: 1
