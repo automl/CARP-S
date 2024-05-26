@@ -118,7 +118,7 @@ class MFPBenchProblem(Problem):
 
         Returns
         -------
-        float
+        TrialValue
             Cost
         """
         configuration = trial_info.config

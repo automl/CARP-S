@@ -23,7 +23,7 @@ LOWER_IS_BETTER = {
     "ias": True,  # interaction strength of features  # TODO check
     "rammodel": True,  # model size
     "val_accuracy": False,
-    "val_cross_entropy": False,
+    "val_cross_entropy": True,
     "acc": False,
     "bac": False,  # balanced acc
     "brier": True,
