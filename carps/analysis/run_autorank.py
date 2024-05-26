@@ -13,11 +13,7 @@ from carps.analysis.utils import savefig
 
 logger = get_logger(__file__)
 
-
-
-
-def calc_critical_difference(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, identifier: str | None = None):
-    perf_col: str = "trial_value__cost_inc"
+def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, perf_col: str = "trial_value__cost_inc") -> pd.DataFrame:
     if not soft:
         df = df[np.isclose(df[budget_var], max_budget)]
     else:
@@ -37,6 +33,12 @@ def calc_critical_difference(df: pd.DataFrame, budget_var: str = "n_trials_norm"
     # Rows are problems, cols are optimizers
     df_crit = df_crit[np.array([not np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]     
     logger.info(f"Lost following experiments: {lost}")
+
+    return df_crit
+
+def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None):
+    df_crit = get_df_crit(df)
+
     result = autorank(df_crit, alpha=0.05, verbose=True)
     create_report(result)
 
