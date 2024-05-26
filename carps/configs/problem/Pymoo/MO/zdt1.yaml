@@ -9,7 +9,7 @@ problem:
   - objective_0
   - objective_1
 task:
-  n_trials: 50
+  n_trials: 240
   time_budget: null
   n_workers: 1
   n_objectives: 2
