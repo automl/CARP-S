@@ -34,7 +34,7 @@ articles, and such.
 
 ### Submit Feedback
 
-The best way to send feedback is to file an issue at https://github.com/benjamc/CARP-S/issues.
+The best way to send feedback is to file an issue at https://github.com/automl/CARP-S/issues.
 
 If you are proposing a feature:
 

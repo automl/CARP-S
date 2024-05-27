@@ -8,7 +8,7 @@ version = "0.1.0"
 dependencies = [
   "autorank",
   "ConfigSpace",
-  "cryptography",  # TODO(eddiebergman): Verify this is needed directly?
+  "cryptography",
   "dataclasses-json",
   "domdf_python_tools",
   "fire",
@@ -246,8 +246,8 @@ max-args = 10 # Changed from default of 5
 
 [tool.mypy]
 python_version = "3.11"
-packages = ["dacbo", "tests"]
-exclude = ["dacbo/plotting.py"]
+packages = ["tests"]
+exclude = []
 show_error_codes = true
 
 warn_unused_configs = true # warn about unused [tool.mypy] lines

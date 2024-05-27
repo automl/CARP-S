@@ -1,1 +1,1 @@
-# Contributng an Optimizer
+# Contributing an Optimizer
