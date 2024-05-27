@@ -1,54 +1,52 @@
-# If you see me, please update my `rev` field using the provided links
-# Click the repo and update to latest tags.
-# If things break on update, raise an issue
+default_language_version:
+  python: python3
+files: |
+  (?x)^(
+    carps|
+    tests
+  )/.*\.py$
 repos:
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
     hooks:
-      - id: isort
-        name: isort imports carps
-        files: carps
-
-      - id: isort
-        name: isort imports tests
-        files: tests
-
-  - repo: https://github.com/ambv/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-        name: black formatter carps
-        files: carps
-
-      - id: black
-        name: black formatter tests
-        files: tests
-
-      - id: black
-        name: black formatter examples
-        files: examples
-
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        files: carps
-        additional_dependencies: ["toml"] # Needed to parse pyproject.toml
-
+      - id: check-added-large-files
+        files: ".*"
+      - id: check-case-conflict
+        files: ".*"
+      - id: check-merge-conflict
+        files: ".*"
+      - id: check-yaml
+        files: ".*"
+      - id: end-of-file-fixer
+        files: ".*"
+        types: ["yaml"]
+      - id: check-toml
+        files: ".*"
+        types: ["toml"]
+      - id: debug-statements
+        files: '^src/.*\.py$'
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.4.1
+    rev: v1.10.0
     hooks:
       - id: mypy
-        name: mypy carps
-        files: carps
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+        additional_dependencies:
+          - "types-pyyaml"
+        args:
+          - "--no-warn-return-any" # Disable this because it doesn't know about 3rd party imports
+          - "--ignore-missing-imports"
+          - "--show-traceback"
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.28.4
     hooks:
-      - id: flake8
-        name: flake8 carps
-        files: carps
+      - id: check-github-workflows
+        files: '^github/workflows/.*\.ya?ml$'
+        types: ["yaml"]
+      - id: check-dependabot
+        files: '^\.github/dependabot\.ya?ml$'
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.5
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --no-cache]
+      - id: ruff-format
 
-      - id: flake8
-        name: flake8 tests
-        files: tests

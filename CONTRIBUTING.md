@@ -1,5 +1,4 @@
 # Contributing
-
 Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
 
@@ -9,7 +8,7 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs at https://github.com/benjamc/dacbo/issues.
+Report bugs at [https://github.com/automl/CARP-S/issues](https://github.com/automl/CARP-S/issues).
 
 If you are reporting a bug, please include:
 
@@ -29,13 +28,13 @@ and "help wanted" is open to whoever wants to implement it.
 
 ### Write Documentation
 
-DACBO could always use more documentation, whether as part of the
-official DACBO docs, in docstrings, or even on the web in blog posts,
+CARP-S could always use more documentation, whether as part of the
+official CARP-S docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 ### Submit Feedback
 
-The best way to send feedback is to file an issue at https://github.com/benjamc/dacbo/issues.
+The best way to send feedback is to file an issue at https://github.com/automl/CARP-S/issues.
 
 If you are proposing a feature:
 
@@ -45,77 +44,73 @@ If you are proposing a feature:
 
 ## Get Started!
 
-Ready to contribute? Here's how to set up `dacbo` for local development.
+Ready to contribute? Here's how to set up `CARP-S` for local development.
 
-1. Fork the `dacbo` repo on GitHub.
-2. Clone your fork locally:
-```
-    $ git clone git@github.com:your_name_here/dacbo.git
-```
-
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:
-```
-    $ mkvirtualenv dacbo
-    $ cd dacbo/
-    $ python setup.py develop
+Fork the `CARP-S` repo on GitHub and then clone your fork locally:
+```bash
+git clone git@github.com:YOUR_NAME_HERE/CARP-S.git
+cd CARP-S
 ```
 
-4. Create a branch for local development:
-```
-    $ git checkout -b name-of-your-bugfix-or-feature
-```
-
-   Now you can make your changes locally.
-
-5. When you're done making changes, check that your changes pass ruff, including testing other Python versions with tox:
-```
-    $ ruff format dacbo tests
-    $ python setup.py test or pytest
-    $ tox
+Install your local copy into a virtualenv.
+We'll also install [`pre-commit`](https://pre-commit.com/) which runs some code quality checks.
+```bash
+python -m venv .venv
+pip install -e ".[dev]"
+pre-commit install
 ```
 
-   To get flake8 and tox, just pip install them into your virtualenv.
-
-6. Commit your changes and push your branch to GitHub:
-```
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+Create a branch for local development:
+```bash
+git checkout -b name-of-your-bugfix-or-feature
 ```
 
-7. Submit a pull request through the GitHub website.
+Now you can make your changes locally!
+
+When you're done making changes, check that your changes pass ruff, including testing other Python versions:
+```bash
+python setup.py test or pytest
+```
+Commit your changes and push your branch to GitHub:
+
+```bash
+git add .
+git commit -m "Your detailed description of your changes."
+git push origin name-of-your-bugfix-or-feature
+```
+Submit a [pull request](https://github.com/automl/CARP-S/pulls) through the GitHub website!
+
+## Local Development
+
+### Virtual Environments
+You can try to install all dependencies into one big environment, but probably there are package clashes.
+Therefore, you can build one virtual environment for each optimizer-benchmark combination.
+Either run `scripts/build_envs.sh` to build all existing combinations or copy the combination and run as needed. It will create an environment with name `automlsuite_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}`.
 
 ## Pull Request Guidelines
-
 Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. Check
-   https://travis-ci.com/benjamc/dacbo/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+2. If the pull request adds functionality, the docs should be updated.
+Put your new functionality into a function with a docstring, and add the feature to the list in `README.md`.
+3. The pull request should work for `Python 3.9` and
+make sure that the tests pass for all supported Python versions.
 
-## Tips
-
+## Testing
 To run a subset of tests:
-
-```
-$ pytest tests.test_dacbo
-
+```bash
+pytest tests/some_file.py  # Run tests only in a certain file
+pytest -k "test_mytest"  # Find tests with a name matching "test_mytest"
 ```
 
 ## Deploying
-
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
-Then run:
+Make sure all your changes are committed (including an entry in `CHANGELOG.md`).
 
-```
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
-```
+Update the version in `pyproject.toml`, then run:
 
-Travis will then deploy to PyPI if tests pass.
+```bash
+git tag "x.y.z"  # Replace with your version
+git push
+git push --tags
+```
