@@ -60,7 +60,7 @@ class RandomSearchOptimizer(Optimizer):
         return None
 
     def get_current_incumbent(self) -> Incumbent:
-        if self.is_multiobjective:
+        if self.is_multiobjective and self.is_multifidelity:
             max_budget = np.max([v[0].budget for v in self.history])
             highest_fidelity = [v for v in self.history if v[0].budget == max_budget]
             hf_cost = np.array([v[1].cost for v in highest_fidelity])
