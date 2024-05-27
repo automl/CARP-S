@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import json
-import logging
 import multiprocessing
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypeVar, Iterable
 
 import fire
 import numpy as np
@@ -25,15 +24,22 @@ logger = get_logger(__file__)
 
 setup_globals()
 
+
 def get_run_dirs(outdir: str):
     triallog_files = list(Path(outdir).glob("**/trial_logs.jsonl"))
     return [f.parent for f in triallog_files]
 
-def annotate_with_cfg(df: pd.DataFrame, cfg: DictConfig, config_keys: list[str], config_keys_forbidden: list[str] | None = None) -> pd.DataFrame:
+
+def annotate_with_cfg(
+    df: pd.DataFrame,
+    cfg: DictConfig,
+    config_keys: list[str],
+    config_keys_forbidden: list[str] | None = None,
+) -> pd.DataFrame:
     if config_keys_forbidden is None:
         config_keys_forbidden = []
     cfg_resolved = OmegaConf.to_container(cfg, resolve=True)
-    flat_cfg = pd.json_normalize(cfg_resolved, sep=".").iloc[0].to_dict()
+    flat_cfg = pd.json_normalize(cfg_resolved, sep=".").iloc[0].to_dict()  # type: ignore
     for k, v in flat_cfg.items():
         if np.any([k.startswith(c) for c in config_keys]) and not np.any([c in k for c in config_keys_forbidden]):
             if isinstance(v, (list, ListConfig)):
@@ -41,73 +47,94 @@ def annotate_with_cfg(df: pd.DataFrame, cfg: DictConfig, config_keys: list[str],
             df[k] = v
     return df
 
+
 def get_Y(X: np.ndarray, problem: Problem) -> np.ndarray:
     return np.array(
         [
-            problem.evaluate(
-                TrialInfo(
-                    config=Configuration(
-                        configuration_space=problem.configspace,
-                        vector=x,
-                    )
-                )
-            ).cost
+            (
+                problem.evaluate(
+                    trial_info=TrialInfo(config=Configuration(configuration_space=problem.configspace, vector=x))
+                ).cost
+            )
             for x in X
         ]
     )
+
 
 def join_df(df1: pd.DataFrame, df2: pd.DataFrame, on: str = "n_trials") -> pd.DataFrame:
     df1.set_index(on)
     return df1.join(df2.set_index(on), on=on)
 
-def load_log(
-    rundir: Path
-) -> pd.DataFrame:
+
+def load_log(rundir: str | Path) -> pd.DataFrame:
     df = read_trial_log(rundir)
+    if df is None:
+        raise NotImplementedError("No idea what should happen here!?")
 
     cfg = load_cfg(rundir)
-    config_fn = str(Path(rundir) / ".hydra/config.yaml")
-    cfg_str = OmegaConf.to_yaml(cfg=cfg)
-    df["cfg_fn"] = config_fn
-    df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
+    if cfg is not None:
+        config_fn = str(Path(rundir) / ".hydra/config.yaml")
+        cfg_str = OmegaConf.to_yaml(cfg=cfg)
+        df["cfg_fn"] = config_fn
+        df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
 
-    # df = maybe_add_bandit_log(df, rundir, n_initial_design=cfg.task.n_initial_design)
+        config_keys = ["benchmark", "problem", "seed", "optimizer_id", "task"]
+        config_keys_forbidden = ["_target_", "_partial_"]
+        df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
+        # df = maybe_add_bandit_log(df, rundir, n_initial_design=cfg.task.n_initial_design)
+    else:
+        config_fn = "no_hydra_config"
+        cfg_str = ""
+        df["cfg_fn"] = config_fn
+        df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
 
-    config_keys = ["benchmark", "problem", "seed", "optimizer_id", "task"]
-    config_keys_forbidden = ["_target_", "_partial_"]
-    df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
     if "problem.function.seed" in df:
         df = df.drop(columns=["problem.function.seed"])
+
     if "problem.function.dim" in df:
         df = df.rename(columns={"problem.function.dim": "dim"})
+
     return df
 
+
+T = TypeVar("T")
+R = TypeVar("R")
+
+
 def map_multiprocessing(
-    task_function: Callable,
-    task_params: list[Any],
-    n_processes: int = 4,
-) -> list:
+    task_function: Callable[[T], R],
+    task_params: Iterable[T],
+    n_processes: int | None = None,
+) -> list[R]:
     with multiprocessing.Pool(processes=n_processes) as pool:
         return pool.map(task_function, task_params)
 
-def read_jsonl_content(filename: str) -> pd.DataFrame:
+
+def read_jsonl_content(filename: str | Path) -> pd.DataFrame:
     with open(filename) as file:
-        content = [json.loads(l) for l in file.readlines()]
+        content = [json.loads(l) for l in file.readlines()]  # noqa: E741
     return pd.DataFrame(content)
 
-def read_trial_log(rundir: str):
+
+def read_trial_log(rundir: str | Path) -> pd.DataFrame | None:
     path = Path(rundir) / "trial_logs.jsonl"
-    df = None
-    if path.exists():
-        df = read_jsonl_content(path)
-        df = normalize_drop(df, "trial_info", rename_columns=True, sep="__")
-        df = normalize_drop(df, "trial_value", rename_columns=True, sep="__")
-        # df = df.drop(columns=["trial_info__instance", "trial_info__budget", "trial_value__time", "trial_value__status", "trial_value__starttime", "trial_value__endtime"])
+    if not path.exists():
+        return None
+
+    df = read_jsonl_content(path)
+    df = normalize_drop(df, "trial_info", rename_columns=True, sep="__")
+    df = normalize_drop(df, "trial_value", rename_columns=True, sep="__")
+    # df = df.drop(columns=["trial_info__instance", "trial_info__budget", "trial_value__time", "trial_value__status", "trial_value__starttime", "trial_value__endtime"])
     return df
 
-def load_cfg(rundir: str) -> DictConfig:
+
+def load_cfg(rundir: str | Path) -> DictConfig | None:
     config_fn = Path(rundir) / ".hydra/config.yaml"
-    return OmegaConf.load(config_fn)
+    if not config_fn.exists():
+        return None
+
+    return OmegaConf.load(config_fn)  # type: ignore
+
 
 def normalize_drop(df: pd.DataFrame, key: str, rename_columns: bool = False, sep: str = ".") -> pd.DataFrame:
     """Normalize columns containing dicts.
@@ -135,29 +162,32 @@ def normalize_drop(df: pd.DataFrame, key: str, rename_columns: bool = False, sep
         df_tmp = df_tmp.rename(columns={c: f"{key}{sep}{c}" for c in df_tmp.columns})
     return pd.concat([df.drop(key, axis=1), df_tmp], axis=1)
 
+
 def maybe_add_n_trials(df: pd.DataFrame, n_initial_design: int, counter_key: str = "n_calls") -> pd.DataFrame:
     if "n_trials" not in df:
         df["n_trials"] = df[counter_key] + n_initial_design  # n_trials is 1-based
     return df
 
-def filelogs_to_df(rundir: str, n_processes: int = 16) -> None:
+
+# NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
+def filelogs_to_df(rundir: str, n_processes: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     logger.info(f"Get rundirs from {rundir}...")
     rundirs = get_run_dirs(rundir)
     logger.info(f"Found {len(rundirs)} runs. Load data...")
     results = map_multiprocessing(load_log, rundirs, n_processes=n_processes)
     df = pd.concat(results).reset_index(drop=True)
     logger.info("Done. Do some preprocessing...")
-    df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v}  for k, v in df["cfg_str"].unique()])
+    df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
     df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
     df_cfg.loc[:, "cfg_str"] = df_cfg["cfg_str"].apply(lambda x: x.replace("\n", "\\n"))
-    df["experiment_id"] = df["cfg_fn"].apply(lambda x:  np.where(df_cfg["cfg_fn"].to_numpy()==x)[0][0])
+    df["experiment_id"] = df["cfg_fn"].apply(lambda x: np.where(df_cfg["cfg_fn"].to_numpy() == x)[0][0])
     del df["cfg_str"]
     del df["cfg_fn"]
     logger.info("Done. Saving to file...")
     df.to_csv(Path(rundir) / "logs.csv", index=False)
     df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
     logger.info("Done. 😊")
-    return None
+    return df, df_cfg
 
 
 if __name__ == "__main__":

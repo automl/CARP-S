@@ -3,8 +3,10 @@ from __future__ import annotations
 import json
 import logging
 import os
+import traceback
 from dataclasses import asdict
 from pathlib import Path
+import warnings
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
@@ -18,29 +20,34 @@ setup_logging()
 logger = get_logger("FileLogger")
 
 
-def get_run_directory() -> str:
+def get_run_directory() -> Path:
     """Get current run dir
 
     Either '.' if hydra not active, else hydra run dir.
 
     Returns
     -------
-    str
+    Path
         Directory
     """
     try:
         # Check if we are in a hydra context
         hydra_cfg = HydraConfig.instance().get()
         if hydra_cfg.mode == RunMode.RUN:
-            directory = Path(hydra_cfg.run.dir)
-        else:  # MULTIRUN
-            directory = Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir
-    except Exception:
-        directory = "."
-    return directory
+            return Path(hydra_cfg.run.dir)
+
+        # TODO: How can we check to actually make sure it's a multi-run...
+        # MULTIRUN
+        return Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir
+    except Exception as e:
+        cwd = Path.cwd()
+        tb = traceback.format_exc()
+        msg = f"Unexpected issue getting current run_directory!\n{tb}\n{e}\n\nReturning current directory of {cwd}."
+        warnings.warn(msg, category=UserWarning, stacklevel=2)
+        return cwd
 
 
-def dump_logs(log_data: dict, filename: str, directory: str | None = None):
+def dump_logs(log_data: dict, filename: str, directory: str | Path | None = None):
     """Dump log dict in jsonl format
 
     This appends one json dict line to the filename.
@@ -58,16 +65,22 @@ def dump_logs(log_data: dict, filename: str, directory: str | None = None):
         Directory to log to. If None, either use hydra run dir or current dir.
     """
     log_data_str = json.dumps(log_data) + "\n"
-    directory = directory or get_run_directory()
-    filename = Path(directory) / filename
-    with open(filename, mode="a") as file:
+    _dir = Path(directory) if directory is not None else get_run_directory()
+    filepath = _dir / filename
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with filepath.open("a") as file:
         file.writelines([log_data_str])
 
 
 def convert_trials(n_trials, trial_info, trial_value, n_function_calls: int | None = None):
     if n_function_calls is None:
         n_function_calls = n_trials
-    info = {"n_trials": n_trials, "n_function_calls": n_function_calls, "trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
+    info = {
+        "n_trials": n_trials,
+        "n_function_calls": n_function_calls,
+        "trial_info": asdict(trial_info),
+        "trial_value": asdict(trial_value),
+    }
     info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
     info["trial_value"]["virtual_time"] = float(info["trial_value"]["virtual_time"])
     return info
@@ -77,7 +90,7 @@ class FileLogger(AbstractLogger):
     _filename: str = "trial_logs.jsonl"
     _filename_trajectory: str = "trajectory_logs.jsonl"
 
-    def __init__(self, overwrite: bool = False, directory: str | None = None) -> None:
+    def __init__(self, overwrite: bool = False, directory: str | Path | None = None) -> None:
         """File logger.
 
         For each trial/function evaluate, write one line to the file.
@@ -95,8 +108,7 @@ class FileLogger(AbstractLogger):
         """
         super().__init__()
 
-        directory = directory or get_run_directory()
-        directory = Path(directory)
+        directory = Path(directory) if directory is not None else get_run_directory()
         self.directory = directory
         if (directory / self._filename).is_file():
             if overwrite:
@@ -110,9 +122,12 @@ class FileLogger(AbstractLogger):
             else:
                 raise RuntimeError(
                     f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite "
-                    f"for the file logger in the config (CARP-S/carps/configs/logger.yaml).")
+                    f"for the file logger in the config (CARP-S/carps/configs/logger.yaml)."
+                )
 
-    def log_trial(self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None) -> None:
+    def log_trial(
+        self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+    ) -> None:
         """Evaluate the problem and log the trial.
 
         Parameters
