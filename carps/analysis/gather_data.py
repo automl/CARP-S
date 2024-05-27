@@ -25,8 +25,14 @@ logger = get_logger(__file__)
 
 setup_globals()
 
+def glob_trial_logs(p: str) -> list[str]:
+    return list(Path(p).glob("**/trial_logs.jsonl"))
+
 def get_run_dirs(outdir: str):
-    triallog_files = list(Path(outdir).glob("**/trial_logs.jsonl"))
+    opt_paths = list(Path(outdir).glob("*/*"))
+    with multiprocessing.Pool() as pool:
+        triallog_files = pool.map(glob_trial_logs, opt_paths)
+    triallog_files = np.concatenate(triallog_files)    
     return [f.parent for f in triallog_files]
 
 def annotate_with_cfg(df: pd.DataFrame, cfg: DictConfig, config_keys: list[str], config_keys_forbidden: list[str] | None = None) -> pd.DataFrame:
@@ -85,7 +91,7 @@ def load_log(
 def map_multiprocessing(
     task_function: Callable,
     task_params: list[Any],
-    n_processes: int = 4,
+    n_processes: int | None = None,
 ) -> list:
     with multiprocessing.Pool(processes=n_processes) as pool:
         return pool.map(task_function, task_params)
@@ -140,7 +146,7 @@ def maybe_add_n_trials(df: pd.DataFrame, n_initial_design: int, counter_key: str
         df["n_trials"] = df[counter_key] + n_initial_design  # n_trials is 1-based
     return df
 
-def filelogs_to_df(rundir: str, n_processes: int = 16) -> None:
+def filelogs_to_df(rundir: str, n_processes: int | None = None) -> None:
     logger.info(f"Get rundirs from {rundir}...")
     rundirs = get_run_dirs(rundir)
     logger.info(f"Found {len(rundirs)} runs. Load data...")
