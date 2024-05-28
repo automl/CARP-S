@@ -1,6 +1,9 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 70.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["carps"]
 
 [project]
 name = "carps"
@@ -74,9 +77,6 @@ dev = [
   "pytest-cases",
 ]
 
-[tool.setuptools.packages.find]
-where = ["carps"]
-namespaces = false
 
 
 # https://docs.pytest.org/en/7.2.x/reference/reference.html#ini-options-ref
