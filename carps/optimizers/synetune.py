@@ -4,6 +4,8 @@ import copy
 import datetime
 from collections import OrderedDict
 from typing import Any, Callable
+import numpy as np
+import omegaconf
 
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
@@ -90,14 +92,15 @@ class SynetuneOptimizer(Optimizer):
         
         self.fidelity_type: str = self.task.fidelity_type
         self.configspace = self.problem.configspace
+        self.metric = self.task.objectives
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
-        self.metric = getattr(problem, "metric", "cost")
         self.trial_counter: int = 0
 
         self.optimizer_name = optimizer_name
         self._solver: SyneTrialScheduler | None = None 
 
-        self.optimizer_kwargs = optimizer_kwargs
+        self.optimizer_kwargs = omegaconf.OmegaConf.to_object(
+            optimizer_kwargs) if optimizer_kwargs is not None else None
 
         self.completed_experiments: OrderedDict[int, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
@@ -214,7 +217,11 @@ class SynetuneOptimizer(Optimizer):
         """
         cost = trial_value.cost
         trial = self.convert_to_synetrial(trial_info=trial_info)
-        experiment_result = {self.metric: cost}
+        experiment_result = {}
+        if self.task.n_objectives == 1:
+            experiment_result = {self.task.objectives[0]: cost}
+        else:
+            experiment_result = {self.task.objectives[i]: cost[i] for i in range(len(cost))}
         self.trial_counter += 1
         self._solver.on_trial_complete(trial=trial, result=experiment_result)
         trial_result = trial.add_results(
@@ -237,6 +244,23 @@ class SynetuneOptimizer(Optimizer):
             [value for key, value in self.completed_experiments.items()],
             key=lambda trial: sign * trial.metrics[metric],
         )
+    
+    def get_pareto_front(self) -> list[TrialResult]:
+        """
+        Return the pareto front for multi-objective optimization
+        """
+        def pareto(costs: np.ndarray) -> np.ndarray:
+            is_pareto = np.ones(costs.shape[0], dtype = bool)
+            for i, c in enumerate(costs):
+                if is_pareto[i]:
+                    is_pareto[is_pareto] = np.any(costs[is_pareto] < c, axis=1)
+                    is_pareto[i] = True
+            return is_pareto
+        
+        results = np.array(list(self.completed_experiments.values()))
+        costs = np.array([list(trial.metrics.values()) for trial in results])
+        front = results[pareto(costs)]
+        return front.tolist()        
 
     def _setup_optimizer(self) -> SyneTrialScheduler:
         """
@@ -253,9 +277,9 @@ class SynetuneOptimizer(Optimizer):
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
         _optimizer_kwargs = dict(
-            config_space=self.syne_tune_configspace,
-            metric=getattr(self.problem, "metric", "cost"),
-            mode="min",
+            config_space = self.syne_tune_configspace,
+            metric = self.task.objectives,
+            mode = "min" if self.task.n_objectives == 1 else list(np.repeat("min", self.task.n_objectives)),
         )
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
             _optimizer_kwargs["resource_attr"] = self.fidelity_type
@@ -268,13 +292,30 @@ class SynetuneOptimizer(Optimizer):
     
     def get_current_incumbent(self) \
             -> Incumbent:
-        trial_result = self.best_trial(metric=self.metric)
-        trial_info = self.convert_to_trial(trial=trial_result)
-        cost = trial_result.metrics[self.metric]
-        trial_value = TrialValue(
-            cost=cost,
-            time=trial_result.seconds,
-            virtual_time=trial_result.seconds,
-            additional_info=trial_result.metrics
-        )
-        return (trial_info, trial_value)
+        if self.task.n_objectives == 1:
+            trial_result = self.best_trial(metric=self.task.objectives[0])
+            trial_info = self.convert_to_trial(trial=trial_result)
+            cost = trial_result.metrics[self.task.objectives[0]]
+            trial_value = TrialValue(
+                cost=cost,
+                time=trial_result.seconds,
+                virtual_time=trial_result.seconds,
+                additional_info=trial_result.metrics
+            )
+            incumbent_tuple = (trial_info, trial_value)
+        else:
+            trial_result = self.get_pareto_front()
+            tis, tvs = [], []
+            for result in trial_result:
+                trial_info = self.convert_to_trial(trial=result)
+                costs = list(result.metrics.values())
+                trial_value = TrialValue(
+                    cost=costs,
+                    time=result.seconds,
+                    virtual_time=result.seconds,
+                    additional_info=result.metrics
+                )
+                tis.append(trial_info)
+                tvs.append(trial_value)
+            incumbent_tuple = list(zip(tis, tvs))
+        return incumbent_tuple
