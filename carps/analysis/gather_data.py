@@ -4,9 +4,10 @@ import json
 import multiprocessing
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, TypeVar, Iterable
+from typing import TYPE_CHECKING, TypeVar, Iterable, Any
 
 import fire
+import pyarrow
 import numpy as np
 import pandas as pd
 from ConfigSpace import Configuration
@@ -217,7 +218,9 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         for c in task_columns:
             key = c.split(".")[1]
-            if np.nan in gdf[c].unique():
+            # print(task_cfg, c)
+            # print(gdf[c].explode().unique())
+            if np.nan in gdf[c].explode().unique():
                 print(c, key, task_cfg, gid)
                 v = task_cfg.get(key)
                 if isinstance(v, (list, ListConfig)):
@@ -232,6 +235,21 @@ def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] = ["n_tria
     task_cols_to_remove = [c for c in logs.columns if c.startswith("task") and c not in keep_task_columns]
     return logs.drop(columns=task_cols_to_remove)
 
+def maybe_convert_cost_dtype(x: Any) -> tuple[float, list[float]]:
+    if isinstance(x, (int,float)):
+        return float(x)
+    elif isinstance(x, str):
+        return eval(x)
+    else:
+        assert isinstance(x, list)
+        return x
+    
+def maybe_convert_cost_to_so(x: Any) -> float:
+    if isinstance(x, list):
+        return np.sum(x)  # TODO replace by hypervolume or similar
+    else:
+        return x
+
 def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_trials"]) -> pd.DataFrame:
     logger.info("Processing raw logs. Normalize n_trials and costs. Calculate trajectory (incumbent cost).")
     # logs= logs.drop(columns=["config"])
@@ -239,10 +257,10 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
     logs = logs[~logs["problem_id"].str.startswith("DUMMY")]
     logs = logs[~logs["benchmark_id"].str.startswith("DUMMY")]
     logs = logs[~logs["optimizer_id"].str.startswith("DUMMY")]
-    logs["trial_value__cost"] = logs["trial_value__cost"].apply(lambda x: x if isinstance(x, float) else eval(x))
-    logs = logs[logs["trial_value__cost"].apply(lambda x: isinstance(x, float))]
-    logs["trial_value__cost"] = logs["trial_value__cost"].apply(float)
+    logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
+    logs["trial_value__cost"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
+
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
@@ -251,6 +269,9 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
         logs["task.is_multiobjective"] = logs["task.n_objectives"] > 1
     logs = add_scenario_type(logs)
     logs = filter_task_info(logs, keep_task_columns)
+
+    # Convert config to object
+    logs["trial_info__config"] = logs["trial_info__config"].apply(lambda x: str(x))
 
     # Add time
     logs = logs.groupby(by=["problem_id", "optimizer_id", "seed"]).apply(calc_time).reset_index(drop=True)
@@ -353,8 +374,11 @@ def filelogs_to_df(rundir: str, n_processes: int | None = None) -> tuple[pd.Data
     logger.info("Full power...")
     df = process_logs(df)
     logger.info("Done. Saving to file...")
-    df.to_parquet(Path(rundir) / "logs.parquet", index=False, dtype_backend="pyarrow")
-    df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False, dtype_backend="pyarrow")
+    # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
+    df.to_csv(Path(rundir) / "logs.csv", index=False) #, engine="pyarrow")
+    df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)  #, engine="pyarrow")
+    df.to_parquet(Path(rundir) / "logs.parquet", index=False) #, engine="pyarrow")
+    df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False)  #, engine="pyarrow")
     logger.info("Done. 😊")
     return df, df_cfg
 
