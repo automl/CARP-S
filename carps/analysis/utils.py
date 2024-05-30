@@ -5,6 +5,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import seaborn as sns
 
 
@@ -25,3 +26,10 @@ def setup_seaborn(font_scale: float | None = None) -> None:
         sns.set_theme(font_scale=font_scale)
     sns.set_style("whitegrid")
     sns.set_palette("colorblind")
+
+def filter_only_final_performance(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True) -> pd.DataFrame:
+    if not soft:
+        df = df[np.isclose(df[budget_var], max_budget)]
+    else:
+        df = df[df.groupby(["optimizer_id", "problem_id", "seed"])[budget_var].transform(lambda x: x == x.max())]
+    return df

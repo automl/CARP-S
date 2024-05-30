@@ -9,15 +9,13 @@ import matplotlib.pyplot as plt
 from carps.analysis.process_data import load_logs
 from autorank import autorank, plot_stats, create_report
 from carps.utils.loggingutils import get_logger
-from carps.analysis.utils import savefig
+from carps.analysis.utils import savefig, filter_only_final_performance
 
 logger = get_logger(__file__)
 
+
 def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, perf_col: str = "trial_value__cost_inc") -> pd.DataFrame:
-    if not soft:
-        df = df[np.isclose(df[budget_var], max_budget)]
-    else:
-        df = df[df.groupby(["optimizer_id", "problem_id", "seed"])[budget_var].transform(lambda x: x == x.max())]
+    df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)
     
     # Work on mean of different seeds
     df_crit = df.groupby(["optimizer_id", "problem_id"])[perf_col].apply(np.nanmean).reset_index()
@@ -235,7 +233,7 @@ def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ig
     # -- Plot
     fig, ax = plt.subplots(figsize=(12, 8))
     plt.rcParams.update({"font.size": 16})
-    _custom_cd_diagram(result, order == "ascending", ax, 8)
+    _custom_cd_diagram(result, order == "descending", ax, 8)
     if plt_title:
         plt.title(plt_title)
     plt.tight_layout()
