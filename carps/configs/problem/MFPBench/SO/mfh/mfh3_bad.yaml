@@ -1,10 +1,12 @@
 # @package _global_
 benchmark_id: MFPBench
-problem_id: mfpbench/mfh/mfh3_terrible
+problem_id: mfpbench/mfh/mfh3_bad
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchProblem
   benchmark_name: mfh
-  benchmark: mfh3_terrible
+  metric:
+  - value
+  benchmark: mfh3_bad
   budget_type: z
   prior: null
   perturb_prior: null
@@ -12,14 +14,15 @@ problem:
     bias: null
     noise: null
 task:
-  n_trials: 100
+  n_trials: 90
   time_budget: null
   n_workers: 1
   n_objectives: 1
-  objectives: null
+  objectives:
+  - value
   is_multifidelity: true
   fidelity_type: z
-  min_budget: 3
+  min_budget: 1
   max_budget: 100
   has_constraints: null
   domain: synthetic

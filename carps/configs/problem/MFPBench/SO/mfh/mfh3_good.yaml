@@ -1,35 +1,39 @@
 # @package _global_
 benchmark_id: MFPBench
-problem_id: mfpbench/pd1/translatewmt_xformer_64
+problem_id: mfpbench/mfh/mfh3_good
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchProblem
-  benchmark_name: pd1
-  benchmark: translatewmt_xformer_64
-  budget_type: epoch
+  benchmark_name: mfh
+  metric:
+  - value
+  benchmark: mfh3_good
+  budget_type: z
   prior: null
   perturb_prior: null
   benchmark_kwargs:
-    datadir: ./data
+    bias: null
+    noise: null
 task:
-  n_trials: 100
+  n_trials: 90
   time_budget: null
   n_workers: 1
   n_objectives: 1
-  objectives: null
+  objectives:
+  - value
   is_multifidelity: true
-  fidelity_type: epoch
+  fidelity_type: z
   min_budget: 1
-  max_budget: 19
+  max_budget: 100
   has_constraints: null
-  domain: DL
+  domain: synthetic
   objective_function_approximation: surrogate
   has_virtual_time: true
   deterministic: true
-  dimensions: 4
+  dimensions: 3
   search_space_n_categoricals: 0
   search_space_n_ordinals: 0
   search_space_n_integers: 0
-  search_space_n_floats: 4
+  search_space_n_floats: 3
   search_space_has_conditionals: false
   search_space_has_forbiddens: false
   search_space_has_priors: false

@@ -61,6 +61,7 @@ class MFPBenchProblem(Problem):
     def __init__(
         self,
         benchmark_name: str,
+        metric: str | list[str],
         benchmark: str | None = None,
         budget_type: Optional[str] = None,
         prior: str | Path | C | Mapping[str, Any] | None = None,
@@ -74,6 +75,7 @@ class MFPBenchProblem(Problem):
         self.benchmark_name = benchmark_name
         self.budget_type = budget_type
         self.benchmark = benchmark
+        self.metrics = metric
         self.prior = prior
         self.perturb_prior = perturb_prior
         assert (
@@ -126,22 +128,20 @@ class MFPBenchProblem(Problem):
         result = self._problem.query(
             configuration.get_dictionary(),
             at=int(trial_info.budget) if trial_info.budget is not None else None,
-        )
+        ).as_dict()
         end_time = time.time()
 
-        ret = None
+        ret = [result[metric] for metric in self.metrics]
+        if len(ret) == 1:
+            ret = ret[0]
+        
         vt = 0.0
         if self.benchmark_name == "jahs":
-            # JAHSBench returns both test and val accuracies
-            # Selecting only the test acc here
-            ret = -result.test_acc.value  # Because we're alwas minimizing
-            vt = result.runtime.value
+            vt = result['runtime']
         elif self.benchmark_name == "mfh":
-            ret = result.value.value
-            vt = result.fid_cost.value
+            vt = result['fid_cost']
         else:
-            ret = result.valid_error_rate.value
-            vt = result.train_cost.value
+            vt = result["train_cost"]
 
         trial_value = TrialValue(
             cost=ret,
