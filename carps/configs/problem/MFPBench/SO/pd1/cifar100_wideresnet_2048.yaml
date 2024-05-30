@@ -11,7 +11,7 @@ problem:
   prior: null
   perturb_prior: null
   benchmark_kwargs:
-    datadir: ../HPO_Suite/data
+    datadir: ./data
 task:
   n_trials: 100
   time_budget: null
