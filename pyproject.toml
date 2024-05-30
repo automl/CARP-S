@@ -21,6 +21,7 @@ dependencies = [
   "hydra-submitit-launcher",
   "omegaconf",
   "pandas",
+  "pyarrow",
   "py-experimenter>=1.4.1",
   "pymysql",
   "rich",
