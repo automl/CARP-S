@@ -15,6 +15,8 @@ from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
 from carps.utils.trials import TrialInfo
 from carps.utils.loggingutils import get_logger, setup_logging
+from dataclasses import asdict
+from carps.utils.task import Task
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
@@ -197,8 +199,8 @@ def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
     logs["scenario"] = logs.apply(determine_scenario_type, axis=1)
     return logs
 
-def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
-    index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
+def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFrame:
+    index_fn = Path("/scratch/hpc-prf-intexml/cbenjamins/repos/CARP-S-Experiments/lib/CARP-S/carps/configs/problem/index.csv")
     if not index_fn.is_file():
         raise ValueError("Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
     problem_index = pd.read_csv(index_fn)
@@ -218,12 +220,15 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
     for gid, gdf in logs.groupby(by="problem_id"):
         task_cfg = load_task_cfg(problem_id=gid)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
+        if overwrite:
+            task_dict = asdict(Task(**task_cfg))
+            task_columns = ["task." + k for k in task_dict.keys()]
+
         for c in task_columns:
             key = c.split(".")[1]
             # print(task_cfg, c)
             # print(gdf[c].explode().unique())
-            if np.nan in gdf[c].explode().unique():
-                print(c, key, task_cfg, gid)
+            if overwrite or np.nan in gdf[c].explode().unique():
                 v = task_cfg.get(key)
                 if isinstance(v, (list, ListConfig)):
                     v = [v] * len(gdf)
