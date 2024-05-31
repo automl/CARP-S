@@ -11,6 +11,8 @@
 # bash scripts/build_superenv.sh Scikit_Optimize X 3.10
 # bash scripts/build_superenv.sh SyneTune X 3.10
 
+# bash scripts/build_superenv.sh DEHB X 3.10
+
 
 
 ml lang/Anaconda3/2022.05
