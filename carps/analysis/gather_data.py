@@ -180,20 +180,20 @@ def maybe_add_n_trials(df: pd.DataFrame, n_initial_design: int, counter_key: str
     return df
 
 
-def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
+def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFrame:
     def determine_scenario_type(x: pd.Series) -> str:
-        if x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
+        if x[task_prefix + "is_multifidelity"] is False and x[task_prefix + "is_multiobjective"] is False:
             scenario = "blackbox"
-        elif x["task.is_multifidelity"] is True and x["task.is_multiobjective"] is False:
+        elif x[task_prefix + "is_multifidelity"] is True and x[task_prefix + "is_multiobjective"] is False:
             scenario = "multi-fidelity"
-        elif x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is True:
+        elif x[task_prefix + "is_multifidelity"] is False and x[task_prefix + "is_multiobjective"] is True:
             scenario = "multi-objective"
-        elif x["task.is_multifidelity"] is True and x["task.is_multiobjective"] is True:
+        elif x[task_prefix + "is_multifidelity"] is True and x[task_prefix + "is_multiobjective"] is True:
             scenario = "multi-fidelity-objective"
-        elif np.isnan(x["task.is_multifidelity"]) or np.isnan(x["task.is_multiobjective"]):
+        elif np.isnan(x[task_prefix + "is_multifidelity"]) or np.isnan(x[task_prefix + "is_multiobjective"]):
             scenario = "blackbox"
         else:
-            print(x["problem_id"], x["optimizer_id"], x["seed"], x["task.is_multifidelity"], type(x["task.is_multifidelity"]))
+            print(x["problem_id"], x["optimizer_id"], x["seed"], x[task_prefix + "is_multifidelity"], type(x[task_prefix + "is_multifidelity"]))
             raise ValueError("Unknown scenario")
         return scenario
     logs["scenario"] = logs.apply(determine_scenario_type, axis=1)
