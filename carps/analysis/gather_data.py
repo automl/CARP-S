@@ -277,7 +277,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
     logger.debug("Handle MO costs...")
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
     logs["trial_value__cost"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
-    logger.info("Determine incumbent cost...")
+    logger.debug("Determine incumbent cost...")
     logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")
 
     logger.debug("Maybe add task info...")
