@@ -26,10 +26,11 @@ conda_env_name: carps_${benchmark_id}_${optimizer_container_id}
 
 timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
-outdir: runs/${optimizer_id}/${benchmark_id}/${problem_id}/${seed}
+baserundir: runs
+outdir: ${baserundir}/${optimizer_id}/${benchmark_id}/${problem_id}/${seed}
 hydra:
   run:
     dir: ${outdir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
-    dir: runs  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: ${baserundir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${optimizer_id}/${benchmark_id}/${problem_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir
