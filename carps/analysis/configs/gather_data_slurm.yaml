@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - override /hydra/launcher: submitit_slurm
+
+rundir: runs
+
+hydra:
+  launcher:
+    partition: normal
+    cpus_per_task: 32
+    name: carps
+    timeout_min: 120
+    # mem_gb: 8
+    mem_per_cpu: 4G
