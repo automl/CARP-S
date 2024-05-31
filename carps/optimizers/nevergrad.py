@@ -58,7 +58,7 @@ def CS_to_nevergrad_space(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:
     elif isinstance(hp, CSH.CategoricalHyperparameter):
         return ng.p.Choice(hp.choices)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
-        return ng.p.TransitionChoice(hp.choices)
+        return ng.p.TransitionChoice(hp.sequence)
     elif isinstance(hp, CSH.Constant):
         return ng.p.Choice([hp.value])
     else:
