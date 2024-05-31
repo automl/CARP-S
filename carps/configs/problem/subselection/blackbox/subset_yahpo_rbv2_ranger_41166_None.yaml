@@ -1,3 +1,4 @@
+# @package _global_
 benchmark_id: YAHPO
 problem_id: blackbox/40/yahpo/rbv2_ranger/41166/None
 problem:

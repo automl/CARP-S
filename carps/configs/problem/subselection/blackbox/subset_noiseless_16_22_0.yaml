@@ -1,3 +1,4 @@
+# @package _global_
 benchmark_id: BBOB
 problem_id: blackbox/40/noiseless/16/22/0
 problem:

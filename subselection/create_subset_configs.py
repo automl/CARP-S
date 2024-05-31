@@ -29,6 +29,7 @@ def create_subset_configs(subset_fn: str, scenario: str) -> None:
         cfg.problem_id = new_problem_id
         new_fn = config_target_path / new_name
         yaml_str = OmegaConf.to_yaml(cfg)
+        yaml_str = "# @package _global_\n" + yaml_str
         new_fn.write_text(yaml_str)
 
 
