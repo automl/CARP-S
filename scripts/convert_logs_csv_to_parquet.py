@@ -6,16 +6,16 @@ import pandas as pd
 import carps
 
 from carps.analysis.run_autorank import get_df_crit
-from carps.analysis.process_data import process_logs
+from carps.analysis.gather_data import convert_mixed_types_to_str
 
 
 if __name__=="__main__":
     paths = {
-    "MF": [
-        "runs/SMAC3-Hyperband",
-        "runs/SMAC3-MutliFidelityFacade",
-        "runs/RandomSearch",
-        ],
+        "MF": [
+            "runs/DEHB",
+            "runs/SMAC3-Hyperband",
+            "runs/SMAC3-MultiFidelityFacade",
+            ],
         "BB": [
             "runs/SMAC3-BlackBoxFacade",
             "runs/RandomSearch",
@@ -38,6 +38,7 @@ if __name__=="__main__":
         if fn_csv.is_file() and not fn_pq.is_file():
             print("Convert", fn_csv, "to", fn_pq)
             df = pd.read_csv(fn_csv)
+            df = convert_mixed_types_to_str(df)
             df.to_parquet(fn_pq)  
 
     for scenario, _paths in paths.items():
