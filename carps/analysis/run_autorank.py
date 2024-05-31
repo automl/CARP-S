@@ -84,7 +84,7 @@ def custom_latex_table(result, *, decimal_places=3, label=None):
 
 
 
-def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, perf_col: str = "trial_value__cost_inc") -> pd.DataFrame:
+def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, perf_col: str = "trial_value__cost_inc", remove_nan: bool = True) -> pd.DataFrame:
     df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)
     
     # Work on mean of different seeds
@@ -96,11 +96,12 @@ def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget:
         values=perf_col
     )
     
-    lost = df_crit[np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])] 
+    if remove_nan:
+        lost = df_crit[np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])] 
 
-    # Rows are problems, cols are optimizers
-    df_crit = df_crit[np.array([not np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]     
-    logger.info(f"Lost following experiments: {lost}")
+        # Rows are problems, cols are optimizers
+        df_crit = df_crit[np.array([not np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]     
+        logger.info(f"Lost following experiments: {lost}")
 
     return df_crit
 
