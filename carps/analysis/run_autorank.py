@@ -13,6 +13,76 @@ from carps.analysis.utils import savefig, filter_only_final_performance
 
 logger = get_logger(__file__)
 
+def custom_latex_table(result, *, decimal_places=3, label=None):
+    """
+    Creates a latex table from the results dataframe of the statistical analysis.
+
+    # Parameters
+
+    result (RankResult):
+        Should be the return value the autorank function.
+
+    decimal_places (int, default=3):
+        Number of decimal places that are used for the report.
+
+    label (str, default=None):
+        Label of the table. Defaults to 'tbl:stat_results' if None.
+    """
+    if label is None:
+        label = 'tbl:stat_results'
+
+    table_df = result.rankdf
+    columns = table_df.columns.to_list()
+    if result.omnibus != 'bayes' and result.pvalue >= result.alpha or \
+       result.omnibus == 'bayes' and len({'smaller', 'larger'}.intersection(set(result.rankdf['decision']))) == 0:
+        columns.remove('effect_size')
+        columns.remove('magnitude')
+    if result.posthoc == 'tukeyhsd':
+        columns.remove('meanrank')
+    columns.insert(columns.index('ci_lower'), 'CI')
+    columns.remove('ci_lower')
+    columns.remove('ci_upper')
+    rename_map = {}
+    if result.effect_size == 'cohen_d':
+        rename_map['effect_size'] = '$d$'
+    elif result.effect_size == 'cliff_delta':
+        rename_map['effect_size'] = r'D-E-L-T-A'
+    elif result.effect_size == 'akinshin_gamma':
+        rename_map['effect_size'] = r'G-A-M-M-A'
+    rename_map['magnitude'] = 'Magnitude'
+    rename_map['mad'] = 'MAD'
+    rename_map['median'] = 'MED'
+    rename_map['meanrank'] = 'MR'
+    rename_map['mean'] = 'M'
+    rename_map['std'] = 'SD'
+    rename_map['decision'] = 'Decision'
+    format_string = '[{0[ci_lower]:.' + str(decimal_places) + 'f}, {0[ci_upper]:.' + str(decimal_places) + 'f}]'
+    table_df['CI'] = table_df.agg(format_string.format, axis=1)
+    table_df = table_df[columns]
+    if result.omnibus == 'bayes':
+        table_df.at[table_df.index[0], 'decision'] = '-'
+    table_df = table_df.rename(rename_map, axis='columns')
+
+    float_format = lambda x: ("{:0." + str(decimal_places) + "f}").format(x) if not np.isnan(x) else '-'
+    table_string = table_df.to_latex(float_format=float_format, na_rep='-').strip()
+    table_string = table_string.replace('D-E-L-T-A', r'$\delta$')
+    table_string = table_string.replace('G-A-M-M-A', r'$\gamma$')
+    table_string = table_string.replace(r'p\_equal', r'$P(\textit{equal})$')
+    table_string = table_string.replace(r'p\_smaller', r'$P(\textit{smaller})$')
+    final_str = \
+"""
+\\begin{{table}}[h]
+    \centering
+    {table_string}
+    \caption{{Summary of populations}}
+    \label{{{label}}}
+\end{{table}}
+""".format(table_string=table_string, label=label)
+    
+    return final_str
+
+
+
 
 def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, perf_col: str = "trial_value__cost_inc") -> pd.DataFrame:
     df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)
@@ -34,29 +104,30 @@ def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget:
 
     return df_crit
 
-def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None):
+def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, figsize=(12,8)):
     df_crit = get_df_crit(df)
 
-    result = autorank(df_crit, alpha=0.05, verbose=True)
-    create_report(result)
+    # result = autorank(df_crit, alpha=0.05, verbose=True)
+    # create_report(result)
 
-    fig, ax = plt.subplots(figsize=(6,2))
-    ax = plot_stats(result, ax=ax)
+    # fig, ax = plt.subplots(figsize=(6,2))
+    # ax = plot_stats(result, ax=ax)
 
-    if identifier is None:
-        identifier = ""
-    else:
-        identifier = "_" + identifier        
-    fn = f"figures/critd/criticaldifference{identifier}"
-    savefig(fig=fig, filename=fn + ".png")
-    savefig(fig=fig, filename=fn + ".pdf")
+    # if identifier is None:
+    #     identifier = ""
+    # else:
+    #     identifier = "_" + identifier        
+    # fn = f"figures/critd/criticaldifference{identifier}"
+    # savefig(fig=fig, filename=fn + ".png")
+    # savefig(fig=fig, filename=fn + ".pdf")
 
 
-    cd_evaluation(
+    result = cd_evaluation(
         df_crit, 
         maximize_metric=False, 
         ignore_non_significance=False, 
-        output_path=f"figures/critd/cd{identifier}"
+        output_path=f"figures/critd/cd{identifier}",
+        figsize=figsize
     )
 
     return result
@@ -176,7 +247,7 @@ def _custom_cd_diagram(result, reverse, ax, width):
     return ax
 
 
-def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ignore_non_significance=False, plt_title=None):
+def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ignore_non_significance=False, plt_title=None, figsize=(12, 8)):
     """Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
     configurations / models / algorithms per dataset. In  detail, the columns are individual configurations.
     rows are datasets and a cell is the performance of the configuration for  dataset.
@@ -231,9 +302,9 @@ def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ig
                              " ignore_non_significance to True.")
 
     # -- Plot
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=figsize)
     plt.rcParams.update({"font.size": 16})
-    _custom_cd_diagram(result, order == "descending", ax, 8)
+    _custom_cd_diagram(result, False, ax, figsize[0]) #order == "descending", ax, 8)
     if plt_title:
         plt.title(plt_title)
     plt.tight_layout()
