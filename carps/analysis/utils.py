@@ -19,7 +19,8 @@ def get_color_palette(df: pd.DataFrame | None) -> dict[str, Any]:
 def savefig(fig: plt.Figure, filename: str) -> None:
     figure_filename = Path(filename)
     figure_filename.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figure_filename, dpi=300, bbox_inches="tight")
+    fig.savefig(str(figure_filename) + ".png", dpi=300, bbox_inches="tight")
+    fig.savefig(str(figure_filename) + ".pdf", dpi=300, bbox_inches="tight")
 
 def setup_seaborn(font_scale: float | None = None) -> None:
     if font_scale is not None:
