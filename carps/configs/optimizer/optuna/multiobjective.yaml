@@ -7,6 +7,4 @@ optimizer:
   optuna_cfg:
     sampler:
       seed: ${seed}
-    study:
-      directions: ${task.objectives}
-        
+    study: {}        

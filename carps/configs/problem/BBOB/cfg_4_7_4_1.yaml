@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: BBOB
-problem_id: noiseless/4/7/1
+problem_id: bbob/noiseless/4/7/1
 problem:
   _target_: carps.benchmarks.bbob.BBOBProblem
   dimension: 4
