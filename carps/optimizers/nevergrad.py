@@ -39,6 +39,7 @@ ext_opts = {
     "CMA-ES": ng.optimization.optimizerlib.ParametrizedCMA,
     "bayes_opt": ng.optimization.optimizerlib.ParametrizedBO,
     "DE": ng.families.DifferentialEvolution,
+    "EvolutionStrategy": ng.families.EvolutionStrategy,
 }
 
 
@@ -46,18 +47,18 @@ def CS_to_nevergrad_space(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:
     """Convert ConfigSpace to Nevergrad Parameter."""
     if isinstance(hp, CSH.FloatHyperparameter):
         if hp.log:
-            return ng.p.Log(hp.lower, hp.upper)
+            return ng.p.Log(lower=hp.lower, upper=hp.upper)
         else:
             return ng.p.Scalar(lower=hp.lower, upper=hp.upper)
     elif isinstance(hp, CSH.IntegerHyperparameter):
         if hp.log:
-            return ng.p.Log(hp.lower, hp.upper).set_integer_casting()
+            return ng.p.Log(lower=hp.lower, upper=hp.upper).set_integer_casting()
         else:
             return ng.p.Scalar(lower=hp.lower, upper=hp.upper).set_integer_casting()
     elif isinstance(hp, CSH.CategoricalHyperparameter):
         return ng.p.Choice(hp.choices)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
-        return ng.p.TransitionChoice(hp.choices)
+        return ng.p.TransitionChoice(hp.sequence)
     elif isinstance(hp, CSH.Constant):
         return ng.p.Choice([hp.value])
     else:
@@ -97,7 +98,7 @@ class NevergradOptimizer(Optimizer):
 
         self._solver: NGOptimizer | ConfNGOptimizer | None = None
         self.counter = 0
-        self.history: dict[str, Tuple[ng.p.Parameter, float | None]] = {}
+        self.history: dict[str, Tuple[ng.p.Parameter, float | list[float]| None]] = {}
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ng.p.Parameter:
         """Convert ConfigSpace configuration space to search space from optimizer.
@@ -216,10 +217,6 @@ class NevergradOptimizer(Optimizer):
         assert unique_name in self.history
         assert self._solver is not None
 
-        if isinstance(trial_value.cost, list):
-            raise NotImplementedError(
-                "Multiobjective optimization not yet implemented for Nevergrad!"
-            )
         self.history[unique_name] = (self.history[unique_name][0], trial_value.cost)
 
         self.solver.tell(
@@ -238,19 +235,32 @@ class NevergradOptimizer(Optimizer):
         incumbent = None
         cost = None
         unique_name = None
-        for name, value in self.history.items():
-            if incumbent is None or value[1] < cost:
-                incumbent = value[0].value
-                cost = value[1]
-                unique_name = name
-        if cost is None:
-            raise ValueError(
-                f"Tried to get Incumbent without calling tell() for config {incumbent}!"
+        if self.task.n_objectives > 1:
+            configs = self.solver.pareto_front()
+            costs = [param.losses.tolist() for param in configs]
+            trial_info = [self.convert_to_trial(
+                config = Configuration(
+                    self.configspace, 
+                    values=config.value
+                )
+            ) for config in configs]
+            trial_value = [TrialValue(cost=cost) for cost in costs]
+            incumbent_tuple = list(zip(trial_info, trial_value))
+        else: 
+            for name, value in self.history.items():
+                if incumbent is None or value[1] < cost:
+                    incumbent = value[0].value
+                    cost = value[1]
+                    unique_name = name
+            if cost is None:
+                raise ValueError(
+                    f"Tried to get Incumbent without calling tell() for config {incumbent}!"
+                )
+            trial_info = self.convert_to_trial(
+                config=Configuration(self.configspace, values=incumbent),
+                name=unique_name,
+                seed=self.nevergrad_cfg.seed,
             )
-        trial_info = self.convert_to_trial(
-            config=Configuration(self.configspace, values=incumbent),
-            name=unique_name,
-            seed=self.nevergrad_cfg.seed,
-        )
-        trial_value = TrialValue(cost=cost)
-        return (trial_info, trial_value)
+            trial_value = TrialValue(cost=cost)
+            incumbent_tuple = (trial_info, trial_value)
+        return incumbent_tuple
