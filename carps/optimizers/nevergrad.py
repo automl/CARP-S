@@ -47,12 +47,12 @@ def CS_to_nevergrad_space(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:
     """Convert ConfigSpace to Nevergrad Parameter."""
     if isinstance(hp, CSH.FloatHyperparameter):
         if hp.log:
-            return ng.p.Log(hp.lower, hp.upper)
+            return ng.p.Log(lower=hp.lower, upper=hp.upper)
         else:
             return ng.p.Scalar(lower=hp.lower, upper=hp.upper)
     elif isinstance(hp, CSH.IntegerHyperparameter):
         if hp.log:
-            return ng.p.Log(hp.lower, hp.upper).set_integer_casting()
+            return ng.p.Log(lower=hp.lower, upper=hp.upper).set_integer_casting()
         else:
             return ng.p.Scalar(lower=hp.lower, upper=hp.upper).set_integer_casting()
     elif isinstance(hp, CSH.CategoricalHyperparameter):
