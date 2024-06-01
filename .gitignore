@@ -162,3 +162,5 @@ logs
 *run_missing.sh
 *.png
 runsold
+multirun
+runs_subset
