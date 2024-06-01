@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Iterable
 
 import optuna
+import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
                                          Hyperparameter, OrdinalHyperparameter,
@@ -26,6 +27,7 @@ from carps.optimizers.optimizer import Optimizer
 from carps.utils.task import Task
 from carps.utils.trials import StatusType, TrialInfo, TrialValue
 from carps.utils.types import Incumbent
+from carps.utils.pareto_front import pareto
 
 # NOTE: Optuna has an extra OptunaTrialState.PRUNED, which indicates something
 # was halted during it's run and not progressed to the next budget. They fundamentally
@@ -122,7 +124,7 @@ class OptunaOptimizer(Optimizer):
         ) -> Study
         """
         sampler = TPESampler(seed=self.optuna_cfg.sampler.seed)
-        study = optuna.create_study(**self.optuna_cfg.study, sampler=sampler)
+        study = optuna.create_study(**self.optuna_cfg.study, sampler=sampler, directions=["minimize"]*self.task.n_objectives)
         printr(sampler)
         printr(study)
 
@@ -191,7 +193,17 @@ class OptunaOptimizer(Optimizer):
 
         self._solver.tell(trial=optuna_trial, values=cost, state=optuna_status)
 
-    def get_current_incumbent(self) -> Incumbent:
+    def get_pareto_front(self) -> list[tuple[TrialInfo,TrialValue]]:
+        """
+        Return the pareto front for multi-objective optimization
+        """
+        non_none_entries = [np.array([config, cost], dtype=object) for _, config, cost in self.history.values() if cost is not None]
+        costs = np.array([v[1] for v in non_none_entries])
+        front = np.array(non_none_entries)[pareto(costs)]
+        return front.tolist() 
+
+    def get_current_incumbent(self) \
+            -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
         Returns
@@ -199,18 +211,19 @@ class OptunaOptimizer(Optimizer):
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
         """
-        if any(isinstance(cost, Iterable) for _, _, cost in self.history.values()):
-            raise RuntimeError("What should this do in multi-objective?")
-
-        non_none_entries = [(config, cost) for _, config, cost in self.history.values() if cost is not None]
-        if len(non_none_entries) == 0:
-            return None
-
-        best_config, best_cost = min(non_none_entries, key=lambda x: x[1])
-        assert not isinstance(best_cost, Iterable)
-        trial_info = TrialInfo(config=best_config)
-        trial_value = TrialValue(cost=best_cost)
-        return (trial_info, trial_value)
+        if self.task.n_objectives == 1:
+            non_none_entries = [(config, cost) for _, config, cost in self.history.values() if cost is not None]
+            if len(non_none_entries) == 0:
+                return None
+            best_config, best_cost = min(non_none_entries, key=lambda x: x[1])
+            assert not isinstance(best_cost, Iterable)
+            trial_info = TrialInfo(config=best_config)
+            trial_value = TrialValue(cost=best_cost)
+            incumbent_tuple = (trial_info, trial_value)
+        else:
+            front = self.get_pareto_front()
+            incumbent_tuple = [(TrialInfo(config=config), TrialValue(cost=cost)) for config, cost in front]
+        return incumbent_tuple
 
     # NOT really needed
     def convert_configspace(self, configspace: ConfigurationSpace) -> dict[str, BaseDistribution]:
