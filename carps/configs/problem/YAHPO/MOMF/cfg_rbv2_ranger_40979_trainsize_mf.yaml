@@ -1,22 +1,22 @@
 # @package _global_
 benchmark_id: YAHPO
-problem_id: yahpo/MFMO/trainsize/rbv2_ranger/40979/trainsize
+problem_id: yahpo/MOMF/trainsize/rbv2_ranger/40979/trainsize
 problem:
   _target_: carps.benchmarks.yahpo.YahpoProblem
   bench: rbv2_ranger
   instance: '40979'
   budget_type: trainsize
   metric:
-    - acc
-    - memory
+  - acc
+  - memory
 task:
   n_trials: 134
   time_budget: null
   n_workers: 1
   n_objectives: 2
   objectives:
-    - acc
-    - memory
+  - acc
+  - memory
   is_multifidelity: true
   fidelity_type: trainsize
   min_budget: 0.03
@@ -26,11 +26,11 @@ task:
   objective_function_approximation: surrogate
   has_virtual_time: true
   deterministic: true
-  dimensions: 8
-  search_space_n_categoricals: 3
-  search_space_n_ordinals: 0
-  search_space_n_integers: 3
-  search_space_n_floats: 2
-  search_space_has_conditionals: true
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  dimensions: null
+  search_space_n_categoricals: null
+  search_space_n_ordinals: null
+  search_space_n_integers: null
+  search_space_n_floats: null
+  search_space_has_conditionals: null
+  search_space_has_forbiddens: null
+  search_space_has_priors: null

@@ -26,11 +26,11 @@ task:
   objective_function_approximation: surrogate
   has_virtual_time: true
   deterministic: true
-  dimensions: 14
-  search_space_n_categoricals: 2
-  search_space_n_ordinals: 0
-  search_space_n_integers: 2
-  search_space_n_floats: 10
-  search_space_has_conditionals: true
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  dimensions: null
+  search_space_n_categoricals: null
+  search_space_n_ordinals: null
+  search_space_n_integers: null
+  search_space_n_floats: null
+  search_space_has_conditionals: null
+  search_space_has_forbiddens: null
+  search_space_has_priors: null
