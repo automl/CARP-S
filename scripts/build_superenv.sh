@@ -73,7 +73,7 @@ EXTRA_COMMAND=$5
 
 
 # Create env
-ENV_NAME="carpsbb_${OPTIMIZER_CONTAINER_ID}"  #carps_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}"
+ENV_NAME="carps_${OPTIMIZER_CONTAINER_ID}"  #carps_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}"
 if [ -z "$ENV_LOCATION" ]
 then
     ENV_LOCATION="-n ${ENV_NAME}"
@@ -115,7 +115,7 @@ else
     $RUN_COMMAND pip install -r container_recipes/optimizers/${OPTIMIZER_CONTAINER_ID}/${OPTIMIZER_CONTAINER_ID}_requirements.txt
 fi
 
-for benchmark_id in "HPOB" "YAHPO" "BBOB"
+for benchmark_id in "HPOB" "YAHPO" "BBOB" "MFPBench" "Pymoo"
 do
     $RUN_COMMAND pip install -r container_recipes/benchmarks/${benchmark_id}/${benchmark_id}_requirements.txt
 done
