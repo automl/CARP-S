@@ -27,19 +27,6 @@ class RandomSearchOptimizer(Optimizer):
         if hasattr(task, "n_objectives"):
             self.is_multiobjective = task.n_objectives > 1
 
-        if self.is_multiobjective:
-            # reduce import dependency to pymoo, if not MO
-            # from pymoo.indicators.hv import Hypervolume
-            from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
-
-            # self.HV = Hypervolume
-            self.NDS = NonDominatedSorting
-
-            # if hasattr(task, 'ref_point'):
-            #     # give user the option to specify the reference point (if known in advance)
-            #     self.ref_point = task.ref_point
-            #     self.hv = self.HV(ref_point=np.array(task.ref_point))
-
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         return configspace
 
@@ -47,6 +34,7 @@ class RandomSearchOptimizer(Optimizer):
         budget = None
         if self.is_multifidelity:
             budget = self.task.max_budget
+            # budget = np.random.choice(np.linspace(self.task.min_budget, self.task.max_budget, 5))
         return TrialInfo(config=config, budget=budget)
 
     def ask(self) -> TrialInfo:
@@ -58,25 +46,34 @@ class RandomSearchOptimizer(Optimizer):
 
     def _setup_optimizer(self) -> None:
         return None
-
-    def get_current_incumbent(self) -> Incumbent:
-        if self.is_multiobjective and self.is_multifidelity:
+    
+    def get_pareto_front(self) -> list[tuple[TrialInfo,TrialValue]]:
+        """
+        Return the pareto front for multi-objective optimization
+        """
+        def pareto(costs: np.ndarray) -> np.ndarray:
+            is_pareto = np.ones(costs.shape[0], dtype = bool)
+            for i, c in enumerate(costs):
+                if is_pareto[i]:
+                    is_pareto[is_pareto] = np.any(costs[is_pareto] < c, axis=1)
+                    is_pareto[i] = True
+            return is_pareto
+        
+        if self.task.is_multifidelity:
             max_budget = np.max([v[0].budget for v in self.history])
-            highest_fidelity = [v for v in self.history if v[0].budget == max_budget]
-            hf_cost = np.array([v[1].cost for v in highest_fidelity])
-
-            # # calculate the hypervolume on the highest fidelity!
-            # if not hasattr(self, 'ref_point'):
-            #     # calculate the reference point as relative margin of the highest fidelity points
-            #     ref_point = hf_cost.max(axis=0)
-            #     self.hv = self.HV(ref_point=ref_point)
-            # hv = self.hv(hf_cost)
-
-            non_dom = self.NDS().do(hf_cost, only_non_dominated_front=True)
-
-            # enforce an order on the non-dominated solutions, to avoid bad comparisons
-            return list(
-                sorted([self.history[i] for i in non_dom], key=lambda x: x[1].cost)
-            )
+            results_on_highest_fidelity = np.array([v for v in self.history if v[0].budget == max_budget])
+            costs = np.array([v[1].cost for v in results_on_highest_fidelity])
+            # Determine pareto front of the trials run on max budget
+            front = results_on_highest_fidelity[pareto(costs)]
         else:
-            return min(self.history, key=lambda x: x[1].cost)
+            costs = np.array([v[1].cost for v in self.history])
+            front = np.array(self.history)[pareto(costs)]
+        return front.tolist()      
+
+    def get_current_incumbent(self) \
+            -> Incumbent:
+        if self.task.n_objectives == 1:
+            incumbent_tuple = min(self.history, key=lambda x: x[1].cost)
+        else:
+            incumbent_tuple = self.get_pareto_front()
+        return incumbent_tuple
