@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: SyneTune-ASHA
+optimizer_id: SyneTune-MOASHA
 optimizer_container_id: SyneTune
 optimizer:
   _target_: carps.optimizers.synetune.SynetuneOptimizer
