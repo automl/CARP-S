@@ -258,7 +258,7 @@ class SynetuneOptimizer(Optimizer):
 
         if self.optimizer_name == "MOASHA":
             experiment_result[self.fidelity_type] = trial_info.budget
-            del experiment_result[self.task.objectives]
+            # del experiment_result[self.task.objectives]
 
             self._solver.on_trial_add(trial=trial)
         self.trial_counter += 1
