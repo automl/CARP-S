@@ -151,6 +151,8 @@ class FileLogger(AbstractLogger):
             logger.debug(info_str)
         else:
             info_str = f"n_trials: {info['n_trials']}, config: {info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
+            if info["trial_info"]["budget"] is not None:
+                info_str += f" budget: {info['trial_info']['budget']}"
             logger.info(info_str)
 
         dump_logs(log_data=info, filename=self._filename, directory=self.directory)
