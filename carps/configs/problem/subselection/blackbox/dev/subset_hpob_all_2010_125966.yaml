@@ -1,0 +1,32 @@
+# @package _global_
+benchmark_id: HPOB
+problem_id: blackbox/30/dev/hpob/all/2010/125966
+problem:
+  _target_: carps.benchmarks.hpo_b.HPOBProblem
+  model_id: '2010'
+  dataset_id: '125966'
+  surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
+task:
+  n_trials: 100
+  time_budget: null
+  n_workers: 1
+  n_objectives: 1
+  objectives:
+  - quality
+  is_multifidelity: false
+  fidelity_type: null
+  min_budget: null
+  max_budget: null
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: surrogate
+  has_virtual_time: false
+  deterministic: true
+  dimensions: 8
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 0
+  search_space_n_integers: 0
+  search_space_n_floats: 8
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false
