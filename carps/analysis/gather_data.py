@@ -416,6 +416,8 @@ def filelogs_to_df(rundir: str, n_processes: int | None = None) -> tuple[pd.Data
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
     df.to_csv(Path(rundir) / "logs.csv", index=False)
     df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False) 
+    df = convert_mixed_types_to_str(df)
+    df_cfg = convert_mixed_types_to_str(df_cfg)
     df.to_parquet(Path(rundir) / "logs.parquet", index=False)
     df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False) 
     logger.info("Done. 😊")
