@@ -1,0 +1,33 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: yahpo/rbv2_super/24/None
+problem:
+  _target_: carps.benchmarks.yahpo.YahpoProblem
+  bench: rbv2_super
+  instance: '24'
+  budget_type: null
+  metric: acc
+task:
+  n_trials: 267
+  time_budget: null
+  n_workers: 1
+  n_objectives: 1
+  objectives:
+  - quality
+  is_multifidelity: false
+  fidelity_type: null
+  min_budget: null
+  max_budget: null
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: surrogate
+  has_virtual_time: true
+  deterministic: true
+  dimensions: 38
+  search_space_n_categoricals: 7
+  search_space_n_ordinals: 0
+  search_space_n_integers: 13
+  search_space_n_floats: 18
+  search_space_has_conditionals: true
+  search_space_has_forbiddens: false
+  search_space_has_priors: false
