@@ -2,7 +2,7 @@ OPT=$1
 echo $OPT
 
 # Subselection. 40
-python -m carps.run +cluster=noctua $OPT '+problem/subselection/blackbox=glob(*)' 'seed=range(1,21)' 'baserundir=runs_subset' -m 
+python -m carps.run +cluster=noctua $OPT '+problem/subselection/blackbox=glob(*)' 'seed=range(1,21)' 'baserundir=runs_subset_BB' -m 
 
 
 
