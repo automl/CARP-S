@@ -13,7 +13,7 @@ optimizer:
       deterministic: true
       n_workers: 1
       objectives: ${task.objectives}
-      output_directory: null # ${outdir}/${seed}/smac3_output
+      output_directory: ${outdir}/${seed}/smac3_output
     smac_kwargs:
       dask_client: null
       multi_objective_algorithm:
