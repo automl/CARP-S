@@ -12,6 +12,7 @@ optimizer:
       n_trials: ${task.n_trials}
       deterministic: true
       n_workers: 1
-      output_directory: ${outdir}/${seed}/smac3_output
+      output_directory: null  # ${outdir}/${seed}/smac3_output
     smac_kwargs:
       dask_client: null
+      overwrite: true

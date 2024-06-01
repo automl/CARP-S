@@ -13,9 +13,10 @@ optimizer:
       deterministic: true
       n_workers: 1
       objectives: ${task.objectives}
-      output_directory: ${outdir}/${seed}/smac3_output
+      output_directory: null # ${outdir}/${seed}/smac3_output
     smac_kwargs:
       dask_client: null
       multi_objective_algorithm:
         _target_: smac.multi_objective.parego.ParEGO
         _partial_: true
+      overwrite: true

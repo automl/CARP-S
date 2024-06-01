@@ -13,7 +13,7 @@ optimizer:
       n_trials: ${task.n_trials}
       deterministic: true
       n_workers: 1
-      output_directory: ${outdir}/${seed}/smac3_output
+      output_directory: null # ${outdir}/${seed}/smac3_output
       min_budget: ${task.min_budget}
       max_budget: ${task.max_budget}
     smac_kwargs:
@@ -22,3 +22,4 @@ optimizer:
         _target_: smac.intensifier.hyperband.Hyperband
         _partial_: true
         eta: 3
+      overwrite: true
