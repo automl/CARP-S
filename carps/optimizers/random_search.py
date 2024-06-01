@@ -9,6 +9,7 @@ from carps.optimizers.optimizer import Optimizer, SearchSpace
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
+from carps.utils.pareto_front import pareto
 
 
 class RandomSearchOptimizer(Optimizer):
@@ -51,14 +52,6 @@ class RandomSearchOptimizer(Optimizer):
         """
         Return the pareto front for multi-objective optimization
         """
-        def pareto(costs: np.ndarray) -> np.ndarray:
-            is_pareto = np.ones(costs.shape[0], dtype = bool)
-            for i, c in enumerate(costs):
-                if is_pareto[i]:
-                    is_pareto[is_pareto] = np.any(costs[is_pareto] < c, axis=1)
-                    is_pareto[i] = True
-            return is_pareto
-        
         if self.task.is_multifidelity:
             max_budget = np.max([v[0].budget for v in self.history])
             results_on_highest_fidelity = np.array([v for v in self.history if v[0].budget == max_budget])

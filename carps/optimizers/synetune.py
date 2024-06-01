@@ -49,6 +49,7 @@ from carps.optimizers.optimizer import Optimizer
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.utils.types import Incumbent
+from carps.utils.pareto_front import pareto
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -292,14 +293,6 @@ class SynetuneOptimizer(Optimizer):
         """
         Return the pareto front for multi-objective optimization
         """
-        def pareto(costs: np.ndarray) -> np.ndarray:
-            is_pareto = np.ones(costs.shape[0], dtype = bool)
-            for i, c in enumerate(costs):
-                if is_pareto[i]:
-                    is_pareto[is_pareto] = np.any(costs[is_pareto] < c, axis=1)
-                    is_pareto[i] = True
-            return is_pareto
-        
         if self.task.is_multifidelity:
             # Determine maximum budget run
             max_budget = np.max(
