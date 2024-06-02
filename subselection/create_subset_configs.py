@@ -40,6 +40,6 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
 
 
 if __name__ == "__main__":
-    # python subselection/create_subset_configs.py sub selection/BB_1/default/subset_30.csv subselection/BB_1/default/subset_complement_subset_30.csv blackbox
+    # python subselection/create_subset_configs.py subselection/BB_1/default/subset_30.csv subselection/BB_1/default/subset_complement_subset_30.csv blackbox
     fire.Fire(create_subset_configs)
 
