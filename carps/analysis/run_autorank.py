@@ -13,7 +13,7 @@ from carps.analysis.utils import savefig, filter_only_final_performance
 
 logger = get_logger(__file__)
 
-def custom_latex_table(result, *, decimal_places=3, label=None):
+def custom_latex_table(result, *, decimal_places=3, label=None, only_tabular: bool = True) -> str:
     """
     Creates a latex table from the results dataframe of the statistical analysis.
 
@@ -73,15 +73,17 @@ def custom_latex_table(result, *, decimal_places=3, label=None):
     final_str = \
 """
 \\begin{{table}}[h]
-    \centering
-    {table_string}
     \caption{{Summary of populations}}
     \label{{{label}}}
+    \centering
+    {table_string}    
 \end{{table}}
 """.format(table_string=table_string, label=label)
     
-    
-    return final_str
+    if only_tabular:
+        return table_string
+    else:
+        return final_str
 
 
 
