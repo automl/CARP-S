@@ -6,12 +6,14 @@ from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
+from dataclasses import asdict
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.facade.abstract_facade import AbstractFacade
 from smac.multi_objective.parego import ParEGO
 from smac.runhistory import TrialInfo as SmacTrialInfo
 from smac.runhistory import TrialValue as SmacTrialValue
+from smac.runhistory import TrialKey as SmacTrialKey
 from smac.scenario import Scenario
 
 from carps.benchmarks.problem import Problem
@@ -244,13 +246,17 @@ class SMAC3Optimizer(Optimizer):
             budget=trial_info.budget,
             seed=trial_info.seed
         )
+        additional_info = trial_value.additional_info
+        if self.task.n_objectives > 1:
+            # Save costs for multi-objective because SMAC might scalarize the cost
+            additional_info["cost"] = trial_value.cost
         smac_trial_value = SmacTrialValue(
             cost=trial_value.cost,
             time=trial_value.time,
             status=trial_value.status,
             starttime=trial_value.starttime,
             endtime=trial_value.endtime,
-            additional_info=trial_value.additional_info
+            additional_info=additional_info
         )
         self.solver.tell(info=smac_trial_info, value=smac_trial_value)
 
@@ -267,9 +273,21 @@ class SMAC3Optimizer(Optimizer):
                     # Initialize weights of ParEGO
                     mo.update_on_iteration_start()
             incs = self.solver.intensifier.get_incumbents()
-            costs = [self.solver.runhistory.get_cost(config=c) for c in incs]
-            tis = [TrialInfo(config=i) for i in incs]
-            tvs = [TrialValue(cost=c) for c in costs]
+            tis = [self.solver.runhistory.get_trials(c)[0] for c in incs] # first trial because only one budget #TODO update for momf
+            tks = [
+                SmacTrialKey(
+                    config_id=self.solver.runhistory.get_config_id(ti.config),
+                    instance=ti.instance,
+                    seed=ti.seed,
+                    budget=ti.budget
+                ) for ti in tis
+            ]
+            tvs = [self.solver.runhistory[k] for k in tks]
+            tvs = [
+                TrialValue(
+                    **asdict(tv)
+                ) for tv in tvs
+            ]
             incumbent_tuple = list(zip(tis, tvs))
 
         return incumbent_tuple
