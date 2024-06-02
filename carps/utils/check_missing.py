@@ -52,17 +52,10 @@ def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
     data.to_csv("runstatus.csv", index=False)
     return data
 
-def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
-    if from_cached:
-        logger.info("Loading experiment status data from 'runstatus.csv'...")
-        data = pd.read_csv("runstatus.csv")
-        logger.info("Done!")
-    else:
-        logger.info("Scanning rundirs for experiment status...")
-        data = check_missing(rundir=rundir)
-        logger.info("Done!")
-
-    missing = data[data["status"].isin([RunStatus.MISSING.name])]#, RunStatus.TRUNCATED.name])]
+def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, baserundir: str = "") -> None:
+    logger.info(f"Regenerate commands for {runstatus.name} runs...")
+    data = missing_data
+    missing = data[data["status"].isin([runstatus.name])]
     runcommands = []
     for gid, gdf in missing.groupby(by=["optimizer_id", "problem_id"]):
         seeds = list(gdf["seed"].unique())
@@ -73,10 +66,26 @@ def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
         override = " ".join(overrides)
         runcommand = f"python -m carps.run {override}\n"
         runcommands.append(runcommand)
-    runcommand_fn = "runcommands_missing.sh"
+    runcommand_fn = f"runcommands_{runstatus.name}.sh"
     with open(runcommand_fn, "w") as file:
         file.writelines(runcommands)
     logger.info(f"Done! Regenerated runcommands at {runcommand_fn}.")
+
+def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
+    baserundir = Path(rundir).parts[0]
+    if from_cached:
+        logger.info("Loading experiment status data from 'runstatus.csv'...")
+        data = pd.read_csv("runstatus.csv")
+        logger.info("Done!")
+    else:
+        logger.info("Scanning rundirs for experiment status...")
+        data = check_missing(rundir=rundir)
+        logger.info("Done!")
+
+    generate_commands(data, RunStatus.MISSING, baserundir)
+    generate_commands(data, RunStatus.TRUNCATED, baserundir)
+
+    
 
 
 if __name__ == "__main__":
