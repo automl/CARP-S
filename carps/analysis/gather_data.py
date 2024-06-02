@@ -200,7 +200,7 @@ def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.Data
     return logs
 
 def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFrame:
-    index_fn = Path("/scratch/hpc-prf-intexml/cbenjamins/repos/CARP-S-Experiments/lib/CARP-S/carps/configs/problem/index.csv")
+    index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
     if not index_fn.is_file():
         raise ValueError("Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
     problem_index = pd.read_csv(index_fn)
