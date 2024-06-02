@@ -107,7 +107,7 @@ def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget:
 
     return df_crit
 
-def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, figsize=(12,8)):
+def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, figsize=(12,8)) -> RankResult:
     df_crit = get_df_crit(df)
 
     # result = autorank(df_crit, alpha=0.05, verbose=True)
@@ -250,7 +250,7 @@ def _custom_cd_diagram(result, reverse, ax, width):
     return ax
 
 
-def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ignore_non_significance=False, plt_title=None, figsize=(12, 8)):
+def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ignore_non_significance=False, plt_title=None, figsize=(12, 8)) -> RankResult:
     """Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
     configurations / models / algorithms per dataset. In  detail, the columns are individual configurations.
     rows are datasets and a cell is the performance of the configuration for  dataset.
