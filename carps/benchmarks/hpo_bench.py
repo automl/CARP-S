@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from typing import Any, Optional
+from omegaconf import ListConfig
 
 from ConfigSpace import ConfigurationSpace
 from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
@@ -28,6 +29,7 @@ class HPOBenchProblem(Problem):
         seed: int,
         model: str | None = None,
         task_id: int | None = None,
+        metric: str | list[str] = "function_value",
         problem: AbstractBenchmarkClient | None = None,
         budget_type: Optional[str] = None,
         loggers: list[AbstractLogger] | None = None,
@@ -57,6 +59,9 @@ class HPOBenchProblem(Problem):
         self._problem = problem if problem else get_hpobench_problem(
             task_id=task_id, model=model, seed=seed, budget_type=self.budget_type
         )
+        if not isinstance(metric, (list, ListConfig)):
+            metric = [metric]
+        self.metric = metric
         self._configspace = self._problem.get_configuration_space(seed=seed)
 
     @property
@@ -102,9 +107,12 @@ class HPOBenchProblem(Problem):
         endtime = time.time()
         T = endtime - starttime
         virtual_time = result_dict["cost"] if trial_info.budget is None else 0.0
+        costs = [result_dict[metric] for metric in self.metric]
+        if len(costs) == 1:
+            costs = costs[0]
         # function_value is 1 - accuracy on the validation set
         trial_value = TrialValue(
-            cost=result_dict["function_value"],
+            cost=costs,
             time=T,
             starttime=starttime,
             endtime=endtime,
