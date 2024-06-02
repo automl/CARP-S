@@ -69,6 +69,7 @@ def custom_latex_table(result, *, decimal_places=3, label=None):
     table_string = table_string.replace('G-A-M-M-A', r'$\gamma$')
     table_string = table_string.replace(r'p\_equal', r'$P(\textit{equal})$')
     table_string = table_string.replace(r'p\_smaller', r'$P(\textit{smaller})$')
+    table_string = table_string.replace("_", "\_")
     final_str = \
 """
 \\begin{{table}}[h]
@@ -78,6 +79,7 @@ def custom_latex_table(result, *, decimal_places=3, label=None):
     \label{{{label}}}
 \end{{table}}
 """.format(table_string=table_string, label=label)
+    
     
     return final_str
 
