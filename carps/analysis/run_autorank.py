@@ -109,8 +109,8 @@ def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget:
 
     return df_crit
 
-def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, figsize=(12,8)) -> RankResult:
-    df_crit = get_df_crit(df)
+def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, figsize=(12,8), perf_col: str = "trial_value__cost_inc_norm") -> RankResult:
+    df_crit = get_df_crit(df, perf_col=perf_col)
 
     # result = autorank(df_crit, alpha=0.05, verbose=True)
     # create_report(result)

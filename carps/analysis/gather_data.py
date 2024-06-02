@@ -17,6 +17,7 @@ from carps.utils.trials import TrialInfo
 from carps.utils.loggingutils import get_logger, setup_logging
 from dataclasses import asdict
 from carps.utils.task import Task
+from functools import partial
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
@@ -75,8 +76,8 @@ def join_df(df1: pd.DataFrame, df2: pd.DataFrame, on: str = "n_trials") -> pd.Da
     return df1.join(df2.set_index(on), on=on)
 
 
-def load_log(rundir: str | Path) -> pd.DataFrame:
-    df = read_trial_log(rundir)
+def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFrame:
+    df = read_trial_log(rundir, log_fn=log_fn)
     if df is None:
         raise NotImplementedError("No idea what should happen here!?")
 
@@ -126,9 +127,8 @@ def read_jsonl_content(filename: str | Path) -> pd.DataFrame:
         content = [json.loads(l) for l in file.readlines()]  # noqa: E741
     return pd.DataFrame(content)
 
-
-def read_trial_log(rundir: str | Path) -> pd.DataFrame | None:
-    path = Path(rundir) / "trial_logs.jsonl"
+def read_trial_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFrame | None:
+    path = Path(rundir) / log_fn
     if not path.exists():
         return None
 
@@ -311,11 +311,16 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Normalize n_trials...")
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
+    # Handle MO
+    ids_mo = logs[logs["scenario"]=="multi-objective"]
+    if len(ids_mo) > 0:
+        logs[ids_mo]["trial_value__cost"] = logs[ids_mo]["hypervolume"]
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
     logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
-    logger.info("Normalize time...")
-    logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
+    if "time" in logs:
+        logger.info("Normalize time...")
+        logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
     logs = convert_mixed_types_to_str(logs, logger)
     logger.info("Done.")
     return logs
@@ -332,7 +337,7 @@ def calc_time(D: pd.DataFrame) -> pd.Series:
 def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:
     return (S - S.min()) / (S.max() - S.min() + epsilon)
 
-def get_interpolated_performance_df(logs: pd.DataFrame, n_points: int = 20, x_column: str = "n_trials_norm") -> pd.DataFrame:
+def get_interpolated_performance_df(logs: pd.DataFrame, n_points: int = 20, x_column: str = "n_trials_norm", interpolation_columns: list[str] = ["trial_value__cost", "trial_value__cost_norm", "trial_value__cost_inc", "trial_value__cost_inc_norm"]) -> pd.DataFrame:
     """Get performance dataframe for plotting.
 
     Interpolated at regular intervals.
@@ -362,7 +367,6 @@ def get_interpolated_performance_df(logs: pd.DataFrame, n_points: int = 20, x_co
         msg = f"x_column `{x_column}` not in logs! Did you call `carps.analysis.process_data.process_logs` on the raw logs?"
         raise ValueError(msg)
 
-    interpolation_columns = ["trial_value__cost", "trial_value__cost_norm", "trial_value__cost_inc", "trial_value__cost_inc_norm"]
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
     group_keys = ["scenario", "set", "benchmark_id", "optimizer_id", "problem_id", "seed"]
@@ -399,11 +403,12 @@ def load_logs(rundir: str):
 
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
-def filelogs_to_df(rundir: str, n_processes: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+def filelogs_to_df(rundir: str, log_fn: str = "trial_logs.jsonl", n_processes: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     logger.info(f"Get rundirs from {rundir}...")
     rundirs = get_run_dirs(rundir)
     logger.info(f"Found {len(rundirs)} runs. Load data...")
-    results = map_multiprocessing(load_log, rundirs, n_processes=n_processes)
+    partial_load_log = partial(load_log, log_fn=log_fn)
+    results = map_multiprocessing(partial_load_log, rundirs, n_processes=n_processes)
     df = pd.concat(results).reset_index(drop=True)
     logger.info("Done. Do some preprocessing...")
     df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
