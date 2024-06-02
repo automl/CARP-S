@@ -165,3 +165,4 @@ runsold
 multirun
 runs_subset
 runs*
+*.parquet
