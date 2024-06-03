@@ -9,3 +9,7 @@ python -m carps.run +cluster=noctua $OPT '+problem/YAHPO/MO=glob(*)' 'seed=range
 
 # MFPBench. 4
 python -m carps.run +cluster=noctua $OPT '+problem/MFPBench/MO=glob(*)' 'seed=range(1,21)' baserundir=runs_MO -m
+
+# HPOBench. 88
+python -m carps.run +cluster=noctua $OPT '+problem/HPOBench/MO/tab=glob(*)' 'seed=range(1,11)' baserundir=runs_MO -m
+python -m carps.run +cluster=noctua $OPT '+problem/HPOBench/MO/tab=glob(*)' 'seed=range(11,21)' baserundir=runs_MO -m
