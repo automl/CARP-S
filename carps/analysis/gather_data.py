@@ -320,7 +320,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Normalize cost...")
     # Handle MO
     ids_mo = logs["scenario"]=="multi-objective"
-    if len(ids_mo) > 0:
+    if len(ids_mo) > 0 and "hypervolume" in logs:
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
