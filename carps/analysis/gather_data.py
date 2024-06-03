@@ -267,7 +267,7 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger=None) -> pd.DataFrame:
         if c == "cfg_str":
             continue
         logs[c] = logs[c].map(lambda x: str(x))
-        logs[c].astype("str")
+        logs[c] = logs[c].astype("str")
     return logs
 
 def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_trials"]) -> pd.DataFrame:
@@ -291,6 +291,13 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
         logs["task.is_multiobjective"] = logs["task.n_objectives"] > 1
     logger.debug("Infer scenario...")
     logs = add_scenario_type(logs)
+
+    # Check for scalarized MO, we want to keep the cost vector
+    if "trial_value__additional_info" in logs:
+        ids_mo = (logs["scenario"]=="multi-objective") & (logs["trial_value__additional_info"].apply(lambda x: "cost" in x))
+        if len(ids_mo) > 0:
+            logs[ids_mo]["trial_value__cost_raw"] = logs[ids_mo]["trial_value__additional_info"].apply(lambda x: x["cost"])
+
     logger.debug(f"Remove task info, only keep {keep_task_columns}...")
     logs = filter_task_info(logs, keep_task_columns)
 
@@ -312,15 +319,19 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
-    ids_mo = logs[logs["scenario"]=="multi-objective"]
+    ids_mo = logs["scenario"]=="multi-objective"
     if len(ids_mo) > 0:
-        logs[ids_mo]["trial_value__cost"] = logs[ids_mo]["hypervolume"]
+        hv = logs.loc[ids_mo, "hypervolume"]
+        logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
+        logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
+        logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
     logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
-    if "time" in logs:
-        logger.info("Normalize time...")
-        logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
+    if "time" not in logs:
+        logs["time"] = 0
+    logger.info("Normalize time...")
+    logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
     logs = convert_mixed_types_to_str(logs, logger)
     logger.info("Done.")
     return logs
