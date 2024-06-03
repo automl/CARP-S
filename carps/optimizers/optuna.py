@@ -8,6 +8,7 @@ from typing import Iterable
 
 import optuna
 import numpy as np
+import warnings
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
                                          Hyperparameter, OrdinalHyperparameter,
@@ -67,11 +68,12 @@ def hp_to_optuna_distribution(hp: Hyperparameter) -> BaseDistribution:
         return FloatDistribution(hp.lower, hp.upper, log=hp.log)
     elif isinstance(hp, CategoricalHyperparameter):
         if hp.weights is not None:
-            raise NotImplementedError("Weights are not supported in Optuna")
+            raise NotImplementedError(f"Weights are not supported in Optuna ({hp})")
 
         return CategoricalDistribution(hp.choices)
     elif isinstance(hp, OrdinalHyperparameter):
-        raise NotImplementedError("Ordinal hyperparameters are not supported in Optuna")
+        warnings.warn(f"Ordinal hyperparameters are not supported in Optuna, use Categorical instead for {hp}.")
+        return CategoricalDistribution(hp.sequence)
     elif isinstance(hp, Constant):
         return CategoricalDistribution([hp.value])
 
@@ -197,10 +199,12 @@ class OptunaOptimizer(Optimizer):
         """
         Return the pareto front for multi-objective optimization
         """
-        non_none_entries = [np.array([config, cost], dtype=object) for _, config, cost in self.history.values() if cost is not None]
+        non_none_entries = [[config, cost] for optuna_trial, config, cost in self.history.values() if cost is not None]
         costs = np.array([v[1] for v in non_none_entries])
-        front = np.array(non_none_entries)[pareto(costs)]
-        return front.tolist() 
+        ids_bool = pareto(costs)
+        ids = np.where(ids_bool)[0]
+        front = [non_none_entries[i] for i in ids]
+        return front
 
     def get_current_incumbent(self) \
             -> Incumbent:
