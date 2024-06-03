@@ -44,7 +44,7 @@ requirements for both of them.
 
 ```bash
 pip install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
-pip install -e container_recipes/benchmarks/BBOB/BBOB_requirements.txt
+pip install -r container_recipes/benchmarks/BBOB/BBOB_requirements.txt
 ```
 
 ### Minimal Example

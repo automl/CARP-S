@@ -39,5 +39,5 @@ the development of effective and reliable methods for hyperparameter optimizatio
 -   :octicons-package-dependents-16: __Minimal Dependencies__
 
     CARP-S is modular and allows you to only install what you need to run and
-    evaluate what you want. For details please have a look at the
+    evaluate what you want. For details, please have a look at the
     [installation instructions](installation.md).

@@ -11,7 +11,7 @@ you would like to run:
 carps --create_cluster_configs --optimizer DUMMY/config --problem DUMMY/config
 ```
 
-Then, then run them from the database with:
+Then, run them from the database with:
 ```bash
 python -m carps.run_from_db 
 ```
