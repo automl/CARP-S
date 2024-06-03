@@ -6,9 +6,10 @@ import numpy as np
 import fire
 from carps.analysis.gather_data import convert_mixed_types_to_str
 from pymoo.indicators.hv import HV
+from typing import Any
+import json
 
-
-run_id = ["scenario", "set", "benchmark_id", "problem_id", "optimizer_id", "seed"]
+run_id = ["scenario", "benchmark_id", "problem_id", "optimizer_id", "seed"]
 
 def gather_trajectory(x: pd.DataFrame) -> pd.DataFrame:
     metadata = dict(zip(run_id, x.name))
@@ -20,6 +21,7 @@ def gather_trajectory(x: pd.DataFrame) -> pd.DataFrame:
         D = {
             "n_trials": n_trials,
             "n_incumbents": len(gdf),
+            "trial_value__cost": cost_inc,
             "trial_value__cost_inc": cost_inc,
         }
         D.update(metadata)
@@ -40,6 +42,32 @@ def calc_hv(x: pd.DataFrame) -> pd.DataFrame:
     x["hypervolume"] = ind(F)
     return x
 
+def serialize_array(arr: np.ndarray):
+    return json.dumps(arr.tolist())
+
+def deserialize_array(serialized_arr):
+    deserialized = serialized_arr
+    try:
+        deserialized = np.array(json.loads(serialized_arr))
+        print(deserialized)
+    except Exception as e:
+        print(e)
+        print(serialized_arr)
+        pass
+    return deserialized 
+
+def maybe_serialize(x: Any) -> Any:
+    if isinstance(x, np.ndarray):
+        return serialize_array(x)
+    else:
+        return x
+    
+def maybe_deserialize(x: Any) -> Any:
+    if isinstance(x, str):
+        return deserialize_array(x)
+    else:
+        return x
+
 def calculate_hypervolume(rundir: str) -> None:
     fn = Path(rundir) / "logs.parquet"
     if not fn.is_file():
@@ -48,11 +76,19 @@ def calculate_hypervolume(rundir: str) -> None:
     if df["scenario"].nunique() > 2 or df["scenario"].unique()[0] != "multi-objective":
         raise ValueError(f"Oops, found some non multi-objective logs in {fn}. This might not work...")
     trajectory_df = df.groupby(by=run_id).apply(gather_trajectory).reset_index(drop=True)
-    trajectory_df = trajectory_df.groupby(by=["scenario", "set", "problem_id"]).apply(add_reference_point).reset_index(drop=True)
+    trajectory_df = trajectory_df.groupby(by=["scenario", "problem_id"]).apply(add_reference_point).reset_index(drop=True)
     trajectory_df = trajectory_df.groupby(by=run_id + ["n_trials"]).apply(calc_hv).reset_index(drop=True)
     trajectory_df.to_csv(Path(rundir) / "trajectory.csv")
     trajectory_df = convert_mixed_types_to_str(trajectory_df)
     trajectory_df.to_parquet(Path(rundir) / "trajectory.parquet")
+
+def load_trajectory(rundir: str) -> pd.DataFrame:
+    fn = Path(rundir) / "trajectory.parquet"
+    if not fn.is_file():
+        raise ValueError(f"Cannot find {fn}. Did you run `python -m carps.analysis.calc_hypervolume {rundir}`?")
+    df = pd.read_parquet(fn)
+    df = df.map(maybe_deserialize)
+    print(df["trial_value__cost"].iloc[0], type(df["trial_value__cost"].iloc[0]))
 
 if __name__ == "__main__":
     fire.Fire(calculate_hypervolume)
