@@ -6,11 +6,10 @@ Welcome to the CARP-S documentation.
     See the navigation links in the header or side-bars. Click the :octicons-three-bars-16: button (top left) on mobile.
 
 For information on how to install CARP-S, please refer to the [installation instructions](installation.md).
-To run a first optimizer on a benchmark, please see an example for this under [first steps](first_steps.md).
-For a more comprehensive overview of what CARP-S can offer, please refer to our [guides](guides.md).
+To see an example of how to run a first optimizer on a benchmark, as well as a more comprehensive overview of what CARP-S can offer, please refer to our [guides](guides/first-steps.md).
 If you are interested in the commands that CARP-S provides, please refer to the [commands](commands.md).
 To learn how to add your own optimizer or benchmark, or if you want to contribute to CARP-S in general, 
-check out our [contributing](contributing.md) section.
+check out our [contributing](contributing/index.md) section.
 
 # What is CARP-S?
 
