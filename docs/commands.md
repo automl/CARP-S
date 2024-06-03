@@ -8,7 +8,7 @@ python -m carps.run +problem=... +optimizer=... seed=... -m
 Another option is to fill the database with all possible combinations of problems and optimizers
 you would like to run:
 ```bash
-carps --create_cluster_configs --optimizer DUMMY/config --problem DUMMY/config
+python -m carps.container.create_cluster_configs +problem=... +optimizer=... -m
 ```
 
 Then, run them from the database with:
