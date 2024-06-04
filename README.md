@@ -96,5 +96,8 @@ python -m carps.utils.database.reset_experiments
 ```
 
 ## Adding a new Optimizer or Benchmark
-For instructions on how to add a new optimizer or benchmark, please refer to the 
-[contributing guidelines](https://AutoML.github.io/CARP-S/latest/contributing).
+For instructions on how to add a new optimizer or benchmark, please refer to the contributing 
+guidelines for 
+[benchmarks](https://automl.github.io/CARP-S/latest/contributing/contributing-a-benchmark/)
+and
+[optimizers](https://automl.github.io/CARP-S/latest/contributing/contributing-an-optimizer/).
