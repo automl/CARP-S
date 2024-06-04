@@ -12,6 +12,7 @@ Here's a step-by-step guide for how to add a new optimizer:
 Create a new Python file in the `carps/optimizers/` directory.
 For example, you might name it `my_optimizer.py`.
 
+
 2. **Define your optimizer class**:
 Define a new class that inherits from `Optimizer`. This class should implement the 
 `convert_configspace` method, that takes a ConfigSpace configuration space and converts it to 
@@ -21,10 +22,18 @@ setting up and returning the optimizer to be used, and a `get_current_incumbent`
 the incumbent config and cost. Finally, an `ask` method is required, that 
 queries a new trial to evaluate from the optimizer and returns it as a TrialInfo object, and a 
 `tell` method, that takes a TrialInfo and TrialValue and updates the optimizer with the results of 
-the trial.
+the trial. If your optimizer requires additional methods, you can implement them in your class. 
 
-4. **Implement additional methods**:
-If your optimizer requires additional methods, you can implement them in your class. 
+
+3. **Requirements file**: Create a requirements file under 
+   `container_recipes/optimizers/my_optimizer/my_optimizer_requirements.txt` and add the 
+   requirements for your optimizer. Please specify exact versions of all requirements! 
+   This is very important for reproducibility.
+
+
+4. **Config files**: Add config files for the different optimizers under 
+   `carps/configs/optimizer/my_optimizer/my_optimizer_config_{variant}.yaml`. 
+   You can use the existing config files as a template.
 
 Here's a basic example of what your `my_optimizer.py` file might look like:
 
