@@ -9,42 +9,50 @@ This is related to this issue: https://github.com/huawei-noah/HEBO/issues/61.
 
 For non-dummy problems HEBO works fine.
 """
+
 from __future__ import annotations
 
 from collections import OrderedDict, abc
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from ConfigSpace import Configuration, ConfigurationSpace
-from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
-                                         FloatHyperparameter, Hyperparameter,
-                                         IntegerHyperparameter,
-                                         OrdinalHyperparameter)
+from ConfigSpace.hyperparameters import (
+    CategoricalHyperparameter,
+    Constant,
+    FloatHyperparameter,
+    Hyperparameter,
+    IntegerHyperparameter,
+    OrdinalHyperparameter,
+)
 from hebo.design_space.design_space import DesignSpace
 from hebo.optimizers.hebo import HEBO
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent
+
+if TYPE_CHECKING:
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
+    from carps.utils.types import Incumbent
 
 
 def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
-    """Convert ConfigSpace hyperparameter to HEBO hyperparameter
+    """Convert ConfigSpace hyperparameter to HEBO hyperparameter.
 
     Parameters
     ----------
     hp : Hyperparameter
         ConfigSpace hyperparameter
 
-    Returns
+    Returns:
     -------
     dict
         HEBO hyperparameter
 
-    Raises
+    Raises:
     ------
     NotImplementedError
         If ConfigSpace hyperparameter is anything else than
@@ -76,23 +84,29 @@ def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
     else:
         raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
-def remove_value_for_inactive_hp(configuration: Configuration, configuration_space: ConfigurationSpace) -> Configuration:
+
+def remove_value_for_inactive_hp(
+    configuration: Configuration, configuration_space: ConfigurationSpace
+) -> Configuration:
     vector = configuration.get_array()
     active_hyperparameters = configuration_space.get_active_hyperparameters(configuration)
 
-    for hp_name, hyperparameter in configuration_space._hyperparameters.items():
+    for hp_name, _hyperparameter in configuration_space._hyperparameters.items():
         hp_value = vector[configuration_space._hyperparameter_idx[hp_name]]
         active = hp_name in active_hyperparameters
 
         if not active and not np.isnan(hp_value):
             vector[configuration_space._hyperparameter_idx[hp_name]] = np.nan
-    return Configuration(configuration_space=configuration_space, vector=vector)            
+    return Configuration(configuration_space=configuration_space, vector=vector)
+
 
 def HEBOcfg2ConfigSpacecfg(
-    hebo_suggestion: pd.DataFrame, design_space: DesignSpace, config_space: ConfigurationSpace,
-    allow_inactive_with_values: bool = True
+    hebo_suggestion: pd.DataFrame,
+    design_space: DesignSpace,
+    config_space: ConfigurationSpace,
+    allow_inactive_with_values: bool = True,
 ) -> Configuration:
-    """Convert HEBO config to ConfigSpace config
+    """Convert HEBO config to ConfigSpace config.
 
     Parameters
     ----------
@@ -103,12 +117,12 @@ def HEBOcfg2ConfigSpacecfg(
     config_space : ConfigurationSpace
         ConfigSpace configuration space
 
-    Returns
+    Returns:
     -------
     Configuration
         Config in ConfigSpace format
 
-    Raises
+    Raises:
     ------
     ValueError
         If HEBO config is more than 1
@@ -125,20 +139,21 @@ def HEBOcfg2ConfigSpacecfg(
             if isinstance(hp_k, OrdinalHyperparameter):
                 hyp[k] = hp_k.sequence[hyp[k]]
 
-    configuration = Configuration(configuration_space=config_space, values=hyp, allow_inactive_with_values=allow_inactive_with_values)
-    configuration = remove_value_for_inactive_hp(configuration, config_space)
-    return configuration
+    configuration = Configuration(
+        configuration_space=config_space, values=hyp, allow_inactive_with_values=allow_inactive_with_values
+    )
+    return remove_value_for_inactive_hp(configuration, config_space)
 
 
 def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
-    """Convert ConfigSpace config to HEBO suggestion
+    """Convert ConfigSpace config to HEBO suggestion.
 
     Parameters
     ----------
     config : Configuration
         Configuration
 
-    Returns
+    Returns:
     -------
     pd.DataFrame
         Configuration in HEBO format, e.g.
@@ -146,19 +161,12 @@ def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
         0  2.817594  0.336420
     """
     config_dict = dict(config)
-    rec = pd.DataFrame(config_dict, index=[0])
-    return rec
+    return pd.DataFrame(config_dict, index=[0])
 
 
 class HEBOOptimizer(Optimizer):
-    def __init__(
-        self,
-        problem: Problem,
-        task: Task,
-        loggers: list[AbstractLogger] | None = None
-    ) -> None:
-        """
-        Interface to HEBO (https://github.com/huawei-noah/HEBO) [1].
+    def __init__(self, problem: Problem, task: Task, loggers: list[AbstractLogger] | None = None) -> None:
+        """Interface to HEBO (https://github.com/huawei-noah/HEBO) [1].
 
         [1] Cowen-Rivers, Alexander I., et al. "An Empirical Study of Assumptions in Bayesian Optimisation." arXiv preprint arXiv:2012.03826 (2021).
 
@@ -172,7 +180,7 @@ class HEBOOptimizer(Optimizer):
         task : Task
             The task description.
 
-        Raises
+        Raises:
         ------
         ValueError
             If neither `num_trials` nor `max_wallclock_time` is specified.
@@ -236,7 +244,7 @@ class HEBOOptimizer(Optimizer):
 
             These are four points.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info, needed to interact with the Problem
@@ -246,23 +254,21 @@ class HEBOOptimizer(Optimizer):
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=rec, design_space=self.hebo_configspace, config_space=self.problem.configspace
         )
-        trial_info = TrialInfo(config=config, instance=None, budget=None, seed=None)
-        return trial_info
+        return TrialInfo(config=config, instance=None, budget=None, seed=None)
 
     def ask(self) -> TrialInfo:
-        """Ask the optimizer for a new trial to run
+        """Ask the optimizer for a new trial to run.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Configuration, instance, seed, budget
         """
         rec = self._solver.suggest(1)
-        trial_info = self.convert_to_trial(rec=rec)
-        return trial_info
+        return self.convert_to_trial(rec=rec)
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-        """Tell: Feed experiment results back to optimizer
+        """Tell: Feed experiment results back to optimizer.
 
         Parameters
         ----------
@@ -275,10 +281,7 @@ class HEBOOptimizer(Optimizer):
         suggestion = self.convert_from_trial(trial_info=trial_info)
 
         self.trial_counter += 1
-        if isinstance(cost, abc.Sequence):
-            cost = np.asarray([cost])
-        else:
-            cost = np.asarray(cost)
+        cost = np.asarray([cost]) if isinstance(cost, abc.Sequence) else np.asarray(cost)
 
         self._solver.observe(suggestion, np.asarray([cost]))
 
@@ -292,7 +295,7 @@ class HEBOOptimizer(Optimizer):
         trial_info : TrialInfo
             Which config to evaluate (and instance, seed, budget)
 
-        Returns
+        Returns:
         -------
         TrialValue
             Information about function evaluation
@@ -302,9 +305,9 @@ class HEBOOptimizer(Optimizer):
         return trial_value
 
     def _setup_optimizer(self) -> HEBO:
-        """Setup Optimizer
+        """Setup Optimizer.
 
-        Returns
+        Returns:
         -------
         HEBO
             Instance of a HEBO Optimizer
@@ -320,7 +323,7 @@ class HEBOOptimizer(Optimizer):
         sort_by: str
             Can be "trials" or "walltime".
 
-        Returns
+        Returns:
         -------
         tuple[list[float], list[float]]
 
@@ -351,14 +354,16 @@ class HEBOOptimizer(Optimizer):
                 Y.append(cost)
 
         return X, Y
-    
+
     def get_current_incumbent(self) -> Incumbent:
         best_x = self.solver.best_x
         best_y = self.solver.best_y
         print(best_x)
         config = HEBOcfg2ConfigSpacecfg(
-            hebo_suggestion=best_x, design_space=self.hebo_configspace, config_space=self.problem.configspace,
-            allow_inactive_with_values=False
+            hebo_suggestion=best_x,
+            design_space=self.hebo_configspace,
+            config_space=self.problem.configspace,
+            allow_inactive_with_values=False,
         )
         trial_info = TrialInfo(config=config)
         trial_value = TrialValue(cost=best_y)

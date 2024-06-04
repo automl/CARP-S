@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 import ConfigSpace.hyperparameters as CSH
 import nevergrad as ng
@@ -23,8 +23,10 @@ from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
-    from nevergrad.optimization.base import ConfiguredOptimizer as ConfNGOptimizer
-    from nevergrad.optimization.base import Optimizer as NGOptimizer
+    from nevergrad.optimization.base import (
+        ConfiguredOptimizer as ConfNGOptimizer,
+        Optimizer as NGOptimizer,
+    )
     from omegaconf import DictConfig
 
     from carps.benchmarks.problem import Problem
@@ -62,9 +64,7 @@ def CS_to_nevergrad_space(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:
     elif isinstance(hp, CSH.Constant):
         return ng.p.Choice([hp.value])
     else:
-        raise NotImplementedError(
-            f"Unknown hyperparameter type: {hp.__class__.__name__}"
-        )
+        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class NevergradOptimizer(Optimizer):
@@ -88,17 +88,12 @@ class NevergradOptimizer(Optimizer):
         self.optimizer_cfg = optimizer_cfg
         if self.optimizer_cfg is None:
             self.optimizer_cfg = {}
-        if (
-            self.nevergrad_cfg.optimizer_name not in opt_list
-            and self.nevergrad_cfg.optimizer_name not in ext_opts
-        ):
-            raise ValueError(
-                f"Optimizer {self.nevergrad_cfg.optimizer_name} not found in Nevergrad!"
-            )
+        if self.nevergrad_cfg.optimizer_name not in opt_list and self.nevergrad_cfg.optimizer_name not in ext_opts:
+            raise ValueError(f"Optimizer {self.nevergrad_cfg.optimizer_name} not found in Nevergrad!")
 
         self._solver: NGOptimizer | ConfNGOptimizer | None = None
         self.counter = 0
-        self.history: dict[str, Tuple[ng.p.Parameter, float | list[float]| None]] = {}
+        self.history: dict[str, tuple[ng.p.Parameter, float | list[float] | None]] = {}
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ng.p.Parameter:
         """Convert ConfigSpace configuration space to search space from optimizer.
@@ -108,7 +103,7 @@ class NevergradOptimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         SearchSpace
             Optimizer's search space.
@@ -123,9 +118,7 @@ class NevergradOptimizer(Optimizer):
             if self.nevergrad_cfg.optimizer_name == "Hyperopt":
                 ng_opt = ext_opts[self.nevergrad_cfg.optimizer_name]
             else:
-                ng_opt = ext_opts[self.nevergrad_cfg.optimizer_name](
-                    **self.optimizer_cfg
-                )
+                ng_opt = ext_opts[self.nevergrad_cfg.optimizer_name](**self.optimizer_cfg)
             ng_opt = ng_opt(
                 parametrization=self.ng_space,
                 budget=self.task.n_trials,
@@ -137,9 +130,7 @@ class NevergradOptimizer(Optimizer):
                 budget=self.task.n_trials,
                 num_workers=self.task.n_workers,
             )
-        ng_opt.parametrization.random_state = np.random.RandomState(
-            self.nevergrad_cfg.seed
-        )
+        ng_opt.parametrization.random_state = np.random.RandomState(self.nevergrad_cfg.seed)
         return ng_opt
 
     def convert_to_trial(  # type: ignore[override]
@@ -161,19 +152,18 @@ class NevergradOptimizer(Optimizer):
         seed : int, optional
             Seed of the trial, by default None
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        trial_info = TrialInfo(
+        return TrialInfo(
             config=config,
             name=name,
             seed=self.nevergrad_cfg.seed,
             budget=None,
             instance=None,
         )
-        return trial_info
 
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
@@ -182,7 +172,7 @@ class NevergradOptimizer(Optimizer):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
@@ -227,7 +217,7 @@ class NevergradOptimizer(Optimizer):
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
-        Returns
+        Returns:
         -------
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
@@ -238,24 +228,19 @@ class NevergradOptimizer(Optimizer):
         if self.task.n_objectives > 1:
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
-            trial_info = [self.convert_to_trial(
-                config = Configuration(
-                    self.configspace, 
-                    values=config.value
-                )
-            ) for config in configs]
+            trial_info = [
+                self.convert_to_trial(config=Configuration(self.configspace, values=config.value)) for config in configs
+            ]
             trial_value = [TrialValue(cost=cost) for cost in costs]
-            incumbent_tuple = list(zip(trial_info, trial_value))
-        else: 
+            incumbent_tuple = list(zip(trial_info, trial_value, strict=False))
+        else:
             for name, value in self.history.items():
                 if incumbent is None or value[1] < cost:
                     incumbent = value[0].value
                     cost = value[1]
                     unique_name = name
             if cost is None:
-                raise ValueError(
-                    f"Tried to get Incumbent without calling tell() for config {incumbent}!"
-                )
+                raise ValueError(f"Tried to get Incumbent without calling tell() for config {incumbent}!")
             trial_info = self.convert_to_trial(
                 config=Configuration(self.configspace, values=incumbent),
                 name=unique_name,

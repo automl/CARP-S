@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-import fire
+from pathlib import Path
 
+import fire
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import matplotlib.pyplot as plt
+
 from carps.analysis.process_data import load_logs
-from autorank import autorank, plot_stats, create_report
+from carps.analysis.utils import filter_only_final_performance
 from carps.utils.loggingutils import get_logger
-from carps.analysis.utils import savefig, filter_only_final_performance
 
 logger = get_logger(__file__)
 
+
 def custom_latex_table(result, *, decimal_places=3, label=None, only_tabular: bool = True) -> str:
-    """
-    Creates a latex table from the results dataframe of the statistical analysis.
+    """Creates a latex table from the results dataframe of the statistical analysis.
 
     # Parameters
 
@@ -29,87 +29,94 @@ def custom_latex_table(result, *, decimal_places=3, label=None, only_tabular: bo
         Label of the table. Defaults to 'tbl:stat_results' if None.
     """
     if label is None:
-        label = 'tbl:stat_results'
+        label = "tbl:stat_results"
 
     table_df = result.rankdf
     columns = table_df.columns.to_list()
-    if result.omnibus != 'bayes' and result.pvalue >= result.alpha or \
-       result.omnibus == 'bayes' and len({'smaller', 'larger'}.intersection(set(result.rankdf['decision']))) == 0:
-        columns.remove('effect_size')
-        columns.remove('magnitude')
-    if result.posthoc == 'tukeyhsd':
-        columns.remove('meanrank')
-    columns.insert(columns.index('ci_lower'), 'CI')
-    columns.remove('ci_lower')
-    columns.remove('ci_upper')
+    if (
+        result.omnibus != "bayes"
+        and result.pvalue >= result.alpha
+        or result.omnibus == "bayes"
+        and len({"smaller", "larger"}.intersection(set(result.rankdf["decision"]))) == 0
+    ):
+        columns.remove("effect_size")
+        columns.remove("magnitude")
+    if result.posthoc == "tukeyhsd":
+        columns.remove("meanrank")
+    columns.insert(columns.index("ci_lower"), "CI")
+    columns.remove("ci_lower")
+    columns.remove("ci_upper")
     rename_map = {}
-    if result.effect_size == 'cohen_d':
-        rename_map['effect_size'] = '$d$'
-    elif result.effect_size == 'cliff_delta':
-        rename_map['effect_size'] = r'D-E-L-T-A'
-    elif result.effect_size == 'akinshin_gamma':
-        rename_map['effect_size'] = r'G-A-M-M-A'
-    rename_map['magnitude'] = 'Magnitude'
-    rename_map['mad'] = 'MAD'
-    rename_map['median'] = 'MED'
-    rename_map['meanrank'] = 'MR'
-    rename_map['mean'] = 'M'
-    rename_map['std'] = 'SD'
-    rename_map['decision'] = 'Decision'
-    format_string = '[{0[ci_lower]:.' + str(decimal_places) + 'f}, {0[ci_upper]:.' + str(decimal_places) + 'f}]'
-    table_df['CI'] = table_df.agg(format_string.format, axis=1)
+    if result.effect_size == "cohen_d":
+        rename_map["effect_size"] = "$d$"
+    elif result.effect_size == "cliff_delta":
+        rename_map["effect_size"] = r"D-E-L-T-A"
+    elif result.effect_size == "akinshin_gamma":
+        rename_map["effect_size"] = r"G-A-M-M-A"
+    rename_map["magnitude"] = "Magnitude"
+    rename_map["mad"] = "MAD"
+    rename_map["median"] = "MED"
+    rename_map["meanrank"] = "MR"
+    rename_map["mean"] = "M"
+    rename_map["std"] = "SD"
+    rename_map["decision"] = "Decision"
+    format_string = "[{0[ci_lower]:." + str(decimal_places) + "f}, {0[ci_upper]:." + str(decimal_places) + "f}]"
+    table_df["CI"] = table_df.agg(format_string.format, axis=1)
     table_df = table_df[columns]
-    if result.omnibus == 'bayes':
-        table_df.at[table_df.index[0], 'decision'] = '-'
-    table_df = table_df.rename(rename_map, axis='columns')
+    if result.omnibus == "bayes":
+        table_df.at[table_df.index[0], "decision"] = "-"
+    table_df = table_df.rename(rename_map, axis="columns")
 
-    float_format = lambda x: ("{:0." + str(decimal_places) + "f}").format(x) if not np.isnan(x) else '-'
-    table_string = table_df.to_latex(float_format=float_format, na_rep='-').strip()
-    table_string = table_string.replace('D-E-L-T-A', r'$\delta$')
-    table_string = table_string.replace('G-A-M-M-A', r'$\gamma$')
-    table_string = table_string.replace(r'p\_equal', r'$P(\textit{equal})$')
-    table_string = table_string.replace(r'p\_smaller', r'$P(\textit{smaller})$')
-    table_string = table_string.replace("_", "\_")
-    final_str = \
-"""
+    float_format = lambda x: ("{:0." + str(decimal_places) + "f}").format(x) if not np.isnan(x) else "-"
+    table_string = table_df.to_latex(float_format=float_format, na_rep="-").strip()
+    table_string = table_string.replace("D-E-L-T-A", r"$\delta$")
+    table_string = table_string.replace("G-A-M-M-A", r"$\gamma$")
+    table_string = table_string.replace(r"p\_equal", r"$P(\textit{equal})$")
+    table_string = table_string.replace(r"p\_smaller", r"$P(\textit{smaller})$")
+    table_string = table_string.replace("_", r"\_")
+    final_str = rf"""
 \\begin{{table}}[h]
-    \caption{{Summary of populations}}
-    \label{{{label}}}
+    \\caption{{Summary of populations}}
+    \\label{{{label}}}
     \centering
-    {table_string}    
+    {table_string}
 \end{{table}}
-""".format(table_string=table_string, label=label)
-    
+"""
+
     if only_tabular:
         return table_string
     else:
         return final_str
 
 
-
-
-def get_df_crit(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1, soft: bool = True, perf_col: str = "trial_value__cost_inc", remove_nan: bool = True) -> pd.DataFrame:
+def get_df_crit(
+    df: pd.DataFrame,
+    budget_var: str = "n_trials_norm",
+    max_budget: float = 1,
+    soft: bool = True,
+    perf_col: str = "trial_value__cost_inc",
+    remove_nan: bool = True,
+) -> pd.DataFrame:
     df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)
-    
+
     # Work on mean of different seeds
     df_crit = df.groupby(["optimizer_id", "problem_id"])[perf_col].apply(np.nanmean).reset_index()
-       
-    df_crit = df_crit.pivot(
-        index="problem_id",
-        columns="optimizer_id",
-        values=perf_col
-    )
-    
+
+    df_crit = df_crit.pivot(index="problem_id", columns="optimizer_id", values=perf_col)
+
     if remove_nan:
-        lost = df_crit[np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])] 
+        lost = df_crit[np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]
 
         # Rows are problems, cols are optimizers
-        df_crit = df_crit[np.array([not np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]     
+        df_crit = df_crit[np.array([not np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]
         logger.info(f"Lost following experiments: {lost}")
 
     return df_crit
 
-def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, figsize=(12,8), perf_col: str = "trial_value__cost_inc_norm") -> RankResult:
+
+def calc_critical_difference(
+    df: pd.DataFrame, identifier: str | None = None, figsize=(12, 8), perf_col: str = "trial_value__cost_inc_norm"
+) -> RankResult:
     df_crit = get_df_crit(df, perf_col=perf_col)
 
     # result = autorank(df_crit, alpha=0.05, verbose=True)
@@ -121,27 +128,23 @@ def calc_critical_difference(df: pd.DataFrame, identifier: str | None = None, fi
     # if identifier is None:
     #     identifier = ""
     # else:
-    #     identifier = "_" + identifier        
+    #     identifier = "_" + identifier
     # fn = f"figures/critd/criticaldifference{identifier}"
     # savefig(fig=fig, filename=fn + ".png")
     # savefig(fig=fig, filename=fn + ".pdf")
 
-
-    result = cd_evaluation(
-        df_crit, 
-        maximize_metric=False, 
-        ignore_non_significance=False, 
+    return cd_evaluation(
+        df_crit,
+        maximize_metric=False,
+        ignore_non_significance=False,
         output_path=f"figures/critd/cd{identifier}",
-        figsize=figsize
+        figsize=figsize,
     )
-
-    return result
 
 
 def calc(rundir: str, scenario: str = "blackbox") -> None:
     df, df_cfg = load_logs(rundir=rundir)
-    calc_critical_difference(df=df[df["scenario"]==scenario], identifier=scenario)
-
+    calc_critical_difference(df=df[df["scenario"] == scenario], identifier=scenario)
 
 
 """Code for CD Plots
@@ -157,9 +160,7 @@ from autorank._util import RankResult, get_sorted_rank_groups, rank_multiple_non
 
 
 def _custom_cd_diagram(result, reverse, ax, width):
-    """
-    !TAKEN FROM AUTORANK WITH MODIFICATIONS!
-    """
+    """!TAKEN FROM AUTORANK WITH MODIFICATIONS!"""
 
     def plot_line(line, color="k", **kwargs):
         ax.plot([pos[0] / width for pos in line], [pos[1] / height for pos in line], color=color, **kwargs)
@@ -177,10 +178,7 @@ def _custom_cd_diagram(result, reverse, ax, width):
     scalewidth = width - 2 * textspace
 
     def rankpos(rank):
-        if not reverse:
-            relative_rank = rank - lowv
-        else:
-            relative_rank = highv - rank
+        relative_rank = rank - lowv if not reverse else highv - rank
         return textspace + scalewidth / (highv - lowv) * relative_rank
 
     linesblank = 0.2 + 0.2 + (len(groups) - 1) * 0.1
@@ -210,7 +208,7 @@ def _custom_cd_diagram(result, reverse, ax, width):
     smalltick = 0.05
 
     tick = None
-    for a in list(np.arange(lowv, highv, 0.5)) + [highv]:
+    for a in [*list(np.arange(lowv, highv, 0.5)), highv]:
         tick = smalltick
         if a == int(a):
             tick = bigtick
@@ -221,12 +219,18 @@ def _custom_cd_diagram(result, reverse, ax, width):
 
     for i in range(math.ceil(len(sorted_ranks) / 2)):
         chei = cline + minnotsignificant + i * 0.2
-        plot_line([(rankpos(sorted_ranks[i]), cline), (rankpos(sorted_ranks[i]), chei), (textspace - 0.1, chei)], linewidth=0.7)
+        plot_line(
+            [(rankpos(sorted_ranks[i]), cline), (rankpos(sorted_ranks[i]), chei), (textspace - 0.1, chei)],
+            linewidth=0.7,
+        )
         plot_text(textspace - 0.2, chei, names[i], ha="right", va="center")
 
     for i in range(math.ceil(len(sorted_ranks) / 2), len(sorted_ranks)):
         chei = cline + minnotsignificant + (len(sorted_ranks) - i - 1) * 0.2
-        plot_line([(rankpos(sorted_ranks[i]), cline), (rankpos(sorted_ranks[i]), chei), (textspace + scalewidth + 0.1, chei)], linewidth=0.7)
+        plot_line(
+            [(rankpos(sorted_ranks[i]), cline), (rankpos(sorted_ranks[i]), chei), (textspace + scalewidth + 0.1, chei)],
+            linewidth=0.7,
+        )
         plot_text(textspace + scalewidth + 0.2, chei, names[i], ha="left", va="center")
 
     # upper scale
@@ -252,17 +256,20 @@ def _custom_cd_diagram(result, reverse, ax, width):
     return ax
 
 
-def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ignore_non_significance=False, plt_title=None, figsize=(12, 8)) -> RankResult:
+def cd_evaluation(
+    performance_per_dataset,
+    maximize_metric,
+    output_path=None,
+    ignore_non_significance=False,
+    plt_title=None,
+    figsize=(12, 8),
+) -> RankResult:
     """Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
     configurations / models / algorithms per dataset. In  detail, the columns are individual configurations.
     rows are datasets and a cell is the performance of the configuration for  dataset.
     """
-
     # -- Preprocess data for autorank
-    if maximize_metric:
-        rank_data = performance_per_dataset.copy() * -1
-    else:
-        rank_data = performance_per_dataset.copy()
+    rank_data = performance_per_dataset.copy() * -1 if maximize_metric else performance_per_dataset.copy()
     rank_data = rank_data.reset_index(drop=True)
     rank_data = pd.DataFrame(rank_data.values, columns=list(rank_data))
 
@@ -303,13 +310,15 @@ def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ig
         if ignore_non_significance:
             warnings.warn("Result is not significant and results of the plot may be misleading!")
         else:
-            raise ValueError("Result is not significant and results of the plot may be misleading. If you still want to see the CD plot, set" +
-                             " ignore_non_significance to True.")
+            raise ValueError(
+                "Result is not significant and results of the plot may be misleading. If you still want to see the CD plot, set"
+                + " ignore_non_significance to True."
+            )
 
     # -- Plot
     fig, ax = plt.subplots(figsize=figsize)
     plt.rcParams.update({"font.size": 16})
-    _custom_cd_diagram(result, False, ax, figsize[0]) #order == "descending", ax, 8)
+    _custom_cd_diagram(result, False, ax, figsize[0])  # order == "descending", ax, 8)
     if plt_title:
         plt.title(plt_title)
     plt.tight_layout()
@@ -317,7 +326,7 @@ def cd_evaluation(performance_per_dataset, maximize_metric, output_path=None, ig
         Path(output_path).parent.mkdir(exist_ok=True, parents=True)
         plt.savefig(output_path + ".png", transparent=True, bbox_inches="tight")
         plt.savefig(output_path + ".pdf", transparent=True, bbox_inches="tight")
-        
+
     plt.show()
     plt.close()
 

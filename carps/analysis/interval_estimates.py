@@ -8,9 +8,13 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
 # Rliable
-from rliable import library as rly
-from rliable import metrics, plot_utils
+from rliable import (
+    library as rly,
+    metrics,
+    plot_utils,
+)
 
 from carps.analysis.utils import savefig
 from carps.utils.loggingutils import get_logger, setup_logging
@@ -21,9 +25,13 @@ logger = get_logger(__file__)
 
 
 def get_final_performance_dict(
-    performance_data: pd.DataFrame, key_method: str, key_performance: str, key_instance: str, 
-    budget_var: str = "n_trials_norm", max_budget: float = 1
-    ) -> dict[str, Any]:
+    performance_data: pd.DataFrame,
+    key_method: str,
+    key_performance: str,
+    key_instance: str,
+    budget_var: str = "n_trials_norm",
+    max_budget: float = 1,
+) -> dict[str, Any]:
     """Generate performance dict for rliable.
 
     Parameters
@@ -60,15 +68,17 @@ def get_final_performance_dict(
         P = gdf[key_performance].to_numpy()
 
         _combos = gdf.loc[:, ["problem_id", "seed"]].to_numpy()
-        _combos = set(list(map(tuple, _combos)))
+        _combos = set(map(tuple, _combos))
 
         missing = list(combos.difference(_combos))
 
         if len(missing) > 0:
-            dropped.append({
-                "method": gid,
-                "missing": missing,
-            })
+            dropped.append(
+                {
+                    "method": gid,
+                    "missing": missing,
+                }
+            )
             optimizer_override = find_override(optimizer_id=gid) or f"+optimizer={gid}"
 
             for _missing in missing:
@@ -83,7 +93,7 @@ def get_final_performance_dict(
     if len(dropped) > 0:
         logger.info("Dropped following incomplete methods:")
         logger.info(dropped)
-        
+
         base_command = "python -m carps.run {override}\n"
         fn = Path(__file__).parent.parent.parent / "scripts/missing/run_missing.sh"
         fn.parent.mkdir(exist_ok=True, parents=True)
@@ -95,19 +105,23 @@ def get_final_performance_dict(
     return perf_dict
 
 
-def calculate_interval_estimates(final_performance_dict: pd.DataFrame, metrics: dict[str, callable], repetitions: int = 5000):    
+def calculate_interval_estimates(
+    final_performance_dict: pd.DataFrame, metrics: dict[str, callable], repetitions: int = 5000
+):
     # Load ALE scores as a dictionary mapping algorithms to their human normalized
     # score matrices, each of which is of size `(num_runs x num_games)`.
     def aggregate_func(x):
         return np.array([agg_fun(x) for agg_fun in metrics.values()])
+
     aggregate_scores, aggregate_score_cis = rly.get_interval_estimates(
-        final_performance_dict, aggregate_func, reps=repetitions)
-    
-    with open('final_performance_dict.pickle', 'wb') as handle:
+        final_performance_dict, aggregate_func, reps=repetitions
+    )
+
+    with open("final_performance_dict.pickle", "wb") as handle:
         pickle.dump(final_performance_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open('aggregate_scores.pickle', 'wb') as handle:
+    with open("aggregate_scores.pickle", "wb") as handle:
         pickle.dump(aggregate_scores, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open('aggregate_score_cis.pickle', 'wb') as handle:
+    with open("aggregate_score_cis.pickle", "wb") as handle:
         pickle.dump(aggregate_score_cis, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     print(final_performance_dict)
@@ -116,7 +130,11 @@ def calculate_interval_estimates(final_performance_dict: pd.DataFrame, metrics: 
     return aggregate_scores, aggregate_score_cis
 
 
-def plot_interval_estimates(performance_data: pd.DataFrame, load_from_pickle: bool = False, figure_filename: str = "figures/plot_interval_estimates.pdf"):
+def plot_interval_estimates(
+    performance_data: pd.DataFrame,
+    load_from_pickle: bool = False,
+    figure_filename: str = "figures/plot_interval_estimates.pdf",
+):
     _metrics = {
         "IQM": metrics.aggregate_iqm,
         "mean": metrics.aggregate_mean,
@@ -125,26 +143,31 @@ def plot_interval_estimates(performance_data: pd.DataFrame, load_from_pickle: bo
     metric_names = list(_metrics.keys())
 
     if not load_from_pickle:
-        final_performance_dict = get_final_performance_dict(performance_data=performance_data, key_method="optimizer_id", key_performance="trial_value__cost", key_instance="problem_id")
+        final_performance_dict = get_final_performance_dict(
+            performance_data=performance_data,
+            key_method="optimizer_id",
+            key_performance="trial_value__cost",
+            key_instance="problem_id",
+        )
         aggregate_scores, aggregate_score_cis = calculate_interval_estimates(
-            final_performance_dict=final_performance_dict,
-            metrics=_metrics,
-            repetitions=5000
+            final_performance_dict=final_performance_dict, metrics=_metrics, repetitions=5000
         )
     else:
-        final_performance_dict = pickle.load('final_performance_dict.pickle')
-        aggregate_scores = pickle.load('aggregate_scores.pickle')
-        aggregate_score_cis = pickle.load('aggregate_score_cis.pickle')
+        final_performance_dict = pickle.load("final_performance_dict.pickle")
+        aggregate_scores = pickle.load("aggregate_scores.pickle")
+        aggregate_score_cis = pickle.load("aggregate_score_cis.pickle")
 
     algorithms = list(final_performance_dict.keys())
 
     sns.set_style("white")
 
     fig, axes = plot_utils.plot_interval_estimates(
-        aggregate_scores, aggregate_score_cis,
+        aggregate_scores,
+        aggregate_score_cis,
         metric_names=metric_names,
-        algorithms=algorithms, xlabel="Cost",
-        xlabel_y_coordinate=-0.6
+        algorithms=algorithms,
+        xlabel="Cost",
+        xlabel_y_coordinate=-0.6,
     )
     savefig(fig, figure_filename)
 
@@ -157,6 +180,7 @@ def plot_interval_estimates(performance_data: pd.DataFrame, load_from_pickle: bo
     #     xlabel_y_coordinate=0.025
     # )
     # fig.savefig("plot_rliable_all.pdf", dpi=300, bbox_inches="tight")
+
 
 if __name__ == "__main__":
     perf = pd.read_csv("/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/analysis/perf.csv")

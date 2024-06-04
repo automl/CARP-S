@@ -35,7 +35,7 @@ scale_factors = [
 class ManyAffine:
     def __init__(self, weights, instances, opt_loc=1, dim=5, sf_type="min_max"):
         self.weights = weights / np.sum(weights)
-        self.fcts = [ioh.get_problem(fid, int(iid), dim) for fid, iid in zip(range(1, 25), instances)]
+        self.fcts = [ioh.get_problem(fid, int(iid), dim) for fid, iid in zip(range(1, 25), instances, strict=False)]
         self.opts = [f.optimum.y for f in self.fcts]
         self.scale_factors = scale_factors
         if type(opt_loc) == int:
@@ -45,7 +45,10 @@ class ManyAffine:
 
     def __call__(self, x):
         raw_vals = np.array(
-            [np.clip(f(x + f.optimum.x - self.opt_x) - o, 1e-12, 1e20) for f, o in zip(self.fcts, self.opts)]
+            [
+                np.clip(f(x + f.optimum.x - self.opt_x) - o, 1e-12, 1e20)
+                for f, o in zip(self.fcts, self.opts, strict=False)
+            ]
         )
         weighted = (np.log10(raw_vals) + 8) / self.scale_factors * self.weights
         return 10 ** (10 * np.sum(weighted) - 8)

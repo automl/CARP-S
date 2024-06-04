@@ -2,22 +2,22 @@ from __future__ import annotations
 
 import json
 import multiprocessing
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
+from dataclasses import asdict
+from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, TypeVar, Iterable, Any
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import fire
-import pyarrow
 import numpy as np
 import pandas as pd
 from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
-from carps.utils.trials import TrialInfo
+
 from carps.utils.loggingutils import get_logger, setup_logging
-from dataclasses import asdict
 from carps.utils.task import Task
-from functools import partial
+from carps.utils.trials import TrialInfo
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
@@ -32,11 +32,12 @@ setup_globals()
 def glob_trial_logs(p: str) -> list[str]:
     return list(Path(p).glob("**/trial_logs.jsonl"))
 
+
 def get_run_dirs(outdir: str):
     opt_paths = list(Path(outdir).glob("*/*"))
     with multiprocessing.Pool() as pool:
         triallog_files = pool.map(glob_trial_logs, opt_paths)
-    triallog_files = np.concatenate(triallog_files)    
+    triallog_files = np.concatenate(triallog_files)
     return [f.parent for f in triallog_files]
 
 
@@ -52,7 +53,7 @@ def annotate_with_cfg(
     flat_cfg = pd.json_normalize(cfg_resolved, sep=".").iloc[0].to_dict()  # type: ignore
     for k, v in flat_cfg.items():
         if np.any([k.startswith(c) for c in config_keys]) and not np.any([c in k for c in config_keys_forbidden]):
-            if isinstance(v, (list, ListConfig)):
+            if isinstance(v, list | ListConfig):
                 v = [v] * len(df)
             df[k] = v
     return df
@@ -104,9 +105,7 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
     if "problem.function.dim" in df:
         df = df.rename(columns={"problem.function.dim": "dim"})
 
-    df = process_logs(df)
-
-    return df
+    return process_logs(df)
 
 
 T = TypeVar("T")
@@ -127,6 +126,7 @@ def read_jsonl_content(filename: str | Path) -> pd.DataFrame:
         content = [json.loads(l) for l in file.readlines()]  # noqa: E741
     return pd.DataFrame(content)
 
+
 def read_trial_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFrame | None:
     path = Path(rundir) / log_fn
     if not path.exists():
@@ -134,9 +134,8 @@ def read_trial_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.D
 
     df = read_jsonl_content(path)
     df = normalize_drop(df, "trial_info", rename_columns=True, sep="__")
-    df = normalize_drop(df, "trial_value", rename_columns=True, sep="__")
+    return normalize_drop(df, "trial_value", rename_columns=True, sep="__")
     # df = df.drop(columns=["trial_info__instance", "trial_info__budget", "trial_value__time", "trial_value__status", "trial_value__starttime", "trial_value__endtime"])
-    return df
 
 
 def load_cfg(rundir: str | Path) -> DictConfig | None:
@@ -193,11 +192,19 @@ def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.Data
         elif np.isnan(x[task_prefix + "is_multifidelity"]) or np.isnan(x[task_prefix + "is_multiobjective"]):
             scenario = "blackbox"
         else:
-            print(x["problem_id"], x["optimizer_id"], x["seed"], x[task_prefix + "is_multifidelity"], type(x[task_prefix + "is_multifidelity"]))
+            print(
+                x["problem_id"],
+                x["optimizer_id"],
+                x["seed"],
+                x[task_prefix + "is_multifidelity"],
+                type(x[task_prefix + "is_multifidelity"]),
+            )
             raise ValueError("Unknown scenario")
         return scenario
+
     logs["scenario"] = logs.apply(determine_scenario_type, axis=1)
     return logs
+
 
 def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFrame:
     index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
@@ -206,23 +213,26 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     problem_index = pd.read_csv(index_fn)
 
     def load_task_cfg(problem_id: str) -> DictConfig:
-        subset = problem_index["config_fn"][problem_index["problem_id"]==problem_id]
+        subset = problem_index["config_fn"][problem_index["problem_id"] == problem_id]
         if len(subset) == 0:
-             raise ValueError(f"Can't find config_fn for {problem_id}. Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh.")
+            raise ValueError(
+                f"Can't find config_fn for {problem_id}. Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh."
+            )
         config_fn = subset.iloc[0]
         if not Path(config_fn).is_file():
-            raise ValueError(f"Can't find config_fn for {problem_id}. Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh.")
+            raise ValueError(
+                f"Can't find config_fn for {problem_id}. Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh."
+            )
         cfg = OmegaConf.load(config_fn)
-        task_cfg = cfg.task
-        return task_cfg
-    
-    new_logs = []    
+        return cfg.task
+
+    new_logs = []
     for gid, gdf in logs.groupby(by="problem_id"):
         task_cfg = load_task_cfg(problem_id=gid)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         if overwrite:
             task_dict = asdict(Task(**task_cfg))
-            task_columns = ["task." + k for k in task_dict.keys()]
+            task_columns = ["task." + k for k in task_dict]
 
         for c in task_columns:
             key = c.split(".")[1]
@@ -230,37 +240,42 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
             # print(gdf[c].explode().unique())
             if overwrite or np.nan in gdf[c].explode().unique():
                 v = task_cfg.get(key)
-                if isinstance(v, (list, ListConfig)):
+                if isinstance(v, list | ListConfig):
                     v = [v] * len(gdf)
                 gdf[c] = v
-        new_logs.append(gdf)    
-    logs = pd.concat(new_logs)
-    return logs
+        new_logs.append(gdf)
+    return pd.concat(new_logs)
 
-def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] = ["n_trials"]) -> pd.DataFrame:
+
+def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] | None = None) -> pd.DataFrame:
+    if keep_task_columns is None:
+        keep_task_columns = ["n_trials"]
     keep_task_columns = [f"task.{c}" for c in keep_task_columns]
     task_cols_to_remove = [c for c in logs.columns if c.startswith("task") and c not in keep_task_columns]
     return logs.drop(columns=task_cols_to_remove)
 
+
 def maybe_convert_cost_dtype(x: Any) -> tuple[float, list[float]]:
-    if isinstance(x, (int,float)):
+    if isinstance(x, int | float):
         return float(x)
     elif isinstance(x, str):
         return eval(x)
     else:
         assert isinstance(x, list)
         return x
-    
+
+
 def maybe_convert_cost_to_so(x: Any) -> float:
     if isinstance(x, list):
         return np.sum(x)  # TODO replace by hypervolume or similar
     else:
         return x
-    
+
+
 def convert_mixed_types_to_str(logs: pd.DataFrame, logger=None) -> pd.DataFrame:
-    mixed_type_columns = logs.select_dtypes(include=['O']).columns
+    mixed_type_columns = logs.select_dtypes(include=["O"]).columns
     if logger:
-        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")    
+        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")
     for c in mixed_type_columns:
         # D = logs[c]
         # logs.drop(columns=c)
@@ -270,7 +285,10 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger=None) -> pd.DataFrame:
         logs[c] = logs[c].astype("str")
     return logs
 
-def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_trials"]) -> pd.DataFrame:
+
+def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None) -> pd.DataFrame:
+    if keep_task_columns is None:
+        keep_task_columns = ["task.n_trials"]
     logger.debug("Processing raw logs. Normalize n_trials and costs. Calculate trajectory (incumbent cost).")
     # logs= logs.drop(columns=["config"])
     # Filter MO costs
@@ -283,7 +301,9 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
     logs["trial_value__cost"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
     logger.debug("Determine incumbent cost...")
-    logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost"].transform("cummin")
+    logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+        "trial_value__cost"
+    ].transform("cummin")
 
     logger.debug("Maybe add task info...")
     logs = maybe_postadd_task(logs)
@@ -294,9 +314,13 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
 
     # Check for scalarized MO, we want to keep the cost vector
     if "trial_value__additional_info" in logs:
-        ids_mo = (logs["scenario"]=="multi-objective") & (logs["trial_value__additional_info"].apply(lambda x: "cost" in x))
+        ids_mo = (logs["scenario"] == "multi-objective") & (
+            logs["trial_value__additional_info"].apply(lambda x: "cost" in x)
+        )
         if len(ids_mo) > 0:
-            logs[ids_mo]["trial_value__cost_raw"] = logs[ids_mo]["trial_value__additional_info"].apply(lambda x: x["cost"])
+            logs[ids_mo]["trial_value__cost_raw"] = logs[ids_mo]["trial_value__additional_info"].apply(
+                lambda x: x["cost"]
+            )
 
     logger.debug(f"Remove task info, only keep {keep_task_columns}...")
     logs = filter_task_info(logs, keep_task_columns)
@@ -313,13 +337,14 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] = ["task.n_tri
     logger.debug("Done 😪🙂")
     return logs
 
+
 def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Start normalization...")
     logger.info("Normalize n_trials...")
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
-    ids_mo = logs["scenario"]=="multi-objective"
+    ids_mo = logs["scenario"] == "multi-objective"
     if len(ids_mo) > 0 and "hypervolume" in logs:
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
@@ -327,7 +352,9 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
         logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
-    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])["trial_value__cost_norm"].transform("cummin")
+    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+        "trial_value__cost_norm"
+    ].transform("cummin")
     if "time" not in logs:
         logs["time"] = 0
     logger.info("Normalize time...")
@@ -335,6 +362,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logs = convert_mixed_types_to_str(logs, logger)
     logger.info("Done.")
     return logs
+
 
 def calc_time(D: pd.DataFrame) -> pd.Series:
     trialtime = D["trial_value__virtual_time"]
@@ -345,10 +373,17 @@ def calc_time(D: pd.DataFrame) -> pd.Series:
     D["time"] = elapsed
     return D
 
+
 def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:
     return (S - S.min()) / (S.max() - S.min() + epsilon)
 
-def get_interpolated_performance_df(logs: pd.DataFrame, n_points: int = 20, x_column: str = "n_trials_norm", interpolation_columns: list[str] = ["trial_value__cost", "trial_value__cost_norm", "trial_value__cost_inc", "trial_value__cost_inc_norm"]) -> pd.DataFrame:
+
+def get_interpolated_performance_df(
+    logs: pd.DataFrame,
+    n_points: int = 20,
+    x_column: str = "n_trials_norm",
+    interpolation_columns: list[str] | None = None,
+) -> pd.DataFrame:
     """Get performance dataframe for plotting.
 
     Interpolated at regular intervals.
@@ -362,18 +397,25 @@ def get_interpolated_performance_df(logs: pd.DataFrame, n_points: int = 20, x_co
     x_column : str, optional
         The x-axis column to interpolate by, by default 'n_trials_norm'
 
-    Raises
+    Raises:
     ------
     ValueError
         When x_column missing in dataframe.
 
-    Returns
+    Returns:
     -------
     pd.DataFrame
         Performance data frame for plotting
     """
+    if interpolation_columns is None:
+        interpolation_columns = [
+            "trial_value__cost",
+            "trial_value__cost_norm",
+            "trial_value__cost_inc",
+            "trial_value__cost_inc_norm",
+        ]
     logger.info("Create dataframe for neat plotting by aligning x-axis / interpolating budget.")
-    
+
     if x_column not in logs:
         msg = f"x_column `{x_column}` not in logs! Did you call `carps.analysis.process_data.process_logs` on the raw logs?"
         raise ValueError(msg)
@@ -397,6 +439,7 @@ def get_interpolated_performance_df(logs: pd.DataFrame, n_points: int = 20, x_co
         D.append(pd.DataFrame(performance_data))
     return pd.concat(D).reset_index(drop=True)
 
+
 def load_logs(rundir: str):
     logs_fn = Path(rundir) / "logs.csv"
     logs_cfg_fn = logs_fn.parent / "logs_cfg.csv"
@@ -414,7 +457,9 @@ def load_logs(rundir: str):
 
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
-def filelogs_to_df(rundir: str, log_fn: str = "trial_logs.jsonl", n_processes: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+def filelogs_to_df(
+    rundir: str, log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     logger.info(f"Get rundirs from {rundir}...")
     rundirs = get_run_dirs(rundir)
     logger.info(f"Found {len(rundirs)} runs. Load data...")
@@ -431,11 +476,11 @@ def filelogs_to_df(rundir: str, log_fn: str = "trial_logs.jsonl", n_processes: i
     logger.info("Done. Saving to file...")
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
     df.to_csv(Path(rundir) / "logs.csv", index=False)
-    df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False) 
+    df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
     df = convert_mixed_types_to_str(df)
     df_cfg = convert_mixed_types_to_str(df_cfg)
     df.to_parquet(Path(rundir) / "logs.parquet", index=False)
-    df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False) 
+    df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False)
     logger.info("Done. 😊")
     return df, df_cfg
 

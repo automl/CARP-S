@@ -3,11 +3,11 @@ from __future__ import annotations
 import copy
 import datetime
 from collections import OrderedDict
-from typing import Any, Callable
-import numpy as np
-import omegaconf
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import omegaconf
 from ConfigSpace import Configuration, ConfigurationSpace
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
@@ -17,9 +17,11 @@ from ConfigSpace.hyperparameters import (
     IntegerHyperparameter,
     OrdinalHyperparameter,
 )
-from syne_tune.backend.trial_status import Status
-from syne_tune.backend.trial_status import Trial as SyneTrial
-from syne_tune.backend.trial_status import TrialResult
+from syne_tune.backend.trial_status import (
+    Status,
+    Trial as SyneTrial,
+    TrialResult,
+)
 from syne_tune.config_space import (
     choice,
     lograndint,
@@ -41,15 +43,18 @@ from syne_tune.optimizer.baselines import (
     MOLinearScalarizationBayesOpt,
     MORandomScalarizationBayesOpt,
 )
-from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.task import Task
-from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent
 from carps.utils.pareto_front import pareto
+from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
+
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
+    from carps.utils.types import Incumbent
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -90,16 +95,14 @@ def configspaceHP2syneTuneHP(hp: Hyperparameter) -> Callable:
     elif isinstance(hp, Constant):
         return choice([hp.value])
     else:
-        raise NotImplementedError(
-            f"Unknown hyperparameter type: {hp.__class__.__name__}"
-        )
+        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class SynetuneOptimizer(Optimizer):
     def __init__(
         self,
         problem: Problem,
-        optimizer_name: "str",
+        optimizer_name: str,
         task: Task,
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
@@ -112,13 +115,9 @@ class SynetuneOptimizer(Optimizer):
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
             self.fidelity_enabled = True
             if self.task.fidelity_type is None:
-                raise ValueError(
-                    "To run multi-fidelity optimizer, the problem must define a fidelity type!"
-                )
+                raise ValueError("To run multi-fidelity optimizer, the problem must define a fidelity type!")
             if self.max_budget is None:
-                raise ValueError(
-                    "To run multi-fidelity optimizer, we must specify max_budget!"
-                )
+                raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
         self.fidelity_type: str = self.task.fidelity_type
         self.configspace = self.problem.configspace
@@ -129,12 +128,11 @@ class SynetuneOptimizer(Optimizer):
         self.optimizer_name = optimizer_name
         self._solver: SyneTrialScheduler | None = None
 
-        self.optimizer_kwargs = omegaconf.OmegaConf.to_object(
-            optimizer_kwargs) if optimizer_kwargs is not None else None
+        self.optimizer_kwargs = (
+            omegaconf.OmegaConf.to_object(optimizer_kwargs) if optimizer_kwargs is not None else None
+        )
 
-        self.completed_experiments: OrderedDict[
-            int, TrialResult
-        ] = OrderedDict()
+        self.completed_experiments: OrderedDict[int, TrialResult] = OrderedDict()
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> dict[str, Any]:
         """Convert configuration space from Problem to Optimizer.
@@ -173,23 +171,15 @@ class SynetuneOptimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
         configs = copy.deepcopy(trial.config)
-        if self.fidelity_type is not None:
-            budget = configs.pop(self.fidelity_type)
-        else:
-            budget = None
-        configuration = Configuration(
-            configuration_space=self.configspace, values=configs
-        )
-        trial_info = TrialInfo(
-            config=configuration, seed=None, budget=budget, instance=None
-        )
-        return trial_info
+        budget = configs.pop(self.fidelity_type) if self.fidelity_type is not None else None
+        configuration = Configuration(configuration_space=self.configspace, values=configs)
+        return TrialInfo(config=configuration, seed=None, budget=budget, instance=None)
 
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
@@ -198,7 +188,7 @@ class SynetuneOptimizer(Optimizer):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
@@ -209,8 +199,7 @@ class SynetuneOptimizer(Optimizer):
             config=trial_suggestion.config,
             creation_time=datetime.datetime.now(),
         )
-        trial_info = self.convert_to_trial(trial=trial)
-        return trial_info
+        return self.convert_to_trial(trial=trial)
 
     def convert_to_synetrial(self, trial_info: TrialInfo) -> SyneTrial:
         """Convert a trial info to the syne tune format.
@@ -220,7 +209,7 @@ class SynetuneOptimizer(Optimizer):
         trial_info : TrialInfo
             Trial info.
 
-        Returns
+        Returns:
         -------
         SyneTrial
             Synetune format
@@ -228,12 +217,11 @@ class SynetuneOptimizer(Optimizer):
         syne_config = dict(trial_info.config)
         if self.fidelity_enabled:
             syne_config[self.fidelity_type] = trial_info.budget
-        trial = SyneTrial(
+        return SyneTrial(
             trial_id=self.trial_counter,
             config=syne_config,
             creation_time=datetime.datetime.now(),
         )
-        return trial
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue):
         """Tell the optimizer a new trial.
@@ -273,59 +261,42 @@ class SynetuneOptimizer(Optimizer):
         self.completed_experiments[trial_result.trial_id] = trial_result
 
     def best_trial(self, metric: str) -> TrialResult:
-        """
-        Return the best trial according to the provided metric
-        """
+        """Return the best trial according to the provided metric."""
         if self.optimizer_name == "MOASHA":
             self.solver.mode = "min"
 
-        if self.solver.mode == "max":
-            sign = 1.0
-        else:
-            sign = -1.0
+        sign = 1.0 if self.solver.mode == "max" else -1.0
 
         return max(
             [value for key, value in self.completed_experiments.items()],
             key=lambda trial: sign * trial.metrics[metric],
         )
-    
+
     def get_pareto_front(self) -> list[TrialResult]:
-        """
-        Return the pareto front for multi-objective optimization
-        """
+        """Return the pareto front for multi-objective optimization."""
         if self.task.is_multifidelity:
             # Determine maximum budget run
-            max_budget = np.max(
-                [
-                    v.metrics[self.fidelity_type]
-                    for v in self.completed_experiments.values()
-                ]
-            )
+            max_budget = np.max([v.metrics[self.fidelity_type] for v in self.completed_experiments.values()])
             # Get only those trial results that ran on max budget
-            results_on_highest_fidelity = np.array([
-                v
-                for v in self.completed_experiments.values()
-                if v.metrics[self.fidelity_type] == max_budget
-            ])
-            # Get costs, exclude fidelity
-            costs = np.array(
-                [[v.metrics[m] for m in self.task.objectives] for v in results_on_highest_fidelity]
+            results_on_highest_fidelity = np.array(
+                [v for v in self.completed_experiments.values() if v.metrics[self.fidelity_type] == max_budget]
             )
+            # Get costs, exclude fidelity
+            costs = np.array([[v.metrics[m] for m in self.task.objectives] for v in results_on_highest_fidelity])
             # Determine pareto front of the trials run on max budget
             front = results_on_highest_fidelity[pareto(costs)]
         else:
             results = np.array(list(self.completed_experiments.values()))
             costs = np.array([list(trial.metrics.values()) for trial in results])
             front = results[pareto(costs)]
-        return front.tolist()        
+        return front.tolist()
 
     def _setup_optimizer(self) -> SyneTrialScheduler:
-        """
-        Setup Optimizer.
+        """Setup Optimizer.
 
         Retrieve defaults and instantiate SyneTune.
 
-        Returns
+        Returns:
         -------
         SyneTrialScheduler
             Instance of a SyneTune.
@@ -333,11 +304,11 @@ class SynetuneOptimizer(Optimizer):
         """
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
-        _optimizer_kwargs = dict(
-            config_space = self.syne_tune_configspace,
-            metric = self.task.objectives,
-            mode = "min" if self.task.n_objectives == 1 else list(np.repeat("min", self.task.n_objectives)),
-        )
+        _optimizer_kwargs = {
+            "config_space": self.syne_tune_configspace,
+            "metric": self.task.objectives,
+            "mode": "min" if self.task.n_objectives == 1 else list(np.repeat("min", self.task.n_objectives)),
+        }
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
             _optimizer_kwargs["resource_attr"] = self.fidelity_type
             # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit for synetune
@@ -349,11 +320,9 @@ class SynetuneOptimizer(Optimizer):
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
 
-        bscheduler = optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
-        return bscheduler
-    
-    def get_current_incumbent(self) \
-            -> Incumbent:
+        return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
+
+    def get_current_incumbent(self) -> Incumbent:
         if self.task.n_objectives == 1:
             trial_result = self.best_trial(metric=self.task.objectives[0])
             trial_info = self.convert_to_trial(trial=trial_result)
@@ -362,7 +331,7 @@ class SynetuneOptimizer(Optimizer):
                 cost=cost,
                 time=trial_result.seconds,
                 virtual_time=trial_result.seconds,
-                additional_info=trial_result.metrics
+                additional_info=trial_result.metrics,
             )
             incumbent_tuple = (trial_info, trial_value)
         else:
@@ -372,12 +341,9 @@ class SynetuneOptimizer(Optimizer):
                 trial_info = self.convert_to_trial(trial=result)
                 costs = list(result.metrics.values())
                 trial_value = TrialValue(
-                    cost=costs,
-                    time=result.seconds,
-                    virtual_time=result.seconds,
-                    additional_info=result.metrics
+                    cost=costs, time=result.seconds, virtual_time=result.seconds, additional_info=result.metrics
                 )
                 tis.append(trial_info)
                 tvs.append(trial_value)
-            incumbent_tuple = list(zip(tis, tvs))
+            incumbent_tuple = list(zip(tis, tvs, strict=False))
         return incumbent_tuple

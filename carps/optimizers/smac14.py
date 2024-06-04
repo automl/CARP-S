@@ -1,19 +1,22 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from ConfigSpace import Configuration, ConfigurationSpace
 from omegaconf import DictConfig, OmegaConf
-from smac.facade.smac_ac_facade import SMAC4AC
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import AskAndTellNotSupportedError
-from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent
+
+if TYPE_CHECKING:
+    from ConfigSpace import Configuration, ConfigurationSpace
+    from smac.facade.smac_ac_facade import SMAC4AC
+
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
+    from carps.utils.types import Incumbent
 
 
 class NotSupportedError(Exception):
@@ -22,11 +25,11 @@ class NotSupportedError(Exception):
 
 class SMAC314Optimizer(Optimizer):
     def __init__(
-            self,
-            problem: Problem,
-            smac_cfg: DictConfig,
-            task: Task,
-            loggers: list[AbstractLogger] | None = None,
+        self,
+        problem: Problem,
+        smac_cfg: DictConfig,
+        task: Task,
+        loggers: list[AbstractLogger] | None = None,
     ) -> None:
         super().__init__(problem, task, loggers)
 
@@ -44,7 +47,7 @@ class SMAC314Optimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space for Optimizer.
@@ -67,19 +70,17 @@ class SMAC314Optimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
-
-        return trial_info
+        return TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
 
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> float | list[float]:
-        """Target Function
+        """Target Function.
 
         Interface for the Problem.
 
@@ -94,7 +95,7 @@ class SMAC314Optimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
+        Returns:
         -------
         float | list[float]
             Cost as float or list[float], depending on the number of objectives.
@@ -104,12 +105,11 @@ class SMAC314Optimizer(Optimizer):
         return trial_value.cost
 
     def _setup_optimizer(self) -> SMAC4AC:
-        """
-        Setup SMAC.
+        """Setup SMAC.
 
         Retrieve defaults and instantiate SMAC.
 
-        Returns
+        Returns:
         -------
         SMAC4AC
             Instance of a SMAC facade.
@@ -173,16 +173,14 @@ class SMAC314Optimizer(Optimizer):
 
         if self.smac_cfg.intensifier is None:
             intensifier = None
+        elif self.smac_cfg.intensifier == "successive_halving":
+            from smac.intensification.successive_halving import SuccessiveHalving
+
+            intensifier = SuccessiveHalving
         else:
-            if self.smac_cfg.intensifier == "successive_halving":
-                from smac.intensification.successive_halving import \
-                    SuccessiveHalving
+            raise RuntimeError("Unsupported intensifier.")
 
-                intensifier = SuccessiveHalving
-            else:
-                raise RuntimeError("Unsupported intensifier.")
-
-        smac = facade_object(
+        return facade_object(
             scenario=scenario,
             tae_runner=self.target_function,
             intensifier=intensifier,
@@ -190,20 +188,17 @@ class SMAC314Optimizer(Optimizer):
             **facade_kwargs,
         )
 
-        return smac
-    
     def ask(self) -> TrialInfo:
         raise AskAndTellNotSupportedError
-    
+
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         raise AskAndTellNotSupportedError
 
     def _run(self) -> Incumbent:
-        """Run SMAC on Problem.
-        """
+        """Run SMAC on Problem."""
         incumbent = self.solver.optimize()  # noqa: F841
         return self.get_current_incumbent()
-    
+
     def get_current_incumbent(self) -> Incumbent:
         trial_info = TrialInfo(config=self.solver.solver.incumbent)
         trial_value = TrialValue(cost=self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))

@@ -1,9 +1,9 @@
 # ml system singularity
-
-from omegaconf import OmegaConf
+from __future__ import annotations
 
 from carps.utils.running import make_problem
 from carps.utils.trials import TrialInfo
+from omegaconf import OmegaConf
 
 fns = [
     "carps/configs/problem/HPOBench/blackbox/surr/cfg_surr_ParamNet_Adult.yaml",
@@ -15,7 +15,7 @@ fns = [
 seed = 1
 for fn in fns:
     cfg = OmegaConf.load(fn)
-    
+
     cfg.problem.seed = seed
     if hasattr(cfg.problem, "problem"):
         cfg.problem.problem.rng = seed

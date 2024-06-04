@@ -4,15 +4,18 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING
 
-from ConfigSpace import ConfigurationSpace
 from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from ConfigSpace import ConfigurationSpace
+
+    from carps.loggers.abstract_logger import AbstractLogger
 
 LOWER_IS_BETTER = {
     "mmce": True,  # classification error
@@ -46,14 +49,14 @@ class YahpoProblem(Problem):
     """Yahpo Problem."""
 
     def __init__(
-            self,
-            bench: str,
-            instance: str,
-            metric: str | list[str],
-            budget_type: Optional[str] = None,
-            lower_is_better: bool = True,
-            yahpo_data_path: str | None = None,
-            loggers: list[AbstractLogger] | None = None,
+        self,
+        bench: str,
+        instance: str,
+        metric: str | list[str],
+        budget_type: str | None = None,
+        lower_is_better: bool = True,
+        yahpo_data_path: str | None = None,
+        loggers: list[AbstractLogger] | None = None,
     ):
         """Initialize a Yahpo problem.
 
@@ -63,7 +66,7 @@ class YahpoProblem(Problem):
             Benchmark name.
         instance : str
             Instance name.
-        metric : str 
+        metric : str
             Metric(s) to optimize for (depends on the Benchmark instance e.g. lcbench).
         budget_type : Optional[str]
             Budget type for the multifidelity setting. Should be None for the blackbox setting.
@@ -93,10 +96,10 @@ class YahpoProblem(Problem):
         self.budget_type = budget_type
         self.lower_is_better = lower_is_better
 
-        assert self.budget_type in self.fidelity_dims + [None], (
+        assert self.budget_type in [*self.fidelity_dims, None], (
             f"The budget type {self.budget_type} you choose is "
             f"not available in this instance. Please choose "
-            f"from {self.fidelity_dims + [None]}."
+            f"from {[*self.fidelity_dims, None]}."
         )
 
         if self.budget_type is None or len(self.fidelity_dims) > 1:
@@ -105,7 +108,7 @@ class YahpoProblem(Problem):
             for fidelity in other_fidelities:
                 self.max_other_fidelities[fidelity] = self.fidelity_space.get_hyperparameter(fidelity).upper
 
-        if not isinstance(metric, (list, ListConfig)):
+        if not isinstance(metric, list | ListConfig):
             metric = [metric]
         self.metrics = metric
 
@@ -113,7 +116,7 @@ class YahpoProblem(Problem):
     def configspace(self) -> ConfigurationSpace:
         """Return configuration space.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space.
@@ -137,7 +140,7 @@ class YahpoProblem(Problem):
         trial_info : TrialInfo
             Dataclass with configuration, seed, budget, instance.
 
-        Returns
+        Returns:
         -------
         TrialValue
             Cost
@@ -151,9 +154,8 @@ class YahpoProblem(Problem):
         if self.budget_type is not None:
             if self.budget_type == "trainsize":
                 xs.update({self.budget_type: trial_info.budget})
-            else:
-                if trial_info.budget is not None:  # to avoid mypy error
-                    xs.update({self.budget_type: round(trial_info.budget)})
+            elif trial_info.budget is not None:  # to avoid mypy error
+                xs.update({self.budget_type: round(trial_info.budget)})
 
         if self.budget_type is None or len(self.fidelity_dims) > 1:
             xs.update(self.max_other_fidelities)
@@ -162,12 +164,11 @@ class YahpoProblem(Problem):
         # as we only pass one config we need to select the first one
         ret = self._problem.objective_function(configuration=xs, seed=trial_info.seed)[0]
         costs = [maybe_invert(ret[target], target) for target in self.metrics]
-        virtual_time = ret.get("time", 0.)
+        virtual_time = ret.get("time", 0.0)
         if len(costs) == 1:
             costs = costs[0]
 
         endtime = time.time()
         T = endtime - starttime
 
-        trial_value = TrialValue(cost=costs, time=T, starttime=starttime, endtime=endtime, virtual_time=virtual_time)
-        return trial_value
+        return TrialValue(cost=costs, time=T, starttime=starttime, endtime=endtime, virtual_time=virtual_time)

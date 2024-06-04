@@ -1,9 +1,8 @@
-"""
-HPO-B is a benchmark for assessing the performance of black-box HPO algorithms.
+"""HPO-B is a benchmark for assessing the performance of black-box HPO algorithms.
 Originally from HPO-B Benchmark: https://github.com/releaunifreiburg/HPO-B
 Sebastian Pineda-Arango, Hadi S. Jomaa, Martin Wistuba, Josif Grabocka: HPO-B: A Large-Scale Reproducible Benchmark for
 Black-Box HPO based on OpenML. NeurIPS Datasets and Benchmarks 2021
-Note that this benchmark only converges the surrogate benchmark. Tabular benchmark can not be used in our framework
+Note that this benchmark only converges the surrogate benchmark. Tabular benchmark can not be used in our framework.
 
 To run this benchmark, you must download the benchmark surrogate model under
 https://rewind.tf.uni-freiburg.de/index.php/s/rTwPgaxS2Z7NH39/download/saved-surrogates.zip
@@ -15,14 +14,17 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 import xgboost as xgb
 from ConfigSpace import ConfigurationSpace
 
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from carps.loggers.abstract_logger import AbstractLogger
 
 HPOB_SEARCH_SPACE_DIMS = {
     "151": 1,
@@ -206,16 +208,15 @@ HPOB_SEARCH_SPACE_DIMS = {
 
 class HPOBProblem(Problem):
     def __init__(
-        self, 
-        dataset_id: tuple[str, int], 
-        model_id: tuple[str, int], 
+        self,
+        dataset_id: tuple[str, int],
+        model_id: tuple[str, int],
         surrogates_dir: Path = Path("carps/benchmark_data/HPO-B/saved-surrogates"),
         loggers: list[AbstractLogger] | None = None,
     ):
-        """
-        Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset is not generated
+        """Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset is not generated
         from grid, we only consider surrogate benchmark.
-        Parameters
+        Parameters.
         ----------
             dataset_id: tuple[str, int]
                 dataset id, the ids can be found under surrogate_model summary directory
@@ -231,9 +232,11 @@ class HPOBProblem(Problem):
         surrogates_dir = Path(surrogates_dir)
         surrogates_file = surrogates_dir / "summary-stats.json"
         if not surrogates_file.is_file():
-            raise RuntimeError("It seems that the surrogate files have not been downloaded. Please run "\
-                               "'bash container_recipes/benchmarks/hpob/download_data.sh' to download the "\
-                               "surrogates.")
+            raise RuntimeError(
+                "It seems that the surrogate files have not been downloaded. Please run "
+                "'bash container_recipes/benchmarks/hpob/download_data.sh' to download the "
+                "surrogates."
+            )
         with open(str(surrogates_file)) as f:
             self.surrogates_stats = json.load(f)
         self.surrogate_dir = surrogates_dir
@@ -247,9 +250,7 @@ class HPOBProblem(Problem):
         self._configspace = self._get_configspace(search_space_dims)
 
     def _get_surrogate_model(self, dataset_id: str, model_id: str) -> xgb.Booster:
-        """
-        Get the surrogate model for the problem
-        """
+        """Get the surrogate model for the problem."""
         surrogate_name = "surrogate-" + str(model_id) + "-" + str(dataset_id)
         surrogate_dir = self.surrogate_dir / (surrogate_name + ".json")
         if not surrogate_dir.exists():
@@ -269,7 +270,7 @@ class HPOBProblem(Problem):
     def configspace(self) -> ConfigurationSpace:
         """Return configuration space.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space.
@@ -284,7 +285,7 @@ class HPOBProblem(Problem):
         trial_info : TrialInfo
             Dataclass with configuration, seed, budget, instance.
 
-        Returns
+        Returns:
         -------
         TrialValue
             Cost
@@ -298,6 +299,4 @@ class HPOBProblem(Problem):
         T = endtime - starttime
 
         # we would like to do minimization
-        trial_value = TrialValue(cost=-predicted_output.item(), time=T, starttime=starttime, endtime=endtime)
-
-        return trial_value
+        return TrialValue(cost=-predicted_output.item(), time=T, starttime=starttime, endtime=endtime)
