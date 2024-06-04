@@ -2,7 +2,9 @@
 
 To add a new benchmark problem to CARP-S, you need to create a Python file that defines a 
 new problem class. This class should inherit from the `Problem` class defined in 
-`carps/benchmarks/problem.py`. Here's a step-by-step guide:
+`carps/benchmarks/problem.py`. 
+
+Here's a step-by-step guide for how to add a new benchmark:
 
 1. **Create a new Python file**:
 Create a new Python file in the `carps/benchmarks/` directory. 

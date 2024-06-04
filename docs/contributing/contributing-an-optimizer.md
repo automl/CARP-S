@@ -2,7 +2,11 @@
 
 To add a new optimizer to CARPS, you need to create a new Python file that defines a new optimizer 
 class. This class should inherit from the `Optimizer` class defined in 
-`carps/optimizers/optimizer.py`. Here's a step-by-step guide:
+`carps/optimizers/optimizer.py`. You can have a look at the 
+[optimizer template](https://github.com/automl/CARP-S-template/blob/main/my-optimizer.py) 
+for inspiration.
+
+Here's a step-by-step guide for how to add a new optimizer:
 
 1. **Create a new Python file**: 
 Create a new Python file in the `carps/optimizers/` directory.
@@ -43,8 +47,8 @@ class MyOptimizer(Optimizer):
         # Convert proposal by optimizer to TrialInfo.
         pass
 
-    def _setup_optimizer(self) -> Optimizer:
-        # Setup and return the optimizer.
+    def _setup_optimizer(self) -> Any:
+        # Setup the optimizer.
         pass
 
     def get_current_incumbent(self) -> Incumbent:

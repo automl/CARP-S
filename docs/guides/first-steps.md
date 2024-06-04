@@ -1,8 +1,11 @@
 # First Steps
 
-Once the requirements for both an optimizer and a benchmark, e.g. `SMAC2.0` and `BBOB`, 
-are installed, you can run one of the following minimal examples to benchmark 
-`SMAC2.0` on `BBOB` directly with Hydra:
+First, follow the [installation instructions](installation.md) to install CARP-S. As described
+in the installation guide, make sure to install the requirements for the benchmark and optimizer
+you would like to run, e.g. `SMAC2.0` and `BBOB`.
+
+Once the requirements for both an optimizer and a benchmark are installed, you can run one of 
+the following minimal examples to benchmark `SMAC2.0` on `BBOB` directly with Hydra:
 
 ```bash
 # Run SMAC BlackBoxFacade on certain BBOB problem
