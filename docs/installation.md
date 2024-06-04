@@ -28,7 +28,7 @@ pip install -r container_recipes/benchmarks/BBOB/BBOB_requirements.txt
 ```
 
 For some benchmarks, it might additionally be necessary to download data, 
-such as the surrogate models, in order to run the benchmark. For example for YAHPO, you can
+such as surrogate models, in order to run the benchmark. For example for YAHPO, you can
 download the surrogate benchmarks with
 ```bash
 mkdir data; cd data; git clone https://github.com/slds-lmu/yahpo_data
