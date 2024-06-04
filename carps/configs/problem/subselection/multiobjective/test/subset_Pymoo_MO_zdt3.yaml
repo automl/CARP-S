@@ -1,0 +1,35 @@
+# @package _global_
+benchmark_id: Pymoo
+problem_id: multiobjective/10/test/Pymoo/MO/zdt3
+problem:
+  _target_: carps.benchmarks.pymoo.PymooProblem
+  problem_name: zdt3
+  seed: ${seed}
+  metric:
+  - objective_0
+  - objective_1
+task:
+  n_trials: 240
+  time_budget: null
+  n_workers: 1
+  n_objectives: 2
+  objectives:
+  - objective_0
+  - objective_1
+  is_multifidelity: false
+  fidelity_type: null
+  min_budget: null
+  max_budget: null
+  has_constraints: false
+  domain: synthetic
+  objective_function_approximation: real
+  has_virtual_time: false
+  deterministic: true
+  dimensions: 30
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 0
+  search_space_n_integers: 0
+  search_space_n_floats: 30
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false
