@@ -6,7 +6,7 @@ logging experiment results and trajectories.
 Either SQLite or MySQL can be used as database, which has some slight differences. 
 Using SQLite is straightforward; you get a local database file but
 parallel execution is not efficient at all. You configure the used database in the 
-[pyexperimenter.yaml](carps/container/py_experimenter.yaml) file by changing the `provider` to `mysql` or 
+`carps/container/py_experimenter.yaml` file by changing the `provider` to `mysql` or 
 `sqlite`. 
 
 In any case, before you can start any jobs, the jobs need to be dispatched to the database.

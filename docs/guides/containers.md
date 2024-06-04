@@ -27,7 +27,7 @@ Note that we provide wrappers for the optimizer and the benchmark interfaces suc
 optimizer or a benchmark within our benchmarking framework, 
 you can ignore all aspects of the system just described and simply follow the simple API. 
 
-![Overview of the whole process](../../images/smac_benchmarking_containers.drawio.png)
+![Overview of the whole process](../images/smac_benchmarking_containers.drawio.png)
 
 
 ### Installation
