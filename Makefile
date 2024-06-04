@@ -1,4 +1,4 @@
-.PHONY: test docs check
+.PHONY: test docs check install-dev
 
 test:
 	python -m pytest tests
@@ -9,3 +9,7 @@ docs:
 
 check:
 	pre-commit run --all-files
+
+install-dev:
+	pip install -e ".[dev]"
+	pre-commit install

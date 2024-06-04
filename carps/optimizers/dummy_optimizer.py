@@ -3,7 +3,7 @@ from __future__ import annotations
 from time import sleep
 from typing import TYPE_CHECKING, Any
 
-from carps.optimizers.optimizer import Optimizer, SearchSpace
+from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
-    from carps.utils.types import Incumbent
+    from carps.utils.types import Incumbent, SearchSpace
 
 
 class DummyOptimizer(Optimizer):

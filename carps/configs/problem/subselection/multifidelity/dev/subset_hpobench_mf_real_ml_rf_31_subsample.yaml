@@ -1,0 +1,33 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: multifidelity/20/dev/hpobench/mf/real/ml/rf/31/subsample
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  model: rf
+  task_id: 31
+  budget_type: subsample
+  seed: ${seed}
+task:
+  n_trials: 100
+  time_budget: null
+  n_workers: 1
+  n_objectives: 1
+  objectives:
+  - quality
+  is_multifidelity: true
+  fidelity_type: subsample
+  min_budget: 0.1
+  max_budget: 1.0
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: real
+  has_virtual_time: false
+  deterministic: false
+  dimensions: 4
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 0
+  search_space_n_integers: 3
+  search_space_n_floats: 1
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false
