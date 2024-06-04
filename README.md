@@ -20,7 +20,7 @@ Main Topics of this README:
 ## Usage - Local Setup
 
 ### Installation
-Create a conda environment and install the package.
+To install CARP-S, you can use the following commands:
 
 ```bash
 git clone https://github.com/AutoML/CARP-S.git
@@ -30,11 +30,12 @@ conda activate carps
 
 # Install for usage
 pip install .
+```
 
+If you want to install CARP-S for development, you can use the following command:
+```bash
 # Install for development
 make install-dev
-
-pip install -r requirements.txt
 ```
 
 Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
@@ -42,8 +43,8 @@ For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark
 requirements for both of them.
 
 ```bash
-pip install -e ".[smac20]"
-pip install -e ".[bbob]"
+pip install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
+pip install -r container_recipes/benchmarks/BBOB/BBOB_requirements.txt
 ```
 
 ### Minimal Example
