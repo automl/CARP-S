@@ -300,4 +300,8 @@ python -m carps.utils.check_missing rundir
 
 # Gather logs from files
 python -m carps.analysis.gather_data rundir
+
+
+# Gather MO data (it's faster) and calculate Hypervolume
+python -m carps.analysis.gather_data runs_MO trajectory_logs.jsonl; python -m carps.analysis.calc_hypervolume runs_MO
 ```
