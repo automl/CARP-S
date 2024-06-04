@@ -166,3 +166,5 @@ multirun
 runs_subset
 runs*
 *.parquet
+run-data*
+*.txt
