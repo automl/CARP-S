@@ -1,6 +1,6 @@
 # First Steps
 
-First, follow the [installation instructions](installation.md) to install CARP-S. As described
+First, follow the [installation instructions](../installation.md) to install CARP-S. As described
 in the installation guide, make sure to install the requirements for the benchmark and optimizer
 you would like to run, e.g. `SMAC2.0` and `BBOB`.
 
