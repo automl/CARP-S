@@ -285,6 +285,19 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger=None) -> pd.DataFrame:
         logs[c] = logs[c].astype("str")
     return logs
 
+def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, pd.DataFrame]:
+    logs = []
+    for p in paths:
+        fn = Path(p) / "trajectory.parquet"
+        if not fn.is_file():
+            fn = Path(p) / "logs.parquet"
+        logs.append(pd.read_parquet(fn))
+
+    df = pd.concat(logs).reset_index(drop=True)
+    df_cfg = pd.concat([pd.read_parquet(Path(p) / "logs_cfg.parquet") for p in paths]).reset_index(drop=True)
+    df["set"] = set_id
+    return df, df_cfg
+
 
 def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None) -> pd.DataFrame:
     if keep_task_columns is None:

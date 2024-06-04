@@ -54,7 +54,7 @@ def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
     return data
 
 
-def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, baserundir: str = "") -> None:
+def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: str = "") -> None:
     logger.info(f"Regenerate commands for {runstatus.name} runs...")
     data = missing_data
     missing = data[data["status"].isin([runstatus.name])]
@@ -68,14 +68,13 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, baserund
         override = " ".join(overrides)
         runcommand = f"python -m carps.run {override}\n"
         runcommands.append(runcommand)
-    runcommand_fn = f"runcommands_{runstatus.name}.sh"
+    runcommand_fn = Path(rundir) / f"runcommands_{runstatus.name}.sh"
     with open(runcommand_fn, "w") as file:
         file.writelines(runcommands)
     logger.info(f"Done! Regenerated runcommands at {runcommand_fn}.")
 
 
 def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
-    baserundir = Path(rundir).parts[0]
     if from_cached:
         logger.info("Loading experiment status data from 'runstatus.csv'...")
         data = pd.read_csv("runstatus.csv")
@@ -85,8 +84,8 @@ def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
         data = check_missing(rundir=rundir)
         logger.info("Done!")
 
-    generate_commands(data, RunStatus.MISSING, baserundir)
-    generate_commands(data, RunStatus.TRUNCATED, baserundir)
+    generate_commands(data, RunStatus.MISSING, rundir)
+    generate_commands(data, RunStatus.TRUNCATED, rundir)
 
 
 if __name__ == "__main__":
