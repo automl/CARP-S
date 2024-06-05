@@ -20,10 +20,11 @@ and return a `TrialValue` object. If your problem requires additional methods, y
 them in your class. For example, you might need a method to load data for your problem. 
 
 
-3. **Requirements file**: Create a requirements file under 
-   `container_recipes/benchmarks/my_benchmark/my_benchmark_requirements.txt` and add the 
-   requirements for your benchmark. Please specify exact versions of all requirements! 
-   This is very important for reproducibility.
+3. **Requirements file**: Create a requirements file and add the requirements for your benchmark. 
+   The file structure must be 
+   `container_recipes/benchmarks/<benchmark_id>/<benchmark_id>_requirements.txt`, so for example,
+   `container_recipes/benchmarks/my_benchmark/my_benchmark_requirements.txt`. Please specify exact 
+   versions of all requirements! This is very important for reproducibility.
 
 
 4. **Config files**: Add config files for the different benchmarking tasks under 

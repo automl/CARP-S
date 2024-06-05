@@ -25,10 +25,11 @@ queries a new trial to evaluate from the optimizer and returns it as a TrialInfo
 the trial. If your optimizer requires additional methods, you can implement them in your class. 
 
 
-3. **Requirements file**: Create a requirements file under 
-   `container_recipes/optimizers/my_optimizer/my_optimizer_requirements.txt` and add the 
-   requirements for your optimizer. Please specify exact versions of all requirements! 
-   This is very important for reproducibility.
+3. **Requirements file**: Create a requirements file and add the requirements for your optimizer.
+   The file structure must be 
+   `container_recipes/optimizers/<optimizer_container_id>/<optimizer_container_id>_requirements.txt`,
+   so for example, `container_recipes/optimizers/my_optimizer/my_optimizer_requirements.txt`.
+   Please specify exact versions of all requirements! This is very important for reproducibility.
 
 
 4. **Config files**: Add config files for the different optimizers under 
