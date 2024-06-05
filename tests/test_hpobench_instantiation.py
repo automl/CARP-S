@@ -1,4 +1,5 @@
 # ml system singularity
+from __future__ import annotations
 
 from omegaconf import OmegaConf
 
@@ -15,7 +16,7 @@ fns = [
 seed = 1
 for fn in fns:
     cfg = OmegaConf.load(fn)
-    
+
     cfg.problem.seed = seed
     if hasattr(cfg.problem, "problem"):
         cfg.problem.problem.rng = seed

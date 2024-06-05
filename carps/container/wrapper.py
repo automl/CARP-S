@@ -1,18 +1,21 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import requests
-from ConfigSpace import ConfigurationSpace
 from ConfigSpace.read_and_write import json as cs_json
 
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from ConfigSpace import ConfigurationSpace
+
+    from carps.loggers.abstract_logger import AbstractLogger
 
 
 class ContainerizedProblemClient(Problem):
-    def __init__(
-            self,
-            n_workers: int = 1,
-            loggers: list[AbstractLogger] | None = None
-    ):
+    def __init__(self, n_workers: int = 1, loggers: list[AbstractLogger] | None = None):
         super().__init__(loggers=loggers)
         self.n_workers = n_workers
         self._configspace = None

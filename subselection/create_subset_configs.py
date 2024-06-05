@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+
+import fire
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
-import fire
 
 
 def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str) -> None:
@@ -40,6 +41,8 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
 
 
 if __name__ == "__main__":
-    # python subselection/create_subset_configs.py subselection/BB_1/default/subset_30.csv subselection/BB_1/default/subset_complement_subset_30.csv blackbox
+    # python subselection/create_subset_configs.py subselection/BB_2/default/subset_30.csv subselection/BB_2/default/subset_complement_subset_30.csv blackbox
+    # python subselection/create_subset_configs.py subselection/MF_1/lognorm/subset_20.csv subselection/MF_1/lognorm/subset_complement_subset_20.csv multifidelity
+    # python subselection/create_subset_configs.py subselection/MO_0/lognorm/subset_10.csv subselection/MO_0/lognorm/subset_complement_subset_10.csv multiobjective
     fire.Fire(create_subset_configs)
 

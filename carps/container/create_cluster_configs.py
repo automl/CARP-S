@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
@@ -25,22 +27,27 @@ def main(cfg: DictConfig) -> None:
     """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
 
-    experiment_configuration_file_path = cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "py_experimenter.yaml"
+    experiment_configuration_file_path = (
+            cfg.pyexperimenter_configuration_file_path or Path(
+        __file__).parent / "py_experimenter.yaml"
+    )
 
     database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "credentials.yaml"
     if database_credential_file_path is not None and not database_credential_file_path.exists():
         database_credential_file_path = None
 
-    experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
-                                  name="carps",
-                                  database_credential_file_path=database_credential_file_path,
-                                  log_level=logging.INFO,
-                                  use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel
-                                  )
+    experimenter = PyExperimenter(
+        experiment_configuration_file_path=experiment_configuration_file_path,
+        name="carps",
+        database_credential_file_path=database_credential_file_path,
+        log_level=logging.INFO,
+        use_ssh_tunnel=OmegaConf.load(
+            experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
+    )
 
     cfg_json = OmegaConf.to_container(cfg, resolve=True)
 
-    # This value will always be unique so it 
+    # This value will always be unique so it
     # disables duplicate checking when adding entries to the database.
     # Py_experimenter will add a creation date so the information
     # is not lost.
@@ -54,17 +61,19 @@ def main(cfg: DictConfig) -> None:
     cfg_str = json.dumps(cfg_json)
     cfg_hash = hashlib.sha256(cfg_str.encode()).hexdigest()
 
-    rows = [{
-        "config": cfg_str,
-        "config_hash": cfg_hash,
-        "benchmark_id": cfg_dict["benchmark_id"],
-        "problem_id": cfg_dict["problem_id"],
-        "optimizer_id": cfg_dict["optimizer_id"],
-        "optimizer_container_id": cfg_dict["optimizer_container_id"],
-        "seed": cfg_dict["seed"],
-        "n_trials": cfg_dict["task"]["n_trials"],
-        "time_budget": cfg_dict["task"]["time_budget"],
-    }]
+    rows = [
+        {
+            "config": cfg_str,
+            "config_hash": cfg_hash,
+            "benchmark_id": cfg_dict["benchmark_id"],
+            "problem_id": cfg_dict["problem_id"],
+            "optimizer_id": cfg_dict["optimizer_id"],
+            "optimizer_container_id": cfg_dict["optimizer_container_id"],
+            "seed": cfg_dict["seed"],
+            "n_trials": cfg_dict["task"]["n_trials"],
+            "time_budget": cfg_dict["task"]["time_budget"],
+        }
+    ]
 
     column_names = list(experimenter.db_connector.database_configuration.keyfields.keys())
 
@@ -87,8 +96,6 @@ def main(cfg: DictConfig) -> None:
 
     if not exists:
         experimenter.fill_table_with_rows(rows)
-
-    return None
 
 
 if __name__ == "__main__":

@@ -19,15 +19,18 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import mfpbench
-from ConfigSpace import ConfigurationSpace
-
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from ConfigSpace import ConfigurationSpace
+
+    from carps.loggers.abstract_logger import AbstractLogger
 
 benchmarks_names = ["pd1", "jahs", "mfh"]
 
@@ -63,7 +66,7 @@ class MFPBenchProblem(Problem):
         benchmark_name: str,
         metric: str | list[str],
         benchmark: str | None = None,
-        budget_type: Optional[str] = None,
+            budget_type: str | None = None,
         prior: str | Path | C | Mapping[str, Any] | None = None,
         perturb_prior: float | None = None,
         benchmark_kwargs: dict | None = None,
@@ -78,18 +81,14 @@ class MFPBenchProblem(Problem):
         self.metrics = metric
         self.prior = prior
         self.perturb_prior = perturb_prior
-        assert (
-            self.benchmark_name in benchmarks_names
-        ), f"benchmark_name must be one of {benchmarks_names}"
+        assert self.benchmark_name in benchmarks_names, f"benchmark_name must be one of {benchmarks_names}"
         assert self.benchmark in benchmarks, f"benchmark '{benchmark}' must be one of {benchmarks}"
 
         if benchmark_kwargs is None:
             benchmark_kwargs = {}
         elif benchmark_kwargs.get("datadir") is not None:
             # Assumes that the data is stored in the following format:
-            benchmark_kwargs["datadir"] = (
-                Path(benchmark_kwargs["datadir"]) / benchmark_name
-            )
+            benchmark_kwargs["datadir"] = Path(benchmark_kwargs["datadir"]) / benchmark_name
 
         self._problem = mfpbench.get(
             name=benchmark,
@@ -103,7 +102,7 @@ class MFPBenchProblem(Problem):
     def configspace(self) -> ConfigurationSpace:
         """Return configuration space.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space.
@@ -118,7 +117,7 @@ class MFPBenchProblem(Problem):
         trial_info : TrialInfo
             Dataclass with configuration, seed, budget, instance.
 
-        Returns
+        Returns:
         -------
         TrialValue
             Cost
@@ -134,20 +133,19 @@ class MFPBenchProblem(Problem):
         ret = [result[metric] for metric in self.metrics]
         if len(ret) == 1:
             ret = ret[0]
-        
+
         vt = 0.0
         if self.benchmark_name == "jahs":
-            vt = result['runtime']
+            vt = result["runtime"]
         elif self.benchmark_name == "mfh":
-            vt = result['fid_cost']
+            vt = result["fid_cost"]
         else:
             vt = result["train_cost"]
 
-        trial_value = TrialValue(
+        return TrialValue(
             cost=ret,
             time=end_time - start_time,
             starttime=start_time,
             endtime=end_time,
             virtual_time=vt,
         )
-        return trial_value

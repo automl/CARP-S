@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from ConfigSpace import ConfigurationSpace
+if TYPE_CHECKING:
+    from ConfigSpace import ConfigurationSpace
 
-from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.trials import TrialInfo, TrialValue
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.trials import TrialInfo, TrialValue
 
 
 class Problem(ABC):
@@ -16,13 +18,13 @@ class Problem(ABC):
 
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
         self.n_trials: float = 0
-        self.n_function_calls: int = 0.
+        self.n_function_calls: int = 0.0
 
     @property
     def f_min(self) -> float | None:
         """Return the minimum function value.
 
-        Returns
+        Returns:
         -------
         float | None
             Minimum function value (if exists).
@@ -33,12 +35,12 @@ class Problem(ABC):
     @property
     @abstractmethod
     def configspace(self) -> ConfigurationSpace:
-        """Configuration Space
+        """Configuration Space.
 
         All optimizers need to receive a configspace and
         convert it to their search space definition.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space.
@@ -54,7 +56,7 @@ class Problem(ABC):
         trial_info : TrialInfo
             Dataclass with configuration, seed, budget, instance, name, checkpoint.
 
-        Returns
+        Returns:
         -------
         TrialValue
             Value of the trial, i.e.:
@@ -76,7 +78,11 @@ class Problem(ABC):
             self.n_trials += 1
 
         for logger in self.loggers:
-            logger.log_trial(n_trials=self.n_trials, n_function_calls=self.n_function_calls, trial_info=trial_info, trial_value=trial_value)
+            logger.log_trial(
+                n_trials=self.n_trials,
+                n_function_calls=self.n_function_calls,
+                trial_info=trial_info,
+                trial_value=trial_value,
+            )
 
         return trial_value
-

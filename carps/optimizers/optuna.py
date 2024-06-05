@@ -1,33 +1,42 @@
-"""
-* Not immeditaly obvious where I even create the "solver" for optuna
+"""* Not immeditaly obvious where I even create the "solver" for optuna
 * Is it always minimize?
 """
+
 from __future__ import annotations
 
-from typing import Iterable
+import warnings
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
-import optuna
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
-from ConfigSpace.hyperparameters import (CategoricalHyperparameter, Constant,
-                                         Hyperparameter, OrdinalHyperparameter,
-                                         UniformFloatHyperparameter,
-                                         UniformIntegerHyperparameter)
-from omegaconf import DictConfig
-from optuna.distributions import (BaseDistribution, CategoricalDistribution,
-                                  FloatDistribution, IntDistribution)
+from ConfigSpace.hyperparameters import (
+    CategoricalHyperparameter,
+    Constant,
+    Hyperparameter,
+    OrdinalHyperparameter,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
+)
+from optuna.distributions import BaseDistribution, CategoricalDistribution, FloatDistribution, \
+    IntDistribution
 from optuna.samplers import TPESampler
-from optuna.study import Study
 from optuna.trial import TrialState as OptunaTrialState
 from rich import print as printr
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
+import optuna
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.task import Task
-from carps.utils.trials import StatusType, TrialInfo, TrialValue
-from carps.utils.types import Incumbent
 from carps.utils.pareto_front import pareto
+from carps.utils.trials import StatusType, TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from omegaconf import DictConfig
+    from optuna.study import Study
+
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
+    from carps.utils.types import Incumbent
 
 # NOTE: Optuna has an extra OptunaTrialState.PRUNED, which indicates something
 # was halted during it's run and not progressed to the next budget. They fundamentally
@@ -67,11 +76,13 @@ def hp_to_optuna_distribution(hp: Hyperparameter) -> BaseDistribution:
         return FloatDistribution(hp.lower, hp.upper, log=hp.log)
     elif isinstance(hp, CategoricalHyperparameter):
         if hp.weights is not None:
-            raise NotImplementedError("Weights are not supported in Optuna")
+            raise NotImplementedError(f"Weights are not supported in Optuna ({hp})")
 
         return CategoricalDistribution(hp.choices)
     elif isinstance(hp, OrdinalHyperparameter):
-        raise NotImplementedError("Ordinal hyperparameters are not supported in Optuna")
+        warnings.warn(
+            f"Ordinal hyperparameters are not supported in Optuna, use Categorical instead for {hp}.")
+        return CategoricalDistribution(hp.sequence)
     elif isinstance(hp, Constant):
         return CategoricalDistribution([hp.value])
 
@@ -111,8 +122,7 @@ class OptunaOptimizer(Optimizer):
         #     sampler = NSGAIISampler(seed=self.optuna_cfg.sampler.seed)
         # else
         #     sampler = TPESampler(seed=self.optuna_cfg.sampler.seed)
-        """
-        (function) def create_study(
+        """(function) def create_study(
             *,
             storage: str | BaseStorage | None = None,
             sampler: BaseSampler | None = None,
@@ -121,10 +131,13 @@ class OptunaOptimizer(Optimizer):
             direction: str | StudyDirection | None = None,
             load_if_exists: bool = False,
             directions: Sequence[str | StudyDirection] | None = None
-        ) -> Study
+        ) -> Study.
         """
         sampler = TPESampler(seed=self.optuna_cfg.sampler.seed)
-        study = optuna.create_study(**self.optuna_cfg.study, sampler=sampler, directions=["minimize"]*self.task.n_objectives)
+        study = optuna.create_study(
+            **self.optuna_cfg.study, sampler=sampler,
+            directions=["minimize"] * self.task.n_objectives
+        )
         printr(sampler)
         printr(study)
 
@@ -137,7 +150,7 @@ class OptunaOptimizer(Optimizer):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
@@ -193,20 +206,19 @@ class OptunaOptimizer(Optimizer):
 
         self._solver.tell(trial=optuna_trial, values=cost, state=optuna_status)
 
-    def get_pareto_front(self) -> list[tuple[TrialInfo,TrialValue]]:
-        """
-        Return the pareto front for multi-objective optimization
-        """
-        non_none_entries = [np.array([config, cost], dtype=object) for _, config, cost in self.history.values() if cost is not None]
+    def get_pareto_front(self) -> list[tuple[TrialInfo, TrialValue]]:
+        """Return the pareto front for multi-objective optimization."""
+        non_none_entries = [[config, cost] for optuna_trial, config, cost in self.history.values()
+                            if cost is not None]
         costs = np.array([v[1] for v in non_none_entries])
-        front = np.array(non_none_entries)[pareto(costs)]
-        return front.tolist() 
+        ids_bool = pareto(costs)
+        ids = np.where(ids_bool)[0]
+        return [non_none_entries[i] for i in ids]
 
-    def get_current_incumbent(self) \
-            -> Incumbent:
+    def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
-        Returns
+        Returns:
         -------
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
@@ -234,7 +246,7 @@ class OptunaOptimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         SearchSpace
             Optimizer's search space.
@@ -247,7 +259,7 @@ class OptunaOptimizer(Optimizer):
 
         This ensures that the problem can be evaluated with a unified API.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.

@@ -3,14 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from ConfigSpace import (CategoricalHyperparameter, ConfigurationSpace,
-                         Constant, OrdinalHyperparameter)
-from ConfigSpace.hyperparameters import (BetaFloatHyperparameter,
-                                         BetaIntegerHyperparameter,
-                                         NormalFloatHyperparameter,
-                                         NormalIntegerHyperparameter,
-                                         UniformFloatHyperparameter,
-                                         UniformIntegerHyperparameter)
+from ConfigSpace import CategoricalHyperparameter, ConfigurationSpace, Constant, \
+    OrdinalHyperparameter
+from ConfigSpace.hyperparameters import (
+    BetaFloatHyperparameter,
+    BetaIntegerHyperparameter,
+    NormalFloatHyperparameter,
+    NormalIntegerHyperparameter,
+    UniformFloatHyperparameter,
+    UniformIntegerHyperparameter,
+)
 from dataclasses_json import dataclass_json
 
 
@@ -25,23 +27,31 @@ def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
     for hp in hps.values():
         if isinstance(hp, CategoricalHyperparameter):
             n_categoricals += 1
-        elif isinstance(hp, (BetaIntegerHyperparameter, NormalIntegerHyperparameter, UniformIntegerHyperparameter)):
+        elif isinstance(hp,
+                        BetaIntegerHyperparameter | NormalIntegerHyperparameter | UniformIntegerHyperparameter):
             n_integers += 1
-        elif isinstance(hp, (BetaFloatHyperparameter, NormalFloatHyperparameter, UniformFloatHyperparameter)):
+        elif isinstance(hp,
+                        BetaFloatHyperparameter | NormalFloatHyperparameter | UniformFloatHyperparameter):
             n_floats += 1
         elif isinstance(hp, OrdinalHyperparameter):
             n_ordinals += 1
         elif isinstance(hp, Constant):
             dimension -= 1
 
-        if isinstance(hp, (BetaFloatHyperparameter, BetaIntegerHyperparameter, NormalFloatHyperparameter, NormalIntegerHyperparameter)):
+        if isinstance(
+                hp,
+                BetaFloatHyperparameter
+                | BetaIntegerHyperparameter
+                | NormalFloatHyperparameter
+                | NormalIntegerHyperparameter,
+        ):
             search_space_has_priors = True
 
     assert n_categoricals + n_floats + n_integers + n_ordinals == dimension
-    
+
     search_space_has_conditionals = len(configspace.get_conditions()) > 0
     search_space_has_forbiddens = len(configspace.get_forbiddens()) > 0
-    search_space_info = {
+    return {
         "dimensions": dimension,
         "search_space_n_categoricals": n_categoricals,
         "search_space_n_ordinals": n_ordinals,
@@ -51,14 +61,12 @@ def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
         "search_space_has_forbiddens": search_space_has_forbiddens,
         "search_space_has_priors": search_space_has_priors,
     }
-    return search_space_info
-
 
 
 @dataclass_json
 @dataclass(frozen=True)
-class Task():
-    """Task information
+class Task:
+    """Task information.
 
     For general optimization, only `n_trials` or `time_budget` needs
     to be defined. The optimizers receive the search space.
@@ -100,7 +108,7 @@ class Task():
         Minimum fidelity. Not used by every optimizer.
     max_budget : float
         Maximum fidelity. Required for multi-fidelity.
-    
+
     has_constraints : bool
         Whether the task has any constraints.
 
@@ -136,7 +144,7 @@ class Task():
     search_space_has_priors: bool
         Whether there are any priors on HPs, e.g. beta or normal.
 
-    Raises
+    Raises:
     ------
     ValueError
         When `is_multifidelity` is set and `max_budget` not specified.
@@ -144,10 +152,11 @@ class Task():
     ValueError
         When neither `n_trials` nor `time_budget` are specified.
     """
+
     # General (REQUIRED)
     n_trials: int | None = None
     time_budget: float | None = None  # 1 cpu, walltime budget in minutes
-    
+
     # Parallelism
     n_workers: int = 1
 
@@ -169,7 +178,7 @@ class Task():
     objective_function_approximation: str | None = None  # real, surrogate, tabular
     has_virtual_time: bool | None = None
     deterministic: bool | None = None
-    
+
     # Search Space
     dimensions: int | None = None
     search_space_n_categoricals: int | None = None

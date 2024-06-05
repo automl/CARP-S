@@ -15,4 +15,4 @@ optimizer:
       output_directory: ${outdir}/${seed}/smac3_output
     smac_kwargs:
       dask_client: null
-      overwrite: True
+      overwrite: true

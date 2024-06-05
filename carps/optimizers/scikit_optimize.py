@@ -49,15 +49,11 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
             weights = np.asarray(hp.weights) / np.sum(hp.weights)
         return Categorical(hp.choices, name=hp.name, weights=weights)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
-        raise ValueError(
-            "Ordinal hyperparameters are not supported by Scikit-Optimize!"
-        )
+        raise ValueError("Ordinal hyperparameters are not supported by Scikit-Optimize!")
     elif isinstance(hp, CSH.Constant):
         return Categorical(list(hp.value), name=hp.name)
     else:
-        raise NotImplementedError(
-            f"Unknown hyperparameter type: {hp.__class__.__name__}"
-        )
+        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class SkoptOptimizer(Optimizer):
@@ -93,7 +89,7 @@ class SkoptOptimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         list[Space]
             Scikit-Optimize Space.
@@ -110,35 +106,29 @@ class SkoptOptimizer(Optimizer):
 
         This ensures that the problem can be evaluated with a unified API.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
         configuration = CS.Configuration(
             configuration_space=self.configspace,
-            values={
-                hp.name: value
-                for hp, value in zip(self.configspace.get_hyperparameters(), config)
-            },
+            values={hp.name: value for hp, value in
+                    zip(self.configspace.get_hyperparameters(), config, strict=False)},
         )
-        assert list(configuration.keys()) == list(
-            self.configspace.get_hyperparameter_names()
-        )
+        assert list(configuration.keys()) == list(self.configspace.get_hyperparameter_names())
         assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]
-        trial_info = TrialInfo(
+        return TrialInfo(
             config=configuration,
             seed=self.skopt_cfg.random_state,
             budget=None,
             instance=None,
         )
-        return trial_info
 
     def _setup_optimizer(self) -> skopt.optimizer.Optimizer:
         if self.skopt_cfg is None:
             self.skopt_cfg = {}
-        opt = skopt.optimizer.Optimizer(dimensions=self.skopt_space, **self.skopt_cfg)
-        return opt
+        return skopt.optimizer.Optimizer(dimensions=self.skopt_space, **self.skopt_cfg)
 
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
@@ -147,14 +137,13 @@ class SkoptOptimizer(Optimizer):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
         """
         config = self.solver.ask()
-        trial_info = self.convert_to_trial(config)
-        return trial_info
+        return self.convert_to_trial(config)
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
@@ -175,7 +164,7 @@ class SkoptOptimizer(Optimizer):
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
-        Returns
+        Returns:
         -------
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.

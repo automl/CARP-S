@@ -4,28 +4,31 @@ import json
 import logging
 import os
 import traceback
+import warnings
 from dataclasses import asdict
 from pathlib import Path
-import warnings
+from typing import TYPE_CHECKING
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 
 from carps.loggers.abstract_logger import AbstractLogger
-from carps.optimizers.optimizer import Incumbent
 from carps.utils.loggingutils import get_logger, setup_logging
-from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from carps.optimizers.optimizer import Incumbent
+    from carps.utils.trials import TrialInfo, TrialValue
 
 setup_logging()
 logger = get_logger("FileLogger")
 
 
 def get_run_directory() -> Path:
-    """Get current run dir
+    """Get current run dir.
 
     Either '.' if hydra not active, else hydra run dir.
 
-    Returns
+    Returns:
     -------
     Path
         Directory
@@ -48,7 +51,7 @@ def get_run_directory() -> Path:
 
 
 def dump_logs(log_data: dict, filename: str, directory: str | Path | None = None):
-    """Dump log dict in jsonl format
+    """Dump log dict in jsonl format.
 
     This appends one json dict line to the filename.
 
@@ -113,7 +116,7 @@ class FileLogger(AbstractLogger):
         if (directory / self._filename).is_file():
             if overwrite:
                 logger.info(f"Found previous run. Removing '{directory}'.")
-                for root, dirs, files in os.walk(directory):
+                for root, _dirs, files in os.walk(directory):
                     for f in files:
                         full_fn = os.path.join(root, f)
                         if ".hydra" not in full_fn:
@@ -146,7 +149,7 @@ class FileLogger(AbstractLogger):
             The number of target function calls, no matter the budget.
         """
         info = convert_trials(n_trials, trial_info, trial_value, n_function_calls)
-        if logging.DEBUG <= logger.level:
+        if logger.level >= logging.DEBUG:
             info_str = json.dumps(info) + "\n"
             logger.debug(info_str)
         else:

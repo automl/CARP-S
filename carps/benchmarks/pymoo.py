@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pymoo
@@ -12,8 +13,10 @@ from pymoo.problems.multi.omnitest import OmniTest
 from pymoo.problems.multi.sympart import SYMPART, SYMPARTRotated
 
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from carps.loggers.abstract_logger import AbstractLogger
 
 extra_probs = {
     "sympart": SYMPART,
@@ -47,16 +50,15 @@ class PymooProblem(Problem):
     def configspace(self) -> ConfigurationSpace:
         """Return configuration space.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space.
         """
         return self._configspace
 
-    def get_pymoo_space(
-        self, pymoo_prob: pymoo.core.problem.Problem, seed: int
-    ) -> ConfigurationSpace:
+    def get_pymoo_space(self, pymoo_prob: pymoo.core.problem.Problem,
+                        seed: int) -> ConfigurationSpace:
         """Get ConfigSpace from pymoo problem."""
         n_var = pymoo_prob.n_var
         xl, xu = pymoo_prob.xl, pymoo_prob.xu
@@ -73,7 +75,7 @@ class PymooProblem(Problem):
         trial_info : TrialInfo
             Dataclass with configuration, seed, budget, instance.
 
-        Returns
+        Returns:
         -------
         TrialValue
             Cost
@@ -85,11 +87,9 @@ class PymooProblem(Problem):
             costs = costs[0]
         end_time = time.time()
 
-        trial_value = TrialValue(
+        return TrialValue(
             cost=costs,
             time=end_time - start_time,
             starttime=start_time,
             endtime=end_time,
         )
-
-        return trial_value

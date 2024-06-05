@@ -29,6 +29,7 @@ dependencies = [
   "seaborn",
   "tomli",
   "typing_extensions",
+  "pymoo"
 ]
 
 requires-python = ">=3.9"
@@ -97,13 +98,13 @@ target-version = "py311"
 line-length = 120
 show-source = true
 src = ["carps", "tests", "examples", "notebooks"]
-extend-safe-fixes = ["ALL"]
+lint.extend-safe-fixes = ["ALL"]
 extend-include = ["*.ipynb"]
 
 # Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-select = [
+lint.select = [
   "A",
   # "ANN", # Handled by mypy
   "ARG",
@@ -152,7 +153,7 @@ select = [
   "YTT",
 ]
 
-ignore = [
+lint.ignore = [
   "D104",    # Missing docstring in public package
   "D105",    # Missing docstring in magic mthod
   "D203",    # 1 blank line required before class docstring

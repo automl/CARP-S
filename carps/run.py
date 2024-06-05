@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import hydra
 from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig
 
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
+
+if TYPE_CHECKING:
+    from omegaconf import DictConfig
 
 setup_logging()
 logger = get_logger(__file__)
@@ -29,8 +33,6 @@ def main(cfg: DictConfig) -> None:
     logger.info(f"Runcommand: `python -m carps.run {' '.join(overrides)}`")
     check_requirements(cfg=cfg)
     optimize(cfg=cfg)
-
-    return None
 
 
 if __name__ == "__main__":

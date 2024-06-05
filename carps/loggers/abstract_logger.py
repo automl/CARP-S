@@ -1,21 +1,25 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent
+if TYPE_CHECKING:
+    from carps.utils.trials import TrialInfo, TrialValue
+    from carps.utils.types import Incumbent
 
 
 class AbstractLogger(ABC):
     def __init__(self) -> None:
-        """AbstractLogger
+        """AbstractLogger.
 
         Intercepts the trial info and value during evaluate.
         """
-        pass
 
     @abstractmethod
-    def log_trial(self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None) -> None:
+    def log_trial(
+            self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue,
+            n_function_calls: int | None = None
+    ) -> None:
         """Log the trial.
 
         Parameters

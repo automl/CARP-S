@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ConfigSpace import Configuration
 from dataclasses_json import dataclass_json
+
+if TYPE_CHECKING:
+    from ConfigSpace import Configuration
 
 
 class StatusType(IntEnum):

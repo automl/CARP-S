@@ -106,11 +106,12 @@ class SynetuneOptimizer(Optimizer):
         task: Task,
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
+            conversion_factor: int = 1000,
     ) -> None:
         super().__init__(problem, task, loggers)
         self.fidelity_enabled = False
         self.max_budget = task.max_budget
-        self.min_budget = task.min_budget
+
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts["with_mf"]:
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
@@ -121,10 +122,12 @@ class SynetuneOptimizer(Optimizer):
             if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
+            self.min_budget = task.min_budget
+
         self.fidelity_type: str = self.task.fidelity_type
         self.configspace = self.problem.configspace
         self.metric: str | list[str] = self.task.objectives
-        self.syne_tune_configspace = self.convert_configspace(self.configspace)
+        self.conversion_factor = conversion_factor
         self.trial_counter: int = 0
 
         self.optimizer_name = optimizer_name
@@ -136,6 +139,7 @@ class SynetuneOptimizer(Optimizer):
         )
 
         self.completed_experiments: OrderedDict[int, TrialResult] = OrderedDict()
+        self.convert = False
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> dict[str, Any]:
         """Convert configuration space from Problem to Optimizer.
@@ -157,7 +161,11 @@ class SynetuneOptimizer(Optimizer):
         for k, v in configspace.items():
             configspace_st[k] = configspaceHP2syneTuneHP(v)
         if self.fidelity_enabled:
-            configspace_st[self.fidelity_type] = self.max_budget
+            configspace_st[self.fidelity_type] = (
+                self.min_budget if not self.convert else int(
+                    self.conversion_factor * self.min_budget)
+            )
+
         return configspace_st
 
     def convert_to_trial(self, trial: SyneTrial) -> TrialInfo:  # type: ignore[override]
@@ -182,7 +190,12 @@ class SynetuneOptimizer(Optimizer):
         configs = copy.deepcopy(trial.config)
         budget = configs.pop(self.fidelity_type) if self.fidelity_type is not None else None
         configuration = Configuration(configuration_space=self.configspace, values=configs)
-        return TrialInfo(config=configuration, seed=None, budget=budget, instance=None)
+        return TrialInfo(
+            config=configuration,
+            seed=None,
+            budget=budget if not self.convert else budget / self.conversion_factor,
+            instance=None,
+        )
 
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
@@ -196,18 +209,23 @@ class SynetuneOptimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
+        # fixme: we should not always inquire new configs and add them to the brackets
+        #  instead we need to check if the optimizer wants to continue a config (and if the
+        #  bracket is full)
         trial_suggestion = self._solver.suggest(self.trial_counter)
 
-        if self.optimizer_name == "MOASHA":
-            trial_suggestion.trial_id = self.trial_counter
-            self._solver.on_trial_add(trial_suggestion)
-            self._solver._trial_info[self.trial_counter]
+        trial_suggestion.trial_id = self.trial_counter
+        self._solver.on_trial_add(trial_suggestion)
+        # self._solver._trial_info[self.trial_counter]
+        # if self.optimizer_name == "MOASHA":
+        #     pass
 
         trial = SyneTrial(
             trial_id=self.trial_counter,
             config=trial_suggestion.config,
             creation_time=datetime.datetime.now(),
         )
+        self.trial_counter += 1
         return self.convert_to_trial(trial=trial)
 
     def convert_to_synetrial(self, trial_info: TrialInfo) -> SyneTrial:
@@ -225,7 +243,10 @@ class SynetuneOptimizer(Optimizer):
         """
         syne_config = dict(trial_info.config)
         if self.fidelity_enabled:
-            syne_config[self.fidelity_type] = trial_info.budget
+            syne_config[self.fidelity_type] = (
+                trial_info.budget if not self.convert else int(
+                    self.conversion_factor * trial_info.budget)
+            )
         return SyneTrial(
             trial_id=self.trial_counter,
             config=syne_config,
@@ -254,18 +275,22 @@ class SynetuneOptimizer(Optimizer):
         else:
             experiment_result = {self.task.objectives[i]: cost[i] for i in range(len(cost))}
 
-        if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
-            experiment_result[self.fidelity_type] = trial_info.budget
+        if self.optimizer_name == "MOASHA":
+            experiment_result[self.fidelity_type] = (
+                trial_info.budget if not self.convert else int(
+                    self.conversion_factor * trial_info.budget)
+            )
             # del experiment_result[self.task.objectives]
 
             # self._solver.on_trial_add(trial=trial)
-        self.trial_counter += 1
+
 
         # whether to continue this configuration
-        self._solver.on_trial_result(trial=trial, result=experiment_result)
+        decision = self._solver.on_trial_result(trial=trial, result=experiment_result)
 
-        # book keeping in the optimizer
-        self._solver.on_trial_complete(trial=trial, result=experiment_result)
+        if decision == "STOP":
+            # book keeping in the optimizer
+            self._solver.on_trial_complete(trial=trial, result=experiment_result)
 
         # book keeping for us
         trial_result = trial.add_results(
@@ -322,24 +347,46 @@ class SynetuneOptimizer(Optimizer):
         """
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
+
         _optimizer_kwargs = {
-            "config_space": self.syne_tune_configspace,
             "metric": self.task.objectives,
             "mode": "min" if self.task.n_objectives == 1 else list(
                 np.repeat("min", self.task.n_objectives)),
         }
+
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
             _optimizer_kwargs["resource_attr"] = self.fidelity_type
             _optimizer_kwargs["max_t"] = self.max_budget
             # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit for synetune
 
+            # for floating point resources like trainsize, we need to convert them to integer for synetune
+            if "grace_period" in self.optimizer_kwargs and isinstance(
+                    self.optimizer_kwargs["grace_period"], float):
+                self.convert = True
+                _optimizer_kwargs["grace_period"] = int(
+                    self.conversion_factor * self.optimizer_kwargs["grace_period"])
+
+                if "max_t" in self.optimizer_kwargs:
+                    _optimizer_kwargs["max_t"] = int(self.conversion_factor * self.max_budget)
+
+                if "max_resource_level" in self.optimizer_kwargs:
+                    _optimizer_kwargs["max_resource_level"] = int(
+                        self.conversion_factor * self.optimizer_kwargs["max_resource_level"]
+                    )
+
+        self.syne_tune_configspace = self.convert_configspace(self.configspace)
+        _optimizer_kwargs["config_space"] = self.syne_tune_configspace
+
         self.optimizer_kwargs.update(_optimizer_kwargs)
 
         if self.optimizer_name == "MOASHA":
             self.metric = self.optimizer_kwargs["metrics"]
-            self.optimizer_kwargs["grace_period"] = self.min_budget
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
+
+        if self.optimizer_name in ["SyncMOBSTER"]:
+            del self.optimizer_kwargs["metrics"]
+            del self.optimizer_kwargs["time_attr"]
 
         return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
 

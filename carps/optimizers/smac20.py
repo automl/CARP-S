@@ -1,35 +1,42 @@
 from __future__ import annotations
 
-from typing import Any
+from dataclasses import asdict
+from typing import TYPE_CHECKING, Any
 
-from ConfigSpace import Configuration, ConfigurationSpace
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
 from rich import print as printr
-from dataclasses import asdict
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
-from smac.facade.abstract_facade import AbstractFacade
 from smac.multi_objective.parego import ParEGO
-from smac.runhistory import TrialInfo as SmacTrialInfo
-from smac.runhistory import TrialValue as SmacTrialValue
-from smac.runhistory import TrialKey as SmacTrialKey
+from smac.runhistory import (
+    TrialInfo as SmacTrialInfo,
+    TrialKey as SmacTrialKey,
+    TrialValue as SmacTrialValue,
+)
 from smac.scenario import Scenario
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.loggingutils import setup_logging
-from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent
+
+if TYPE_CHECKING:
+    from ConfigSpace import Configuration, ConfigurationSpace
+    from smac.facade.abstract_facade import AbstractFacade
+
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
+    from carps.utils.types import Incumbent
 
 setup_logging()
+
 
 def maybe_inst_add_scenario(smac_kwargs: dict[str, Any], key: str, scenario: Scenario) -> dict[str, Any]:
     if key in smac_kwargs:
         smac_kwargs[key] = smac_kwargs[key](scenario=scenario)
     return smac_kwargs
+
 
 class SMAC3Optimizer(Optimizer):
     def __init__(
@@ -56,7 +63,7 @@ class SMAC3Optimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space for Optimizer.
@@ -79,19 +86,17 @@ class SMAC3Optimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        trial_info = TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
-
-        return trial_info
+        return TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
 
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> float | list[float]:
-        """Target Function
+        """Target Function.
 
         Interface for the Problem.
 
@@ -106,7 +111,7 @@ class SMAC3Optimizer(Optimizer):
         instance : str | None, optional
             Instance, by default None
 
-        Returns
+        Returns:
         -------
         float | list[float]
             Cost as float or list[float], depending on the number of objectives.
@@ -116,12 +121,11 @@ class SMAC3Optimizer(Optimizer):
         return trial_value.cost
 
     def _setup_optimizer(self) -> AbstractFacade:
-        """
-        Setup SMAC.
+        """Setup SMAC.
 
         Retrieve defaults and instantiate SMAC.
 
-        Returns
+        Returns:
         -------
         SMAC4AC
             Instance of a SMAC facade.
@@ -150,11 +154,11 @@ class SMAC3Optimizer(Optimizer):
             smac_kwargs = OmegaConf.to_container(self.smac_cfg.smac_kwargs, resolve=True, enum_to_str=True)
 
         # Instantiate Scenario
-        scenario_kwargs = dict(
-            configspace=self.configspace,
+        scenario_kwargs = {
+            "configspace": self.configspace,
             # output_directory=Path(self.config.hydra.sweep.dir)
             # / "smac3_output",  # output directory is automatically set via config file
-        )
+        }
         # We always expect scenario kwargs from the user
         _scenario_kwargs = OmegaConf.to_container(self.smac_cfg.scenario, resolve=True)
         scenario_kwargs.update(_scenario_kwargs)
@@ -208,7 +212,7 @@ class SMAC3Optimizer(Optimizer):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
@@ -218,7 +222,7 @@ class SMAC3Optimizer(Optimizer):
             for callback in self.solver.optimizer._callbacks:
                 callback.on_start(self.solver.optimizer)
         smac_trial_info = self.solver.ask()
-        trial_info = TrialInfo(
+        return TrialInfo(
             config=smac_trial_info.config,
             instance=smac_trial_info.instance,
             budget=smac_trial_info.budget,
@@ -226,8 +230,7 @@ class SMAC3Optimizer(Optimizer):
             name=None,
             checkpoint=None,
         )
-        return trial_info
-    
+
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
 
@@ -241,9 +244,7 @@ class SMAC3Optimizer(Optimizer):
             trial value (cost, time, ...)
         """
         smac_trial_info = SmacTrialInfo(
-            config=trial_info.config,
-            instance=trial_info.instance,
-            budget=trial_info.budget,
+            config=trial_info.config, instance=trial_info.instance, budget=trial_info.budget,
             seed=trial_info.seed
         )
         additional_info = trial_value.additional_info
@@ -256,7 +257,7 @@ class SMAC3Optimizer(Optimizer):
             status=trial_value.status,
             starttime=trial_value.starttime,
             endtime=trial_value.endtime,
-            additional_info=additional_info
+            additional_info=additional_info,
         )
         self.solver.tell(info=smac_trial_info, value=smac_trial_value)
 
@@ -273,21 +274,20 @@ class SMAC3Optimizer(Optimizer):
                     # Initialize weights of ParEGO
                     mo.update_on_iteration_start()
             incs = self.solver.intensifier.get_incumbents()
-            tis = [self.solver.runhistory.get_trials(c)[0] for c in incs] # first trial because only one budget #TODO update for momf
+            tis = [
+                self.solver.runhistory.get_trials(c)[0] for c in incs
+            ]  # first trial because only one budget #TODO update for momf
             tks = [
                 SmacTrialKey(
                     config_id=self.solver.runhistory.get_config_id(ti.config),
                     instance=ti.instance,
                     seed=ti.seed,
-                    budget=ti.budget
-                ) for ti in tis
+                    budget=ti.budget,
+                )
+                for ti in tis
             ]
             tvs = [self.solver.runhistory[k] for k in tks]
-            tvs = [
-                TrialValue(
-                    **asdict(tv)
-                ) for tv in tvs
-            ]
-            incumbent_tuple = list(zip(tis, tvs))
+            tvs = [TrialValue(**asdict(tv)) for tv in tvs]
+            incumbent_tuple = list(zip(tis, tvs, strict=False))
 
         return incumbent_tuple

@@ -1,30 +1,36 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-from py_experimenter.result_processor import ResultProcessor
-from rich import inspect
-from rich import print as printr
+from rich import (
+    inspect,
+    print as printr,
+)
 
-from carps.benchmarks.problem import Problem
-from carps.optimizers.optimizer import Optimizer
 from carps.utils.exceptions import NotSupportedError
+
+if TYPE_CHECKING:
+    from py_experimenter.result_processor import ResultProcessor
+
+    from carps.benchmarks.problem import Problem
+    from carps.optimizers.optimizer import Optimizer
 
 
 def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> Problem:
-    """Make Problem
+    """Make Problem.
 
     Parameters
     ----------
     cfg : DictConfig
         Global configuration.
     result_processor : ResultProcessor
-        Py experimenter result processor, important for logging. Necessary to 
+        Py experimenter result processor, important for logging. Necessary to
         instantiate database logger.
 
-    Returns
+    Returns:
     -------
     Problem
         Target problem.
@@ -34,19 +40,18 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
     if "loggers" in cfg:
         for logger in cfg.loggers:
             if "DatabaseLogger" in logger._target_:
-                kwargs = dict(result_processor=result_processor)
+                kwargs = {"result_processor": result_processor}
             elif "FileLogger" in logger._target_:
-                kwargs = dict(directory=cfg.outdir)
+                kwargs = {"directory": cfg.outdir}
             else:
-                kwargs = dict()
+                kwargs = {}
             logger = instantiate(logger)(**kwargs)
             loggers.append(logger)
-    problem = instantiate(problem_cfg, loggers=loggers)
-    return problem
+    return instantiate(problem_cfg, loggers=loggers)
 
 
 def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
-    """Make Optimizer
+    """Make Optimizer.
 
     Parameters
     ----------
@@ -57,15 +62,13 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
     problem : Problem
         Target problem
 
-    Returns
+    Returns:
     -------
     Optimizer
         Instantiated optimizer.
     """
     optimizer_cfg = cfg.optimizer
-    optimizer = instantiate(optimizer_cfg)(problem=problem,
-                                          task=cfg.task,
-                                           loggers=problem.loggers)
+    optimizer = instantiate(optimizer_cfg)(problem=problem, task=cfg.task, loggers=problem.loggers)
     if "optimizer_wrappers" in cfg:
         for wrapper in cfg.optimizer_wrappers:
             optimizer = wrapper(optimizer)
@@ -82,7 +85,7 @@ def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -
     cfg : DictConfig
         Global configuration.
     result_processor : ResultProcessor
-        Py experimenter result processor, important for logging. Necessary to 
+        Py experimenter result processor, important for logging. Necessary to
         instantiate database logger.
 
     """
@@ -108,5 +111,3 @@ def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -
         print("Something went wrong:")
         print(e)
         raise e
-
-    return None

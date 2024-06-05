@@ -1,15 +1,20 @@
 from __future__ import annotations
 
-import numpy as np
-from ConfigSpace import Configuration, ConfigurationSpace
+from typing import TYPE_CHECKING
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
-from carps.optimizers.optimizer import Optimizer, SearchSpace
-from carps.utils.task import Task
-from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent
+import numpy as np
+
+from carps.optimizers.optimizer import Optimizer
 from carps.utils.pareto_front import pareto
+from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from ConfigSpace import Configuration, ConfigurationSpace
+
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.task import Task
+    from carps.utils.types import Incumbent, SearchSpace
 
 
 class RandomSearchOptimizer(Optimizer):
@@ -47,11 +52,9 @@ class RandomSearchOptimizer(Optimizer):
 
     def _setup_optimizer(self) -> None:
         return None
-    
-    def get_pareto_front(self) -> list[tuple[TrialInfo,TrialValue]]:
-        """
-        Return the pareto front for multi-objective optimization
-        """
+
+    def get_pareto_front(self) -> list[tuple[TrialInfo, TrialValue]]:
+        """Return the pareto front for multi-objective optimization."""
         if self.task.is_multifidelity:
             max_budget = np.max([v[0].budget for v in self.history])
             results_on_highest_fidelity = np.array([v for v in self.history if v[0].budget == max_budget])
@@ -61,10 +64,9 @@ class RandomSearchOptimizer(Optimizer):
         else:
             costs = np.array([v[1].cost for v in self.history])
             front = np.array(self.history)[pareto(costs)]
-        return front.tolist()      
+        return front.tolist()
 
-    def get_current_incumbent(self) \
-            -> Incumbent:
+    def get_current_incumbent(self) -> Incumbent:
         if self.task.n_objectives == 1:
             incumbent_tuple = min(self.history, key=lambda x: x[1].cost)
         else:

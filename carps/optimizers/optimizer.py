@@ -2,23 +2,24 @@ from __future__ import annotations
 
 import time
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from ConfigSpace import ConfigurationSpace
 from omegaconf import DictConfig, OmegaConf
 
-from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
-from carps.utils.types import Incumbent, SearchSpace
+
+if TYPE_CHECKING:
+    from ConfigSpace import ConfigurationSpace
+
+    from carps.benchmarks.problem import Problem
+    from carps.loggers.abstract_logger import AbstractLogger
+    from carps.utils.types import Incumbent, SearchSpace
 
 
 class Optimizer(ABC):
     def __init__(
-            self,
-            problem: Problem,
-            task: Task | dict | DictConfig,
+            self, problem: Problem, task: Task | dict | DictConfig,
             loggers: list[AbstractLogger] | None = None
     ) -> None:
         super().__init__()
@@ -71,7 +72,7 @@ class Optimizer(ABC):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         SearchSpace
             Optimizer's search space.
@@ -84,7 +85,7 @@ class Optimizer(ABC):
 
         This ensures that the problem can be evaluated with a unified API.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
@@ -95,7 +96,7 @@ class Optimizer(ABC):
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
-        Returns
+        Returns:
         -------
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
@@ -120,7 +121,7 @@ class Optimizer(ABC):
         return cont
 
     def _run(self) -> Incumbent:
-        """Run Optimizer on Problem"""
+        """Run Optimizer on Problem."""
         start_time = time.time()
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()
@@ -132,7 +133,7 @@ class Optimizer(ABC):
                     budget=trial_info.budget,
                     normalized_budget=trial_info.budget / self.task.max_budget,
                     checkpoint=trial_info.checkpoint,
-                    name=trial_info.name
+                    name=trial_info.name,
                 )
             trial_value = self.problem.evaluate(trial_info=trial_info)
             self.virtual_time_elapsed_seconds += trial_value.virtual_time
@@ -158,7 +159,7 @@ class Optimizer(ABC):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
@@ -181,7 +182,6 @@ class Optimizer(ABC):
             trial value (cost, time, ...)
         """
         raise NotImplementedError
-    
 
     # def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
     # def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:

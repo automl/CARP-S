@@ -5,12 +5,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List
-
-from dehb import DEHB
+from typing import TYPE_CHECKING, Any
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
+from dehb import DEHB
 
 if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
@@ -30,7 +29,7 @@ class DEHBOptimizer(Optimizer):
         problem: Problem,
         dehb_cfg: DictConfig,
         task: Task,
-        loggers: List[AbstractLogger] | None = None,
+            loggers: list[AbstractLogger] | None = None,
     ) -> None:
         super().__init__(problem, task, loggers)
 
@@ -47,18 +46,15 @@ class DEHBOptimizer(Optimizer):
         self.history: dict[str, dict[str, Any]] = {}
 
     def _setup_optimizer(self) -> Any:
-        dehb_opt = DEHB(
+        return DEHB(
             cs=self.configspace,
             min_fidelity=self.task.min_budget,
             max_fidelity=self.task.max_budget,
             n_workers=self.task.n_workers,
             **self.dehb_cfg,
         )
-        return dehb_opt
 
-    def convert_configspace(
-        self, configspace: ConfigurationSpace
-    ) -> ConfigurationSpace:
+    def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
 
         Here, we don't need to convert.
@@ -68,7 +64,7 @@ class DEHBOptimizer(Optimizer):
         configspace : ConfigurationSpace
             Configuration space from Problem.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space for Optimizer.
@@ -97,7 +93,7 @@ class DEHBOptimizer(Optimizer):
         budget : float, optional
             Budget of the trial, by default None
 
-        Returns
+        Returns:
         -------
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
@@ -111,7 +107,7 @@ class DEHBOptimizer(Optimizer):
         raise `carps.utils.exceptions.AskAndTellNotSupportedError`
         in child class.
 
-        Returns
+        Returns:
         -------
         TrialInfo
             trial info (config, seed, instance, budget)
@@ -119,13 +115,12 @@ class DEHBOptimizer(Optimizer):
         info = self.solver.ask()
         unique_name = f"{info['config_id']}_{info['fidelity']}_{self.dehb_cfg.seed}"
         self.history[unique_name] = info
-        trial_info = self.convert_to_trial(
+        return self.convert_to_trial(
             config=info["config"],
             name=unique_name,
             seed=self.dehb_cfg.seed,
             budget=info["fidelity"],
         )
-        return trial_info
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
@@ -148,16 +143,14 @@ class DEHBOptimizer(Optimizer):
 
         dehb_job_info = self.history[unique_name]
         if isinstance(trial_value.cost, list):
-            raise NotImplementedError(
-                "Multiobjective optimization not yet implemented for DEHB!"
-            )
+            raise NotImplementedError("Multiobjective optimization not yet implemented for DEHB!")
         dehb_result = {"fitness": float(trial_value.cost), "cost": (trial_value.time)}
         self.solver.tell(dehb_job_info, dehb_result)
 
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
 
-        Returns
+        Returns:
         -------
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.

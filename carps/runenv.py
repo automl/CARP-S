@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import hydra
 from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig
 
 from carps.utils.loggingutils import get_logger, setup_logging
+
+if TYPE_CHECKING:
+    from omegaconf import DictConfig
 
 setup_logging()
 logger = get_logger(__file__)
@@ -33,9 +36,7 @@ def main(cfg: DictConfig) -> None:
     logger.info(f"Selected environment: {env_location}")
     command = f"source ~/.bashrc; micromamba run -p {env_location} {runcommand}"
     logger.info(command)
-    subprocess.run(command, shell=True)
-
-    return None
+    subprocess.run(command, shell=True, check=False)
 
 
 if __name__ == "__main__":

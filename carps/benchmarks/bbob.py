@@ -1,28 +1,24 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import ioh
 from ConfigSpace import ConfigurationSpace, Float
 
 from carps.benchmarks.manyaffinebbob import register_many_affine_functions
 from carps.benchmarks.problem import Problem
-from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.trials import TrialInfo, TrialValue
+
+if TYPE_CHECKING:
+    from carps.loggers.abstract_logger import AbstractLogger
 
 register_many_affine_functions()
 
 
 class BBOBProblem(Problem):
-    def __init__(
-            self,
-            fid: int,
-            instance: int,
-            dimension: int,
-            seed: int,
-            loggers: list[AbstractLogger] | None = None
-    ):
+    def __init__(self, fid: int, instance: int, dimension: int, seed: int,
+                 loggers: list[AbstractLogger] | None = None):
         super().__init__(loggers)
 
         self._configspace, self._problem = get_bbob_problem(fid=fid, instance=instance, dimension=dimension, seed=seed)
@@ -35,7 +31,7 @@ class BBOBProblem(Problem):
     def configspace(self) -> ConfigurationSpace:
         """Return configuration space.
 
-        Returns
+        Returns:
         -------
         ConfigurationSpace
             Configuration space.
@@ -50,7 +46,7 @@ class BBOBProblem(Problem):
         trial_info : TrialInfo
             Dataclass with configuration, seed, budget, instance.
 
-        Returns
+        Returns:
         -------
         float
             Cost
@@ -62,13 +58,11 @@ class BBOBProblem(Problem):
         endtime = time.time()
         T = endtime - starttime
 
-        trial_value = TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
-
-        return trial_value
+        return TrialValue(cost=cost, time=T, starttime=starttime, endtime=endtime)
 
 
 def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tuple[ConfigurationSpace, Any]:
-    r"""Get BBOB problem
+    r"""Get BBOB problem.
 
     Parameters
     ----------
@@ -81,7 +75,7 @@ def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tupl
     seed : int
         Seed for configuration space.
 
-    Returns
+    Returns:
     -------
     tuple[ConfigurationSpace, Any]
         Configuration space, target function.

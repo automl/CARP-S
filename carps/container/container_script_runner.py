@@ -1,16 +1,20 @@
+from __future__ import annotations
+
 import json
 import os
+from typing import TYPE_CHECKING
 
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
-from py_experimenter.result_processor import ResultProcessor
+
+if TYPE_CHECKING:
+    from py_experimenter.result_processor import ResultProcessor
 
 
-def py_experimenter_evaluate(parameters: dict,
-                             result_processor: ResultProcessor,
+def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor,
                              custom_config: dict):
-    config = parameters['config']
+    config = parameters["config"]
     cfg_dict = json.loads(config)
 
     job_id = os.environ["BENCHMARKING_JOB_ID"]
@@ -42,11 +46,13 @@ def main() -> None:
     else:
         database_credential_file_path = None
 
-    experimenter = PyExperimenter(experiment_configuration_file_path=experiment_configuration_file_path,
-                                  name="example_notebook",
-                                  database_credential_file_path=database_credential_file_path,
-                                  log_file=f"logs/{slurm_job_id}.log",
-                                  use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel
+    experimenter = PyExperimenter(
+        experiment_configuration_file_path=experiment_configuration_file_path,
+        name="example_notebook",
+        database_credential_file_path=database_credential_file_path,
+        log_file=f"logs/{slurm_job_id}.log",
+        use_ssh_tunnel=OmegaConf.load(
+            experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
     )
 
     experimenter.execute(py_experimenter_evaluate, max_experiments=1)

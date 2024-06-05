@@ -1,3 +1,4 @@
+scikit-learn
 mf-prior-bench
 
 # PD1
