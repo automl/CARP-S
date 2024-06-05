@@ -20,11 +20,12 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
     df["set"] = set_id
     return df, df_cfg
 
-def get_MO_fullset(
+def get_fullset(
         rundir: str, 
+        optimizer_ids: list[str],
         output_dir: str = ".",
         normalize_performance: bool = True,
-        optimizer_ids: list[str] = ["RandomSearch", "Optuna-MO", "Nevergrad-DE"]
+        
 ) -> pd.DataFrame:
     if len(optimizer_ids) != 3:
         raise ValueError(f"Please select only three optimizers for the benchmark subselection. Current selection: {optimizer_ids}."\
@@ -48,4 +49,7 @@ def get_MO_fullset(
 
 
 if __name__ == "__main__":
-    fire.Fire(get_MO_fullset)
+    # in the subselection dir
+    # python get_fullset.py ../runs_MO '["RandomSearch","Optuna-MO","Nevergrad-DE"]' MO_0
+    # python get_fullset.py ../runs_MOMF '["RandomSearch","SMAC3-MOMF-GP","Nevergrad-DE"]' MOMF_0/default
+    fire.Fire(get_fullset)
