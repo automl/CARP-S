@@ -1,0 +1,37 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: multiobjective/10/dev/hpobench/MO/tab/ml/xgboost/14965
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  model: xgboost
+  task_id: 14965
+  metric:
+  - function_value
+  - cost
+  budget_type: null
+  seed: ${seed}
+task:
+  n_trials: 100
+  time_budget: null
+  n_workers: 1
+  n_objectives: 2
+  objectives:
+  - function_value
+  - cost
+  is_multifidelity: false
+  fidelity_type: null
+  min_budget: null
+  max_budget: null
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: tabular
+  has_virtual_time: false
+  deterministic: false
+  dimensions: 4
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 4
+  search_space_n_integers: 0
+  search_space_n_floats: 0
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false

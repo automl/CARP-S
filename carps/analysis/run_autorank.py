@@ -136,7 +136,7 @@ def calc_critical_difference(
     return cd_evaluation(
         df_crit,
         maximize_metric=False,
-        ignore_non_significance=False,
+        ignore_non_significance=True,
         output_path=f"figures/critd/cd{identifier}",
         figsize=figsize,
     )
@@ -306,9 +306,11 @@ def cd_evaluation(
         None,
     )
     print(res.rankdf)
+    is_significant = True
     if result.pvalue >= result.alpha:
         if ignore_non_significance:
             warnings.warn("Result is not significant and results of the plot may be misleading!")
+            is_significant = False
         else:
             raise ValueError(
                 "Result is not significant and results of the plot may be misleading. If you still want to see the CD plot, set"
@@ -319,7 +321,10 @@ def cd_evaluation(
     fig, ax = plt.subplots(figsize=figsize)
     plt.rcParams.update({"font.size": 16})
     _custom_cd_diagram(result, False, ax, figsize[0])  # order == "descending", ax, 8)
-    if plt_title:
+    if plt_title or not is_significant:
+        plt_title = ""
+        if not is_significant:
+            plt_title += "(non-significant)"
         plt.title(plt_title)
     plt.tight_layout()
     if output_path:
