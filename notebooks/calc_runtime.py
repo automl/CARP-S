@@ -40,6 +40,21 @@ runtime_df = df_final.groupby(by=["scenario"])["time"].sum() / 3600
 runtime_df.to_csv("runtimes.csv")
 
 
+df_rt = pd.read_csv("runtimes.csv", index_col="scenario").map(int)
+total = df_rt.sum()
+
+total = pd.DataFrame(total).T
+total.index = ['total']
+
+df_rt = pd.concat([df_rt, total], axis=0)
+
+latex_str = df_rt.to_latex(
+    buf="runtimes.tex",
+    caption="Runtimes in CPU Hours per Scenario",
+    label="tab:runtimes"
+)
+
+
 
 
 
