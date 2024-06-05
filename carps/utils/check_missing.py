@@ -84,8 +84,11 @@ def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
         data = check_missing(rundir=rundir)
         logger.info("Done!")
 
-    generate_commands(data, RunStatus.MISSING, rundir)
-    generate_commands(data, RunStatus.TRUNCATED, rundir)
+    if len(data) > 0:
+        generate_commands(data, RunStatus.MISSING, rundir)
+        generate_commands(data, RunStatus.TRUNCATED, rundir)
+    else:
+        logger.info(f"But nothing found at {rundir}.")
 
 
 if __name__ == "__main__":
