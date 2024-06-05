@@ -27,3 +27,20 @@ pip install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
 pip install -r container_recipes/benchmarks/BBOB/BBOB_requirements.txt
 ```
 
+For some benchmarks, it is additionally necessary to download data, 
+such as surrogate models, in order to run the benchmark: 
+
+-   For HPOB, you can download the surrogate benchmarks with
+    ```bash
+    bash container_recipes/benchmarks/HPOB/download_data.sh
+    ```
+
+-   For MFPBench, you can download the surrogate benchmarks with
+    ```bash
+    bash container_recipes/benchmarks/MFPBench/download_data.sh
+    ```
+
+-   For YAHPO, you can download the required surrogate benchmarks and meta-data with
+    ```bash
+    bash container_recipes/benchmarks/YAHPO/prepare_yahpo.sh
+    ```
