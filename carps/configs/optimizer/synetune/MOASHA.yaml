@@ -16,6 +16,7 @@ optimizer:
     max_t: ${task.max_budget}
     reduction_factor: 3
     mode: 'min'
+    brackets: 5
   #max_budget: ${task.max_budget}
 
 
