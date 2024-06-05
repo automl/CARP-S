@@ -124,13 +124,16 @@ class Optimizer(ABC):
         start_time = time.time()
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()
+            normalized_budget = 1
+            if self.task.max_budget is not None and trial_info.budget is not None:
+                normalized_budget = trial_info.budget / self.task.max_budget
             if self.task.is_multifidelity:
                 trial_info = TrialInfo(
                     config=trial_info.config,
                     instance=trial_info.instance,
                     seed=trial_info.seed,
                     budget=trial_info.budget,
-                    normalized_budget=trial_info.budget / self.task.max_budget,
+                    normalized_budget=normalized_budget,
                     checkpoint=trial_info.checkpoint,
                     name=trial_info.name,
                 )
