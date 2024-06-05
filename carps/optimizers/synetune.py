@@ -106,6 +106,7 @@ class SynetuneOptimizer(Optimizer):
         task: Task,
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
+            conversion_factor: int = 1000,
     ) -> None:
         super().__init__(problem, task, loggers)
         self.fidelity_enabled = False
@@ -155,8 +156,11 @@ class SynetuneOptimizer(Optimizer):
         for k, v in configspace.items():
             configspace_st[k] = configspaceHP2syneTuneHP(v)
         if self.fidelity_enabled:
-            configspace_st[self.fidelity_type] = self.max_budget if not self.convert else int(
-                1000 * self.max_budget)
+            configspace_st[self.fidelity_type] = (
+                self.max_budget if not self.convert else int(
+                    self.conversion_factor * self.max_budget)
+            )
+
         return configspace_st
 
     def convert_to_trial(self, trial: SyneTrial) -> TrialInfo:  # type: ignore[override]
@@ -182,8 +186,10 @@ class SynetuneOptimizer(Optimizer):
         budget = configs.pop(self.fidelity_type) if self.fidelity_type is not None else None
         configuration = Configuration(configuration_space=self.configspace, values=configs)
         return TrialInfo(
-            config=configuration, seed=None, budget=budget if not self.convert else budget / 1000,
-            instance=None
+            config=configuration,
+            seed=None,
+            budget=budget if not self.convert else budget / self.conversion_factor,
+            instance=None,
         )
 
     def ask(self) -> TrialInfo:
@@ -221,8 +227,10 @@ class SynetuneOptimizer(Optimizer):
         """
         syne_config = dict(trial_info.config)
         if self.fidelity_enabled:
-            syne_config[self.fidelity_type] = trial_info.budget if not self.convert else int(
-                1000 * trial_info.budget)
+            syne_config[self.fidelity_type] = (
+                trial_info.budget if not self.convert else int(
+                    self.conversion_factor * trial_info.budget)
+            )
         return SyneTrial(
             trial_id=self.trial_counter,
             config=syne_config,
@@ -253,7 +261,8 @@ class SynetuneOptimizer(Optimizer):
 
         if self.optimizer_name == "MOASHA":
             experiment_result[self.fidelity_type] = (
-                trial_info.budget if not self.convert else int(1000 * trial_info.budget)
+                trial_info.budget if not self.convert else int(
+                    self.conversion_factor * trial_info.budget)
             )
             # del experiment_result[self.task.objectives]
 
@@ -327,14 +336,15 @@ class SynetuneOptimizer(Optimizer):
                     self.optimizer_kwargs["grace_period"], float):
                 self.convert = True
                 _optimizer_kwargs["grace_period"] = int(
-                    1000 * self.optimizer_kwargs["grace_period"])
+                    self.conversion_factor * self.optimizer_kwargs["grace_period"])
 
                 if "max_t" in self.optimizer_kwargs:
-                    _optimizer_kwargs["max_t"] = int(1000 * self.max_budget)
+                    _optimizer_kwargs["max_t"] = int(self.conversion_factor * self.max_budget)
 
                 if "max_resource_level" in self.optimizer_kwargs:
                     _optimizer_kwargs["max_resource_level"] = int(
-                        1000 * self.optimizer_kwargs["max_resource_level"])
+                        self.conversion_factor * self.optimizer_kwargs["max_resource_level"]
+                    )
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         _optimizer_kwargs["config_space"] = self.syne_tune_configspace
