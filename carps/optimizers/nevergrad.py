@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 import ConfigSpace.hyperparameters as CSH
 import nevergrad as ng
+from nevergrad.parametrization import parameter
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 
@@ -81,6 +82,10 @@ class NevergradOptimizer(Optimizer):
         super().__init__(problem, task, loggers)
 
         self.fidelity_enabled = False
+        self.fidelity_type = None
+        if self.task.is_multifidelity:
+            self.fidelity_enabled = True
+            self.fidelity_type: str = self.task.fidelity_type
         self.task = task
         self.configspace = problem.configspace
         self.ng_space = self.convert_configspace(self.configspace)
@@ -138,6 +143,7 @@ class NevergradOptimizer(Optimizer):
         config: Configuration,
         name: str | None = None,
         seed: int | None = None,
+        budget: float | None = None,
     ) -> TrialInfo:
         """Convert proposal from Nevergrad to TrialInfo.
 
@@ -161,7 +167,7 @@ class NevergradOptimizer(Optimizer):
             config=config,
             name=name,
             seed=self.nevergrad_cfg.seed,
-            budget=None,
+            budget=budget,
             instance=None,
         )
 
@@ -177,13 +183,14 @@ class NevergradOptimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
-        config = self.solver.ask()
+        config: parameter.Parameter = self.solver.ask()
         unique_name = f"{self.counter}_{config.value}_{self.nevergrad_cfg.seed}"
         self.history[unique_name] = (config, None)
         trial_info = self.convert_to_trial(
             config=Configuration(self.configspace, values=config.value),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
+            budget=None if not self.fidelity_enabled else self.task.max_budget
         )
         self.counter += 1
         return trial_info
