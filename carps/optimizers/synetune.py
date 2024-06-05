@@ -123,6 +123,8 @@ class SynetuneOptimizer(Optimizer):
         self.fidelity_type: str = self.task.fidelity_type
         self.configspace = self.problem.configspace
         self.metric: str | list[str] = self.task.objectives
+        if len(self.metric) == 1:
+            self.metric = self.metric[0]
         self.conversion_factor = conversion_factor
         self.trial_counter: int = 0
 
@@ -323,7 +325,7 @@ class SynetuneOptimizer(Optimizer):
             self.optimizer_kwargs = {}
 
         _optimizer_kwargs = {
-            "metric": self.task.objectives,
+            "metric": self.metric,
             "mode": "min" if self.task.n_objectives == 1 else list(np.repeat("min", self.task.n_objectives)),
         }
 
@@ -345,6 +347,8 @@ class SynetuneOptimizer(Optimizer):
                     _optimizer_kwargs["max_resource_level"] = int(
                         self.conversion_factor * self.optimizer_kwargs["max_resource_level"]
                     )
+
+            print(_optimizer_kwargs)
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         _optimizer_kwargs["config_space"] = self.syne_tune_configspace
