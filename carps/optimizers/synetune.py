@@ -123,7 +123,7 @@ class SynetuneOptimizer(Optimizer):
         self.fidelity_type: str = self.task.fidelity_type
         self.configspace = self.problem.configspace
         self.metric: str | list[str] = self.task.objectives
-
+        self.conversion_factor = conversion_factor
         self.trial_counter: int = 0
 
         self.optimizer_name = optimizer_name
@@ -355,6 +355,11 @@ class SynetuneOptimizer(Optimizer):
             self.metric = self.optimizer_kwargs["metrics"]
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
+
+        if self.optimizer_name in ['SyncMOBSTER']:
+            del self.optimizer_kwargs['metrics']
+            del self.optimizer_kwargs['time_attr']
+
 
         return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
 
