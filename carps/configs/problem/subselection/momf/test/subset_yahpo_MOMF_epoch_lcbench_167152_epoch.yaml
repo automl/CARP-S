@@ -1,0 +1,36 @@
+# @package _global_
+benchmark_id: YAHPO
+problem_id: momf/9/test/yahpo/MOMF/epoch/lcbench/167152/epoch
+problem:
+  _target_: carps.benchmarks.yahpo.YahpoProblem
+  bench: lcbench
+  instance: '167152'
+  budget_type: epoch
+  metric:
+  - val_accuracy
+  - val_cross_entropy
+task:
+  n_trials: 126
+  time_budget: null
+  n_workers: 1
+  n_objectives: 2
+  objectives:
+  - val_accuracy
+  - val_cross_entropy
+  is_multifidelity: true
+  fidelity_type: epoch
+  min_budget: 1
+  max_budget: 52
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: surrogate
+  has_virtual_time: true
+  deterministic: true
+  dimensions: 7
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 0
+  search_space_n_integers: 3
+  search_space_n_floats: 4
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false
