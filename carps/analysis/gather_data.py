@@ -285,6 +285,7 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger=None) -> pd.DataFrame:
         logs[c] = logs[c].astype("str")
     return logs
 
+
 def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, pd.DataFrame]:
     logs = []
     for p in paths:
