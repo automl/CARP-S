@@ -1,6 +1,6 @@
 import datetime
 
-name = "SMACBenchmarking"
+name = "CARP-S"
 package_name = "carps"
 author = "AutoML"
 author_email = "smac@ai.uni-hannover.de"
