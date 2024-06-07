@@ -43,5 +43,6 @@ if __name__ == "__main__":
     # python subselection/create_subset_configs.py subselection/BB_2/default/subset_30.csv subselection/BB_2/default/subset_complement_subset_30.csv blackbox
     # python subselection/create_subset_configs.py subselection/MF_1/lognorm/subset_20.csv subselection/MF_1/lognorm/subset_complement_subset_20.csv multifidelity
     # python subselection/create_subset_configs.py subselection/MO_0/lognorm/subset_10.csv subselection/MO_0/lognorm/subset_complement_subset_10.csv multiobjective
+    # python subselection/create_subset_configs.py subselection/MOMF_0/lognorm/subset_9.csv subselection/MOMF_0/lognorm/subset_complement_subset_9.csv momf
     fire.Fire(create_subset_configs)
 

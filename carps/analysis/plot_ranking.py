@@ -27,7 +27,11 @@ def plot_ranking(
     identifier = f"{scenario}_{set_id}"
     label = f"tab:stat_results_{identifier}"
     result = calc_critical_difference(gdf, identifier=identifier, figsize=(8, 3), perf_col=perf_col)
-    create_report(result)
+    print(result)
+    try: 
+        create_report(result)
+    except Exception as e:
+        print(e)
     table_str = custom_latex_table(result, label=label)
     fn = Path("figures/critd/" + label[len("tab:") :] + ".tex")
     fn.write_text(table_str)
