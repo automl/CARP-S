@@ -47,7 +47,7 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
         weights = None
         if hp.weights is not None:
             weights = np.asarray(hp.weights) / np.sum(hp.weights)
-        return Categorical(hp.choices, name=hp.name, weights=weights)
+        return Categorical(hp.choices, name=hp.name, prior=weights)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
         raise ValueError("Ordinal hyperparameters are not supported by Scikit-Optimize!")
     elif isinstance(hp, CSH.Constant):
@@ -114,6 +114,7 @@ class SkoptOptimizer(Optimizer):
         configuration = CS.Configuration(
             configuration_space=self.configspace,
             values={hp.name: value for hp, value in zip(self.configspace.get_hyperparameters(), config, strict=False)},
+            allow_inactive_with_values=True,
         )
         assert list(configuration.keys()) == list(self.configspace.get_hyperparameter_names())
         assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]

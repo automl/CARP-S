@@ -85,21 +85,6 @@ def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
         raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
-def remove_value_for_inactive_hp(
-    configuration: Configuration, configuration_space: ConfigurationSpace
-) -> Configuration:
-    vector = configuration.get_array()
-    active_hyperparameters = configuration_space.get_active_hyperparameters(configuration)
-
-    for hp_name, _hyperparameter in configuration_space._hyperparameters.items():
-        hp_value = vector[configuration_space._hyperparameter_idx[hp_name]]
-        active = hp_name in active_hyperparameters
-
-        if not active and not np.isnan(hp_value):
-            vector[configuration_space._hyperparameter_idx[hp_name]] = np.nan
-    return Configuration(configuration_space=configuration_space, vector=vector)
-
-
 def HEBOcfg2ConfigSpacecfg(
     hebo_suggestion: pd.DataFrame,
     design_space: DesignSpace,
@@ -116,6 +101,9 @@ def HEBOcfg2ConfigSpacecfg(
         HEBO design space
     config_space : ConfigurationSpace
         ConfigSpace configuration space
+    allow_inactive_with_values : bool
+        Allow values for inactive hyperparameters. This is relevant if the space has
+        conditionals but the optimizer does not support them.
 
     Returns:
     -------
@@ -139,10 +127,9 @@ def HEBOcfg2ConfigSpacecfg(
             if isinstance(hp_k, OrdinalHyperparameter):
                 hyp[k] = hp_k.sequence[hyp[k]]
 
-    configuration = Configuration(
+    return Configuration(
         configuration_space=config_space, values=hyp, allow_inactive_with_values=allow_inactive_with_values
     )
-    return remove_value_for_inactive_hp(configuration, config_space)
 
 
 def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
@@ -191,8 +178,9 @@ class HEBOOptimizer(Optimizer):
         self.configspace = self.problem.configspace
 
         if len(self.configspace.get_conditions()) > 0:
-            msg = "HEBO does not support conditional search spaces."
-            raise RuntimeError(msg)
+            pass
+            # msg = "HEBO does not support conditional search spaces."
+            # raise RuntimeError(msg)
 
         self.hebo_configspace = self.convert_configspace(self.configspace)
         self.metric = getattr(problem, "metric", "cost")
@@ -252,7 +240,10 @@ class HEBOOptimizer(Optimizer):
         if len(rec) > 1:
             raise ValueError(f"Only one suggestion is ok, got {len(rec)}.")
         config = HEBOcfg2ConfigSpacecfg(
-            hebo_suggestion=rec, design_space=self.hebo_configspace, config_space=self.problem.configspace
+            hebo_suggestion=rec,
+            design_space=self.hebo_configspace,
+            config_space=self.problem.configspace,
+            allow_inactive_with_values=True,
         )
         return TrialInfo(config=config, instance=None, budget=None, seed=None)
 
@@ -358,12 +349,11 @@ class HEBOOptimizer(Optimizer):
     def get_current_incumbent(self) -> Incumbent:
         best_x = self.solver.best_x
         best_y = self.solver.best_y
-        print(best_x)
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=best_x,
             design_space=self.hebo_configspace,
             config_space=self.problem.configspace,
-            allow_inactive_with_values=False,
+            allow_inactive_with_values=True,
         )
         trial_info = TrialInfo(config=config)
         trial_value = TrialValue(cost=best_y)

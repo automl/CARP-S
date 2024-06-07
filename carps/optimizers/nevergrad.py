@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING
 
 import ConfigSpace.hyperparameters as CSH
 import nevergrad as ng
-from nevergrad.parametrization import parameter
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
 
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
         ConfiguredOptimizer as ConfNGOptimizer,
         Optimizer as NGOptimizer,
     )
+    from nevergrad.parametrization import parameter
     from omegaconf import DictConfig
 
     from carps.benchmarks.problem import Problem
@@ -187,10 +187,10 @@ class NevergradOptimizer(Optimizer):
         unique_name = f"{self.counter}_{config.value}_{self.nevergrad_cfg.seed}"
         self.history[unique_name] = (config, None)
         trial_info = self.convert_to_trial(
-            config=Configuration(self.configspace, values=config.value),
+            config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
-            budget=None if not self.fidelity_enabled else self.task.max_budget
+            budget=None if not self.fidelity_enabled else self.task.max_budget,
         )
         self.counter += 1
         return trial_info
@@ -249,7 +249,7 @@ class NevergradOptimizer(Optimizer):
             if cost is None:
                 raise ValueError(f"Tried to get Incumbent without calling tell() for config {incumbent}!")
             trial_info = self.convert_to_trial(
-                config=Configuration(self.configspace, values=incumbent),
+                config=Configuration(self.configspace, values=incumbent, allow_inactive_with_values=True),
                 name=unique_name,
                 seed=self.nevergrad_cfg.seed,
             )

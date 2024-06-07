@@ -106,7 +106,7 @@ class SynetuneOptimizer(Optimizer):
         task: Task,
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
-            conversion_factor: int = 1000,
+        conversion_factor: int = 1000,
     ) -> None:
         super().__init__(problem, task, loggers)
         self.fidelity_enabled = False
@@ -159,8 +159,7 @@ class SynetuneOptimizer(Optimizer):
             configspace_st[k] = configspaceHP2syneTuneHP(v)
         if self.fidelity_enabled:
             configspace_st[self.fidelity_type] = (
-                self.max_budget if not self.convert else int(
-                    self.conversion_factor * self.max_budget)
+                self.max_budget if not self.convert else int(self.conversion_factor * self.max_budget)
             )
 
         return configspace_st
@@ -186,7 +185,9 @@ class SynetuneOptimizer(Optimizer):
         """
         configs = copy.deepcopy(trial.config)
         budget = configs.pop(self.fidelity_type) if self.fidelity_type is not None else None
-        configuration = Configuration(configuration_space=self.configspace, values=configs)
+        configuration = Configuration(
+            configuration_space=self.configspace, values=configs, allow_inactive_with_values=True
+        )
         return TrialInfo(
             config=configuration,
             seed=None,
@@ -230,8 +231,7 @@ class SynetuneOptimizer(Optimizer):
         syne_config = dict(trial_info.config)
         if self.fidelity_enabled:
             syne_config[self.fidelity_type] = (
-                trial_info.budget if not self.convert else int(
-                    self.conversion_factor * trial_info.budget)
+                trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )
         return SyneTrial(
             trial_id=self.trial_counter,
@@ -263,8 +263,7 @@ class SynetuneOptimizer(Optimizer):
 
         if self.optimizer_name == "MOASHA":
             experiment_result[self.fidelity_type] = (
-                trial_info.budget if not self.convert else int(
-                    self.conversion_factor * trial_info.budget)
+                trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )
             # del experiment_result[self.task.objectives]
 
@@ -334,11 +333,9 @@ class SynetuneOptimizer(Optimizer):
             # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit for synetune
 
             # for floating point resources like trainsize, we need to convert them to integer for synetune
-            if "grace_period" in self.optimizer_kwargs and isinstance(
-                    self.optimizer_kwargs["grace_period"], float):
+            if "grace_period" in self.optimizer_kwargs and isinstance(self.optimizer_kwargs["grace_period"], float):
                 self.convert = True
-                _optimizer_kwargs["grace_period"] = int(
-                    self.conversion_factor * self.optimizer_kwargs["grace_period"])
+                _optimizer_kwargs["grace_period"] = int(self.conversion_factor * self.optimizer_kwargs["grace_period"])
 
                 if "max_t" in self.optimizer_kwargs:
                     _optimizer_kwargs["max_t"] = int(self.conversion_factor * self.max_budget)
@@ -360,10 +357,9 @@ class SynetuneOptimizer(Optimizer):
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
 
-        if self.optimizer_name in ['SyncMOBSTER']:
-            del self.optimizer_kwargs['metrics']
-            del self.optimizer_kwargs['time_attr']
-
+        if self.optimizer_name in ["SyncMOBSTER"]:
+            del self.optimizer_kwargs["metrics"]
+            del self.optimizer_kwargs["time_attr"]
 
         return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
 
