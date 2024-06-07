@@ -22,7 +22,7 @@ botocore==1.34.69
 -e git+https://github.com/AutoML/SMACBenchmarking.git@69a11e7ff541673a7438466122091f95e8e93a1c#egg=CARP_S
 certifi==2024.2.2
 cffi @ file:///croot/cffi_1714483155441/work
-cfgv==3.4.0
+cfgv==3.4.0psynetu
 charset-normalizer==3.3.2
 click==8.1.7
 cloudpickle==2.2.1

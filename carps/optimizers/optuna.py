@@ -101,10 +101,7 @@ class OptunaOptimizer(Optimizer):
         self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
 
-        configspace = problem.configspace
-        if any(configspace.get_conditions()):
-            raise NotImplementedError("Conditionals are not yet supported in Optuna")
-
+        configspace = self.problem.configspace
         if any(configspace.forbidden_clauses):
             raise NotImplementedError("Forbidden clauses are not yet supported in Optuna")
 
@@ -158,7 +155,9 @@ class OptunaOptimizer(Optimizer):
         config = optuna_trial.params
         trial_number = optuna_trial.number
         unique_name = f"{trial_number=}"
-        configspace_config = Configuration(configuration_space=self.configspace, values=config)
+        configspace_config = Configuration(
+            configuration_space=self.configspace, values=config, allow_inactive_with_values=True
+        )
         self.history[unique_name] = (optuna_trial, configspace_config, None)
         return TrialInfo(
             config=configspace_config,

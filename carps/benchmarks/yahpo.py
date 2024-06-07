@@ -88,7 +88,7 @@ class YahpoProblem(Problem):
         self.scenario = bench
         self.instance = str(instance)
 
-        self._problem = BenchmarkSet(scenario=bench, instance=self.instance)
+        self._problem = BenchmarkSet(scenario=bench, instance=self.instance, check=False)
         self._configspace = self._problem.get_opt_space(drop_fidelity_params=True)
         self.fidelity_space = self._problem.get_fidelity_space()
         self.fidelity_dims = list(self._problem.get_fidelity_space()._hyperparameters.keys())
