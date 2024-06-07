@@ -42,7 +42,7 @@ clean-build:
 
 # Build a distribution in ./dist
 build:
-	$(PYTHON) -m pip install build
+    $(PYTHON) -m pip install build
     $(PYTHON) -m build --sdist
 
 # Publish to testpypi
