@@ -14,7 +14,33 @@ For more details on CARP-S, please have a look at the
 [documentation](https://AutoML.github.io/CARP-S/latest/).
 
 ## Installation
-To install CARP-S, you can use the following commands:
+To install CARP-S, you can simply use `pip`:
+
+```bash
+conda create -n carps python=3.11
+conda activate carps
+pip install carps
+```
+
+Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
+For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark, you need to install the
+requirements for both of them via:
+
+```bash
+pip install carps[smac, bbob]
+```
+
+All possible install options for benchmarks are:
+```bash
+dummy, bhob, hpob, hpobench, mfpbench, pymoo, yahpoo
+```
+
+All possible install options for optimizers are:
+```bash
+dummy, dehb, hebo, nevergrad, optuna, skopt, smac, smac14, synetune
+```
+
+If you want to install from source, you can clone the repository and install CARP-S via:
 
 ```bash
 git clone https://github.com/AutoML/CARP-S.git
@@ -26,19 +52,14 @@ conda activate carps
 pip install .
 ```
 
-If you want to install CARP-S for development, you can use the following command:
+For installing the requirements for the optimizer and benchmark, you can then use the following command:
 ```bash
-# Install for development
-make install-dev
+pip install ".[smac, bbob]"
 ```
 
-Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
-For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark, you need to install the
-requirements for both of them.
-
+If you want to install CARP-S for development, you can use the following command:
 ```bash
-pip install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
-pip install -r container_recipes/benchmarks/BBOB/BBOB_requirements.txt
+make install-dev
 ```
 
 ## Minimal Example
