@@ -49,9 +49,9 @@ def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
             weights = np.asarray(hp.weights) / np.sum(hp.weights)
         return Categorical(hp.choices, name=hp.name, prior=weights)
     elif isinstance(hp, CSH.OrdinalHyperparameter):
-        raise ValueError("Ordinal hyperparameters are not supported by Scikit-Optimize!")
+        return Categorical(list(hp.sequence), name=hp.name)
     elif isinstance(hp, CSH.Constant):
-        return Categorical(list(hp.value), name=hp.name)
+        return Categorical([hp.value], name=hp.name)
     else:
         raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
