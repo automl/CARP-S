@@ -9,6 +9,7 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from py_experimenter.exceptions import DatabaseConnectionError
 from py_experimenter.experimenter import PyExperimenter
+from carps.utils.loggingutils import CustomEncoder
 
 logger = logging.getLogger("create experiments")
 
@@ -56,7 +57,7 @@ def main(cfg: DictConfig) -> None:
     # In MySQL json objects are reordered to improve performance.
     # This means that there is no guarantee of the json strings
     # to be equal.
-    cfg_str = json.dumps(cfg_json)
+    cfg_str = json.dumps(cfg_json, cls=CustomEncoder)
     cfg_hash = hashlib.sha256(cfg_str.encode()).hexdigest()
 
     rows = [
