@@ -355,13 +355,14 @@ class SynetuneOptimizer(Optimizer):
         self.optimizer_kwargs.update(_optimizer_kwargs)
 
         if self.optimizer_name == "MOASHA":
-            self.metric = self.optimizer_kwargs["metrics"]
+            self.metric = self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
 
         if self.optimizer_name in ["SyncMOBSTER"]:
-            del self.optimizer_kwargs["metrics"]
-            del self.optimizer_kwargs["time_attr"]
+            # del self.optimizer_kwargs["metric"]
+            if "time_attr" in self.optimizer_kwargs:
+                del self.optimizer_kwargs["time_attr"]
 
         return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
 
