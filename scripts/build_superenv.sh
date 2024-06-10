@@ -123,12 +123,14 @@ done
 # HPOBench
 # $RUN_COMMAND pip install git+https://github.com/automl/HPOBench.git
 git clone https://github.com/automl/HPOBench.git lib/HPOBench
-RUN_COMMAND=
+# RUN_COMMAND=
 $RUN_COMMAND pip install Cython==0.29.36
 $RUN_COMMAND pip install scikit-learn==0.24.2 --no-build-isolation
 $RUN_COMMAND pip install openml==0.12.2
 $RUN_COMMAND pip install xgboost==1.3.1
 $RUN_COMMAND pip install lib/HPOBench
+# Cheat a bit, works with newer ConfigSpace
+# $RUN_COMMAND pip install ConfigSpace==0.6.1
 
 $RUN_COMMAND $EXTRA_COMMAND
 
