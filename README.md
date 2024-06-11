@@ -1,3 +1,5 @@
+<img src="docs/images/carps_Logo_wide.png" alt="Logo"/>
+
 # CARP-S
 Welcome to CARP-S! 
 This repository contains a benchmarking framework for optimizers.

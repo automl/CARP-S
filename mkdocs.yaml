@@ -42,8 +42,8 @@ theme:
   palette:
     - scheme: slate
       media: "(prefers-color-scheme: dark)"
-      primary: indigo
-      accent: deep purple
+      primary: custom
+      accent: teal
       toggle:
         icon: material/eye-outline
         name: Switch to light mode
@@ -51,8 +51,8 @@ theme:
     # Palette toggle for light mode
     - scheme: default
       media: "(prefers-color-scheme: light)"
-      primary: indigo
-      accent: deep purple
+      primary: custom
+      accent: teal
       toggle:
         icon: material/eye
         name: Switch to dark mode

@@ -1,3 +1,5 @@
+<img src="images/carps_Logo_wide.png" alt="Logo"/>
+
 # CARP-S
 Welcome to the CARP-S documentation.
 
