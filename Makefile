@@ -22,6 +22,7 @@ help:
 	@echo "* test             to run the tests"
 
 PYTHON ?= python
+PIP ?= pip
 
 test:
 	$(PYTHON) -m pytest tests
