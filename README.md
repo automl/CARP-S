@@ -125,3 +125,11 @@ guidelines for
 [benchmarks](https://automl.github.io/CARP-S/latest/contributing/contributing-a-benchmark/)
 and
 [optimizers](https://automl.github.io/CARP-S/latest/contributing/contributing-an-optimizer/).
+
+
+## Evaluation Results
+For each optimizer family, we select one representative optimization method and run the optimizer on the subselected 
+task set. Here we provide the link to the [meta data](https://drive.google.com/file/d/17pn48ragmWsyRC39sInsh2fEPUHP3BRT/view?usp=sharing) 
+that contains the detailed optimization setting for each run  
+and the [running results](https://drive.google.com/file/d/1yzJRbwRvdLbpZ9SdQN2Vk3yQSdDP_vck/view?usp=drive_link) that 
+records the running results of each optimization-benchmark combination. 
