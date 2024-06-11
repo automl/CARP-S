@@ -46,6 +46,12 @@ dummy,dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
 Please note that installing all requirements for all benchmarks and optimizers in a single 
 environment will not be possible due to conflicting dependencies.
 
+Furthermore, for HPOBench, you need to install the following additional requirements:
+```bash
+pip install git+https://github.com/automl/HPOBench.git --ignore-requires-python
+pip install scikit-learn==0.24.2 --no-build-isolation
+```
+
 ### Installation from Source
 
 If you want to install from source, you can clone the repository and install CARP-S via:
