@@ -35,7 +35,7 @@ pip install carps[smac,bbob]
 
 All possible install options for benchmarks are:
 ```bash
-dummy,bhob,hpob,hpobench,mfpbench,pymoo,yahpoo
+dummy,bhob,hpob,hpobench,mfpbench,pymoo,yahpo
 ```
 
 All possible install options for optimizers are:
