@@ -80,14 +80,6 @@ dev = [
 dummy = ["scikit-learn"]
 bbob = ["ioh==0.3.14"]
 hpob = ["xgboost==1.5.2"]
-hpobench = [
-  "tqdm",
-  "pandas==1.2.4",
-  "Cython==0.29.36",
-  "openml==0.12.2",
-  "xgboost==1.3.1",
-  "ConfigSpace",
-]
 mfpbench = [
   "scikit-learn",
   "mf-prior-bench",

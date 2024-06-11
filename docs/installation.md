@@ -20,7 +20,7 @@ pip install carps[smac,bbob]
 
 All possible install options for benchmarks are:
 ```bash
-dummy,bhob,hpob,hpobench,mfpbench,pymoo,yahpo
+dummy,bhob,hpob,mfpbench,pymoo,yahpo
 ```
 
 All possible install options for optimizers are:
@@ -30,12 +30,6 @@ dummy,dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
 
 Please note that installing all requirements for all benchmarks and optimizers in a single 
 environment will not be possible due to conflicting dependencies.
-
-Furthermore, for HPOBench, you need to install the following additional requirements:
-```bash
-pip install git+https://github.com/automl/HPOBench.git --ignore-requires-python
-pip install scikit-learn==0.24.2 --no-build-isolation
-```
 
 ### Installation from Source
 
@@ -61,9 +55,14 @@ If you want to install CARP-S for development, you can use the following command
 make install-dev
 ```
 
-### Additional Data Downloads
+### Additional Steps for Benchmarks
 
-For some benchmarks, it is additionally necessary to download data, 
+For HPOBench, it is necessary to install the requirements via:
+```bash
+bash container_recipes/benchmarks/HPOBench/install_HPOBench.sh
+```
+
+For some benchmarks, it is necessary to download data, 
 such as surrogate models, in order to run the benchmark: 
 
 -   For HPOB, you can download the surrogate benchmarks with
