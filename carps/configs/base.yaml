@@ -34,3 +34,54 @@ hydra:
   sweep:
     dir: ${baserundir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${optimizer_id}/${benchmark_id}/${problem_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir
+
+  help:
+    # App name, override to match the name your app is known by
+    app_name: ${hydra.job.name}
+
+    header: |
+      ${hydra.help.app_name} is powered by Hydra.
+      You must specify a problem instance and an optimizer instance by calling
+      python carps/run.py +optimizer/{OPTIMIZER_TYPE}={OPTIMIZER_INSTANCE} +problem/{PROBLEM_TYPE}={PROBLEM_INSTANCE}
+
+    footer: |
+      Use --hydra-help to view Hydra specific help
+
+    # Basic Hydra flags:
+    #   $FLAGS_HELP
+    #
+    # Config groups, choose one of:
+    #   $APP_CONFIG_GROUPS: All config groups that does not start with hydra/.
+    #   $HYDRA_CONFIG_GROUPS: All the Hydra config groups (starts with hydra/)
+    #
+    # Configuration generated with overrides:
+    #   $CONFIG : Generated config
+    #
+    template: |
+      ${hydra.help.header}
+      
+      == Required Config ==
+      
+      The following configs are required to execute a run
+            
+      problem: The benchmark to be evaluated. You could find all the problem types under `carps/configs/problem` and
+          problem instances under `carps/configs/{YOUR_PROBLEM_TYPES}`
+      
+      optimizer: The optimizer applied to the benchmark. You could find all the optimizer types under
+          `carps/configs/optimizer` and problem instances under `carps/configs/optimizer/`
+      
+      == Optional Config ==
+      
+      The following configs are optional and can be override by the user inputs
+
+      seed: The random seed.
+      
+      task.n_trials: Optimization budget as number of evaluations.
+      
+      task.time_budget: Optimization budget as time in seconds
+      
+      task.min_budget: (multi-fidelity optimization only) the minimal budget that can be used to evaluate a problem
+      
+      task.max_budget: (multi-fidelity optimization only) the minimal budget that can be used to evaluate a problem
+      
+      ${hydra.help.footer}
