@@ -38,6 +38,7 @@ from syne_tune.optimizer.baselines import (
     KDE,
     MOASHA,
     MOBSTER,
+    SyncMOBSTER,
     MOREA,
     BayesianOptimization,
     MOLinearScalarizationBayesOpt,
@@ -69,10 +70,11 @@ optimizers_dict = {
     "BORE": BORE,
     "DEHB": DEHB,
     "MOASHA": MOASHA,
+    "SyncMOBSTER": SyncMOBSTER,
 }
 
 mf_optimizer_dicts = {
-    "with_mf": {"ASHA", "MOASHA", "DEHB", "MOBSTER", "BOHB"},
+    "with_mf": {"ASHA", "MOASHA", "DEHB", "MOBSTER", "BOHB", "SyncMOBSTER"},
     "without_mf": {"BORE", "BayesianOptimization", "KDE"},
 }
 
@@ -261,7 +263,7 @@ class SynetuneOptimizer(Optimizer):
         else:
             experiment_result = {self.task.objectives[i]: cost[i] for i in range(len(cost))}
 
-        if self.optimizer_name == "MOASHA":
+        if self.task.is_multifidelity:
             experiment_result[self.fidelity_type] = (
                 trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )
@@ -353,13 +355,14 @@ class SynetuneOptimizer(Optimizer):
         self.optimizer_kwargs.update(_optimizer_kwargs)
 
         if self.optimizer_name == "MOASHA":
-            self.metric = self.optimizer_kwargs["metrics"]
+            self.metric = self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
 
         if self.optimizer_name in ["SyncMOBSTER"]:
-            del self.optimizer_kwargs["metrics"]
-            del self.optimizer_kwargs["time_attr"]
+            # del self.optimizer_kwargs["metric"]
+            if "time_attr" in self.optimizer_kwargs:
+                del self.optimizer_kwargs["time_attr"]
 
         return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
 

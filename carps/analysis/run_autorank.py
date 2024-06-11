@@ -95,7 +95,7 @@ def get_df_crit(
     max_budget: float = 1,
     soft: bool = True,
     perf_col: str = "trial_value__cost_inc",
-    remove_nan: bool = True,
+    nan_handling: str = "remove",
 ) -> pd.DataFrame:
     df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)
 
@@ -104,12 +104,22 @@ def get_df_crit(
 
     df_crit = df_crit.pivot(index="problem_id", columns="optimizer_id", values=perf_col)
 
-    if remove_nan:
-        lost = df_crit[np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]
+    if nan_handling == "remove":
+        nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])
+        lost = df_crit[nan_ids]
 
         # Rows are problems, cols are optimizers
-        df_crit = df_crit[np.array([not np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])]
+        df_crit = df_crit[~nan_ids]
         logger.info(f"Lost following experiments: {lost}")
+    elif nan_handling == "keep":
+        pass
+    elif nan_handling == "replace_by_highest":
+        nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])
+        max_val = df_crit[perf_col].max()
+        df_crit.loc[nan_ids, perf_col] = max_val
+        logger.info(f"Replaced nans by max val {max_val}: {df_crit}")
+    else:
+        raise ValueError(f"Unknown nan handling {nan_handling}. Can only do `remove`, `keep`, `replace_by_highest`.")
 
     return df_crit
 

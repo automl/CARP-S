@@ -9,7 +9,7 @@ from autorank import create_report
 from autorank._util import get_sorted_rank_groups
 
 from carps.analysis.run_autorank import calc_critical_difference, custom_latex_table, get_df_crit
-from carps.analysis.utils import savefig
+from carps.analysis.utils import savefig, get_color_palette, filter_only_final_performance
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -27,7 +27,11 @@ def plot_ranking(
     identifier = f"{scenario}_{set_id}"
     label = f"tab:stat_results_{identifier}"
     result = calc_critical_difference(gdf, identifier=identifier, figsize=(8, 3), perf_col=perf_col)
-    create_report(result)
+    print(result)
+    try: 
+        create_report(result)
+    except Exception as e:
+        print(e)
     table_str = custom_latex_table(result, label=label)
     fn = Path("figures/critd/" + label[len("tab:") :] + ".tex")
     fn.write_text(table_str)
@@ -38,7 +42,7 @@ def plot_ranking(
     print(sorted_ranks, names, groups)
 
     # DF on normalized perf values
-    df_crit = get_df_crit(gdf, remove_nan=False, perf_col=perf_col)
+    df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
     df_crit = df_crit.reindex(columns=names)
     df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
     df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
@@ -52,7 +56,7 @@ def plot_ranking(
 
     # Df on raw values
     # Optionally, plot the ranked data as a heatmap
-    df_crit = get_df_crit(gdf, remove_nan=False, perf_col=perf_col)
+    df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
     df_crit = df_crit.reindex(columns=names)
     df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
     df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
@@ -72,4 +76,60 @@ def plot_ranking(
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", cbar=True, square=True, fmt=".2f")
     plt.title("Spearman Rank Correlation Matrix Between Optimizers")
     savefig(plt.gcf(), fpath / f"spearman_rank_corr_matrix_opt_{identifier}")
+    plt.show()
+
+
+    # combined
+    ncols = 2
+    nrows = 3
+    right = 0.6
+    h = 0.9
+    w = 1
+    factor = 15
+
+    fig = plt.figure(layout=None, facecolor="white", figsize=(w * factor, h * factor))
+    gs = fig.add_gridspec(nrows=nrows, ncols=ncols, left=0.05, right=right,
+                        hspace=0.3, wspace=0.3
+                        )
+
+    # Perf per problem (normalized)
+    ax0 = fig.add_subplot(gs[:, :-1])
+    df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
+    df_crit = df_crit.reindex(columns=names)
+    df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
+    df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+    ax0 = sns.heatmap(df_crit, annot=False, fmt="g", cmap="viridis_r", ax=ax0)
+    ax0.set_title("Performance of Optimizers per Problem (Normalized)")
+    ax0.set_ylabel("Problem ID")
+    ax0.set_xlabel("Optimizer")
+
+
+    df_finalperf = filter_only_final_performance(df=gdf)
+    palette = get_color_palette(df=gdf)
+    ax1 = fig.add_subplot(gs[0, -1])
+    x="n_trials_norm"
+    y="trial_value__cost_inc_norm"
+    x = y
+    hue="optimizer_id"
+    y = hue
+    ax1 = sns.boxplot(
+        data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax1
+    )
+
+    ax2 = fig.add_subplot(gs[1, -1])
+    ax2 = sns.violinplot(
+        data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax2, cut=0
+    )
+
+    # Spearman rank correlation
+    ax3 = fig.add_subplot(gs[2, -1])
+    ranked_df = df_crit.rank(axis=1, method="min", ascending=True)
+    correlation_matrix = ranked_df.corr(method="spearman")
+    ax3 = sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", cbar=True, square=True, fmt=".2f", ax=ax3)
+    ax3.set_title("Spearman Rank Correlation Matrix Between Optimizers")
+
+    fig.set_tight_layout(True)
+
+    savefig(fig, fpath / f"final_per_combined_{identifier}")
+
     plt.show()

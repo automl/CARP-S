@@ -95,7 +95,16 @@ bash container_recipes/benchmarks/YAHPO/prepare_yahpo.sh $ENV_LOCATION
 bash container_recipes/benchmarks/MFPBench/download_data.sh $ENV_LOCATION
 
 # HPOBench
-bash container_recipes/benchmarks/HPOBench/install_HPOBench.sh $ENV_LOCATION
+# $RUN_COMMAND pip install git+https://github.com/automl/HPOBench.git
+git clone https://github.com/automl/HPOBench.git lib/HPOBench
+# RUN_COMMAND=
+$RUN_COMMAND pip install Cython==0.29.36
+$RUN_COMMAND pip install scikit-learn==0.24.2 --no-build-isolation
+$RUN_COMMAND pip install openml==0.12.2
+$RUN_COMMAND pip install xgboost==1.3.1
+$RUN_COMMAND pip install lib/HPOBench
+# Cheat a bit, works with newer ConfigSpace
+# $RUN_COMMAND pip install ConfigSpace==0.6.1
 
 $RUN_COMMAND $EXTRA_COMMAND
 

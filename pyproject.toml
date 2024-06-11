@@ -28,7 +28,9 @@ dependencies = [
   "seaborn",
   "tomli",
   "typing_extensions",
-  "pymoo"
+  "pymoo",
+  "GitPython",
+  "mlcroissant",
 ]
 
 requires-python = ">=3.9"

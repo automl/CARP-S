@@ -80,7 +80,8 @@ def join_df(df1: pd.DataFrame, df2: pd.DataFrame, on: str = "n_trials") -> pd.Da
 def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFrame:
     df = read_trial_log(rundir, log_fn=log_fn)
     if df is None:
-        raise NotImplementedError("No idea what should happen here!?")
+        # raise NotImplementedError("No idea what should happen here!?")
+        return pd.DataFrame()
 
     cfg = load_cfg(rundir)
     if cfg is not None:

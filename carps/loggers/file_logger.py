@@ -13,7 +13,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 
 from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.loggingutils import get_logger, setup_logging
+from carps.utils.loggingutils import get_logger, setup_logging, CustomEncoder
 
 if TYPE_CHECKING:
     from carps.optimizers.optimizer import Incumbent
@@ -67,7 +67,7 @@ def dump_logs(log_data: dict, filename: str, directory: str | Path | None = None
     directory: str | None, defaults to None
         Directory to log to. If None, either use hydra run dir or current dir.
     """
-    log_data_str = json.dumps(log_data) + "\n"
+    log_data_str = json.dumps(log_data, cls=CustomEncoder) + "\n"
     _dir = Path(directory) if directory is not None else get_run_directory()
     filepath = _dir / filename
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -150,7 +150,7 @@ class FileLogger(AbstractLogger):
         """
         info = convert_trials(n_trials, trial_info, trial_value, n_function_calls)
         if logger.level >= logging.DEBUG:
-            info_str = json.dumps(info) + "\n"
+            info_str = json.dumps(info, cls=CustomEncoder) + "\n"
             logger.debug(info_str)
         else:
             info_str = f"n_trials: {info['n_trials']}, config: {info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
