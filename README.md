@@ -14,6 +14,9 @@ For more details on CARP-S, please have a look at the
 [documentation](https://AutoML.github.io/CARP-S/latest/).
 
 ## Installation
+
+### Installation from PyPI
+
 To install CARP-S, you can simply use `pip`:
 
 ```bash
