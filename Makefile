@@ -42,8 +42,8 @@ clean-build:
 
 # Build a distribution in ./dist
 build:
-    $(PYTHON) -m pip install build
-    $(PYTHON) -m build --sdist
+	$(PYTHON) -m pip install build
+	$(PYTHON) -m build --sdist
 
 # Publish to testpypi
 # Will echo the commands to actually publish to be run to publish to actual PyPi
@@ -55,7 +55,7 @@ publish: clean-build build
 	$(PYTHON) -m twine upload --repository testpypi ${DIST}/*
 	@echo
 	@echo "Test with the following:"
-	@echo "* Create a new virtual environment to install the uplaoded distribution into"
+	@echo "* Create a new virtual environment to install the uploaded distribution into"
 	@echo "* Run the following:"
 	@echo "--- pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ${PACKAGE_NAME}==${VERSION}"
 	@echo

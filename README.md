@@ -14,6 +14,9 @@ For more details on CARP-S, please have a look at the
 [documentation](https://AutoML.github.io/CARP-S/latest/).
 
 ## Installation
+
+### Installation from PyPI
+
 To install CARP-S, you can simply use `pip`:
 
 ```bash
@@ -32,7 +35,7 @@ pip install carps[smac,bbob]
 
 All possible install options for benchmarks are:
 ```bash
-dummy,bhob,hpob,hpobench,mfpbench,pymoo,yahpoo
+dummy,bhob,hpob,mfpbench,pymoo,yahpo
 ```
 
 All possible install options for optimizers are:
@@ -42,6 +45,8 @@ dummy,dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
 
 Please note that installing all requirements for all benchmarks and optimizers in a single 
 environment will not be possible due to conflicting dependencies.
+
+### Installation from Source
 
 If you want to install from source, you can clone the repository and install CARP-S via:
 
@@ -64,6 +69,31 @@ If you want to install CARP-S for development, you can use the following command
 ```bash
 make install-dev
 ```
+
+### Additional Steps for Benchmarks
+
+For HPOBench, it is necessary to install the requirements via:
+```bash
+bash container_recipes/benchmarks/HPOBench/install_HPOBench.sh
+```
+
+For some benchmarks, it is necessary to download data, 
+such as surrogate models, in order to run the benchmark: 
+
+-   For HPOB, you can download the surrogate benchmarks with
+    ```bash
+    bash container_recipes/benchmarks/HPOB/download_data.sh
+    ```
+
+-   For MFPBench, you can download the surrogate benchmarks with
+    ```bash
+    bash container_recipes/benchmarks/MFPBench/download_data.sh
+    ```
+
+-   For YAHPO, you can download the required surrogate benchmarks and meta-data with
+    ```bash
+    bash container_recipes/benchmarks/YAHPO/prepare_yahpo.sh
+    ```
 
 ## Minimal Example
 Once the requirements for both an optimizer and a benchmark, e.g. `SMAC2.0` and `BBOB`, are installed, you can run
