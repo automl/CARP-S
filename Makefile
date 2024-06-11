@@ -42,8 +42,8 @@ clean-build:
 
 # Build a distribution in ./dist
 build:
-    $(PYTHON) -m pip install build
-    $(PYTHON) -m build --sdist
+	$(PYTHON) -m pip install build
+	$(PYTHON) -m build --sdist
 
 # Publish to testpypi
 # Will echo the commands to actually publish to be run to publish to actual PyPi
