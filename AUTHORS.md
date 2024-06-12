@@ -1,12 +1,17 @@
 # Credits
 
 
-## Development Lead
+## Development
 
-Carolin Benjamins <c.benjamins@ai.uni-hannover.de>
-Helena Graf <h.graf@ai.uni-hannover.de>
+- Carolin Benjamins (Lead)
+- Helena Graf
+- Sarah Segel
+- Difan Deng
+- Tim Ruhkopf
+- Leona Hennig
+- Soham Basu
+- Edward Bergman
 
 ## Contributors
-
 
 None yet. Why not be the first?
