@@ -7,4 +7,4 @@ then
 else
     CONDA_RUN_COMMAND="${CONDA_COMMAND} run ${CONDA_ENV_NAME}"
 fi
-$CONDA_RUN_COMMAND pip install git+https://github.com/automl/HPOBench.git --ignore-requires-python
+$CONDA_RUN_COMMAND pip install git+https://github.com/automl/HPOBench.git@fix/numpy_depreciation
