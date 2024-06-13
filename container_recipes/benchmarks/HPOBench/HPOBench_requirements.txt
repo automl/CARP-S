@@ -1,1 +1,1 @@
-git+https://github.com/automl/HPOBench.git@fix/numpy_depreciation
+git+https://github.com/automl/HPOBench.git@fix/numpy_deprecation
