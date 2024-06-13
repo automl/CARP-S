@@ -5,12 +5,12 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-from hpobench.benchmarks.ml.lr_benchmark import LRBenchmark
-from hpobench.benchmarks.ml.nn_benchmark import NNBenchmark
-from hpobench.benchmarks.ml.rf_benchmark import RandomForestBenchmark
-from hpobench.benchmarks.ml.svm_benchmark import SVMBenchmark
-from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
-from hpobench.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
+from hpobench.container.benchmarks.ml.lr_benchmark import LRBenchmark
+from hpobench.container.benchmarks.ml.nn_benchmark import NNBenchmark
+from hpobench.container.benchmarks.ml.rf_benchmark import RandomForestBenchmark
+from hpobench.container.benchmarks.ml.svm_benchmark import SVMBenchmark
+from hpobench.container.benchmarks.ml.tabular_benchmark import TabularBenchmark
+from hpobench.container.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
 from omegaconf import ListConfig
 
 from carps.benchmarks.problem import Problem
