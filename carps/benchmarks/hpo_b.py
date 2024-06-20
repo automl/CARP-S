@@ -234,7 +234,7 @@ class HPOBProblem(Problem):
         if not surrogates_file.is_file():
             raise RuntimeError(
                 "It seems that the surrogate files have not been downloaded. Please run "
-                "'bash container_recipes/benchmarks/hpob/download_data.sh' to download the "
+                "'bash container_recipes/benchmarks/HPOB/download_data.sh' to download the "
                 "surrogates."
             )
         with open(str(surrogates_file)) as f:
