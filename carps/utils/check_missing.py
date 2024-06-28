@@ -30,7 +30,7 @@ def get_experiment_status(path: Path) -> dict:
     if trial_logs_fn.is_file():
         trial_logs = read_jsonl_content(str(trial_logs_fn))
         n_trials_done = trial_logs["n_trials"].max()
-        status = RunStatus.COMPLETED if n_trials == n_trials_done else RunStatus.TRUNCATED
+        status = RunStatus.COMPLETED if n_trials >= n_trials_done else RunStatus.TRUNCATED
 
     overrides = OmegaConf.load(path.parent / "overrides.yaml")
     # TODO maybe filter cluster
