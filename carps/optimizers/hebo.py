@@ -271,7 +271,6 @@ class HEBOOptimizer(Optimizer):
         cost = trial_value.cost
         suggestion = self.convert_from_trial(trial_info=trial_info)
 
-        self.trial_counter += 1
         cost = np.asarray([cost]) if isinstance(cost, abc.Sequence) else np.asarray(cost)
 
         self._solver.observe(suggestion, np.asarray([cost]))
