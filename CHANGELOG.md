@@ -2,7 +2,8 @@
 # v0.1.1
 
 ## Bug Fixes
-- Fix HEBO integration (#149)
+- Disallowed HPOBench use in carp-s container, changed HPOBench mode to container mode (#94).
+- Fix HEBO integration (#149).
 
 # v0.1.0
 
