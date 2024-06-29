@@ -3,6 +3,7 @@
 
 ## Bug Fixes
 - Fix HEBO integration (#149)
+- Fix plotting and data gathering
 
 # v0.1.0
 
