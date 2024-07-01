@@ -24,7 +24,6 @@ dependencies = [
   "py-experimenter>=1.4.1",
   "pymysql",
   "rich",
-  "rliable",
   "seaborn",
   "tomli",
   "typing_extensions",
