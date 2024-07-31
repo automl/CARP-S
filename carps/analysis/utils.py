@@ -12,10 +12,11 @@ if TYPE_CHECKING:
 
 
 def get_color_palette(df: pd.DataFrame | None) -> dict[str, Any]:
-    cmap = sns.color_palette("colorblind", as_cmap=True)
+    cmap = sns.color_palette("colorblind", as_cmap=False)
     optimizers = list(df["optimizer_id"].unique())
     optimizers.sort()
-    return {o: cmap[i] for i, o in enumerate(optimizers)}
+    cmap2 = sns.color_palette("Paired", as_cmap=False)
+    return {p: c for p, c in zip(optimizers, list(cmap) + list(cmap2))}
 
 
 def savefig(fig: plt.Figure, filename: str) -> None:
