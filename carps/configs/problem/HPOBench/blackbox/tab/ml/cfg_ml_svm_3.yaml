@@ -1,0 +1,33 @@
+# @package _global_
+benchmark_id: HPOBench
+problem_id: hpobench/bb/tab/ml/svm/3
+problem:
+  _target_: carps.benchmarks.hpo_bench.HPOBenchProblem
+  model: svm
+  task_id: 3
+  budget_type: null
+  seed: ${seed}
+task:
+  n_trials: 77
+  time_budget: null
+  n_workers: 1
+  n_objectives: 1
+  objectives:
+  - quality
+  is_multifidelity: false
+  fidelity_type: null
+  min_budget: null
+  max_budget: null
+  has_constraints: false
+  domain: ML
+  objective_function_approximation: tabular
+  has_virtual_time: false
+  deterministic: false
+  dimensions: 2
+  search_space_n_categoricals: 0
+  search_space_n_ordinals: 2
+  search_space_n_integers: 0
+  search_space_n_floats: 0
+  search_space_has_conditionals: false
+  search_space_has_forbiddens: false
+  search_space_has_priors: false

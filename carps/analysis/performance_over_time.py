@@ -14,8 +14,8 @@ from carps.analysis.utils import filter_only_final_performance
 if TYPE_CHECKING:
     import pandas as pd
 
-def get_order_by_mean(df: pd.DataFrame) -> list[str]:
-    final_df = filter_only_final_performance(df)
+def get_order_by_mean(df: pd.DataFrame, budget_var: str = "n_trials_norm") -> list[str]:
+    final_df = filter_only_final_performance(df, budget_var=budget_var)
     reduced = final_df.groupby(by="optimizer_id")["trial_value__cost_inc_norm"].apply(np.nanmean)
     reduced = reduced.sort_values()
     return reduced.index.tolist()
@@ -33,7 +33,7 @@ def plot_performance_over_time(
     **lineplot_kwargs,
 ) -> tuple[plt.Figure, matplotlib.axes.Axes]:
     setup_seaborn(font_scale=1.5)
-    sorter = get_order_by_mean(df=df)
+    sorter = get_order_by_mean(df=df, budget_var=x)
     df = df.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))
     palette = get_color_palette(df)
     fig = plt.figure(figsize=figsize)
