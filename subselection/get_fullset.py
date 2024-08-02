@@ -21,9 +21,10 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
     return df, df_cfg
 
 def get_fullset(
-        rundir: str, 
+        rundir: str | list[str], 
         optimizer_ids: list[str],
         output_dir: str = ".",
+        benchmark_exclusions: list[str] | None = None,
         normalize_performance: bool = True,
         
 ) -> pd.DataFrame:
@@ -32,7 +33,12 @@ def get_fullset(
                          "The subselection can be in principle also done with more optimizers but this is currently not "\
                             "integrated nor tested.")
 
-    df, df_cfg = load_set([rundir], set_id="full")
+    if not isinstance(rundir, list):
+        rundir = [rundir]
+    df, df_cfg = load_set(rundir, set_id="full")
+
+    if benchmark_exclusions is not None:
+        df = df[~df["benchmark_id"].isin(benchmark_exclusions)]
 
     df = normalize_logs(df)
 
@@ -52,4 +58,5 @@ if __name__ == "__main__":
     # in the subselection dir
     # python get_fullset.py ../runs_MO '["RandomSearch","Optuna-MO","Nevergrad-DE"]' MO_0
     # python get_fullset.py ../runs_MOMF '["RandomSearch","SMAC3-MOMF-GP","Nevergrad-DE"]' MOMF_0/default
+    # python subselection/get_fullset.py '["runs/RandomSearch","runs/SMAC3-BlackBoxFacade","runs/Nevergrad-CMA-ES"]' '["RandomSearch","SMAC3-BlackBoxFacade","Nevergrad-CMA-ES"]' subselection/data/BB/round2
     fire.Fire(get_fullset)
