@@ -188,6 +188,7 @@ nav:
     - "guides/database.md"
     - "guides/containers.md"
     - "guides/large-scale-benchmarking.md"
+    - "guides/using-carps.md"
   - Commands: "commands.md"
   - Contributing:
     - "contributing/index.md"
