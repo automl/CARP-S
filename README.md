@@ -163,7 +163,7 @@ In the case when you are developing your optimizer or benchmark in a standalone 
 For a custom benchmark we have an [example repo](https://github.com/automl/OptBench).
 It shows how to use your own benchmark with carps optimizers.
 For a custom optimizer check this [example repo](https://github.com/automl/CARP-S-example-optimizer).
-Information also available [here](https://automl.github.io/CARP-S/guides/using-carps/).
+Information is also available [here](https://automl.github.io/CARP-S/guides/using-carps/).
 
 ## Evaluation Results
 For each scenario (blackbox, multi-fidelity, multi-objective and multi-fidelity-multi-objective) and set (dev and test), we run selected optimizers and provide the data.
