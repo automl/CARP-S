@@ -64,7 +64,7 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
         seeds.sort()
         overrides = gdf["overrides"].iloc[0].split(" ")
         overrides = [o for o in overrides if "seed" not in o]
-        overrides.append(f"seed={','.join(str(s) for s in seeds)} -m")
+        overrides.append(f"seed={','.join(str(s) for s in seeds)} -m &")
         override = " ".join(overrides)
         runcommand = f"python -m carps.run {override}\n"
         runcommands.append(runcommand)
