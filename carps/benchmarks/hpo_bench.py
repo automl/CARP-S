@@ -9,7 +9,7 @@ from hpobench.container.benchmarks.ml.lr_benchmark import LRBenchmark
 from hpobench.container.benchmarks.ml.nn_benchmark import NNBenchmark
 from hpobench.container.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.container.benchmarks.ml.svm_benchmark import SVMBenchmark
-from hpobench.container.benchmarks.ml.tabular_benchmark import TabularBenchmark
+from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.container.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
 from omegaconf import ListConfig
 
