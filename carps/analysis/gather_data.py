@@ -293,6 +293,8 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
         fn = Path(p) / "trajectory.parquet"
         if not fn.is_file():
             fn = Path(p) / "logs.parquet"
+        if not fn.is_file():
+            raise ValueError(f"File {fn} does not exist. Maybe you need to gather the data first with `python -m carps.analysis.gather_data {p}`")
         logs.append(pd.read_parquet(fn))
 
     df = pd.concat(logs).reset_index(drop=True)
