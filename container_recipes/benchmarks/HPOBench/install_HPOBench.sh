@@ -9,3 +9,4 @@ else
 fi
 $CONDA_RUN_COMMAND pip install git+https://github.com/automl/HPOBench.git@fix/numpy_deprecation
 $CONDA_RUN_COMMAND pip install ConfigSpace --upgrade
+$CONDA_RUN_COMMAND python container_recipes/benchmarks/HPOBench/prepare_nas_benchmarks.py
