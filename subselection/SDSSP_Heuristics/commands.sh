@@ -18,6 +18,7 @@ echo "Current working directory"
 pwd
 
 echo "Convert df_crit.csv to points"
+date > "time_$ks.txt"
 python3 ../extract_csv.py df_crit.csv df_crit.txt
 echo "Subselect for $ks sizes"
 ../run.sh ../a.out df_crit.txt 3 $n_tasks $ks
@@ -28,3 +29,4 @@ echo "Run again"
 ../again.sh ../a.out df_crit.csv $n_tasks 3 $ks
 echo "Gather info"
 ../extract.sh $ks >> info.csv
+date >> "time_$ks.txt"
