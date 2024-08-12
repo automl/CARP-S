@@ -816,7 +816,7 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 							memcpy(top_bord,best_bord,dim*sizeof(double));
 							
 							upper=curr_disc;
-							fprintf(stderr,"New2:%lf",upper);
+							//fprintf(stderr,"New2:%lf ",upper);
 						}
 					}
 						curr_dim+=1;
@@ -851,7 +851,7 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 	
 	free(top_bord);
 	
-  fprintf(stderr,"Natural: %d, Brute: %d, Discr: %lf",nb_natural,nb_brute,upper);
+  fprintf(stderr,"Natural: %d, Brute: %d, Discr: %lf\n",nb_natural,nb_brute,upper);
   return upper;
 
   
@@ -859,6 +859,7 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 
 int main(int argc, char **argv)
 {
+  fprintf(stderr, ">>>>>>>>>>>>>>>>> Starting subselection algorithm");
   int dim, npoints,i,j,h,kpoints;
   int chosen_dim;
   FILE *pointfile;
@@ -972,7 +973,7 @@ int main(int argc, char **argv)
   free(Orig_pointset);
   free(curr_bord);
   free(best_bord);
-  fprintf(stderr,"We're done!");
+  fprintf(stderr,"\nWe're done!\n");
   return 0;
 
 }

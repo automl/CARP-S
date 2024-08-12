@@ -1,13 +1,21 @@
 folder=$1 # folder to run stuff in
 n_tasks=$2  # number of points
 ks=$3  # subset sizes as comma separated list
+dontclean=$4  # whether to not clean up the folder (only relevant for parallel)
 
 cd $folder
 
-rm subset*
-rm log*
-rm info.csv
-rm df_crit.txt
+if [ -z "$dontclean" ]
+then
+    echo "Clean folder"
+    rm subset*
+    rm log*
+    rm info.csv
+    rm df_crit.txt 
+fi
+
+echo "Current working directory"
+pwd
 
 echo "Convert df_crit.csv to points"
 python3 ../extract_csv.py df_crit.csv df_crit.txt

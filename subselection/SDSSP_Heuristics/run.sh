@@ -62,9 +62,11 @@ export SHIFT_TRIES
 command_function() {
     local value=$1
     echo "SHIFT_TRIES=${SHIFT_TRIES:-5000} ${executable} ${input_file} ${dimension} ${num_points} ${value} subset_${value}.txt"
-    SHIFT_TRIES=${SHIFT_TRIES:-5000} ${executable} ${input_file} ${dimension} ${num_points} ${value} subset_${value}.txt 2>&1 | date > log_${value}.txt
+    date > log_${value}.txt
+    SHIFT_TRIES=${SHIFT_TRIES:-20} ${executable} ${input_file} ${dimension} ${num_points} ${value} subset_${value}.txt 2>&1 > log_${value}.txt
 }
 
+pwd
 # Export the function if parallel execution is used
 if [ "$num_cores" -gt 1 ]; then
     export -f command_function

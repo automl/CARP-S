@@ -11,7 +11,7 @@ Credits go to Francois Clément and Deyao Chen.
 1. moreutils
 
 ### Compile Program
-If `a.out` is not there or you have changed something in the c-file: Compile shift_v2nobrute.c
+If `a.out` is not there or is not working or you have changed something in the c-file: Compile shift_v2nobrute.c
 ```bash
 gcc shift_v2nobrute.c -lm -O3
 ```
@@ -38,6 +38,8 @@ mkdir run-data
 cp df_crit.csv run-data/
 # $1: folder to run stuff in, $2: number of points in full set, $3: different ks
 bash commands.sh run-data 106 10,20 
+bash commands.sh run-data 1317 10,20 
+sbatch parallel_run.sh run-data 1317
 
 # e.g.
 bash commands.sh run-data-MOMF 27 5,6,7,8,9,10,11,12,13

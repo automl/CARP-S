@@ -12,7 +12,6 @@
 
 # %%
 import argparse
-
 # %%
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -21,6 +20,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     with open(args.input) as f:
         lines = f.readlines()
+    if not lines[-1].endswith("\n"):
+        raise ValueError(f"{args.input} must end with a newline character.")
     with open(args.output, 'w') as f:
         for line in lines[1:]:
             f.write(' '.join(line.strip().split(',')[1:]) + '\n')
