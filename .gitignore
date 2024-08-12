@@ -168,3 +168,4 @@ runs*
 *.parquet
 run-data*
 *.txt
+slurm-*
