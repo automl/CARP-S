@@ -12,3 +12,4 @@ hydra:
     mem_per_cpu: 4G
     setup:
       - module load system singularity
+      - ml system singularity
