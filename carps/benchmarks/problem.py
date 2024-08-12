@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
+from dataclasses import asdict
+from carps.utils.trials import TrialInfo, TrialValue
+from ConfigSpace import Configuration
 
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.utils.trials import TrialInfo, TrialValue
+    
 
 
 class Problem(ABC):
@@ -86,3 +89,39 @@ class Problem(ABC):
             )
 
         return trial_value
+
+    def parallel_evaluate(self, eval_config: dict, fidels: dict[str, int | float] | None = None, trial_info: TrialInfo | None = None, obj_keys: list[str] | None = None, **kwargs) -> dict[str, float]:
+        assert obj_keys, "obj_keys must be specified, usually during instantiation of "\
+            "carps.benchmarks.wrapper.ParallelProblemWrapper"
+
+        if trial_info is None:
+            trial_info = TrialInfo(
+                config=Configuration(values=eval_config, configuration_space=self.configspace),
+                budget=list(fidels.values())[0] if fidels else None
+            )
+
+        trial_value = self._evaluate(trial_info=trial_info)
+        self.n_function_calls += 1
+        if trial_info.normalized_budget is not None:
+            self.n_trials += trial_info.normalized_budget
+        else:
+            self.n_trials += 1
+
+        for logger in self.loggers:
+            logger.log_trial(
+                n_trials=self.n_trials,
+                n_function_calls=self.n_function_calls,
+                trial_info=trial_info,
+                trial_value=trial_value,
+            )
+
+        cost = trial_value.cost
+        if not isinstance(cost, list):
+            cost = [cost]
+        cost_dict = dict(zip(obj_keys, cost, strict=False))
+
+        return {
+            **cost_dict,
+            "runtime": max(trial_value.time, trial_value.virtual_time)
+        }
+

@@ -11,6 +11,11 @@ from rich import (
 )
 
 from carps.utils.exceptions import NotSupportedError
+from carps.benchmarks.wrapper import ParallelProblemWrapper
+from benchmark_simulator import ObjectiveFuncWrapper
+from carps.benchmarks.wrapper import OptimizerParallelWrapper
+
+from functools import partial
 
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
@@ -47,7 +52,17 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
                 kwargs = {}
             logger = instantiate(logger)(**kwargs)
             loggers.append(logger)
-    return instantiate(problem_cfg, loggers=loggers)
+
+    problem = instantiate(problem_cfg, loggers=loggers)
+    if cfg.task.n_workers > 1:
+        problem.evaluate = ParallelProblemWrapper(
+            obj_func=problem.parallel_evaluate,
+            obj_keys=[*list(cfg.task.objectives), "runtime"],
+            fidel_keys=[cfg.task.fidelity_type] if cfg.task.fidelity_type else None,
+            n_workers=cfg.task.n_workers,
+            ask_and_tell=False
+        )
+    return problem
 
 
 def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
@@ -99,15 +114,38 @@ def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -
     problem = make_problem(cfg=cfg, result_processor=result_processor)
     inspect(problem)
 
-    optimizer = make_optimizer(cfg=cfg, problem=problem)
-    inspect(optimizer)
+    if cfg.task.n_workers > 1:
+        cfg_copy = cfg.copy()
+        cfg_copy.task.n_workers = 1
+        optimizer = make_optimizer(cfg=cfg_copy, problem=problem)
+        inspect(optimizer)
+        opt = OptimizerParallelWrapper(optimizer=optimizer)
+        obj_fun = partial(problem.parallel_evaluate, obj_keys=optimizer.task.objectives)
+        worker = ObjectiveFuncWrapper(
+            save_dir_name="tmp",
+            ask_and_tell=True,
+            n_workers=cfg.task.n_workers,
+            obj_func=obj_fun,
+            n_actual_evals_in_opt=cfg.task.n_trials + cfg.task.n_workers,  # TODO check if trial for simulator means the same as in carps
+            n_evals=cfg.task.n_trials,
+            seed=cfg.seed,
+            fidel_keys=None,
+            obj_keys=optimizer.task.objectives,
+            # allow_parallel_sampling=True,
+            expensive_sampler=True
+        )
+        worker.simulate(opt)
 
-    try:
-        inc_tuple = optimizer.run()
-        printr("Solution found: ", inc_tuple)
-    except NotSupportedError:
-        print("Not supported. Skipping.")
-    except Exception as e:
-        print("Something went wrong:")
-        print(e)
-        raise e
+    else:
+        optimizer = make_optimizer(cfg=cfg, problem=problem)
+        inspect(optimizer)
+
+        try:
+            inc_tuple = optimizer.run()
+            printr("Solution found: ", inc_tuple)
+        except NotSupportedError:
+            print("Not supported. Skipping.")
+        except Exception as e:
+            print("Something went wrong:")
+            print(e)
+            raise e
