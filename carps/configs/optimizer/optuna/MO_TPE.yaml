@@ -1,0 +1,10 @@
+# @package _global_
+optimizer_id: Optuna-MO-TPE
+optimizer_container_id: Optuna
+optimizer:
+  _target_: carps.optimizers.optuna.OptunaOptimizer
+  _partial_: true
+  optuna_cfg:
+    study:
+      _target_: optuna.samplers.TPESampler
+      seed: ${seed}

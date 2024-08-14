@@ -20,7 +20,6 @@ from ConfigSpace.hyperparameters import (
     UniformIntegerHyperparameter,
 )
 from optuna.distributions import BaseDistribution, CategoricalDistribution, FloatDistribution, IntDistribution
-from optuna.samplers import TPESampler
 from optuna.trial import TrialState as OptunaTrialState
 from rich import print as printr
 
@@ -105,7 +104,7 @@ class OptunaOptimizer(Optimizer):
         if any(configspace.forbidden_clauses):
             raise NotImplementedError("Forbidden clauses are not yet supported in Optuna")
 
-        self.optuna_space = {hp.name: hp_to_optuna_distribution(hp) for hp in configspace.get_hyperparameters()}
+        self.optuna_space = {hp.name: hp_to_optuna_distribution(hp) for hp in list(configspace.values())}
         self.configspace = configspace
         self.history: dict[str, tuple[optuna.Trial, Configuration, None | float | list[float]]] = {}
 
@@ -128,11 +127,9 @@ class OptunaOptimizer(Optimizer):
             directions: Sequence[str | StudyDirection] | None = None
         ) -> Study.
         """
-        sampler = TPESampler(seed=self.optuna_cfg.sampler.seed)
         study = optuna.create_study(
-            **self.optuna_cfg.study, sampler=sampler, directions=["minimize"] * self.task.n_objectives
+            **self.optuna_cfg.study, directions=["minimize"] * self.task.n_objectives
         )
-        printr(sampler)
         printr(study)
 
         return study
