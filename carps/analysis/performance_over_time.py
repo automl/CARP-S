@@ -26,7 +26,7 @@ def plot_performance_over_time(
     x="n_trials_norm",
     y="cost_inc_norm",
     hue="optimizer_id",
-    figure_filename: str = "figures/performance_over_time.pdf",
+    figure_filename: str = "figures/performance_over_time",
     figsize: tuple[int, int] = (6, 4),
     show_legend: bool = True,
     title: str | None = None,
