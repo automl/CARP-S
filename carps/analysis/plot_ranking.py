@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
 import seaborn as sns
 from autorank import create_report
-from autorank._util import get_sorted_rank_groups
+from autorank._util import get_sorted_rank_groups, RankResult
 
 from carps.analysis.run_autorank import calc_critical_difference, custom_latex_table, get_df_crit
 from carps.analysis.utils import savefig, get_color_palette, filter_only_final_performance
@@ -21,7 +21,7 @@ def plot_ranking(
     set_id: str,
     perf_col: str = "trial_value__cost_inc_norm",
     problem_prefix: str = "",
-) -> None:
+) -> RankResult:
     fpath = Path("figures/ranking")
     fpath.mkdir(exist_ok=True, parents=True)
     identifier = f"{scenario}_{set_id}"
@@ -139,3 +139,5 @@ def plot_ranking(
     savefig(fig, fpath / f"final_per_combined_{identifier}")
 
     plt.show()
+
+    return result
