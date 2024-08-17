@@ -26,7 +26,7 @@ def plot_ranking(
     fpath.mkdir(exist_ok=True, parents=True)
     identifier = f"{scenario}_{set_id}"
     label = f"tab:stat_results_{identifier}"
-    result = calc_critical_difference(gdf, identifier=identifier, figsize=(8, 3), perf_col=perf_col)
+    result = calc_critical_difference(gdf, identifier=identifier, figsize=(8, 3), perf_col=perf_col, plot_diagram=True)
     # print(result)
     # try: 
     #     create_report(result)
