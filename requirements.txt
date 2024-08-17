@@ -11,3 +11,4 @@ pymysql
 cryptography
 domdf_python_tools
 py-experimenter>=1.4.1
+mfhpo-simulator
