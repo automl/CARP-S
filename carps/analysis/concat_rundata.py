@@ -32,5 +32,8 @@ def concat_rundata():
     df = convert_mixed_types_to_str(df)
     df.to_parquet("rundata.parquet")
 
+    df_cfg = pd.concat([d for _, d in res]).reset_index(drop=True)
+    df_cfg.to_parquet("rundata_cfg.parquet")
+
 if __name__ == "__main__":
     concat_rundata()
