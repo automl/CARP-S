@@ -1,0 +1,17 @@
+# @package _global_
+optimizer_container_id: Scikit_Optimize
+optimizer:
+  _target_: carps.optimizers.scikit_optimize.SkoptOptimizer
+  _partial_: true
+  skopt_cfg:
+    # See skopt.optimizer.optimizer.Optimizer for more details
+    random_state: ${seed}
+    n_random_starts: null
+    n_initial_points: 10
+    initial_point_generator: random
+    model_queue_size: null
+    space_constraint: null
+    avoid_duplicates: true
+
+    acq_func_kwargs: null
+    acq_optimizer_kwargs: null

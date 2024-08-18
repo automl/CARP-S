@@ -1,11 +1,12 @@
 # @package _global_
+defaults:
+  - base
 optimizer_id: Scikit_Optimize
-optimizer_container_id: Scikit_Optimize
 optimizer:
-  _target_: carps.optimizers.scikit_optimize.SkoptOptimizer
-  _partial_: true
   skopt_cfg:
-    random_state: ${seed}
-    base_estimator: "GP"
-    acq_func: "gp_hedge"
-    acq_optimizer: "auto"
+    # See skopt.optimizer.optimizer.Optimizer for more details
+    base_estimator: GP
+    acq_func: gp_hedge
+    acq_optimizer: auto
+
+
