@@ -1,5 +1,5 @@
 # @package _global_
-optimizer_id: Scikit_Optimize
+optimizer_id: Scikit_Optimize-GP-EI
 optimizer_container_id: Scikit_Optimize
 optimizer:
   _target_: carps.optimizers.scikit_optimize.SkoptOptimizer
@@ -7,5 +7,5 @@ optimizer:
   skopt_cfg:
     random_state: ${seed}
     base_estimator: "GP"
-    acq_func: "gp_hedge"
+    acq_func: "EI"
     acq_optimizer: "auto"
