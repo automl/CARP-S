@@ -1,0 +1,5 @@
+# @package _global_
+optimizer_container_id: SyneTune
+optimizer:
+  _target_: carps.optimizers.synetune.SynetuneOptimizer
+  _partial_: true
