@@ -120,7 +120,7 @@ class SkoptOptimizer(Optimizer):
         assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]
         return TrialInfo(
             config=configuration,
-            seed=self.skopt_cfg.random_state,
+            seed=self.skopt_cfg.get("random_state"),
             budget=None,
             instance=None,
         )
@@ -128,6 +128,10 @@ class SkoptOptimizer(Optimizer):
     def _setup_optimizer(self) -> skopt.optimizer.Optimizer:
         if self.skopt_cfg is None:
             self.skopt_cfg = {}
+        else:
+            self.skopt_cfg = dict(self.skopt_cfg)
+        if "n_jobs" not in self.skopt_cfg and self.task.n_workers is not None:
+            self.skopt_cfg["n_jobs"] = self.task.n_workers
         return skopt.optimizer.Optimizer(dimensions=self.skopt_space, **self.skopt_cfg)
 
     def ask(self) -> TrialInfo:

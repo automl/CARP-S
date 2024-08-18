@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - base
+optimizer_id: Scikit_Optimize-GP-LCB
+optimizer:
+  skopt_cfg:
+    # See skopt.optimizer.optimizer.Optimizer for more details
+    random_state: ${seed}
+    base_estimator: "GP"
+    acq_func: "LCB"
+    acq_optimizer: "auto"

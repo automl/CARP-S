@@ -1,25 +1,12 @@
 # @package _global_
-optimizer_id: SMAC3-MultiFidelityFacade
-optimizer_container_id: SMAC3
+defaults:
+  - base
+optimizer_id: SMAC3-MultiFidelityFacade  # BOHB
 optimizer:
-  _target_: carps.optimizers.smac20.SMAC3Optimizer
-  _partial_: true
-
   smac_cfg:
     smac_class: smac.facade.multi_fidelity_facade.MultiFidelityFacade
-    budget_variable: ${problem.budget_type}
-    scenario:
-      seed: ${seed}
-      n_trials: ${task.n_trials}
-      deterministic: true
-      n_workers: 1
-      output_directory: ${outdir}/${seed}/smac3_output
-      min_budget: ${task.min_budget}
-      max_budget: ${task.max_budget}
     smac_kwargs:
-      dask_client: null
       intensifier:
         _target_: smac.intensifier.hyperband.Hyperband
         _partial_: true
         eta: 3
-      overwrite: true

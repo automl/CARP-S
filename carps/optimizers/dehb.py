@@ -1,6 +1,18 @@
 """DEHB Optimizer.
 
 * Source: https://github.com/automl/DEHB/tree/master
+
+* Paper:
+@inproceedings{awad-ijcai21,
+  author    = {N. Awad and N. Mallik and F. Hutter},
+  title     = {{DEHB}: Evolutionary Hyberband for Scalable, Robust and Efficient Hyperparameter Optimization},
+  pages     = {2147--2153},
+  booktitle = {Proceedings of the Thirtieth International Joint Conference on
+               Artificial Intelligence, {IJCAI-21}},
+  publisher = {ijcai.org},
+  editor    = {Z. Zhou},
+  year      = {2021}
+}
 """
 
 from __future__ import annotations

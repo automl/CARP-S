@@ -28,15 +28,20 @@ from ConfigSpace.hyperparameters import (
 )
 from hebo.design_space.design_space import DesignSpace
 from hebo.optimizers.hebo import HEBO
+from omegaconf import DictConfig
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
+from carps.utils.loggingutils import get_logger, setup_logging, CustomEncoder
 
 if TYPE_CHECKING:
     from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
+
+setup_logging()
+logger = get_logger("HEBO")
 
 
 def configspaceHP2HEBOHP(hp: Hyperparameter) -> dict:
@@ -152,7 +157,7 @@ def ConfigSpacecfg2HEBOcfg(config: Configuration) -> pd.DataFrame:
 
 
 class HEBOOptimizer(Optimizer):
-    def __init__(self, problem: Problem, task: Task, loggers: list[AbstractLogger] | None = None) -> None:
+    def __init__(self, problem: Problem, task: Task, hebo_cfg: DictConfig | None = None, loggers: list[AbstractLogger] | None = None) -> None:
         """Interface to HEBO (https://github.com/huawei-noah/HEBO) [1].
 
         [1] Cowen-Rivers, Alexander I., et al. "An Empirical Study of Assumptions in Bayesian Optimisation." arXiv preprint arXiv:2012.03826 (2021).
@@ -163,22 +168,22 @@ class HEBOOptimizer(Optimizer):
         Parameters
         ----------
         problem : Problem
-            _description_
+            The objective function.
         task : Task
             The task description.
-
-        Raises:
-        ------
-        ValueError
-            If neither `num_trials` nor `max_wallclock_time` is specified.
+        hebo_cfg : DictConfig, optional
+            Optional kwargs for HEBO class.
+        loggers : list[AbstractLogger], optional
+            List of loggers to use, by default None
         """
         super().__init__(problem, task, loggers)
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.problem.configspace
 
-        if len(self.configspace.get_conditions()) > 0:
-            pass
+        if len(self.configspace.conditions) > 0:
+            logger.warn("HEBO treats search spaces with conditions as spaces without, "\
+                        "as it does not support conditional search spaces.")
             # msg = "HEBO does not support conditional search spaces."
             # raise RuntimeError(msg)
 
@@ -186,6 +191,10 @@ class HEBOOptimizer(Optimizer):
         self.metric = getattr(problem, "metric", "cost")
         self.budget_type = getattr(self.problem, "budget_type", None)
         self.trial_counter = 0
+        hebo_cfg = {} if hebo_cfg is None else dict(hebo_cfg)
+        if "scramble_seed" not in hebo_cfg:
+            hebo_cfg["scramble_seed"] = self.rng.randint(1, 1000)
+        self.hebo_cfg = hebo_cfg
 
         self._solver: HEBO | None = None
 
@@ -303,7 +312,7 @@ class HEBOOptimizer(Optimizer):
             Instance of a HEBO Optimizer
 
         """
-        return HEBO(space=self.hebo_configspace)
+        return HEBO(space=self.hebo_configspace, **self.hebo_cfg)
 
     def get_trajectory(self, sort_by: str = "trials") -> tuple[list[float], list[float]]:
         """List of x and y values of the incumbents over time. x depends on ``sort_by``.

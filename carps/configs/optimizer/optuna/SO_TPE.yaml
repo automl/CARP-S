@@ -1,11 +1,11 @@
 # @package _global_
+defaults:
+  - base
 optimizer_id: Optuna-TPE
-optimizer_container_id: Optuna
 optimizer:
-  _target_: carps.optimizers.optuna.OptunaOptimizer
-  _partial_: true
   optuna_cfg:
-    study:
-      _target_: optuna.samplers.TPESampler
-      seed: ${seed}
-        
+    study:  # See https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html#optuna.study.Study
+      sampler:
+        _target_: optuna.samplers.TPESampler
+        seed: ${seed}
+          
