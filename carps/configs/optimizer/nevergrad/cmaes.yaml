@@ -1,9 +1,8 @@
 # @package _global_
+defaults:
+  - base
 optimizer_id: Nevergrad-CMA-ES
-optimizer_container_id: Nevergrad
 optimizer:
-  _target_: carps.optimizers.nevergrad.NevergradOptimizer
-  _partial_: true
   nevergrad_cfg:
     optimizer_name: "CMA-ES"
     seed: ${seed}

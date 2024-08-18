@@ -15,7 +15,7 @@ task:
   objectives:
   - value
   is_multifidelity: false
-  fidelity_type: dummy
+  # fidelity_type: dummy
   has_constraints: null
   domain: synthetic
   objective_function_approximation: real
