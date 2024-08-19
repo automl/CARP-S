@@ -2,6 +2,7 @@
 
 ## Benchmarks
 - HPOBench: Add rl, nasbench_101, nasbench_201, nasbench1shot1, and nas_hpo (#155, fix for benchmarks #158)
+- Pymoo: Add all unconstraint problems (#162)
 
 ## Improvements
 - Update/clean optimizer configs, update HEBO+Skopt a bit (#161)

@@ -32,18 +32,19 @@ class PymooProblem(Problem):
         self,
         problem_name: str,
         seed: int,
-        metric: str | list[str],
+        problem_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         """Initialize a Pymoo problem."""
+        if problem_kwargs is None:
+            problem_kwargs = {}
         super().__init__(loggers)
 
         self.problem_name = problem_name
-        self.metric = metric
         if problem_name in extra_probs:
-            self._problem = extra_probs[problem_name]()
+            self._problem = extra_probs[problem_name](**problem_kwargs)
         else:
-            self._problem = pymoo.problems.get_problem(self.problem_name)
+            self._problem = pymoo.problems.get_problem(self.problem_name, **problem_kwargs)
         self._configspace = self.get_pymoo_space(pymoo_prob=self._problem, seed=seed)
 
     @property
@@ -63,7 +64,7 @@ class PymooProblem(Problem):
         xl, xu = pymoo_prob.xl, pymoo_prob.xu
         hps = [Float(name=f"x{i}", bounds=[xl[i], xu[i]]) for i in range(n_var)]
         configspace = ConfigurationSpace(seed=seed)
-        configspace.add_hyperparameters(hps)
+        configspace.add(hps)
         return configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
