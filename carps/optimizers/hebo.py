@@ -192,9 +192,6 @@ class HEBOOptimizer(Optimizer):
         self.budget_type = getattr(self.problem, "budget_type", None)
         self.trial_counter = 0
         hebo_cfg = {} if hebo_cfg is None else dict(hebo_cfg)    
-        self.rng = np.random.default_rng(98765)    
-        if "scramble_seed" not in hebo_cfg:
-            hebo_cfg["scramble_seed"] = int(self.rng.integers(0, 1000, size=1)[0])
         self.hebo_cfg = hebo_cfg
 
         self._solver: HEBO | None = None
