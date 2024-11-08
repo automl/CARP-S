@@ -1,13 +1,11 @@
 # @package _global_
 benchmark_id: Pymoo
-problem_id: Pymoo/MO/zdt4
+problem_id: Pymoo/MO/unconstraint/zdt6
 problem:
   _target_: carps.benchmarks.pymoo.PymooProblem
-  problem_name: zdt4
+  problem_name: zdt6
+  problem_kwargs: {}
   seed: ${seed}
-  metric:
-  - objective_0
-  - objective_1
 task:
   n_trials: 147
   time_budget: null
@@ -23,7 +21,7 @@ task:
   has_constraints: false
   domain: synthetic
   objective_function_approximation: real
-  has_virtual_time: false
+  has_virtual_time: true
   deterministic: true
   dimensions: 10
   search_space_n_categoricals: 0
