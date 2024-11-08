@@ -5,7 +5,8 @@
 - Pymoo: Add all unconstraint problems (#162)
 
 ## Improvements
-- Update/clean optimizer configs, update HEBO+Skopt a bit (#161)
+- Update/clean optimizer configs, update HEBO+Skopt a bit (#161, #163)
+- Add BBOB-Vizier setup (but using BBOB from ioh; d=20, n_trials=100, #163)
 
 # v0.1.1
 
