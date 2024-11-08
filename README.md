@@ -5,6 +5,7 @@ Welcome to CARP-S!
 This repository contains a benchmarking framework for optimizers.
 It allows flexibly combining optimizers and benchmarks via a simple interface, and logging experiment results 
 and trajectories to a database.
+carps can launch experiment runs in parallel by using [hydra](https://hydra.cc), which offers launchers for slurm/submitit, Ray, RQ, and joblib.
 
 The main topics of this README are:
 - [Installation](#installation)
@@ -121,17 +122,6 @@ You can run a certain problem and optimizer combination directly with Hydra via:
 python -m carps.run +problem=... +optimizer=... seed=... -m
 ```
 
-Another option is to fill the database with all possible combinations of problems and optimizers
-you would like to run:
-```bash
-python -m carps.container.create_cluster_configs +problem=... +optimizer=... -m
-```
-
-Then, run them from the database with:
-```bash
-python -m carps.run_from_db 
-```
-
 To check whether any runs are missing, you can use the following command. It will create
 a file `runcommands_missing.sh` containing the missing runs:
 ```bash
@@ -149,6 +139,18 @@ The experiments can be matched via the column `experiment_id`.
 Experiments with error status (or any other status) can be reset via:
 ```bash
 python -m carps.utils.database.reset_experiments
+```
+
+### Running with Containers and Database
+Another option is to fill the database with all possible combinations of problems and optimizers
+you would like to run:
+```bash
+python -m carps.container.create_cluster_configs +problem=... +optimizer=... -m
+```
+
+Then, run them from the database with:
+```bash
+python -m carps.run_from_db 
 ```
 
 ## Adding a new Optimizer or Benchmark
