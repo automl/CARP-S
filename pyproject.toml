@@ -9,7 +9,7 @@ name = "carps"
 version = "0.1.1"
 dependencies = [
   "autorank",
-  "ConfigSpace>=1.0.0",
+  "ConfigSpace>=1.0.0,<1.2.0",
   "cryptography",
   "dataclasses-json",
   "domdf_python_tools",

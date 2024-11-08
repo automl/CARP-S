@@ -1,10 +1,10 @@
 # @package _global_
 defaults:
   - base
-optimizer_id: SMAC3-MO-GP  # with a Gaussian process
+optimizer_id: SMAC3-MO-RF  # with a random forest
 optimizer:
   smac_cfg:
-    smac_class: smac.facade.blackbox_facade.BlackBoxFacade
+    smac_class: smac.facade.hyperparameter_optimization_facade.HyperparameterOptimizationFacade
     smac_kwargs:
       multi_objective_algorithm:
         _target_: smac.multi_objective.parego.ParEGO

@@ -1,0 +1,5 @@
+# @package _global_
+optimizer_container_id: Nevergrad
+optimizer:
+  _target_: carps.optimizers.nevergrad.NevergradOptimizer
+  _partial_: true

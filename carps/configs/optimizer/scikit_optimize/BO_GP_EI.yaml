@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - base
+optimizer_id: Scikit_Optimize-GP-EI
+optimizer:
+  skopt_cfg:
+    # See skopt.optimizer.optimizer.Optimizer for more details
+    random_state: ${seed}
+    base_estimator: "GP"
+    acq_func: "EI"
+    acq_optimizer: "auto"
