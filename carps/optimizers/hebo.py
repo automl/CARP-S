@@ -182,7 +182,7 @@ class HEBOOptimizer(Optimizer):
         self.configspace = self.problem.configspace
 
         if len(self.configspace.conditions) > 0:
-            logger.warn("HEBO treats search spaces with conditions as spaces without, "\
+            logger.warning("HEBO treats search spaces with conditions as spaces without, "\
                         "as it does not support conditional search spaces.")
             # msg = "HEBO does not support conditional search spaces."
             # raise RuntimeError(msg)
@@ -191,9 +191,7 @@ class HEBOOptimizer(Optimizer):
         self.metric = getattr(problem, "metric", "cost")
         self.budget_type = getattr(self.problem, "budget_type", None)
         self.trial_counter = 0
-        hebo_cfg = {} if hebo_cfg is None else dict(hebo_cfg)
-        if "scramble_seed" not in hebo_cfg:
-            hebo_cfg["scramble_seed"] = self.rng.randint(1, 1000)
+        hebo_cfg = {} if hebo_cfg is None else dict(hebo_cfg)    
         self.hebo_cfg = hebo_cfg
 
         self._solver: HEBO | None = None

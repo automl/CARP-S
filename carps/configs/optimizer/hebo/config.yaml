@@ -12,3 +12,4 @@ optimizer:
       _partial_: true
     es: nsga2
     model_config: null
+    scramble_seed: ${seed}
