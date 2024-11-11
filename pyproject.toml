@@ -133,7 +133,7 @@ markers = ["example: An example"]
 [tool.ruff]
 target-version = "py311"
 line-length = 120
-show-source = true
+output-format = "full"
 src = ["carps", "tests", "examples", "notebooks"]
 lint.extend-safe-fixes = ["ALL"]
 extend-include = ["*.ipynb"]
@@ -238,7 +238,7 @@ exclude = [
 ]
 
 # Exclude a variety of commonly ignored directories.
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*.py" = [
   "S101",
   "D103",
@@ -268,7 +268,7 @@ exclude = [
 "docs/*" = ["INP001"]
 
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["amltk"]
 known-third-party = ["sklearn"]
 no-lines-before = ["future"]
@@ -277,10 +277,10 @@ combine-as-imports = true
 extra-standard-library = ["typing_extensions"]
 force-wrap-aliases = true
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 10 # Changed from default of 5
 
 [tool.mypy]
