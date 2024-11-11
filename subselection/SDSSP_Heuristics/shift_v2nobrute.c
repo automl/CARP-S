@@ -951,12 +951,18 @@ int main(int argc, char **argv)
   cput = ((double) (end - start)) / CLOCKS_PER_SEC;
   if (super_best>upper){
 	  super_best=upper;
+
+  FILE *fpmetadata;
+  fpmetadata=fopen(argv[6],"w");  
+  fprintf(fpmetadata, "n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n",npoints,kpoints,dim,upper,cput);
+
   FILE *fp; // Move our opti point set to a file
-  fp=fopen(argv[5],"w");
-  fprintf(fp, "n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n",npoints,kpoints,dim,upper,cput);
+  fp=fopen(argv[5],"w");  
   for (i=0; i<kpoints;i++){
 	  for (j=0;j<dim;j++){
-		  fprintf(fp,"%.18e ",optiset[i][j]);
+		  fprintf(fp,"%.18e",optiset[i][j]);
+		  if (j != dim - 1)
+			  fprintf(fp,",");
 	  }
 	  fprintf(fp,"\n");
   }
