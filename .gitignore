@@ -138,6 +138,7 @@ containers
 data
 outputs
 runs
+results
 runsold
 *.json
 *.code-workspace
