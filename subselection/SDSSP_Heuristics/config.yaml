@@ -1,0 +1,13 @@
+k: 10
+fullset_csv_fn: "run-data/df_crit.csv"
+n_reps: !!int 5000
+executable: ./a.out
+n_subsets: 2
+
+outdir: results
+hydra:
+  run:
+    dir: ${outdir}/${k}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${outdir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${k}
