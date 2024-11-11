@@ -68,32 +68,31 @@ def match_index(index_list, values):
             raise ValueError("No match found")
     return results
 
-
-# %%
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('origin_csv', type=str)
-    parser.add_argument('remaining_points', type=str)
-    parser.add_argument('output_csv', type=str)
-    parser.add_argument('complement_csv', type=str)
-    args = parser.parse_args()
-    with open(args.origin_csv, 'r') as f:
+def match_index_main(origin_csv_path, remaining_points_path, output_csv_path, complement_csv_path):
+    with open(origin_csv_path, 'r') as f:
         origin_csv = f.readlines()
-    with open(args.remaining_points, 'r') as f:
+    with open(remaining_points_path, 'r') as f:
         remaining_points = f.readlines()
     index_list = build_list([tuple(map(Decimal, x.strip().split(',')[1:])) for x in origin_csv[1:]])
-    ans = match_index(index_list, [tuple(map(Decimal, x.split())) for x in remaining_points[1:]])
-    with open(args.output_csv, 'w') as f:
+    remaining_points_numeric = [tuple(map(Decimal, x.split())) for x in remaining_points[1:]]
+    ans = match_index(index_list, remaining_points_numeric)
+    with open(output_csv_path, 'w') as f:
         f.write(origin_csv[0])
         for i in ans:
             f.write(origin_csv[i+1])
     
-    with open(args.complement_csv, 'w') as f:
+    with open(complement_csv_path, 'w') as f:
         f.write(origin_csv[0])
         ans = set(ans)
         for i in range(len(origin_csv)-1):
             if i not in ans:
                 f.write(origin_csv[i+1])
-    
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Match index')
+    parser.add_argument('origin_csv_path', type=str, help='Path to the original csv file')
+    parser.add_argument('remaining_points_path', type=str, help='Path to the remaining points file')
+    parser.add_argument('output_csv_path', type=str, help='Path to the output csv file')
+    parser.add_argument('complement_csv_path', type=str, help='Path to the complement csv file')
+    args = parser.parse_args()
+    match_index_main(args.origin_csv_path, args.remaining_points_path, args.output_csv_path, args.complement_csv_path)
