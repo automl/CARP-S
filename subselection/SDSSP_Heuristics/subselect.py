@@ -31,7 +31,7 @@ def read_metadata(file_name: str) -> dict:
     # n=1317,k=5,dim=3, discrepancy=0.421367, runtime=0.006542
     with open(file_name) as file:
         first_line = file.readline().strip()
-    return ast.literaleval("dict(" + first_line + ")")
+    return eval("dict(" + first_line + ")")
 
 def extract_points_csv2txt(input_csv: str, output_txt: str) -> int:
     """Extract points from a csv file to a txt file.
@@ -211,7 +211,7 @@ def subselect(
             "subset_fn": subset_fn,
             "remainingset_fn": remainingset_fn,
         }
-        metadata = read_metadata(k, metadata_fn)
+        metadata = read_metadata(metadata_fn)
         result.update(metadata)
 
         print(result)
