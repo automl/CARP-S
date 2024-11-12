@@ -175,6 +175,8 @@ def subselect(
                 The remaining points.
             n: int
                 The number of points.
+            subset_id:
+                The id of the subset.
             k: int
                 The subset size.
             dim: int
@@ -210,6 +212,7 @@ def subselect(
             "sourcepointset_fn": sourcepointset_fn,
             "subset_fn": subset_fn,
             "remainingset_fn": remainingset_fn,
+            "subset_id": i,
         }
         metadata = read_metadata(metadata_fn)
         result.update(metadata)

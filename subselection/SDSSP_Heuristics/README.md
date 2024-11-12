@@ -25,24 +25,19 @@ ml compiler/GCC/13.2.0
 ```
 If you are not on the cluster, install those libraries.
 
-
-
 ## Running the Subselection
 This will run the subselection (i.e. choose k points the n-k remaining k points after the first iteration). 
 ```bash
 # Create a new directory. The script will litter the directory with files and overwrite things without warning. 
 ```bash
-mkdir run-data
 
-# Copy the performance of optimizer per problem file into the dir
-cp df_crit.csv run-data/
-# $1: folder to run stuff in, $2: number of points in full set, $3: different ks
-bash commands.sh run-data 106 10,20 
+# Single k
+python subselect.py k=30
 
-# e.g.
-bash commands.sh run-data-MOMF 27 5,6,7,8,9,10,11,12,13
+# Sweep over ks
+python subselect.py k=5,10,15,20 -m
 ```
+Check `config.yaml` or `subselect.py` for more arguments.
 
-If you want to split the k points obtained from the full set of size n instead of finding k points again from
-the remaining n-k, then replace `again.sh` by `split.sh` in `commands.sh` (check which arguments `again.sh`
-requires).
+## Inspecting the subselection
+See `show_results_info.ipynb`.
