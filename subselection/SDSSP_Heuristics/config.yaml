@@ -1,7 +1,7 @@
 
 # @package _global_
 defaults:
-  - override /hydra/launcher: submitit_slurm
+  - override /hydra/launcher: joblib
   - override /hydra/job_logging: colorlog
 
 identifier: default
@@ -24,8 +24,12 @@ hydra:
 
 # Cluster config
   launcher:
-    partition: normal
-    cpus_per_task: 1
-    name: carpssubset
-    timeout_min: 720
-    mem_per_cpu: 4G
+    # Slurm
+    # partition: normal
+    # cpus_per_task: 1
+    # name: carpssubset
+    # timeout_min: 720
+    # mem_per_cpu: 4G
+
+    # Joblib
+    n_jobs: 4
