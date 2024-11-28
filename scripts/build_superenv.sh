@@ -89,7 +89,7 @@ do
 done
 
 # YAHPO
-bash container_recipes/benchmarks/YAHPO/prepare_yahpo.sh $ENV_LOCATION
+bash container_recipes/benchmarks/YAHPO/install_yahpo.sh $ENV_LOCATION
 
 # MFPBench
 bash container_recipes/benchmarks/MFPBench/download_data.sh $ENV_LOCATION

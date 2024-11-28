@@ -10,6 +10,8 @@ else
     CONDA_RUN_COMMAND="${CONDA_COMMAND} run ${CONDA_ENV_NAME}"
 fi
 $CONDA_RUN_COMMAND pip install yahpo-gym
+git clone https://github.com/benjamc/yahpo_gym.git lib/yahpo_gym
+$CONDA_RUN_COMMAND pip install -e lib/yahpo_gym/yahpo_gym
 cd carps
 mkdir benchmark_data
 cd benchmark_data

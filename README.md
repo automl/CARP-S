@@ -95,7 +95,7 @@ such as surrogate models, in order to run the benchmark:
 
 -   For YAHPO, you can download the required surrogate benchmarks and meta-data with
     ```bash
-    bash container_recipes/benchmarks/YAHPO/prepare_yahpo.sh
+    bash container_recipes/benchmarks/YAHPO/install_yahpo.sh
     ```
 
 ## Minimal Example
