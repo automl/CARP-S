@@ -1,8 +1,9 @@
 OPT=$1
 echo $OPT
 
-# Pymoo. 10
-python -m carps.run +cluster=noctua $OPT '+problem/Pymoo/MO=glob(*)' 'seed=range(1,21)' baserundir=runs_MO -m
+# Pymoo. 10 + 20
+python -m carps.run +cluster=noctua $OPT '+problem/Pymoo/MO/unconstraint=glob(*)' 'seed=range(1,21)' baserundir=runs_MO -m
+python -m carps.run +cluster=noctua $OPT '+problem/Pymoo/ManyO/unconstraint=glob(*)' 'seed=range(1,21)' baserundir=runs_MO -m
 
 # YAHPO. MO. 23
 python -m carps.run +cluster=noctua $OPT '+problem/YAHPO/MO=glob(*)' 'seed=range(1,21)' baserundir=runs_MO -m
