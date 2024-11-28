@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: Pymoo
-problem_id: Pymoo/ManyO/unconstraint/dtlz1^-1
+problem_id: Pymoo/ManyO/unconstraint/dtlz1_inv
 problem:
   _target_: carps.benchmarks.pymoo.PymooProblem
   problem_name: dtlz1^-1
