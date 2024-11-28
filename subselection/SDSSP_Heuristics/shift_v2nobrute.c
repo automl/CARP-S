@@ -74,14 +74,14 @@ void usage()
 
 
 double oydiscr_cell(int npoints, int dim, int rempoints,
-		    double **forced, int nforced, 
+		    double **forced, int nforced,
 		    double *lowerleft, double *upperright)
 {
   double discr, maxdiscr, coordlist[dim][nforced];
   int indexes[dim];
   int i,j,k,h, status, dimension;
   double biggest[dim][nforced+1], smallest[dim][nforced+1];
-  
+
   /*if (upperright[0]>0.999 && upperright[1]>0.999 && upperright[2]>0.999 && upperright[3]>0.999 && upperright[4]>0.999)
 	  debugg-=1;*/
   //double big_bord[dim][nforced+1][dim], small_bord[dim][nforced+1][dim]; // Could do it with less memory but this will do for the moment. Need double because of upperright and unknown box choices
@@ -101,7 +101,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
 		  }
 	  }
   }
-  int maxpoints[dim], ntotal = rempoints + nforced;  
+  int maxpoints[dim], ntotal = rempoints + nforced;
   // biggest[i][j]: biggest product of coords 0--i for hitting j points
   // smallest[i][j]: smallest product of coords 0--i for hitting j+1 points
   // maxpoints[i]: number of points you get in total from coords 0--i
@@ -109,7 +109,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
   for (i=0; i<dim; i++) {
     vol1 *= lowerleft[i];
     vol2 *= upperright[i];
-  }    
+  }
 #ifdef SPAM
   fprintf(stderr, "Parameters: npoints %d, dim %d, rempoints %d, nforced %d\n",
 	  npoints, dim, rempoints, nforced);
@@ -133,9 +133,9 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
   if (discr > maxdiscr){
     maxdiscr = discr;
 	for (i=0;i<dim;i++)
-		curr_bord[i]=upperright[i]; 
+		curr_bord[i]=upperright[i];
 	temp_fill=true;
-	
+
   }
   if (maxdiscr < globallower){
 	  for (i=0;i<dim;i++){
@@ -164,7 +164,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
     for (j=0; j<dim; j++) {
       // order is chosen to handle final box
       if (forced[i][j] <= lowerleft[j])
-	continue; 
+	continue;
       else if (forced[i][j] >= upperright[j])
 	break;
       else { // strictly internal
@@ -187,7 +187,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
       }
     }
   }
-  
+
   for (i=0; i<dim; i++)
     qsort(&(coordlist[i][0]), indexes[i], sizeof(double), cmpdbl);
   maxpoints[0]=indexes[0];
@@ -206,7 +206,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
     fprintf(stderr, "\n");
   }
 #endif
-  
+
   // coord 0 first, since there is no recursion for that:
   smallest[0][0]=lowerleft[0];
   small_bord[0][0][0]=lowerleft[0]; //Changed here
@@ -218,12 +218,12 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
   }
   biggest[0][indexes[0]]=upperright[0];
   big_bord[0][indexes[0]][0]=upperright[0];
-  
+
   //INIT CORRECT
-  
-  
-  
-  
+
+
+
+
 #ifdef SPAM
   fprintf(stderr, "Direction 0 only, biggest: ");
   for (j=0; j<=maxpoints[0]; j++)
@@ -233,7 +233,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
     fprintf(stderr, "%g ", smallest[0][j]);
   fprintf(stderr, "\n");
 #endif
-    
+
   for (i=1; i<dim; i++) {
     // first the special loop for smallest: "nothing contributed by us"
     for (j=0; j<=maxpoints[i-1]; j++){
@@ -250,7 +250,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
 	vol2=biggest[i-1][k]*vol1;
 	if (vol2 > biggest[i][j+k]){
 	  biggest[i][j+k]=vol2;
-  
+
     for (h=0;h<i;h++)
 		  big_bord[i][j+k][h]=big_bord[i-1][k][h]; // Copy the values we had obtained for this pre-set before. yes, memcpy would be better.
 	big_bord[i][j+k][i]=coordlist[i][j]; // Add the new dimension that wasn't known beforehand.
@@ -285,9 +285,9 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
     fprintf(stderr, "\n");
 #endif
   }
-  
+
   // now, use these to find lower, upper limits
-  // mode: always contain "rempoints", additionally 
+  // mode: always contain "rempoints", additionally
   //         pick from smallest[dim-1], biggest[dim-1]
   maxdiscr=0;
   //fprintf(stderr, "DynProg time\n");
@@ -296,13 +296,13 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
 	//fprintf(stderr, "%d\n",i);
     discr = (double)(rempoints+i)/npoints - smallest[dim-1][i];
     if (discr > maxdiscr){
-		
+
       maxdiscr=discr;
 	  for (j=0;j<dim;j++)
 		  curr_bord[j]=small_bord[dim-1][i][j]; // Now storing solution if it's a small box
 	  temp_fill=true;
-	  
-	  
+
+
 	}
     // big box
     discr = biggest[dim-1][i] - (double)(rempoints+i)/npoints;
@@ -314,7 +314,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
 		  curr_bord[j]=big_bord[dim-1][i][j]; // Now storing solution if it's a big box
 	  }
 	  temp_fill=false;
-	  
+
 	}
   }
   //fprintf(stderr, "Get out cell2\n");
@@ -329,7 +329,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
     //fprintf(stderr, "Conclusion: %g\n", maxdiscr);
 #endif
 	//fprintf(stderr, "left a cell\n");
-	
+
   /*if (debugg<3){
 	  for (i=0;i<dim;i++){
 		  for (j=0;j<nforced+1;j++){
@@ -361,7 +361,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
   }
   free(big_bord);
   free(small_bord);
-	
+
   return maxdiscr;
 }
 
@@ -373,7 +373,7 @@ double oydiscr_cell(int npoints, int dim, int rempoints,
 //   ON lower-left counts as in (including when lowerleft=1)
 //   ON upper-right counts as out (except if previous).
 double oydiscr_int(double **pointset, int npoints, int dim, int rempoints,
-		   double **forced, int nforced, int cdim, 
+		   double **forced, int nforced, int cdim,
 		   double *lowerleft, double *upperright)
 {
   double coord, forcedcoord, lowedge=0.0, highedge;
@@ -387,14 +387,14 @@ double oydiscr_int(double **pointset, int npoints, int dim, int rempoints,
   //                forcedidx: next unused forced element (a.k.a. counter)
   //                curridx: current pointset point ("i" as loop var)
   //  coords:
-  //           coord is value of current pointset-point, 
+  //           coord is value of current pointset-point,
   //           forcedcoord is value of next-up forced boundary,
   //           lowedge is value of last boundary we used
   // newcount counts number of pointset-points since last coord
   if (cdim==dim) {
 	  //fprintf(stderr, "Reached a cell\n");
     free(newforced);
-    discr= oydiscr_cell(npoints, dim, rempoints, 
+    discr= oydiscr_cell(npoints, dim, rempoints,
 			forced, nforced,
 			lowerleft, upperright);
 			double check;
@@ -408,9 +408,9 @@ double oydiscr_int(double **pointset, int npoints, int dim, int rempoints,
 		glob_bound=discr;
 	}
 	return discr;
-	
+
   }
-  
+
   comparedim=cdim;
   qsort(pointset, rempoints, sizeof(double *), cmpkeyk);
   qsort(forced, nforced, sizeof(double *), cmpkeyk);
@@ -466,21 +466,21 @@ double oydiscr_int(double **pointset, int npoints, int dim, int rempoints,
     for (; (j<rempoints) && (pointset[j][cdim] < highedge); j++)
       newforced[newforcedidx++] = pointset[j];
     if (j>(curridx+1))
-      resort=1; 
+      resort=1;
     // 3. make call with properly adjusted boundaries, update variables
     discr = oydiscr_int(pointset, npoints, dim, newrempoints,
 			newforced, newforcedidx, cdim+1,
 			lowerleft, upperright);
     if (discr > maxdiscr) {
       maxdiscr = discr;
-	  
+
 	  /*for (j=0;j<dim;j++)
 		  best_bord[j]=curr_bord[j];
 	  if (curr_fill)
 		fill=true;
 	  else
 		fill=false;*/
-	  
+
 	}
     if (resort) {
       comparedim=cdim;
@@ -514,15 +514,15 @@ double oydiscr_int(double **pointset, int npoints, int dim, int rempoints,
 		fill=true;
 	else
 	    fill=false;*/
-	
+
   }
-	
+
   free(newforced);
   return maxdiscr;
 
 
 }
-    
+
 double oydiscr(double **pointset, int dim, int npoints, double *lower)
 {
   double lowerleft[dim], upperright[dim];
@@ -551,7 +551,7 @@ double oydiscr(double **pointset, int dim, int npoints, double *lower)
   for (i=0; i<dim; i++) {
     maxcoord=-1.0;
     maxpos=-1;
-    for (j=0; j<npoints; j++) 
+    for (j=0; j<npoints; j++)
       if (pointset[j][i] > maxcoord) {
 	maxcoord = pointset[j][i];
 	maxpos=j;
@@ -565,7 +565,7 @@ double oydiscr(double **pointset, int dim, int npoints, double *lower)
     else
       clone_set[k++]=pointset[i];
 //  discr = oydiscr_int(pointset, npoints, dim, npoints,
-//		      pre_force, dim, 0, 
+//		      pre_force, dim, 0,
 //		      lowerleft, upperright);
 //  discr = oydiscr_int(clone_set, npoints, dim, k,
 //		      pre_force, j, 0,
@@ -575,7 +575,7 @@ double oydiscr(double **pointset, int dim, int npoints, double *lower)
 //		      lowerleft, upperright);
   // final version: NOTHING pre-determined.
   //fprintf(stderr, "First part\n");
-  discr = oydiscr_int(pointset, npoints, dim, npoints, 
+  discr = oydiscr_int(pointset, npoints, dim, npoints,
 		      pre_force, 0, 0,
 		      lowerleft, upperright); // Careful, this is called npoints like in original code but is equal to kpoints
   for (i=0; i<dim; i++)
@@ -610,7 +610,7 @@ int find_point(double **copysorted,double temp_coord, int cho, int npoints){
 			b=mid;
 			mid=(a+b)/2;
 		}
-			 
+
 	}
 	if (b-a==1){ // This only works because we KNOW the box should be given by some coord. With double precision there might be some mistake in the volume calc-> inexact coord. We take the closest one.
 		if (copysorted[cho][b]-temp_coord> temp_coord-copysorted[cho][a])
@@ -635,23 +635,23 @@ void replace(double **pointset, double **Orig_pointset, int kpoints, int npoints
 		}
 	}
 	return;
-	
+
 }
 
 
 
 double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 {
-  
+
   // SHuffle our point array, shuffle directly in Orig_pointset. Do this in main?
-  
-  
+
+
   int i, j, h, a, b, c, d, f, g, search_count, temp_bordpoint, chosen_dim, nb_natural, nb_brute, nb_runs, tempo, curr_dim, actu_dim, index;
   double upper,lower;
   upper=1.0;
   int nb_calc=0;
-  
-	
+
+
 // Sorting the points in each dim
   double **copysorted=malloc(dim*sizeof(int*));
   double **subset;
@@ -672,8 +672,8 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 				  revorderings[i][j]=h;
 				  break; // We supposed general position
 			  }
-		  }	  
-	  } 
+		  }
+	  }
   }
   is_in =malloc(npoints*sizeof(int));
   for (i=0;i<npoints;i++){
@@ -693,11 +693,11 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 	fprintf(stderr, "Sorted points\n");
 	upper = oydiscr(temp_subset, dim, kpoints,&lower); // We know this is "optimal" at least for the moment
 	glob_bound=0;
-	
+
 	lower=0.0;
 	nb_calc+=1;
 	globallower=0.0;
-	//replace(subset,Orig_pointset,kpoints,npoints); 
+	//replace(subset,Orig_pointset,kpoints,npoints);
 	double curr_disc;
 	bool chosen,boom,problem;
 	nb_natural=0;nb_brute=0;
@@ -776,10 +776,10 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 						}
 						//BUG WAS HERE, WITH AN ELSE MODIFYING OUR SUBSET FOR NO REASON
 						}
-				curr_dim+=1;	
+				curr_dim+=1;
 					}
 			}
-			
+
 			else{ // Now underfilled box
 				g=0;
 				while (!chosen && curr_dim<dim){
@@ -798,7 +798,7 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 						c=list_points[actu_dim]; // Before we had the position and not the point number
 						for (i=0;i<kpoints;i++)
 							memcpy(temp_subset[i],subset[i],dim*sizeof(double));
-						tempo=is_in[c];							
+						tempo=is_in[c];
 						memcpy(temp_subset[tempo],Orig_pointset[d],dim*sizeof(double));
 						curr_disc = oydiscr(temp_subset, dim, kpoints, &lower);
 						glob_bound=0;
@@ -811,10 +811,10 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 							memcpy(subset[tempo],Orig_pointset[d],dim*sizeof(double));
 							is_in[d]=tempo;
 							is_in[c]=-1;
-							
+
 							fill=curr_fill;
 							memcpy(top_bord,best_bord,dim*sizeof(double));
-							
+
 							upper=curr_disc;
 							fprintf(stderr,"New2:%lf",upper);
 						}
@@ -822,16 +822,16 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 						curr_dim+=1;
 				}
 			}
-		search_count+=1; // We've gone thourgh a full dim rotation or found a point	
+		search_count+=1; // We've gone thourgh a full dim rotation or found a point
 		}
-		
+
 	if (!chosen)
 		break;
 	}
 	fprintf(stderr,"Nb calcu:%d, Final discre:%lf\n",nb_calc,upper);
 	for (i=0;i<kpoints;i++)
 		memcpy(optiset[i],subset[i], dim*sizeof(double));
-		
+
 	for (i=0;i<dim;i++){
 		free(copysorted[i]);
 		free(orderings[i]);
@@ -848,13 +848,13 @@ double shift(int npoints, int kpoints, int dim, double **Orig_pointset)
 	free(revorderings);
 	free(is_in);
 	free(list_points);
-	
+
 	free(top_bord);
-	
+
   fprintf(stderr,"Natural: %d, Brute: %d, Discr: %lf",nb_natural,nb_brute,upper);
   return upper;
 
-  
+
 }
 
 int main(int argc, char **argv)
@@ -875,13 +875,13 @@ int main(int argc, char **argv)
   if (test!=3)
 	  exit(EXIT_FAILURE);
   fprintf(stderr, "Reading dim %d npoints %d kpoints %d\n", dim, npoints,kpoints);*/
-  
+
   dim=atoi(argv[2]);
   npoints=atoi(argv[3]);
   kpoints=atoi(argv[4]);
-  
+
   fprintf(stderr, "\n \n Reading dim %d npoints %d kpoints %d ", dim, npoints,kpoints);
-  
+
   Orig_pointset = malloc(npoints*sizeof(double*));
   for (i=0; i<npoints; i++) {
     Orig_pointset[i] = malloc(dim*sizeof(double));
@@ -922,7 +922,7 @@ int main(int argc, char **argv)
 		  Orig_pointset[rando2][j]=swap[j];
   }
   }
-  
+
   free(swap);
   epsilon=1;
   for (i=0;i<npoints;i++){
@@ -933,30 +933,36 @@ int main(int argc, char **argv)
   }
   best_bord=malloc(dim*sizeof(double));
   curr_bord=malloc(dim*sizeof(double));
-  
-  
+
+
 	for (int i=0;i<dim;i++){ // Shouldn't be necessary as oydiscr necessarily modifies this at some point?
 		best_bord[i]=0;
 		curr_bord[i]=0;
 	}
-  optiset=malloc(kpoints*sizeof(double*));  
+  optiset=malloc(kpoints*sizeof(double*));
   fill=false; // Should be useless
   for (i=0;i<kpoints;i++){
 	  optiset[i]=malloc(dim*sizeof(double));
 	  memcpy(optiset[i],Orig_pointset[i], dim*sizeof(double));
   }
-   
+
   upper=shift(npoints,kpoints,dim,Orig_pointset);
   end = clock();
   cput = ((double) (end - start)) / CLOCKS_PER_SEC;
   if (super_best>upper){
 	  super_best=upper;
+
+  FILE *fpmetadata;
+  fpmetadata=fopen(argv[6],"w");  
+  fprintf(fpmetadata, "n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n",npoints,kpoints,dim,upper,cput);
+
   FILE *fp; // Move our opti point set to a file
-  fp=fopen(argv[5],"w");
-  fprintf(fp, "n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n",npoints,kpoints,dim,upper,cput);
+  fp=fopen(argv[5],"w");  
   for (i=0; i<kpoints;i++){
 	  for (j=0;j<dim;j++){
-		  fprintf(fp,"%.18e ",optiset[i][j]);
+		  fprintf(fp,"%.18e",optiset[i][j]);
+		  if (j != dim - 1)
+			  fprintf(fp,",");
 	  }
 	  fprintf(fp,"\n");
   }
