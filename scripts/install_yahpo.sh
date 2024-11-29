@@ -1,7 +1,7 @@
-# If you want to use yahpo locally and do not want to change to an old ConfigSpace version
-# run this :)
-pip install yahpo-gym
-cd carps
+# This includes an upgrade to the new ConfigSpace
+# pip install yahpo-gym
+git clone https://github.com/benjamc/yahpo_gym.git lib/yahpo_gym
+pip install -e lib/yahpo_gym/yahpo_gym
 mkdir carps/benchmark_data
 cd carps/benchmark_data
 git clone https://github.com/slds-lmu/yahpo_data.git
