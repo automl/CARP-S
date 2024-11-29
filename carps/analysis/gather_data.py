@@ -346,7 +346,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
 
     # Add time
     logger.debug("Calculate the elapsed time...")
-    logs = logs.groupby(by=["problem_id", "optimizer_id", "seed"]).apply(calc_time).reset_index(drop=True)
+    logs = logs.groupby(by=["problem_id", "optimizer_id", "seed"]).apply(calc_time, include_groups=False).reset_index(drop=True)
 
     logs = convert_mixed_types_to_str(logs, logger)
     logger.debug("Done 😪🙂")
