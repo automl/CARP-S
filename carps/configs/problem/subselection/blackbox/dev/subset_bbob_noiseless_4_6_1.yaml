@@ -1,8 +1,6 @@
 # @package _global_
 scenario: blackbox
 subset_id: dev
-scenario: blackbox
-subset_id: dev
 benchmark_id: BBOB
 problem_id: blackbox/20/dev/bbob/noiseless/4/6/1
 problem:
