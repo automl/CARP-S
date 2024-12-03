@@ -1,4 +1,6 @@
 # @package _global_
+scenario: multiobjective
+subset_id: dev
 benchmark_id: HPOBench
 problem_id: multiobjective/10/dev/hpobench/MO/tab/ml/nn/146821
 problem:

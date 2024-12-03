@@ -1,4 +1,6 @@
 # @package _global_
+scenario: multiobjective
+subset_id: test
 benchmark_id: Pymoo
 problem_id: multiobjective/10/test/Pymoo/MO/unconstraint/zdt1
 problem:

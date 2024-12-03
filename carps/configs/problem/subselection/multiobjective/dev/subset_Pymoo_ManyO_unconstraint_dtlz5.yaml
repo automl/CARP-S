@@ -1,4 +1,6 @@
 # @package _global_
+scenario: multiobjective
+subset_id: dev
 benchmark_id: Pymoo
 problem_id: multiobjective/10/dev/Pymoo/ManyO/unconstraint/dtlz5
 problem:
