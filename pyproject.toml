@@ -117,6 +117,7 @@ synetune = [
   "xgboost==2.0.3",
   "scikit-learn==1.4.0",
 ]
+ax = ["ax-platform"]
 
 # https://docs.pytest.org/en/7.2.x/reference/reference.html#ini-options-ref
 [tool.pytest.ini_options]
