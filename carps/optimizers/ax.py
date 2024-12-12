@@ -1,6 +1,6 @@
 """Ax Optimizer.
 
-* Source: https://https://github.com/facebook/Ax
+* Source: https://github.com/facebook/Ax
 
 * Paper:
 E. Bakshy, L. Dworkin, B. Karrer, K. Kashin, B. Letham, A. Murthy, S. Singh.
@@ -10,10 +10,12 @@ for ML and Open Source Software, NeurIPS 2018.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
 from ax.service.ax_client import AxClient, ObjectiveProperties
 from ax.service.utils.instantiation import InstantiationBase
+from ax.utils.common.random import set_rng_seed
 from ConfigSpace import Configuration
 from ConfigSpace.hyperparameters import (
     CategoricalHyperparameter,
@@ -31,6 +33,7 @@ if TYPE_CHECKING:
     from ax.core.search_space import SearchSpace
     from ax.core.types import (
         TParameterization,
+        TParamValue,
     )
     from ConfigSpace import ConfigurationSpace
     from omegaconf import DictConfig
@@ -41,7 +44,7 @@ if TYPE_CHECKING:
     from carps.utils.types import Incumbent
 
 
-def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, None | str | bool | float | int | list[Any]]:
+def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, TParamValue | Sequence[TParamValue]]:
     """Converts a ConfigSpace hyperparameter into a suitable Ax representation.
 
     Parameters
@@ -49,14 +52,14 @@ def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, None | str
     name : str
         Hyperparameter name
     parameter : Hyperparameter
-        Hyerparameter to convert
+        Hyperparameter to convert
 
     Returns:
     -------
-    dict[str, Union[None, str, bool, float, int]]
+    dict[str, TParamValue | Sequence[TParamValue]]
         Hyperparameter representation suitable for Ax's search space
     """
-    res: dict[str, None | str | bool | float | int | list[Any]] = {}
+    res: dict[str, TParamValue | Sequence[TParamValue]] = {}
 
     res["name"] = name
     res["log_scale"] = parameter.log if hasattr(parameter, "log") else False
@@ -81,7 +84,9 @@ def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, None | str
 
     elif isinstance(parameter, OrdinalHyperparameter):
         res["is_ordered"] = True
-        res["bounds"] = parameter.sequence
+        res["type"] = "choice"
+        res["values"] = parameter.sequence
+
     else:
         raise NotImplementedError("Invalid hyperparameter found during instantiation of Ax search space")
 
@@ -89,7 +94,16 @@ def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, None | str
 
 
 class AxOptimizer(Optimizer):
-    """Ax optimizer. Supports single- and multi-objective problems."""
+    """Ax optimizer. Supports single- and multi-objective problems.
+
+    Random Seed
+    -------
+    Note that this setting only affects the Sobol quasi-random generator
+    and BoTorch-powered Bayesian optimization models. For the latter models,
+    setting random seed to the same number for two optimizations will make
+    the generated trials similar, but not exactly the same, and over time
+    the trials will diverge more.
+    """
 
     def __init__(
         self,
@@ -113,7 +127,7 @@ class AxOptimizer(Optimizer):
         """
         super().__init__(problem, task, loggers)
 
-        self._parameters: list[dict[str, Any]] = []
+        self._parameters: list[dict[str, TParamValue | Sequence[TParamValue]]] = []
         self._parameter_contraints: list[str] = []
 
         self.task = task
@@ -170,7 +184,7 @@ class AxOptimizer(Optimizer):
         Returns:
         -------
         TrialInfo
-            TrialInfo representaton of the input trial
+            TrialInfo representation of the input trial
         """
         config = Configuration(self.problem.configspace, values=trial)
 
@@ -184,6 +198,7 @@ class AxOptimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
+        set_rng_seed(self.ax_cfg.scenario.seed)  # Note: This does not guarantee deterministic behavior
         parameterization, trial_index = self.solver.get_next_trial()
 
         return self.convert_to_trial(parameterization, trial_index)
