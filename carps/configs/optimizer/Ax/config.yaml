@@ -1,0 +1,10 @@
+# @package _global_
+optimizer_id: Ax
+optimizer_container_id: Ax
+optimizer:
+  _target_: carps.optimizers.ax.AxOptimizer
+  _partial_: True
+  ax_cfg:
+    scenario:
+      seed: ${seed}
+      objectives: ${task.objectives}
