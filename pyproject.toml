@@ -29,6 +29,7 @@ dependencies = [
   "typing_extensions",
   "pymoo",
   "GitPython",
+  "fire",
 ]
 
 requires-python = ">=3.9"
