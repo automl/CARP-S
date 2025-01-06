@@ -90,7 +90,17 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         df["cfg_fn"] = config_fn
         df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
 
-        config_keys = ["benchmark", "problem", "seed", "optimizer_id", "task"]
+        config_keys = [
+            "benchmark_id",
+            "problemd_id",
+            "scenario",
+            "subset_id",
+            "benchmark",
+            "problem",
+            "seed",
+            "optimizer_id",
+            "task",
+        ]
         config_keys_forbidden = ["_target_", "_partial_"]
         df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
         # df = maybe_add_bandit_log(df, rundir, n_initial_design=cfg.task.n_initial_design)
@@ -349,9 +359,8 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     logs = (
         logs.groupby(by=["problem_id", "optimizer_id", "seed"])
         .apply(calc_time, include_groups=False)
-        .reset_index(drop=True)
+        .reset_index(drop=False)
     )
-
     logs = convert_mixed_types_to_str(logs, logger)
     logger.debug("Done 😪🙂")
     return logs
@@ -371,9 +380,23 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
         logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
+
+    # logs["trial_value__cost_log"] = logs["trial_value__cost"].apply(lambda x: np.log(x + 1e-10))
+    logs["trial_value__cost_log"] = logs.groupby(by=["problem_id"])["trial_value__cost"].transform(
+        lambda x: np.log(x - x.min() + 1e-10)
+    )
+    logs["trial_value__cost_inc_log"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+        "trial_value__cost_log"
+    ].transform("cummin")
+    logs["trial_value__cost_log_norm"] = logs.groupby("problem_id")["trial_value__cost_log"].transform(normalize)
+    logs["trial_value__cost_inc_log_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+        "trial_value__cost_log_norm"
+    ].transform("cummin")
+
     logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
         "trial_value__cost_norm"
     ].transform("cummin")
+    logs["trial_value__cost_inc_norm_log"] = logs["trial_value__cost_inc_norm"].apply(lambda x: np.log(x + 1e-10))
     if "time" not in logs:
         logs["time"] = 0
     logger.info("Normalize time...")
@@ -431,7 +454,10 @@ def get_interpolated_performance_df(
             "trial_value__cost",
             "trial_value__cost_norm",
             "trial_value__cost_inc",
+            "trial_value__cost_inc_log",
+            "trial_value__cost_inc_log_norm",
             "trial_value__cost_inc_norm",
+            "trial_value__cost_inc_norm_log",
         ]
     logger.info("Create dataframe for neat plotting by aligning x-axis / interpolating budget.")
 

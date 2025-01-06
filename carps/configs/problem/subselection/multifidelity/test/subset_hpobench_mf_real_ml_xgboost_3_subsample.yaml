@@ -1,4 +1,6 @@
 # @package _global_
+scenario: multifidelity
+subset_id: test
 benchmark_id: HPOBench
 problem_id: multifidelity/20/test/hpobench/mf/real/ml/xgboost/3/subsample
 problem:

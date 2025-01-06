@@ -32,7 +32,7 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
             new_fn = config_target_path / identifier / new_name
             new_fn.parent.mkdir(exist_ok=True, parents=True)
             yaml_str = OmegaConf.to_yaml(cfg)
-            yaml_str = "# @package _global_\n" + yaml_str
+            yaml_str = f"# @package _global_\nscenario: {scenario}\nsubset_id: {identifier}\n" + yaml_str
             new_fn.write_text(yaml_str)
 
     write_subsets(subset_fn_dev, "dev")

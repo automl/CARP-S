@@ -1,4 +1,6 @@
 # @package _global_
+scenario: blackbox
+subset_id: test
 benchmark_id: HPOBench
 problem_id: blackbox/20/test/hpobench/bb/tab/ml/svm/12
 problem:

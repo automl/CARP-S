@@ -1,4 +1,6 @@
 # @package _global_
+scenario: blackbox
+subset_id: test
 benchmark_id: YAHPO
 problem_id: blackbox/20/test/yahpo/rbv2_svm/1493/None
 problem:

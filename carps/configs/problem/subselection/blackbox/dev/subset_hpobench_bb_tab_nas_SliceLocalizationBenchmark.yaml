@@ -1,4 +1,6 @@
 # @package _global_
+scenario: blackbox
+subset_id: dev
 benchmark_id: HPOBench
 problem_id: blackbox/20/dev/hpobench/bb/tab/nas/SliceLocalizationBenchmark
 problem:

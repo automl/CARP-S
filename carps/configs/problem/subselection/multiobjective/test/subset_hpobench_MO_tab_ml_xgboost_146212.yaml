@@ -1,4 +1,6 @@
 # @package _global_
+scenario: multiobjective
+subset_id: test
 benchmark_id: HPOBench
 problem_id: multiobjective/10/test/hpobench/MO/tab/ml/xgboost/146212
 problem:

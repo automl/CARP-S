@@ -1,4 +1,6 @@
 # @package _global_
+scenario: blackbox
+subset_id: test
 benchmark_id: BBOB
 problem_id: blackbox/20/test/bbob/noiseless/16/11/0
 problem:

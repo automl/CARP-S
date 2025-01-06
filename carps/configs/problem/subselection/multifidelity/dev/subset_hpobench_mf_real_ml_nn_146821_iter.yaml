@@ -1,4 +1,6 @@
 # @package _global_
+scenario: multifidelity
+subset_id: dev
 benchmark_id: HPOBench
 problem_id: multifidelity/20/dev/hpobench/mf/real/ml/nn/146821/iter
 problem:

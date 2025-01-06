@@ -1,4 +1,6 @@
 # @package _global_
+scenario: momf
+subset_id: test
 benchmark_id: YAHPO
 problem_id: momf/9/test/yahpo/MOMF/trainsize/iaml_xgboost/1489/trainsize
 problem:

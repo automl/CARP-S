@@ -170,3 +170,4 @@ runs*
 run-data*
 *.txt
 slurm-*
+tmp*
