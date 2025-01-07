@@ -11,12 +11,27 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
-def get_color_palette(df: pd.DataFrame | None) -> dict[str, Any]:
-    cmap = sns.color_palette("colorblind", as_cmap=False)
-    optimizers = list(df["optimizer_id"].unique())
+colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
+
+
+def get_color_palette(df: pd.DataFrame, model_name_key: str = "optimizer_id") -> dict[str, Any]:
+    """Get a color palette based on the optimizers.
+
+    Args:
+        df (pd.DataFrame): Results dataframe.
+        model_name_key (str, optional): The column name for the model name. Defaults to "model_name".
+
+    Returns:
+        dict[str, Any]: Color map.
+    """
+    optimizers = list(df[model_name_key].unique())
     optimizers.sort()
-    cmap2 = sns.color_palette("Paired", as_cmap=False)
-    return {p: c for p, c in zip(optimizers, list(cmap) + list(cmap2))}
+    cmap1 = colorblind_palette
+    cmap2 = sns.color_palette("colorblind", as_cmap=False)
+    cmap3 = sns.color_palette("Paired", as_cmap=False)
+    colormaps = list(cmap1) + list(cmap2) + list(cmap3)
+    assert len(optimizers) <= len(colormaps), f"Too many optimizers: {len(optimizers)} > {len(colormaps)}"
+    return dict(zip(optimizers, colormaps, strict=False))
 
 
 def savefig(fig: plt.Figure, filename: str) -> None:
