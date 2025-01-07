@@ -125,8 +125,11 @@ def get_df_crit(
 
 
 def calc_critical_difference(
-    df: pd.DataFrame, identifier: str | None = None, figsize=(12, 8), perf_col: str = "trial_value__cost_inc_norm",
-    plot_diagram: bool = True
+    df: pd.DataFrame,
+    identifier: str | None = None,
+    figsize=(12, 8),
+    perf_col: str = "trial_value__cost_inc_norm",
+    plot_diagram: bool = True,
 ) -> RankResult:
     df_crit = get_df_crit(df, perf_col=perf_col)
 
@@ -317,6 +320,7 @@ def cd_evaluation(
         None,
         res.effect_size,
         None,
+        force_mode=None,
     )
     print(res.rankdf)
     is_significant = True
