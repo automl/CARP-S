@@ -2,6 +2,8 @@ from __future__ import annotations
 import fire
 from pathlib import Path
 import datetime
+import matplotlib
+matplotlib.use('Agg')  # Set non-interactive backend
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,13 +27,14 @@ setup_logging()
 logger = get_logger(__file__)
 
 
-def plot_ranks_over_time(perf: pd.DataFrame, output_dir: str = "figures", replot: bool = True) -> dict[tuple[str, str], str]:
+def plot_ranks_over_time(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True) -> dict[tuple[str, str], str]:
     setup_seaborn(font_scale=1.3)
-    palette = get_color_palette(perf)
     lineplot_kwargs = dict(linewidth=3)
 
     key_performance = "trial_value__cost_inc"
     x_column = "n_trials_norm"
+
+    perf = get_interpolated_performance_df(df)
 
     # Calculate the rank of each optimizer for each problem. The estimated performance is
     # the mean of all seeds. We use the interpolated performance, otherwise it is not
@@ -43,6 +46,7 @@ def plot_ranks_over_time(perf: pd.DataFrame, output_dir: str = "figures", replot
 
     resulting_files = []
     for gid, gdf in df_rank.groupby(["scenario", "set"]):
+        palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/rank_{gid[0]}_{gid[1]}"
         resulting_files.append({
             "scenario": gid[0],
@@ -59,7 +63,8 @@ def plot_ranks_over_time(perf: pd.DataFrame, output_dir: str = "figures", replot
             continue
 
         final_rank = gdf[gdf[x_column] == df_rank[x_column].max()].groupby("optimizer_id")["rank"].mean().sort_values()
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig = plt.Figure(figsize=(6, 4))
+        ax = fig.add_subplot(111)
         ax = sns.lineplot(data=gdf, x=x_column, y="rank", hue="optimizer_id", ax=ax, palette=palette, **lineplot_kwargs)
         ax.set_xlabel("Number of Trials (normalized)")
         ax.set_ylabel("Rank (lower is better)")
@@ -72,13 +77,12 @@ def plot_ranks_over_time(perf: pd.DataFrame, output_dir: str = "figures", replot
         # ax.legend(loc="center left", bbox_to_anchor=(1.05, 0.5))
         ax.set_title(f"{gid[0]}: {gid[1]}")
         savefig(fig, figure_filename)
-        plt.show()
+        plt.close(fig)
 
     return resulting_files
 
 def plot_ecdf(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True) -> dict[tuple[str, str], str]:
     setup_seaborn(font_scale=1.3)
-    palette = get_color_palette(df)
     lineplot_kwargs = dict(linewidth=3)
 
     key_performance = "trial_value__cost_inc_log_norm"
@@ -86,6 +90,7 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True
 
     resulting_files = []
     for gid, gdf in df.groupby(["scenario", "set"]):
+        palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/ecdf_{gid[0]}_{gid[1]}"
         resulting_files.append({
             "scenario": gid[0],
@@ -103,7 +108,8 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True
         if not replot:
             continue
 
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig = plt.Figure(figsize=(6, 4))
+        ax = fig.add_subplot(111)
 
         for optimizer_id, odf in gdf.groupby("optimizer_id"):
             ax = sns.ecdfplot(data=odf, x=key_performance, ax=ax, label=optimizer_id, color=palette[optimizer_id], **lineplot_kwargs)
@@ -113,7 +119,7 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True
         ax.set_ylabel("Proportion")
         ax.set_title(f"{gid[0]}: {gid[1]}")
         savefig(fig, figure_filename)
-        plt.show()
+        plt.close(fig)
 
     return resulting_files
 
@@ -142,7 +148,7 @@ def plot_critical_difference(df: pd.DataFrame, output_dir: str = "figures", repl
         })
         if not replot:
             continue
-        df_crit = get_df_crit(df, perf_col=perf_col)
+        df_crit = get_df_crit(gdf, perf_col=perf_col)
         rank_result = cd_evaluation(
             df_crit,
             maximize_metric=False,
@@ -155,11 +161,8 @@ def plot_critical_difference(df: pd.DataFrame, output_dir: str = "figures", repl
 
 def plot_performance_per_problem(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True) -> dict[tuple[str, str], str]:
     setup_seaborn(font_scale=1.3)
-    palette = get_color_palette(df)
-    lineplot_kwargs = dict(linewidth=3)
 
     perf_col = "trial_value__cost_inc_log_norm"
-    x_column = "n_trials_norm"
 
     resulting_files = []
     for gid, gdf in df.groupby(["scenario", "set"]):
@@ -184,7 +187,8 @@ def plot_performance_per_problem(df: pd.DataFrame, output_dir: str = "figures", 
         # sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
 
 
-        fig, ax0 = plt.subplots(figsize=(12, 12))
+        fig = plt.Figure(figsize=(12, 12))
+        ax0 = fig.add_subplot(111)
 
         # Perf per problem (normalized)
         df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
@@ -196,12 +200,11 @@ def plot_performance_per_problem(df: pd.DataFrame, output_dir: str = "figures", 
         ax0.set_ylabel("Problem ID")
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
-        plt.show()
+        plt.close(fig)
     return resulting_files
 
 def plot_boxplot_violinplot(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True) -> dict[tuple[str, str], str]:
     setup_seaborn(font_scale=1.3)
-    palette = get_color_palette(df)
     lineplot_kwargs = dict(linewidth=3)
 
     perf_col = "trial_value__cost_inc_log_norm"
@@ -209,6 +212,7 @@ def plot_boxplot_violinplot(df: pd.DataFrame, output_dir: str = "figures", replo
 
     resulting_files = []
     for gid, gdf in df.groupby(["scenario", "set"]):
+        palette = get_color_palette(gdf)
         figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{gid[0]}_{gid[1]}"
         resulting_files.append({
             "scenario": gid[0],
@@ -237,7 +241,8 @@ def plot_boxplot_violinplot(df: pd.DataFrame, output_dir: str = "figures", replo
         result = calc_critical_difference(gdf, identifier=None, perf_col=perf_col, plot_diagram=False)
         sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
 
-        fig, ax1 = plt.subplots(figsize=(6, 4))
+        fig = plt.Figure(figsize=(6, 4))
+        ax1 = fig.add_subplot(111)
         df_finalperf = filter_only_final_performance(df=gdf)
         sorter = names
         df_finalperf = df_finalperf.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))
@@ -252,25 +257,23 @@ def plot_boxplot_violinplot(df: pd.DataFrame, output_dir: str = "figures", replo
         )
         ax1.set_title("Log Final Performance (Normalized)")
         savefig(fig, figure_filename_boxplot)
-        plt.show()
+        plt.close(fig)
 
-        fig, ax2 = plt.subplots(figsize=(6, 4))
+        fig = plt.Figure(figsize=(6, 4))
+        ax2 = fig.add_subplot(111)
         ax2 = sns.violinplot(
             data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax2, cut=0
         )
         ax2.set_title("Log Final Performance (Normalized)")
         savefig(fig, figure_filename_violinplot)
-        plt.show()
+        plt.close(fig)
 
     return resulting_files
 
 def plot_spearman_rank_correlation(df: pd.DataFrame, output_dir: str = "figures", replot: bool = True) -> dict[tuple[str, str], str]:
     setup_seaborn(font_scale=1.2)
-    palette = get_color_palette(df)
-    lineplot_kwargs = dict(linewidth=3)
 
     perf_col = "trial_value__cost_inc_log_norm"
-    x_column = "n_trials_norm"
 
     resulting_files = []
     for gid, gdf in df.groupby(["scenario", "set"]):
@@ -296,7 +299,8 @@ def plot_spearman_rank_correlation(df: pd.DataFrame, output_dir: str = "figures"
         # df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
         # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
 
-        fig, ax3 = plt.subplots(figsize=(6 * 1.5, 4 * 1.5))
+        fig = plt.Figure(figsize=(6 * 1.5, 4 * 1.5))
+        ax3 = fig.add_subplot(111)
         ranked_df = df_crit.rank(axis=1, method="min", ascending=True)
         correlation_matrix = ranked_df.corr(method="spearman")
         ax3 = sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", cbar=True, square=True, fmt=".2f", ax=ax3)
@@ -306,12 +310,12 @@ def plot_spearman_rank_correlation(df: pd.DataFrame, output_dir: str = "figures"
 
         savefig(fig, figure_filename)
 
-        plt.show()
+        plt.close(fig)
 
     return resulting_files
 
 def generate_report(
-    result_csv_path: str = "results.csv",
+    result_csv_path: str = "logs_combined.parquet",
     report_dir: str = "reports",
     report_name: str = "report",
 ):
@@ -326,55 +330,57 @@ def generate_report(
     figure_dir.mkdir(exist_ok=True, parents=True)
 
 
-    # # 1. Load results
-    # logger.info("Loading results")
-    # df = pd.read_csv(result_csv_path)
+    # 1. Load results
+    logger.info("Loading results")
+    if result_csv_path.endswith(".parquet"):
+        df = pd.read_parquet(result_csv_path)
+    else:
+        df = pd.read_csv(result_csv_path)
 
-    # # 2. Preprocess results
-    # logger.info("Preprocessing results")
-    # print(df.columns)
-    # df = normalize_logs(df)
-    # perf = get_interpolated_performance_df(df)
+    # 2. Preprocess results
+    logger.info("Preprocessing results")
+    print(df.columns)
+    df = normalize_logs(df)
 
-    # # FINAL PERFORMANCE
-    # logger.info("Plotting final performance...")
+    # FINAL PERFORMANCE
+    logger.info("Plotting final performance...")
 
-    # # Critical Difference
-    # logger.info("\t...critical difference")
-    # resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=False)
+    # Critical Difference
+    logger.info("\t...critical difference")
+    resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=True)
 
-    # # Spearman Rank Correlation
-    # logger.info("\t...spearman rank correlation")
-    # resulting_files_spearman_rank_correlation = plot_spearman_rank_correlation(df, output_dir=figure_dir, replot=False)
+    # Spearman Rank Correlation
+    logger.info("\t...spearman rank correlation")
+    resulting_files_spearman_rank_correlation = plot_spearman_rank_correlation(df, output_dir=figure_dir, replot=True)
 
-    # # Final Performance per Problem (Mean over seeds, heatmap)
-    # logger.info("\t...performance per problem")
-    # resulting_files_performance_per_problem = plot_performance_per_problem(df, output_dir=figure_dir, replot=False)
+    # Final Performance per Problem (Mean over seeds, heatmap)
+    logger.info("\t...performance per problem")
+    resulting_files_performance_per_problem = plot_performance_per_problem(df, output_dir=figure_dir, replot=True)
 
-    # # Final Performance as boxplot and violinplot
-    # logger.info("\t...boxplot and violinplot")
-    # resulting_files_boxplot_violinplot = plot_boxplot_violinplot(df, output_dir=figure_dir, replot=False)
+    # Final Performance as boxplot and violinplot
+    logger.info("\t...boxplot and violinplot")
+    resulting_files_boxplot_violinplot = plot_boxplot_violinplot(df, output_dir=figure_dir, replot=True)
 
-    # # ANYTIME PERFORMANCE
-    # logger.info("Plotting anytime performance...")
+    # ANYTIME PERFORMANCE
+    logger.info("Plotting anytime performance...")
 
-    # # Plot ranks over time
-    # logger.info("\t...ranks over time")
-    # resulting_files_rank_over_time = plot_ranks_over_time(perf, output_dir=figure_dir, replot=False)
+    # Plot ranks over time
+    logger.info("\t...ranks over time")
+    resulting_files_rank_over_time = plot_ranks_over_time(df, output_dir=figure_dir, replot=True)
 
-    # # Plot eCDF
-    # logger.info("\t...ecdf")
-    # resulting_files_ecdf = plot_ecdf(df, output_dir=figure_dir, replot=False)
+    # Plot eCDF
+    logger.info("\t...ecdf")
+    resulting_files_ecdf = plot_ecdf(df, output_dir=figure_dir, replot=True)
 
-    # resulting_files = pd.concat([
-    #     pd.DataFrame(resulting_files_critical_difference),
-    #     pd.DataFrame(resulting_files_spearman_rank_correlation),
-    #     pd.DataFrame(resulting_files_performance_per_problem),
-    #     pd.DataFrame(resulting_files_boxplot_violinplot),
-    #     pd.DataFrame(resulting_files_rank_over_time),
-    #     pd.DataFrame(resulting_files_ecdf),
-    # ]).reset_index(drop=True)
-    # resulting_files.to_csv(report_dir / "resulting_files.csv", index=False)
+    resulting_files = pd.concat([
+        pd.DataFrame(resulting_files_critical_difference),
+        pd.DataFrame(resulting_files_spearman_rank_correlation),
+        pd.DataFrame(resulting_files_performance_per_problem),
+        pd.DataFrame(resulting_files_boxplot_violinplot),
+        pd.DataFrame(resulting_files_rank_over_time),
+        pd.DataFrame(resulting_files_ecdf),
+    ]).reset_index(drop=True)
+    resulting_files.to_csv(report_dir / "resulting_files.csv", index=False)
 
     resulting_files = pd.read_csv(report_dir / "resulting_files.csv")
     print(resulting_files)
