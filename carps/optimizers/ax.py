@@ -76,7 +76,7 @@ def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, TParamValu
 
     elif isinstance(parameter, CategoricalHyperparameter):
         res["type"] = "choice"
-        res["values"] = parameter.items
+        res["values"] = list(parameter.choices)
 
     elif isinstance(parameter, Constant):
         res["type"] = "fixed"
