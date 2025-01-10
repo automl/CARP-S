@@ -85,7 +85,7 @@ def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, TParamValu
     elif isinstance(parameter, OrdinalHyperparameter):
         res["is_ordered"] = True
         res["type"] = "choice"
-        res["values"] = parameter.sequence
+        res["values"] = list(parameter.sequence)
 
     else:
         raise NotImplementedError("Invalid hyperparameter found during instantiation of Ax search space")
