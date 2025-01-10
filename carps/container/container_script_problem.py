@@ -7,9 +7,9 @@ from ConfigSpace.read_and_write import json as cs_json
 from flask import Flask, request
 from omegaconf import OmegaConf
 
+from carps.utils.loggingutils import CustomEncoder
 from carps.utils.running import make_problem
 from carps.utils.trials import TrialInfo
-from carps.utils.loggingutils import CustomEncoder
 
 if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
     cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")

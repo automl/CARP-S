@@ -13,7 +13,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 
 from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.loggingutils import get_logger, setup_logging, CustomEncoder
+from carps.utils.loggingutils import CustomEncoder, get_logger, setup_logging
 
 if TYPE_CHECKING:
     from carps.optimizers.optimizer import Incumbent

@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 import pandas as pd
-from carps.analysis.gather_data import load_set, convert_mixed_types_to_str
+
+from carps.analysis.gather_data import convert_mixed_types_to_str, load_set
+
 
 def concat_rundata():
     paths = {
@@ -24,9 +27,8 @@ def concat_rundata():
 
     args = []
     for item in paths.values():
-        for k,v in item.items():
-            from pathlib import Path
-            args.append((v,k))
+        for k, v in item.items():
+            args.append((v, k))
     res = [load_set(paths=a[0], set_id=a[1]) for a in args]
     df = pd.concat([r[0] for r in res]).reset_index(drop=True)
     df = convert_mixed_types_to_str(df)
@@ -34,6 +36,7 @@ def concat_rundata():
 
     df_cfg = pd.concat([d for _, d in res]).reset_index(drop=True)
     df_cfg.to_parquet("rundata_cfg.parquet")
+
 
 if __name__ == "__main__":
     concat_rundata()

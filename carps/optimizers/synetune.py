@@ -38,11 +38,11 @@ from syne_tune.optimizer.baselines import (
     KDE,
     MOASHA,
     MOBSTER,
-    SyncMOBSTER,
     MOREA,
     BayesianOptimization,
     MOLinearScalarizationBayesOpt,
     MORandomScalarizationBayesOpt,
+    SyncMOBSTER,
 )
 
 from carps.optimizers.optimizer import Optimizer

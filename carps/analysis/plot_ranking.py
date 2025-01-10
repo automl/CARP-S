@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-from autorank import create_report
-from autorank._util import get_sorted_rank_groups, RankResult
+from autorank._util import RankResult, get_sorted_rank_groups
 
-from carps.analysis.run_autorank import calc_critical_difference, custom_latex_table, get_df_crit
-from carps.analysis.utils import savefig, get_color_palette, filter_only_final_performance
+from carps.analysis.run_autorank import calc_critical_difference, get_df_crit
+from carps.analysis.utils import filter_only_final_performance, get_color_palette, savefig
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -25,10 +24,9 @@ def plot_ranking(
     fpath = Path("figures/ranking")
     fpath.mkdir(exist_ok=True, parents=True)
     identifier = f"{scenario}_{set_id}"
-    label = f"tab:stat_results_{identifier}"
     result = calc_critical_difference(gdf, identifier=identifier, figsize=(8, 3), perf_col=perf_col, plot_diagram=True)
     # print(result)
-    # try: 
+    # try:
     #     create_report(result)
     # except Exception as e:
     #     print(e)
@@ -78,7 +76,6 @@ def plot_ranking(
     # savefig(plt.gcf(), fpath / f"spearman_rank_corr_matrix_opt_{identifier}")
     # plt.show()
 
-
     # combined
     ncols = 2
     nrows = 3
@@ -90,9 +87,7 @@ def plot_ranking(
     wspace = 0.7
 
     fig = plt.figure(layout=None, facecolor="white", figsize=(w * factor, h * factor))
-    gs = fig.add_gridspec(nrows=nrows, ncols=ncols, left=0.05, right=right,
-                        hspace=hspace, wspace=wspace
-                        )
+    gs = fig.add_gridspec(nrows=nrows, ncols=ncols, left=0.05, right=right, hspace=hspace, wspace=wspace)
 
     # Perf per problem (normalized)
     ax0 = fig.add_subplot(gs[:, :-1])
@@ -105,26 +100,21 @@ def plot_ranking(
     ax0.set_ylabel("Problem ID")
     ax0.set_xlabel("Optimizer")
 
-
     df_finalperf = filter_only_final_performance(df=gdf)
     sorter = names
     df_finalperf = df_finalperf.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))
     palette = get_color_palette(df=gdf)
     ax1 = fig.add_subplot(gs[0, -1])
-    x="n_trials_norm"
-    y="trial_value__cost_inc_norm"
+    x = "n_trials_norm"
+    y = "trial_value__cost_inc_norm"
     x = y
-    hue="optimizer_id"
+    hue = "optimizer_id"
     y = hue
-    ax1 = sns.boxplot(
-        data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax1
-    )
+    ax1 = sns.boxplot(data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax1)
     ax1.set_title("Final Performance (Normalized)")
 
     ax2 = fig.add_subplot(gs[1, -1])
-    ax2 = sns.violinplot(
-        data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax2, cut=0
-    )
+    ax2 = sns.violinplot(data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax2, cut=0)
     ax2.set_title("Final Performance (Normalized)")
 
     # Spearman rank correlation

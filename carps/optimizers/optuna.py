@@ -127,9 +127,7 @@ class OptunaOptimizer(Optimizer):
             directions: Sequence[str | StudyDirection] | None = None
         ) -> Study.
         """
-        study = optuna.create_study(
-            **self.optuna_cfg.study, directions=["minimize"] * self.task.n_objectives
-        )
+        study = optuna.create_study(**self.optuna_cfg.study, directions=["minimize"] * self.task.n_objectives)
         printr(study)
 
         return study

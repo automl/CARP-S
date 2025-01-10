@@ -5,7 +5,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING
 
 from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.loggingutils import get_logger, setup_logging, CustomEncoder
+from carps.utils.loggingutils import CustomEncoder, get_logger, setup_logging
 
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
@@ -22,7 +22,9 @@ def convert_trial_info(trial_info, trial_value):
     info["trial_info"]["config"] = json.dumps(asdict(trial_info)["config"].get_dictionary(), cls=CustomEncoder)
     info["trial_value"]["status"] = info["trial_value"]["status"].name
     info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"], cls=CustomEncoder)
-    info["trial_value"]["cost"] = json.dumps({"cost": json.dumps(info["trial_value"]["cost"], cls=CustomEncoder)}, cls=CustomEncoder)
+    info["trial_value"]["cost"] = json.dumps(
+        {"cost": json.dumps(info["trial_value"]["cost"], cls=CustomEncoder)}, cls=CustomEncoder
+    )
     keys = ["trial_info", "trial_value"]
     for key in keys:
         d = info.pop(key)

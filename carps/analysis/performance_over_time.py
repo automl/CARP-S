@@ -4,15 +4,14 @@ from typing import TYPE_CHECKING
 
 import matplotlib
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
+import seaborn as sns
 
-from carps.analysis.utils import get_color_palette, savefig, setup_seaborn
-from carps.analysis.utils import filter_only_final_performance
-
+from carps.analysis.utils import filter_only_final_performance, get_color_palette, savefig, setup_seaborn
 
 if TYPE_CHECKING:
     import pandas as pd
+
 
 def get_order_by_mean(df: pd.DataFrame, budget_var: str = "n_trials_norm") -> list[str]:
     final_df = filter_only_final_performance(df, budget_var=budget_var)
