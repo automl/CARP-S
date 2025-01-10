@@ -1,3 +1,5 @@
+"""Base class for all optimizers."""
+
 from __future__ import annotations
 
 import time
@@ -18,9 +20,27 @@ if TYPE_CHECKING:
 
 
 class Optimizer(ABC):
+    """Base class for all optimizers."""
+
     def __init__(
         self, problem: Problem, task: Task | dict | DictConfig, loggers: list[AbstractLogger] | None = None
     ) -> None:
+        """Optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            Optimization problem aka the function to be optimized.
+        task : Task | dict | DictConfig
+            Task definition, e.g. specifiying the number of trials, etc.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None
+
+        Raises:
+        ------
+        ValueError
+            Unknown task type, must be either `Task`, `dict` or `DictConfig`.
+        """
         super().__init__()
         self.problem = problem
 
@@ -49,13 +69,28 @@ class Optimizer(ABC):
 
     @property
     def solver(self) -> Any:
+        """Solver instance.
+
+        Returns.
+        -------
+        Any
+            Solver instance.
+        """
         return self._solver
 
     @solver.setter
     def solver(self, value: Any) -> None:
+        """Set the solver instance.
+
+        Parameters
+        ----------
+        value : Any
+            Solver instance.
+        """
         self._solver = value
 
-    def setup_optimizer(self):
+    def setup_optimizer(self) -> None:
+        """Setup the optimizer."""
         self.solver = self._setup_optimizer()
 
     @abstractmethod
@@ -103,6 +138,15 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     def run(self) -> Incumbent:
+        """Run the optimizer.
+
+        Setup if not already done and run the optimizer.
+
+        Returns.
+        -------
+        Incumbent
+            Best performing configuration(s).
+        """
         if self.solver is None:
             self.setup_optimizer()
         return self._run()
@@ -110,7 +154,22 @@ class Optimizer(ABC):
     def _time_left(self, start_time) -> bool:
         return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
 
-    def continue_optimization(self, start_time) -> bool:
+    def continue_optimization(self, start_time: float) -> bool:
+        """Check whether to continue optimization.
+
+        (a) Based on time budget if specified.
+        (b) Based on number of trials if specified.
+
+        Parameters
+        ----------
+        start_time : float
+            Starting time.
+
+        Returns:
+        -------
+        bool
+            True when optimization should continue, false otherwise.
+        """
         cont = True
         if self.time_budget is not None and not self._time_left(start_time):
             cont = False
@@ -184,9 +243,3 @@ class Optimizer(ABC):
             trial value (cost, time, ...)
         """
         raise NotImplementedError
-
-    # def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
-    # def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
-    # def ask(self) -> TrialInfo:
-    # def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-    # def get_current_incumbent(self) -> Incumbent:

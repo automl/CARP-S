@@ -1,3 +1,5 @@
+"""Requirement checking."""
+
 from __future__ import annotations
 
 import warnings
@@ -42,15 +44,16 @@ def _check(p: str | Path) -> None:
                 f"\t>>>>>>>>>> pip install -r {p}\n"
                 "You can also build an env for that specific combination, check `CARP-S/scripts/build_env(s).sh`."
             )
-            raise RuntimeError(msg)
+            raise RuntimeError(msg) from error
         except pkg_resources.VersionConflict as error:
             error_msg = str(error)
             msg = (
-                f"Version Conflict: {error_msg} for {p}. Resolve manually. If it is about YAHPO and ConfigSpace, run the following "
+                f"Version Conflict: {error_msg} for {p}. Resolve manually. If it is about "
+                "YAHPO and ConfigSpace, run the following "
                 "to make YAHPO compatible with newest ConfigSpace:\n"
                 f"\t>>>>>>>>>> python {p.parent.parent.parent.parent / 'scripts/patch_yahpo_configspace.py'}"
             )
-            warnings.warn(msg)
+            warnings.warn(msg, stacklevel=2)
 
 
 def check_requirements(cfg: DictConfig) -> None:
