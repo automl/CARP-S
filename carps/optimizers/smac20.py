@@ -54,6 +54,10 @@ class SMAC3Optimizer(Optimizer):
         self._solver: AbstractFacade | None = None
         self._cb_on_start_called: bool = False
 
+    def __del__(self) -> None:
+        for callback in self.solver.optimizer._callbacks:
+            callback.on_end(self.solver.optimizer)
+
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
         """Convert configuration space from Problem to Optimizer.
 
@@ -222,6 +226,10 @@ class SMAC3Optimizer(Optimizer):
             self._cb_on_start_called = True
             for callback in self.solver.optimizer._callbacks:
                 callback.on_start(self.solver.optimizer)
+
+        for callback in self.solver.optimizer._callbacks:
+            callback.on_iteration_start(self.solver.optimizer)
+
         smac_trial_info = self.solver.ask()
         return TrialInfo(
             config=smac_trial_info.config,
@@ -260,6 +268,9 @@ class SMAC3Optimizer(Optimizer):
             additional_info=additional_info,
         )
         self.solver.tell(info=smac_trial_info, value=smac_trial_value)
+
+        for callback in self.solver.optimizer._callbacks:
+            callback.on_iteration_end(self.solver.optimizer)
 
     def get_current_incumbent(self) -> Incumbent:
         if self.solver.scenario.count_objectives() == 1:
