@@ -146,7 +146,7 @@ class YahpoProblem(Problem):
             Cost
         """
         configuration = trial_info.config
-        xs = configuration.get_dictionary()
+        xs = dict(configuration)
 
         # If there are multiple fidelities, we take maximum fidelity value for the respective other fidelity dimensions
         # If we are in the blackbox setting, we take maximum fidelity value for all fidelity dimensions
