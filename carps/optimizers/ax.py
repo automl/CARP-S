@@ -186,7 +186,9 @@ class AxOptimizer(Optimizer):
         TrialInfo
             TrialInfo representation of the input trial
         """
-        config = Configuration(self.problem.configspace, values=trial)
+        # Allow inactivate parameter values for optimizers that cannot handle conditions
+        # In that case they will propose a value for each HP, whether it is active or not.
+        config = Configuration(self.problem.configspace, values=trial, allow_inactive_with_values=True)
 
         return TrialInfo(config=config, seed=self.ax_cfg.scenario.seed, name=str(trial_index))
 
