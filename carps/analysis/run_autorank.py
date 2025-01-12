@@ -109,7 +109,8 @@ def get_df_crit(
         lost = df_crit[nan_ids]
 
         # Rows are problems, cols are optimizers
-        df_crit = df_crit[~nan_ids]
+        if len(lost) > 0:
+            df_crit = df_crit[~nan_ids]
         logger.info(f"Lost following experiments: {lost}")
     elif nan_handling == "keep":
         pass
@@ -279,6 +280,7 @@ def cd_evaluation(
     plt_title=None,
     figsize=(12, 8),
     plot_diagram=True,
+    verbose = False,
 ) -> RankResult:
     """Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
     configurations / models / algorithms per dataset. In  detail, the columns are individual configurations.
@@ -292,7 +294,6 @@ def cd_evaluation(
     # -- Settings for autorank
     alpha = 0.05
     effect_size = None
-    verbose = True
     order = "ascending"  # always due to the preprocessing
     alpha_normality = alpha / len(rank_data.columns)
     all_normal, pvals_shapiro = test_normality(rank_data, alpha_normality, verbose)
@@ -322,7 +323,6 @@ def cd_evaluation(
         None,
         force_mode=None,
     )
-    print(res.rankdf)
     is_significant = True
     if result.pvalue >= result.alpha:
         if ignore_non_significance:

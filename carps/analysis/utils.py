@@ -55,4 +55,5 @@ def filter_only_final_performance(
         df = df[np.isclose(df[budget_var], max_budget)]
     else:
         df = df[df.groupby(["optimizer_id", "problem_id", "seed"])[budget_var].transform(lambda x: x == x.max())]
+        df = df[df[budget_var] <= max_budget]
     return df
