@@ -1,4 +1,11 @@
-"""Generate a report from the results of the optimization runs."""
+"""Generate a report from the results of the optimization runs.
+
+For this we need the run logs, which are stored in a CSV or parquet file.
+
+To generate this file, call `python -m carps.analysis.gather_results <rundir>`.
+Of course, you can concatenate multiple result files.
+Keep in mind that the results are grouped by scenario and set id.
+"""
 
 from __future__ import annotations
 
