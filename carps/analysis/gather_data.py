@@ -503,21 +503,46 @@ def load_logs(rundir: str):
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
 def filelogs_to_df(
-    rundir: str, log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
+    rundir: str | list[str], log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    logger.info(f"Get rundirs from {rundir}...")
-    rundirs = get_run_dirs(rundir)
-    logger.info(f"Found {len(rundirs)} runs. Load data...")
-    partial_load_log = partial(load_log, log_fn=log_fn)
-    results = map_multiprocessing(partial_load_log, rundirs, n_processes=n_processes)
-    df = pd.concat(results).reset_index(drop=True)
-    logger.info("Done. Do some preprocessing...")
-    df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
-    df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
-    df["experiment_id"] = df["cfg_fn"].apply(lambda x: np.where(df_cfg["cfg_fn"].to_numpy() == x)[0][0])
-    df_cfg.loc[:, "cfg_str"] = df_cfg["cfg_str"].apply(lambda x: x.replace("\n", "\\n"))
-    del df["cfg_str"]
-    del df["cfg_fn"]
+    """Load logs from file and preprocess.
+
+    Will collect all results from all runs contained in `rundir`.
+
+    Parameters
+    ----------
+    rundir : str | list[str]
+        Directory containing logs.
+    log_fn : str, optional
+        Filename of the log file, by default "trial_logs.jsonl"
+    n_processes : int | None, optional
+        Number of processes to use for multiprocessing, by default None
+
+    Returns.
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Logs and config data frames.
+    """
+    if isinstance(rundir, str):
+        rundir = [rundir]
+    rundirs = rundir
+    df_list = []
+    for rundir in rundirs:
+        logger.info(f"Get rundirs from {rundir}...")
+        rundirs = get_run_dirs(rundir)
+        logger.info(f"Found {len(rundirs)} runs. Load data...")
+        partial_load_log = partial(load_log, log_fn=log_fn)
+        results = map_multiprocessing(partial_load_log, rundirs, n_processes=n_processes)
+        df = pd.concat(results).reset_index(drop=True)
+        logger.info("Done. Do some preprocessing...")
+        df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
+        df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
+        df["experiment_id"] = df["cfg_fn"].apply(lambda x: np.where(df_cfg["cfg_fn"].to_numpy() == x)[0][0])
+        df_cfg.loc[:, "cfg_str"] = df_cfg["cfg_str"].apply(lambda x: x.replace("\n", "\\n"))
+        del df["cfg_str"]
+        del df["cfg_fn"]
+        df_list.append(df)
+    df = pd.concat(df_list).reset_index(drop=True)
     logger.info("Done. Saving to file...")
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
     df.to_csv(Path(rundir) / "logs.csv", index=False)
