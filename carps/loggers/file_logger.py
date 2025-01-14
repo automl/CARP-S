@@ -1,3 +1,5 @@
+"""File logger."""
+
 from __future__ import annotations
 
 import json
@@ -42,7 +44,7 @@ def get_run_directory() -> Path:
         # TODO: How can we check to actually make sure it's a multi-run...
         # MULTIRUN
         return Path(hydra_cfg.sweep.dir) / hydra_cfg.sweep.subdir
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         cwd = Path.cwd()
         tb = traceback.format_exc()
         msg = f"Unexpected issue getting current run_directory!\n{tb}\n{e}\n\nReturning current directory of {cwd}."
@@ -50,7 +52,7 @@ def get_run_directory() -> Path:
         return cwd
 
 
-def dump_logs(log_data: dict, filename: str, directory: str | Path | None = None):
+def dump_logs(log_data: dict, filename: str, directory: str | Path | None = None) -> None:
     """Dump log dict in jsonl format.
 
     This appends one json dict line to the filename.
@@ -75,25 +77,51 @@ def dump_logs(log_data: dict, filename: str, directory: str | Path | None = None
         file.writelines([log_data_str])
 
 
-def convert_trials(n_trials, trial_info, trial_value, n_function_calls: int | None = None):
+def convert_trials(
+    n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+) -> dict:
+    """Convert trials to json serializable format.
+
+    Parameters
+    ----------
+    n_trials : float
+        The number of trials that have been run so far.
+        For the case of multi-fidelity, a full trial
+        is a configuration evaluated on the maximum budget and
+        the counter is increased by `budget/max_budget` instead
+        of 1.
+    trial_info : TrialInfo
+        The trial info.
+    trial_value : TrialValue
+        The trial value.
+    n_function_calls: int | None, default None
+        The number of target function calls, no matter the budget.
+
+    Returns:
+    -------
+    dict
+        Json serializable dictionary.
+    """
     if n_function_calls is None:
-        n_function_calls = n_trials
+        n_function_calls = int(n_trials)
     info = {
         "n_trials": n_trials,
         "n_function_calls": n_function_calls,
         "trial_info": asdict(trial_info),
         "trial_value": asdict(trial_value),
     }
-    info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())
-    info["trial_value"]["virtual_time"] = float(info["trial_value"]["virtual_time"])
+    info["trial_info"]["config"] = list(dict(info["trial_info"]["config"]).values())  # type: ignore[index]
+    info["trial_value"]["virtual_time"] = float(info["trial_value"]["virtual_time"])  # type: ignore[index]
     return info
 
 
 class FileLogger(AbstractLogger):
+    """File logger."""
+
     _filename: str = "trial_logs.jsonl"
     _filename_trajectory: str = "trajectory_logs.jsonl"
 
-    def __init__(self, overwrite: bool = False, directory: str | Path | None = None) -> None:
+    def __init__(self, overwrite: bool = False, directory: str | Path | None = None) -> None:  # noqa: FBT001, FBT002
         """File logger.
 
         For each trial/function evaluate, write one line to the file.
@@ -118,9 +146,9 @@ class FileLogger(AbstractLogger):
                 logger.info(f"Found previous run. Removing '{directory}'.")
                 for root, _dirs, files in os.walk(directory):
                     for f in files:
-                        full_fn = os.path.join(root, f)
-                        if ".hydra" not in full_fn:
-                            os.remove(full_fn)
+                        full_fn = Path(root) / f
+                        if ".hydra" not in str(full_fn):
+                            Path(full_fn).unlink()
                             logger.debug(f"Removed {full_fn}")
             else:
                 raise RuntimeError(
@@ -129,7 +157,7 @@ class FileLogger(AbstractLogger):
                 )
 
     def log_trial(
-        self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+        self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
     ) -> None:
         """Evaluate the problem and log the trial.
 
@@ -153,7 +181,8 @@ class FileLogger(AbstractLogger):
             info_str = json.dumps(info, cls=CustomEncoder) + "\n"
             logger.debug(info_str)
         else:
-            info_str = f"n_trials: {info['n_trials']}, config: {info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
+            info_str = f"n_trials: {info['n_trials']}, config: "
+            "{info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
             if info["trial_info"]["budget"] is not None:
                 info_str += f" budget: {info['trial_info']['budget']}"
             logger.info(info_str)
@@ -161,6 +190,15 @@ class FileLogger(AbstractLogger):
         dump_logs(log_data=info, filename=self._filename, directory=self.directory)
 
     def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+        """Log incumbent.
+
+        Parameters
+        ----------
+        n_trials : int
+            Number of trials.
+        incumbent : Incumbent
+            Incumbent(s) (best performing configuration(s)) to log.
+        """
         if incumbent is None:
             return
         if not isinstance(incumbent, list):
@@ -171,4 +209,13 @@ class FileLogger(AbstractLogger):
             dump_logs(log_data=info, filename=self._filename_trajectory, directory=self.directory)
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
+        """Log arbitrary data.
+
+        Parameters
+        ----------
+        data : dict
+            Data to log.
+        entity : str
+            Basename of the logfile.
+        """
         dump_logs(log_data=data, filename=f"{entity}.jsonl", directory=self.directory)
