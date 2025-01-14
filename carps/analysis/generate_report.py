@@ -18,11 +18,15 @@ import matplotlib
 
 matplotlib.use("Agg")  # Set non-interactive backend
 
-# from carps.analysis.process_data import get_interpolated_performance_df, load_logs, process_logs
-
+import matplotlib.axes
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.colors import LogNorm
+from seaborn.utils import (
+    relative_luminance,
+)
 
 from carps.analysis.gather_data import (
     get_interpolated_performance_df,
@@ -39,6 +43,35 @@ from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__file__)
+
+
+def _annotate_heatmap(
+    ax: matplotlib.axes.Axes, mesh: matplotlib.collections.QuadMesh, annot_kws: dict, fmt: str, annot_data: np.ndarray
+) -> None:
+    """Add textual labels with the value in each cell.
+
+    Takes care of the color contrast between the text and the cell.
+
+    Args:
+        ax (matplotlib.axes.Axes): The axes to annotate.
+        mesh (matplotlib.collections.QuadMesh): The mesh of the heatmap.
+        annot_kws (dict): Keyword arguments for the annotation.
+        fmt (str): The format string.
+        annot_data (np.ndarray): The data to annotate.
+    """
+    mesh.update_scalarmappable()
+    height, width = annot_data.shape
+    xpos, ypos = np.meshgrid(np.arange(width) + 0.5, np.arange(height) + 0.5)
+    for x, y, m, color, val in zip(
+        xpos.flat, ypos.flat, mesh.get_array().flat, mesh.get_facecolors(), annot_data.flat, strict=False
+    ):
+        if m is not np.ma.masked:
+            lum = relative_luminance(color)
+            text_color = ".15" if lum > 0.408 else "w"  # noqa: PLR2004
+            annotation = ("{:" + fmt + "}").format(val)
+            text_kwargs = {"color": text_color, "ha": "center", "va": "center"}
+            text_kwargs.update(annot_kws)
+            ax.text(x, y, annotation, **text_kwargs)
 
 
 def plot_ranks_over_time(
@@ -205,7 +238,7 @@ def plot_critical_difference(
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
     """
-    perf_col: str = "trial_value__cost_inc_log_norm"
+    perf_col: str = "trial_value__cost_inc"
     figsize = (6 * 1.5, 4 * 1.5)
 
     resulting_files = []
@@ -237,7 +270,7 @@ def plot_critical_difference(
         if not replot:
             continue
         df_crit = get_df_crit(gdf, perf_col=perf_col)
-        cd_evaluation(
+        _ = cd_evaluation(
             df_crit,
             maximize_metric=False,
             ignore_non_significance=True,
@@ -265,7 +298,7 @@ def plot_performance_per_problem(
     """
     setup_seaborn(font_scale=1.3)
 
-    perf_col = "trial_value__cost_inc_log_norm"
+    perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
     for gid, gdf in df.groupby(["scenario", "set"]):
@@ -297,13 +330,40 @@ def plot_performance_per_problem(
 
         # Perf per problem (normalized)
         df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
-        # df_crit = df_crit.reindex(columns=names)
-        # df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
-        # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+        offset = 1e-8
+        df_crit[df_crit == 0] = offset
         ax0 = sns.heatmap(
-            df_crit, annot=False, fmt="g", cmap="viridis_r", ax=ax0, cbar_kws={"shrink": 0.8, "aspect": 30}
+            df_crit,
+            annot=False,
+            fmt=".6f",
+            cmap="viridis_r",
+            ax=ax0,
+            cbar_kws={"shrink": 0.8, "aspect": 30},
+            norm=LogNorm(vmin=offset, vmax=1),
+            annot_kws={"fontsize": 8},
         )
-        ax0.set_title("Log Final Performance per Problem (Normalized)")
+        df_crit_raw = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col.replace("_norm", ""))
+        annot_data = df_crit_raw.to_numpy()
+
+        mesh = ax0.collections[0]
+        _annotate_heatmap(ax0, mesh, {"fontsize": 8}, ".6g", annot_data)
+
+        ax0.set_title(
+            f"Final Performance per Problem for Scenario {gid[0]} and Set {gid[1]}\n"
+            "Annotations: Raw Values, Colormap: Normalized Values"
+        )
+
+        ax0.set_title(f"Final Performance per Problem for Scenario {gid[0]} and Set {gid[1]}")
+        ax0.text(
+            0.5,
+            1.05,
+            "Annotations: Raw Values, Colormap: Normalized Values",
+            ha="center",
+            va="bottom",
+            fontsize=12,
+            transform=ax0.transAxes,
+        )
+
         ax0.set_ylabel("Problem ID")
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
@@ -395,6 +455,72 @@ def plot_boxplot_violinplot(
     return resulting_files
 
 
+def plot_finalperfbarplot(
+    df: pd.DataFrame,
+    output_dir: str | Path = "figures",
+    replot: bool = True,  # noqa: FBT001, FBT002
+) -> list[dict[str, Any]]:
+    """Plot the final performance of the optimizers as boxplot and violinplot.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the results.
+        output_dir (str | Path, "figures"): The output directory to save the plots to.
+        replot (bool, True): Whether to replot the figures.
+
+    Returns:
+        list[dict[str, Any]]: The filenames of and information about the resulting plots.
+    """
+    setup_seaborn(font_scale=1.2)
+
+    perf_col = "trial_value__cost_inc_norm"
+    x_column = "n_trials_norm"
+
+    resulting_files = []
+    for gid, gdf in df.groupby(["scenario", "set"]):
+        palette = get_color_palette(gdf)
+        figure_filename = f"{output_dir}/finalperfbarplot_{gid[0]}_{gid[1]}"
+        resulting_files.append(
+            {
+                "scenario": gid[0],
+                "set": gid[1],
+                "problem_id": None,
+                "filename": figure_filename,
+                "plot_type": "finalperformance_barplot",
+                "plot_type_pretty": "Final Performance (Normalized, Barplot)",
+                "explanation": "The barplot shows the mean final performance of the optimizers "
+                r"with 95-\% confidence interval.",
+            }
+        )
+        if not replot:
+            continue
+
+        result = calc_critical_difference(gdf, identifier=None, perf_col=perf_col, plot_diagram=False)
+        sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
+
+        fig = plt.Figure(figsize=(6, 4))
+        ax1 = fig.add_subplot(111)
+        df_finalperf = filter_only_final_performance(df=gdf)
+        df_finalperf["mean_perf"] = df_finalperf.groupby("optimizer_id")[perf_col].transform("mean")
+        df_finalperf = df_finalperf.sort_values(by="mean_perf")
+        # df_finalperf = df_finalperf.sort_values(
+        #     by="optimizer_id",
+        #     key=lambda column: column.map(lambda e: sorter.index(e)),
+        # )
+        palette = get_color_palette(df=gdf)
+        x = x_column
+        y = perf_col
+        x = y
+        hue = "optimizer_id"
+        y = hue
+        ax1 = sns.barplot(data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax1)
+        ax1.set_title("Final Performance (Normalized)")
+        ax1.set_xscale("log")
+        savefig(fig, figure_filename)
+        plt.close(fig)
+
+    return resulting_files
+
+
 def plot_spearman_rank_correlation(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
@@ -477,7 +603,11 @@ def load_results(result_path: str) -> pd.DataFrame:
     # 2. Preprocess results
     logger.info("Preprocessing results")
     print(df.columns)
-    return normalize_logs(df)
+
+    df = normalize_logs(df)  # noqa: PD901
+    if "set" not in df.columns:
+        df["set"] = df["problem_id"].apply(lambda x: "dev" if "dev" in x else "test")
+    return df
 
 
 latex_template_explanation_block = r"""\subsubsection{explanation_title}
@@ -523,14 +653,15 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
     order = {
         "Final Performance": [
             "critical_difference",
-            "spearman_rank_correlation",
+            # "spearman_rank_correlation",
             "performance_per_problem",
-            "finalperformance_boxplot",
-            "finalperformance_violinplot",
+            # "finalperformance_boxplot",
+            # "finalperformance_violinplot",
+            "finalperformance_barplot",
         ],
         "Anytime Performance": [
             "rank_over_time",
-            "ecdf",
+            # "ecdf",
         ],
     }
 
@@ -582,7 +713,7 @@ def generate_report(
     """Generate a report from the results of the optimization runs.
 
     Args:
-        result_path (str, "logs_combined.parquet"): Path to the results CSV or parquet file.
+        result_path (str, "logs.parquet"): Path to the results CSV or parquet file.
         report_dir (str | Path, "reports"): Directory to save the report to.
         report_name (str, "report"): Name of the report.
     """
@@ -607,17 +738,13 @@ def generate_report(
     logger.info("\t...critical difference")
     resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=True)
 
-    # Spearman Rank Correlation
-    logger.info("\t...spearman rank correlation")
-    resulting_files_spearman_rank_correlation = plot_spearman_rank_correlation(df, output_dir=figure_dir, replot=True)
-
     # Final Performance per Problem (Mean over seeds, heatmap)
     logger.info("\t...performance per problem")
     resulting_files_performance_per_problem = plot_performance_per_problem(df, output_dir=figure_dir, replot=True)
 
-    # Final Performance as boxplot and violinplot
-    logger.info("\t...boxplot and violinplot")
-    resulting_files_boxplot_violinplot = plot_boxplot_violinplot(df, output_dir=figure_dir, replot=True)
+    # Final Performance Barplot per Problem (Mean over seeds with std)
+    logger.info("\t...barplot")
+    resulting_files_finalperfbarplot = plot_finalperfbarplot(df, output_dir=figure_dir, replot=True)
 
     # ANYTIME PERFORMANCE
     logger.info("Plotting anytime performance...")
@@ -626,18 +753,12 @@ def generate_report(
     logger.info("\t...ranks over time")
     resulting_files_rank_over_time = plot_ranks_over_time(df, output_dir=figure_dir, replot=True)
 
-    # Plot eCDF
-    logger.info("\t...ecdf")
-    resulting_files_ecdf = plot_ecdf(df, output_dir=figure_dir, replot=True)
-
     resulting_files = pd.concat(
         [
             pd.DataFrame(resulting_files_critical_difference),
-            pd.DataFrame(resulting_files_spearman_rank_correlation),
             pd.DataFrame(resulting_files_performance_per_problem),
-            pd.DataFrame(resulting_files_boxplot_violinplot),
+            pd.DataFrame(resulting_files_finalperfbarplot),
             pd.DataFrame(resulting_files_rank_over_time),
-            pd.DataFrame(resulting_files_ecdf),
         ]
     ).reset_index(drop=True)
     write_latex_report(resulting_files, report_dir, report_name)
