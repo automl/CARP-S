@@ -1,3 +1,5 @@
+"""Find overrides for problems and optimizers based on their IDs."""
+
 from __future__ import annotations
 
 import os
@@ -16,7 +18,21 @@ config_folder_problem = config_folder / "problem"
 config_folder_optimizer = config_folder / "optimizer"
 
 
-def find_override(problem_id: str | None = None, optimizer_id: str | None = None):
+def find_override(problem_id: str | None = None, optimizer_id: str | None = None) -> str | None:
+    """Find the override string for a problem or optimizer based on its ID.
+
+    Parameters
+    ----------
+    problem_id : str, optional
+        The ID of the problem to find the override for.
+    optimizer_id : str, optional
+        The ID of the optimizer to find the override for.
+
+    Returns:
+    -------
+    str
+        The override string for the problem or optimizer or None if nothing is found.
+    """
     if problem_id is not None:
         key = "problem_id"
         path = config_folder_problem
@@ -34,16 +50,31 @@ def find_override(problem_id: str | None = None, optimizer_id: str | None = None
     table = pd.read_csv(index_fn)
 
     try:
-        config_fn = table["config_fn"][table[key] == to_find].values[0]
+        config_fn = table["config_fn"][table[key] == to_find].to_numpy()[0]
         stripped_path = str(config_fn)[len(str(config_folder)) + 1 : -len(".yaml")]
         index = next(x for x, v in enumerate(stripped_path) if v == "/")
         return "+" + stripped_path[:index] + "=" + stripped_path[index + 1 :]
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.info(f"Nothing found for {to_find} in config path {path}. Error: {e}")
         return None
 
 
 def merge_overrides(overrides: list[str | None]) -> str:
+    """Merge multiple overrides into one.
+
+    If we can find a common path among the overrides, we merge them into one
+    for a hydra grid.
+
+    Parameters
+    ----------
+    overrides : list[str], optional
+        The overrides to merge.
+
+    Returns:
+    -------
+    str
+        The merged override string.
+    """
     # overrides = [
     #     "+problem=YAHPO/MO/cfg_rbv2_super_1457",
     #     "+problem=YAHPO/MO/cfg_rbv2_super_1452",
