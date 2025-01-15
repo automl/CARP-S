@@ -1,19 +1,34 @@
+"""Logging utilities for the project."""
+
 from __future__ import annotations
 
 import json
 import logging
+from typing import Any
 
 import numpy as np
 from rich.logging import RichHandler
 
 
 def setup_logging() -> None:
+    """Setup logging module."""
     FORMAT = "%(message)s"
     logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
 
 
 def get_logger(logger_name: str) -> logging.Logger:
-    """Get the logger by name."""
+    """Get the logger by name.
+
+    Parameters
+    ----------
+    logger_name : str
+        Name of the logger.
+
+    Returns:
+    --------
+    logging.Logger
+        Logger object.
+    """
     return logging.getLogger(logger_name)
 
 
@@ -24,9 +39,21 @@ class CustomEncoder(json.JSONEncoder):
         - `json.dump(*args, cls=EncodeFromNumpy)` to create a file.json.
     """
 
-    def default(self, obj):
+    def default(self, obj: Any) -> Any:
+        """Converts numpy objects to pure python objects.
+
+        Parameters
+        ----------
+        obj : Any
+            Object to be converted.
+
+        Returns:
+        --------
+        Any
+            Pure python object.
+        """
         if isinstance(obj, np.int64):
             return int(obj)
-        elif isinstance(obj, np.float64):
+        if isinstance(obj, np.float64):
             return float(obj)
         return super().default(obj)
