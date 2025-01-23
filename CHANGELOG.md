@@ -1,4 +1,4 @@
-# v0.1.2
+# v0.2.0
 
 ## Benchmarks
 - HPOBench: Add rl, nasbench_101, nasbench_201, nasbench1shot1, and nas_hpo (#155, fix for benchmarks #158)
