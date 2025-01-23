@@ -5,7 +5,7 @@ SHELL := /bin/bash
 
 NAME := CARP-S
 PACKAGE_NAME := carps
-VERSION := 0.1.1
+VERSION := 0.2.0
 
 DIST := dist
 
