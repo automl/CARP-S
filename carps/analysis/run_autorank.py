@@ -111,7 +111,7 @@ def get_df_crit(
         # Rows are problems, cols are optimizers
         if len(lost) > 0:
             df_crit = df_crit[~nan_ids]
-        logger.info(f"Lost following experiments: {lost}")
+            logger.info(f"Lost following experiments: {lost}")
     elif nan_handling == "keep":
         pass
     elif nan_handling == "replace_by_highest":
@@ -236,7 +236,7 @@ def _custom_cd_diagram(result, reverse, ax, width):
     for i in range(math.ceil(len(sorted_ranks) / 2)):
         chei = cline + minnotsignificant + i * 0.2
         plot_line(
-            [(rankpos(sorted_ranks[i]), cline), (rankpos(sorted_ranks[i]), chei), (textspace - 0.1, chei)],
+            [(rankpos(sorted_ranks.iloc[i]), cline), (rankpos(sorted_ranks.iloc[i]), chei), (textspace - 0.1, chei)],
             linewidth=0.7,
         )
         plot_text(textspace - 0.2, chei, names[i], ha="right", va="center")
@@ -244,7 +244,11 @@ def _custom_cd_diagram(result, reverse, ax, width):
     for i in range(math.ceil(len(sorted_ranks) / 2), len(sorted_ranks)):
         chei = cline + minnotsignificant + (len(sorted_ranks) - i - 1) * 0.2
         plot_line(
-            [(rankpos(sorted_ranks[i]), cline), (rankpos(sorted_ranks[i]), chei), (textspace + scalewidth + 0.1, chei)],
+            [
+                (rankpos(sorted_ranks.iloc[i]), cline),
+                (rankpos(sorted_ranks.iloc[i]), chei),
+                (textspace + scalewidth + 0.1, chei),
+            ],
             linewidth=0.7,
         )
         plot_text(textspace + scalewidth + 0.2, chei, names[i], ha="left", va="center")
@@ -280,7 +284,7 @@ def cd_evaluation(
     plt_title=None,
     figsize=(12, 8),
     plot_diagram=True,
-    verbose = False,
+    verbose=False,
 ) -> RankResult:
     """Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
     configurations / models / algorithms per dataset. In  detail, the columns are individual configurations.
