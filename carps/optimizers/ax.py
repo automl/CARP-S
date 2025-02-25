@@ -128,10 +128,10 @@ class AxOptimizer(Optimizer):
         super().__init__(problem, task, loggers)
 
         self._parameters: list[dict[str, TParamValue | Sequence[TParamValue]]] = []
-        self._parameter_contraints: list[str] = []
+        self._parameter_constraints: list[str] = []
 
         self.task = task
-        self.configspace = self.convert_configspace(self.problem.configspace)
+        self.ax_configspace = self.convert_configspace(self.problem.configspace)
         self.ax_cfg = ax_cfg
         self._solver: AxClient | None = None
         self.history: dict[str, dict[str, Any]] = {}
@@ -141,7 +141,7 @@ class AxOptimizer(Optimizer):
 
         ax_client.create_experiment(
             parameters=self._parameters,
-            parameter_constraints=self._parameter_contraints,
+            parameter_constraints=self._parameter_constraints,
             objectives={
                 objective: ObjectiveProperties(minimize=True) for objective in self.ax_cfg.scenario.objectives
             },  # Note: Always minimization objective
@@ -166,7 +166,7 @@ class AxOptimizer(Optimizer):
             self._parameters.append(configspace2ax(name, parameter))
 
         return InstantiationBase.make_search_space(
-            parameters=self._parameters, parameter_constraints=self._parameter_contraints
+            parameters=self._parameters, parameter_constraints=self._parameter_constraints
         )
 
     def convert_to_trial(  # type: ignore[override]

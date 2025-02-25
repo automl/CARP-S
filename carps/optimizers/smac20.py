@@ -298,7 +298,11 @@ class SMAC3Optimizer(Optimizer):
                 for ti in tis
             ]
             tvs = [self.solver.runhistory[k] for k in tks]
-            tvs = [TrialValue(**asdict(tv)) for tv in tvs]
+            tvs_dicts = [asdict(tv) for tv in tvs]
+            for tv in tvs_dicts:
+                if "cpu_time" in tv:
+                    _ = tv.pop("cpu_time")
+            tvs = [TrialValue(**tv) for tv in tvs_dicts]
             incumbent_tuple = list(zip(tis, tvs, strict=False))
 
         return incumbent_tuple
