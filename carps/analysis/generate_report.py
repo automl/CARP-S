@@ -706,7 +706,7 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
 
 
 def generate_report(
-    result_path: str = "logs_combined.parquet",
+    result_path: str = "logs.parquet",
     report_dir: str | Path = "reports",
     report_name: str = "report",
 ) -> None:
