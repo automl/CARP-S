@@ -187,9 +187,11 @@ class SynetuneOptimizer(Optimizer):
         for k, v in configspace.items():
             configspace_st[k] = configspace_hp_to_synetune_hp(v)
         if self.fidelity_enabled:
-            configspace_st[self.fidelity_type] = (
-                self.max_budget if not self.convert else int(self.conversion_factor * self.max_budget)
-            )
+            assert self.max_budget is not None
+            max_budget = self.max_budget if not self.convert else int(self.conversion_factor * self.max_budget)
+            max_budget_synetune_hp = choice([max_budget])
+
+            configspace_st[self.fidelity_type] = max_budget_synetune_hp
 
         return configspace_st
 
@@ -236,6 +238,7 @@ class SynetuneOptimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
+        assert self._solver is not None
         trial_suggestion = self._solver.suggest(self.trial_counter)
         trial = SyneTrial(
             trial_id=self.trial_counter,
@@ -259,6 +262,7 @@ class SynetuneOptimizer(Optimizer):
         """
         syne_config = dict(trial_info.config)
         if self.fidelity_enabled:
+            assert trial_info.budget is not None
             syne_config[self.fidelity_type] = (
                 trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )
@@ -268,7 +272,7 @@ class SynetuneOptimizer(Optimizer):
             creation_time=datetime.datetime.now(),
         )
 
-    def tell(self, trial_info: TrialInfo, trial_value: TrialValue):
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
 
         If the optimizer does not support ask and tell,
@@ -282,15 +286,17 @@ class SynetuneOptimizer(Optimizer):
         trial_value : TrialValue
             trial value (cost, time, ...)
         """
+        assert self._solver is not None
         cost = trial_value.cost
         trial = self.convert_to_synetrial(trial_info=trial_info)
         experiment_result = {}
         if self.task.n_objectives == 1:
             experiment_result = {self.task.objectives[0]: cost}
         else:
-            experiment_result = {self.task.objectives[i]: cost[i] for i in range(len(cost))}
+            experiment_result = {self.task.objectives[i]: cost[i] for i in range(len(cost))}  # type: ignore[arg-type,index]
 
         if self.task.is_multifidelity:
+            assert trial_info.budget is not None
             experiment_result[self.fidelity_type] = (
                 trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )
@@ -352,7 +358,7 @@ class SynetuneOptimizer(Optimizer):
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
 
-        _optimizer_kwargs = {
+        _optimizer_kwargs: dict[str, Any] = {
             "metric": self.metric,
             "mode": "min" if self.task.n_objectives == 1 else list(np.repeat("min", self.task.n_objectives)),
         }
@@ -368,6 +374,7 @@ class SynetuneOptimizer(Optimizer):
                 _optimizer_kwargs["grace_period"] = int(self.conversion_factor * self.optimizer_kwargs["grace_period"])
 
                 if "max_t" in self.optimizer_kwargs:
+                    assert self.max_budget is not None
                     _optimizer_kwargs["max_t"] = int(self.conversion_factor * self.max_budget)
 
                 if "max_resource_level" in self.optimizer_kwargs:
@@ -401,9 +408,10 @@ class SynetuneOptimizer(Optimizer):
             Incumbent tuple(s) containing trial info and trial value.
         """
         if self.task.n_objectives == 1:
-            trial_result = self.best_trial(metric=self.task.objectives[0])
+            objective = self.task.objectives[0]
+            trial_result = self.best_trial(metric=objective)
             trial_info = self.convert_to_trial(trial=trial_result)
-            cost = trial_result.metrics[self.task.objectives[0]]
+            cost = trial_result.metrics[objective]
             trial_value = TrialValue(
                 cost=cost,
                 time=trial_result.seconds,
@@ -422,5 +430,5 @@ class SynetuneOptimizer(Optimizer):
                 )
                 tis.append(trial_info)
                 tvs.append(trial_value)
-            incumbent_tuple = list(zip(tis, tvs, strict=False))
+            incumbent_tuple = list(zip(tis, tvs, strict=False))  # type: ignore[assignment]
         return incumbent_tuple
