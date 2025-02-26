@@ -111,7 +111,7 @@ class Task:
 
     # Multi-objective
     n_objectives : int
-        The number of optimization objectives.
+        The number of optimization objectives, by default 1.
     objectives : list[str]
         Optional names of objectives.
 
@@ -177,7 +177,7 @@ class Task:
     n_workers: int = 1
 
     # Multi-Objective
-    n_objectives: int | None = None
+    n_objectives: int = 1
     objectives: list[str] | None = None
 
     # Multi-Fidelity
