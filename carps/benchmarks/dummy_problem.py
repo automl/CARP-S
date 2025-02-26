@@ -18,7 +18,7 @@ class DummyProblem(Problem):
     """Dummy problem for testing purposes."""
 
     def __init__(
-        self, return_value=0, budget_type: str | None = "dummy", loggers: list[AbstractLogger] | None = None
+        self, return_value: float = 0, budget_type: str | None = "dummy", loggers: list[AbstractLogger] | None = None
     ) -> None:
         """Initialize Dummy Problem.
 

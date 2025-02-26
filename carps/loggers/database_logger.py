@@ -72,7 +72,7 @@ class DatabaseLogger(AbstractLogger):
             logger.info("Not logging to database (result processor is None).")
 
     def log_trial(
-        self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+        self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
     ) -> None:
         """Evaluate the problem and log the trial.
 
@@ -98,7 +98,7 @@ class DatabaseLogger(AbstractLogger):
         if self.result_processor:
             self.result_processor.process_logs({"trials": info})
 
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
         """Log the incumbent.
 
         Parameters

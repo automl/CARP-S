@@ -104,11 +104,10 @@ class NevergradOptimizer(Optimizer):
         super().__init__(problem, task, loggers)
 
         self.fidelity_enabled = False
-        self.fidelity_type = None
+        self.fidelity_type: str | None = None
         if self.task.is_multifidelity:
             self.fidelity_enabled = True
-            self.fidelity_type: str = self.task.fidelity_type
-        self.task = task
+            self.fidelity_type = self.task.fidelity_type
         self.configspace = problem.configspace
         self.ng_space = self.convert_configspace(self.configspace)
         self.nevergrad_cfg = nevergrad_cfg
@@ -257,11 +256,11 @@ class NevergradOptimizer(Optimizer):
         if self.task.n_objectives > 1:
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
-            trial_info = [
+            trial_infos = [
                 self.convert_to_trial(config=Configuration(self.configspace, values=config.value)) for config in configs
             ]
-            trial_value = [TrialValue(cost=cost) for cost in costs]
-            incumbent_tuple = list(zip(trial_info, trial_value, strict=False))
+            trial_values = [TrialValue(cost=cost) for cost in costs]
+            incumbent_tuple = list(zip(trial_infos, trial_values, strict=False))
         else:
             for name, value in self.history.items():
                 if incumbent is None or value[1] < cost:
@@ -276,5 +275,5 @@ class NevergradOptimizer(Optimizer):
                 seed=self.nevergrad_cfg.seed,
             )
             trial_value = TrialValue(cost=cost)
-            incumbent_tuple = (trial_info, trial_value)
+            incumbent_tuple = (trial_info, trial_value)  # type: ignore[assignment]
         return incumbent_tuple

@@ -20,7 +20,7 @@ def plot_final_performance_boxplot(
     max_budget: float = 1,
     figure_filename: str = "figures/final_performance_boxplot.pdf",
     figsize: tuple[int, int] = (6, 4),
-    **boxplot_kwargs,
+    **boxplot_kwargs: dict,
 ) -> tuple[plt.Figure, matplotlib.axes.Axes]:
     """Plot final performance as a boxplot.
 
@@ -59,7 +59,7 @@ def plot_final_performance_violinplot(
     max_budget: float = 1,
     figure_filename: str = "figures/final_performance_boxplot.pdf",
     figsize: tuple[int, int] = (6, 4),
-    **violinplot_kwargs,
+    **violinplot_kwargs: dict,
 ) -> tuple[plt.Figure, matplotlib.axes.Axes]:
     """Plot final performance as a violinplot.
 

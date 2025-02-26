@@ -212,7 +212,7 @@ class HEBOOptimizer(Optimizer):
 
         self._solver: HEBO | None = None
 
-        self.completed_experiments: OrderedDict[int, tuple[TrialValue, TrialInfo]] = OrderedDict()
+        self.completed_experiments: OrderedDict[str, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> DesignSpace:
         """Convert configuration space from Problem to Optimizer.
@@ -252,7 +252,7 @@ class HEBOOptimizer(Optimizer):
             config=trial_info.config,
         )
 
-    def convert_to_trial(self, rec: pd.DataFrame) -> TrialInfo:
+    def convert_to_trial(self, rec: pd.DataFrame) -> TrialInfo:  # type: ignore[override]
         """Convert HEBO's recommendation to trial info.
 
         Parameters
@@ -290,6 +290,7 @@ class HEBOOptimizer(Optimizer):
         TrialInfo
             Configuration, instance, seed, budget
         """
+        assert self._solver is not None
         rec = self._solver.suggest(1)
         return self.convert_to_trial(rec=rec)
 
@@ -303,6 +304,7 @@ class HEBOOptimizer(Optimizer):
         trial_value : TrialValue
             Cost and additional information
         """
+        assert self._solver is not None
         cost = trial_value.cost
         suggestion = self.convert_from_trial(trial_info=trial_info)
 
@@ -326,7 +328,7 @@ class HEBOOptimizer(Optimizer):
             Information about function evaluation
         """
         trial_value = self.problem.evaluate(trial_info=trial_info)
-        self.completed_experiments[self.trial_counter] = (trial_value, trial_info)
+        self.completed_experiments[str(self.trial_counter)] = (trial_value, trial_info)
         return trial_value
 
     def _setup_optimizer(self) -> HEBO:
@@ -364,13 +366,14 @@ class HEBOOptimizer(Optimizer):
         for k, v in self.completed_experiments.items():
             trial_value, trial_info = v
             cost = trial_value.cost
+            assert isinstance(cost, float)  # HEBO does not support multi-objective optimization
             if cost > SMALL_NUMBER:
                 continue
             if current_incumbent < cost:
                 current_incumbent = cost
 
                 if sort_by == "trials":
-                    X.append(k)
+                    X.append(float(k))
                 elif sort_by == "walltime":
                     X.append(trial_value.endtime)
                 else:

@@ -208,19 +208,20 @@ class OptunaOptimizer(Optimizer):
 
         self._solver.tell(trial=optuna_trial, values=cost, state=optuna_status)
 
-    def get_pareto_front(self) -> list[tuple[TrialInfo, TrialValue]]:
+    def get_pareto_front(self) -> list[tuple[Configuration, None | float | list[float]]]:
         """Return the pareto front for multi-objective optimization.
 
         Returns:
         -------
-        list[tuple[TrialInfo, TrialValue]]
-            The pareto front.
+        list[tuple[Configuration, None | float | list[float]]]
+            The pareto front as a list of tuples of configuration and cost.
         """
         non_none_entries = [[config, cost] for optuna_trial, config, cost in self.history.values() if cost is not None]
         costs = np.array([v[1] for v in non_none_entries])
         ids_bool = pareto(costs)
         ids = np.where(ids_bool)[0]
-        return [non_none_entries[i] for i in ids]
+        pareto_front: list[tuple[Configuration, None | float | list[float]]] = [non_none_entries[i] for i in ids]  # type: ignore[misc]
+        return pareto_front
 
     def get_current_incumbent(self) -> Incumbent:
         """Extract the incumbent config and cost. May only be available after a complete run.
@@ -241,7 +242,9 @@ class OptunaOptimizer(Optimizer):
             incumbent_tuple = (trial_info, trial_value)
         else:
             front = self.get_pareto_front()
-            incumbent_tuple = [(TrialInfo(config=config), TrialValue(cost=cost)) for config, cost in front]
+            incumbent_tuple = [  # type: ignore[assignment]
+                (TrialInfo(config=config), TrialValue(cost=cost)) for config, cost in front if cost is not None
+            ]
         return incumbent_tuple
 
     # NOT really needed

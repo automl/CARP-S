@@ -24,14 +24,15 @@ app = Flask(__name__)
 app.run()
 
 
-@app.route("/configspace", methods=["GET"])
+@app.route("/configspace", methods=["GET"])  # type: ignore[misc]
 def _request_configspace() -> str:
     return json.dumps(cs_json.write(problem.configspace), cls=CustomEncoder)
 
 
-@app.route("/evaluate", methods=["POST"])
+@app.route("/evaluate", methods=["POST"])  # type: ignore[misc]
 def _request_evaluation() -> str:
     if request.is_json:
         trial_info = TrialInfo(**json.loads(request.get_json()))
-        return json.dumps(problem.evaluate(trial_info).to_json(), cls=CustomEncoder)
+        trial_value = problem.evaluate(trial_info)
+        return json.dumps(trial_value.to_json(), cls=CustomEncoder)  # type: ignore[attr-defined]
     raise ValueError("Request is not JSON.")

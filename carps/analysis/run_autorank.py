@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import warnings
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import fire
 import matplotlib.pyplot as plt
@@ -15,6 +16,9 @@ from autorank._util import RankResult, get_sorted_rank_groups, rank_multiple_non
 from carps.analysis.process_data import load_logs
 from carps.analysis.utils import filter_only_final_performance
 from carps.utils.loggingutils import get_logger
+
+if TYPE_CHECKING:
+    from matplotlib.axis import Axis
 
 logger = get_logger(__file__)
 
@@ -213,13 +217,13 @@ Source: https://gist.github.com/LennartPurucker/cf4616512529e29c123608b6c2c4a7e9
 """
 
 
-def _custom_cd_diagram(result, reverse, ax, width):  # noqa: C901, PLR0915
+def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float):  # noqa: C901, FBT001, PLR0915
     """!TAKEN FROM AUTORANK WITH MODIFICATIONS!"""
 
-    def plot_line(line, color="k", **kwargs):
+    def plot_line(line, color: str = "k", **kwargs: dict) -> None:
         ax.plot([pos[0] / width for pos in line], [pos[1] / height for pos in line], color=color, **kwargs)
 
-    def plot_text(x, y, s, *args, **kwargs):
+    def plot_text(x: float, y: float, s: str, *args: tuple, **kwargs: dict):
         ax.text(x / width, y / height, s, *args, **kwargs)
 
     sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse)
@@ -231,7 +235,7 @@ def _custom_cd_diagram(result, reverse, ax, width):  # noqa: C901, PLR0915
     textspace = 1
     scalewidth = width - 2 * textspace
 
-    def rankpos(rank):
+    def rankpos(rank: float) -> float:
         relative_rank = rank - lowv if not reverse else highv - rank
         return textspace + scalewidth / (highv - lowv) * relative_rank
 
@@ -261,7 +265,7 @@ def _custom_cd_diagram(result, reverse, ax, width):  # noqa: C901, PLR0915
     bigtick = 0.1
     smalltick = 0.05
 
-    tick = None
+    tick: int | float | None = None
     for a in [*list(np.arange(lowv, highv, 0.5)), highv]:
         tick = smalltick
         if a == int(a):
@@ -269,6 +273,7 @@ def _custom_cd_diagram(result, reverse, ax, width):  # noqa: C901, PLR0915
         plot_line([(rankpos(a), cline - tick / 2), (rankpos(a), cline)], linewidth=0.7)
 
     for a in range(lowv, highv + 1):
+        assert tick is not None, "Cannot plot, tick was not set."
         plot_text(rankpos(a), cline - tick / 2 - 0.05, str(a), ha="center", va="bottom")
 
     for i in range(math.ceil(len(sorted_ranks) / 2)):
@@ -320,7 +325,7 @@ def cd_evaluation(
     output_path: str | None = None,
     ignore_non_significance: bool = False,  # noqa: FBT001, FBT002
     plt_title: str | None = None,
-    figsize: tuple[int] = (12, 8),
+    figsize: tuple[int, int] | tuple[float, float] = (12, 8),
     plot_diagram: bool = True,  # noqa: FBT001, FBT002
     verbose: bool = False,  # noqa: FBT001, FBT002
 ) -> RankResult:
@@ -336,7 +341,7 @@ def cd_evaluation(
         output_path (str, optional): Path to save the figure. Defaults to None.
         ignore_non_significance (bool, optional): Whether to ignore non-significance. Defaults to False.
         plt_title (str, optional): Title of the plot. Defaults to None.
-        figsize (tuple[int], optional): Figure size. Defaults to (12, 8).
+        figsize (tuple[int | float], optional): Figure size. Defaults to (12, 8).
         plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
         verbose (bool, optional): Whether to print verbose output. Defaults to False.
 

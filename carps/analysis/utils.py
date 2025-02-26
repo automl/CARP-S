@@ -36,12 +36,12 @@ def get_color_palette(df: pd.DataFrame, model_name_key: str = "optimizer_id") ->
     return dict(zip(optimizers, colormaps, strict=False))
 
 
-def savefig(fig: plt.Figure, filename: str) -> None:
+def savefig(fig: plt.Figure, filename: str | Path) -> None:
     """Save figure as png and pdf.
 
     Args:
         fig (plt.Figure): Figure to save.
-        filename (str): Filename without extension.
+        filename (str | Path): Filename without extension.
     """
     figure_filename = Path(filename)
     figure_filename.parent.mkdir(parents=True, exist_ok=True)

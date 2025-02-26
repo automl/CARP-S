@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import multiprocessing
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 from dataclasses import asdict
 from functools import partial
 from pathlib import Path
@@ -32,11 +32,11 @@ logger = get_logger(__file__)
 setup_globals()
 
 
-def glob_trial_logs(p: str) -> list[Path]:
+def glob_trial_logs(p: str | Path) -> list[Path]:
     """Glob trial logs.
 
     Args:
-        p (str): Rundir to perform the globbing in.
+        p (str | Path): Rundir to perform the globbing in.
 
     Returns:
         list[Path]: List of paths to trial logs. The paths are relative to the rundir. The trial log path's location is
@@ -57,8 +57,9 @@ def get_run_dirs(outdir: str) -> list[Path]:
     opt_paths = list(Path(outdir).glob("*/*"))
     with multiprocessing.Pool() as pool:
         triallog_files = pool.map(glob_trial_logs, opt_paths)
-    triallog_files = np.concatenate(triallog_files)
-    return [f.parent for f in triallog_files]
+    if len(triallog_files) == 0:
+        raise ValueError("No trial logs found.")
+    return [f.parent for f in triallog_files]  # type: ignore[attr-defined]
 
 
 def annotate_with_cfg(
@@ -421,7 +422,7 @@ def maybe_convert_cost_dtype(x: int | float | str | list) -> float | list[float]
     return x
 
 
-def maybe_convert_cost_to_so(x: float | Sequence[float]) -> float:
+def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
     """Maybe convert cost to single-objective if cost is a vector by summation.
 
     TODO: Replace by hypervolume or similar.
@@ -429,12 +430,17 @@ def maybe_convert_cost_to_so(x: float | Sequence[float]) -> float:
     Args:
         x (float | Sequence[float]): Cost (vector).
 
+    Raises:
+        ValueError: Unknown cost type.
+
     Returns:
         float: Single-objective cost or aggregated cost.
     """
-    if isinstance(x, list):
+    if isinstance(x, list | np.ndarray):
         return np.sum(x)
-    return x
+    if isinstance(x, float):
+        return x
+    raise ValueError(f"Unknown cost type {type(x)}. Supported are float, list, np.ndarray.")
 
 
 def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None = None) -> pd.DataFrame:
@@ -735,7 +741,7 @@ def filelogs_to_df(
 
     Parameters
     ----------
-    rundir : str | list[str]
+    rundir : str | Path | list[str]
         Directory containing logs.
     log_fn : str, optional
         Filename of the log file, by default "trial_logs.jsonl"
@@ -749,9 +755,9 @@ def filelogs_to_df(
     """
     if isinstance(rundir, str):
         rundir = [rundir]
-    rundirs = rundir
+    rundirs_list = rundir
     df_list = []
-    for rundir in rundirs:
+    for rundir in rundirs_list:
         logger.info(f"Get rundirs from {rundir}...")
         rundirs = get_run_dirs(rundir)
         logger.info(f"Found {len(rundirs)} runs. Load data...")

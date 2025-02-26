@@ -57,7 +57,7 @@ def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor
 
 
 def main(
-    pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | None = None
+    pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | Path | None = None
 ) -> None:
     """Run the optimization from the database.
 
@@ -66,7 +66,7 @@ def main(
     Args:
         pyexperimenter_configuration_file_path (str, optional): Path to the py_experimenter configuration file.
             Defaults to None.
-        database_credential_file_path (str, optional): Path to the database credential file. Defaults to None.
+        database_credential_file_path (str | Path, optional): Path to the database credential file. Defaults to None.
     """
     slurm_job_id = getattr(os.environ, "SLURM_JOB_ID", None)
 
@@ -77,6 +77,7 @@ def main(
     database_credential_file_path = (
         database_credential_file_path or Path(__file__).parent / "container/credentials.yaml"
     )
+    database_credential_file_path = Path(database_credential_file_path)
     if database_credential_file_path is not None and not database_credential_file_path.exists():
         database_credential_file_path = None
 

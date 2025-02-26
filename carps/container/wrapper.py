@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import requests
+import requests  # type: ignore[import-untyped]
 from ConfigSpace.read_and_write import json as cs_json
 
 from carps.benchmarks.problem import Problem
@@ -51,10 +51,11 @@ class ContainerizedProblemClient(Problem):
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         # ask server about evaluation
-        response = requests.post("http://localhost:5000/evaluate", json=trial_info.to_json())  # noqa: S113
-        return TrialValue.from_json(response.json())
+        # TrialInfo and TrialValue are a json dataclasses
+        response = requests.post("http://localhost:5000/evaluate", json=trial_info.to_json())  # type: ignore[attr-defined] # noqa: S113
+        return TrialValue.from_json(response.json())  # type: ignore[attr-defined]
 
-    def f_min(self) -> float | None:
+    def f_min(self) -> float | None:  # type: ignore[override]
         """Get the minimum value of the objective function.
 
         Reises

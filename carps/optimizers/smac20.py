@@ -135,7 +135,8 @@ class SMAC3Optimizer(Optimizer):
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        return TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
+        inst = int(instance) if instance is not None else None
+        return TrialInfo(config=config, seed=seed, budget=budget, instance=inst)
 
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
@@ -361,6 +362,6 @@ class SMAC3Optimizer(Optimizer):
                 if "cpu_time" in tv:
                     _ = tv.pop("cpu_time")
             tvs = [TrialValue(**tv) for tv in tvs_dicts]
-            incumbent_tuple = list(zip(tis, tvs, strict=False))
+            incumbent_tuple = list(zip(tis, tvs, strict=False))  # type: ignore[assignment]
 
         return incumbent_tuple

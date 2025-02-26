@@ -45,17 +45,17 @@ if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
     experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
 
+    kwargs = {}
     if Path("carps/container/credentials.yaml").exists():
         database_credential_file = "carps/container/credentials.yaml"
-    else:
-        database_credential_file = None
+        kwargs["database_credential_file"] = database_credential_file
 
     experimenter = PyExperimenter(
         experiment_configuration_file_path=experiment_configuration_file_path,
         name="example_notebook",
-        database_credential_file_path=database_credential_file,
         log_file=f"logs/{slurm_job_id}.log",
         use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
+        **kwargs,
     )
 
     experimenter.unpause_experiment(experiment_id, optimizer_experiment)

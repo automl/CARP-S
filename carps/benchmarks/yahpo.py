@@ -95,11 +95,11 @@ class YahpoProblem(Problem):
 
         assert bench in list_scenarios(), f"The scenario {bench} you choose is not available."
 
-        yahpo_data_path = yahpo_data_path or Path(__file__).parent.parent / "benchmark_data/yahpo_data"
+        yahpo_data_path_path = yahpo_data_path or Path(__file__).parent.parent / "benchmark_data/yahpo_data"
 
         # setting up meta data for surrogate benchmarks
         local_config.init_config()
-        local_config.set_data_path(yahpo_data_path)
+        local_config.set_data_path(yahpo_data_path_path)
 
         self.scenario = bench
         self.instance = str(instance)
@@ -182,7 +182,7 @@ class YahpoProblem(Problem):
         costs = [maybe_invert(ret[target], target) for target in self.metrics]
         virtual_time = ret.get("time", 0.0)
         if len(costs) == 1:
-            costs = costs[0]
+            costs = costs[0]  # type: ignore[assignment]
 
         endtime = time.time()
         T = endtime - starttime

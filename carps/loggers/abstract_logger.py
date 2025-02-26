@@ -40,13 +40,13 @@ class AbstractLogger(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
         """Log the incumbents.
 
         Parameters
         ----------
-        n_trials : int
-            The number of trials that have been run so far.
+        n_trials : int | float
+            The number of trials that have been run so far. Can also be a fraction in case of multi-fidelity.
         incumbent : Incumbent
             The incumbent (or multiple incumbents).
         """

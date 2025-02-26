@@ -45,7 +45,7 @@ class RandomSearchOptimizer(Optimizer):
         self.history: list[tuple[TrialInfo, TrialValue]] = []
         self.is_multifidelity = task.is_multifidelity
 
-        if hasattr(task, "n_objectives"):
+        if hasattr(task, "n_objectives") and task.n_objectives is not None:
             self.is_multiobjective = task.n_objectives > 1
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
@@ -139,5 +139,5 @@ class RandomSearchOptimizer(Optimizer):
         if self.task.n_objectives == 1:
             incumbent_tuple = min(self.history, key=lambda x: x[1].cost)
         else:
-            incumbent_tuple = self.get_pareto_front()
+            incumbent_tuple = self.get_pareto_front()  # type: ignore[assignment]
         return incumbent_tuple

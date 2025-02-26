@@ -53,11 +53,11 @@ def get_experiment_status(path: Path) -> dict:
     }
 
 
-def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
+def check_missing(rundir: str | Path, n_processes: int = 4) -> pd.DataFrame:
     """Check missing runs in the given rundir.
 
     Args:
-        rundir (str): Path to the rundir.
+        rundir (str | Path): Path to the rundir.
         n_processes (int, optional): Number of processes to use. Defaults to 4.
 
     Returns:
@@ -67,8 +67,8 @@ def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
     paths = rundir.glob("**/.hydra/config.yaml")
     with Pool(processes=n_processes) as pool:
         data = pool.map(get_experiment_status, paths)
-    data = pd.DataFrame(data)
-    data.to_csv("runstatus.csv", index=False)
+    data_df = pd.DataFrame(data)
+    data_df.to_csv("runstatus.csv", index=False)
     return data
 
 

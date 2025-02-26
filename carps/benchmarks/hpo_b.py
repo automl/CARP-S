@@ -211,8 +211,8 @@ class HPOBProblem(Problem):
 
     def __init__(
         self,
-        dataset_id: tuple[str, int],
-        model_id: tuple[str, int],
+        dataset_id: str | int,
+        model_id: str | int,
         surrogates_dir: Path = Path("carps/benchmark_data/HPO-B/saved-surrogates"),
         loggers: list[AbstractLogger] | None = None,
     ):
@@ -221,9 +221,9 @@ class HPOBProblem(Problem):
 
         Parameters.
         ----------
-        dataset_id: tuple[str, int]
+        dataset_id: str | int
             dataset id, the ids can be found under surrogate_model summary directory
-        model_id: tuple[str, int]
+        model_id: str | int
             model id, each model corresponds to a search space, the search space dimensions can be found under
         surrogates_dir: Path
             path to directory with surrogates models.
@@ -247,7 +247,7 @@ class HPOBProblem(Problem):
         self.surrogate_model = self._get_surrogate_model(self.dataset_id, self.model_id)
 
         # generate configuration space, all the feature values range from [0,1] according to the setting
-        search_space_dims = HPOB_SEARCH_SPACE_DIMS[model_id]
+        search_space_dims = HPOB_SEARCH_SPACE_DIMS[self.model_id]
         self.search_space_dims = search_space_dims
 
         self._configspace = self._get_configspace(search_space_dims)
@@ -262,7 +262,7 @@ class HPOBProblem(Problem):
         bst_surrogate.load_model(str(self.surrogate_dir / (surrogate_name + ".json")))
         return bst_surrogate
 
-    def _get_configspace(self, search_space_dims: int):
+    def _get_configspace(self, search_space_dims: int) -> ConfigurationSpace:
         """Generate the configuration space for the problem.
 
         All the feature values range 0 to 1.
@@ -271,6 +271,11 @@ class HPOBProblem(Problem):
         ----------
         search_space_dims: int
             The number of dimensions in the search space.
+
+        Returns:
+        -------
+        ConfigurationSpace
+            The configuration space for the problem.
         """
         bounds = tuple([(0, 1) for _ in range(search_space_dims)])
         cs = ConfigurationSpace()

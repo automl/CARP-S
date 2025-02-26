@@ -189,12 +189,12 @@ class FileLogger(AbstractLogger):
 
         dump_logs(log_data=info, filename=self._filename, directory=self.directory)
 
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
         """Log incumbent.
 
         Parameters
         ----------
-        n_trials : int
+        n_trials : int | float
             Number of trials.
         incumbent : Incumbent
             Incumbent(s) (best performing configuration(s)) to log.

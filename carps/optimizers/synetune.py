@@ -149,7 +149,7 @@ class SynetuneOptimizer(Optimizer):
             if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
-        self.fidelity_type: str = self.task.fidelity_type
+        self.fidelity_type: str | None = self.task.fidelity_type
         self.configspace = self.problem.configspace
         self.metric: str | list[str] = self.task.objectives
         if len(self.metric) == 1:
@@ -297,6 +297,7 @@ class SynetuneOptimizer(Optimizer):
 
         if self.task.is_multifidelity:
             assert trial_info.budget is not None
+            assert self.fidelity_type is not None
             experiment_result[self.fidelity_type] = (
                 trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )

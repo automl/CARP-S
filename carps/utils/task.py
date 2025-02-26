@@ -178,7 +178,7 @@ class Task:
 
     # Multi-Objective
     n_objectives: int = 1
-    objectives: list[str] | None = None
+    objectives: list[str] = ["quality"]  # noqa: RUF008
 
     # Multi-Fidelity
     is_multifidelity: bool | None = None

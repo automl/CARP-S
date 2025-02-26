@@ -88,7 +88,8 @@ class SMAC314Optimizer(Optimizer):
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        return TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
+        inst = int(instance) if instance is not None else None
+        return TrialInfo(config=config, seed=seed, budget=budget, instance=inst)
 
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None

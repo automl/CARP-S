@@ -10,8 +10,11 @@ import pandas as pd
 from carps.analysis.gather_data import convert_mixed_types_to_str, load_set
 
 
-def concat_rundata():
-    """Concatenate run data from multiple runs/sets."""
+def concat_rundata() -> None:
+    """Concatenate run data from multiple runs/sets.
+
+    Save to "rundata.parquet" and "rundata_cfg.parquet".
+    """
     paths = {
         "BBsubset": {
             "dev": ["runs_subset_BB/dev"],
