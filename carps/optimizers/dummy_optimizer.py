@@ -44,12 +44,43 @@ class DummyOptimizer(Optimizer):
         return TrialInfo(config=config, budget=budget)
 
     def ask(self) -> TrialInfo:
-        sleep(1)
+        """Ask the optimizer for a new trial to evaluate.
+
+        Sample a random configuration from configuration space after a delay.
+
+        Returns:
+        -------
+        TrialInfo
+            trial info (config, seed, instance, budget)
+        """
+        sleep(0.5)
         config = self.problem.configspace.sample_configuration()
         return self.convert_to_trial(config, budget=self.budget)
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+        """Tell the optimizer a new trial.
+
+        Simply add the trial info and value to the history.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            trial info (config, seed, instance, budget)
+        trial_value : TrialValue
+            trial value (cost, time, ...)
+        """
         self.history.append((trial_info, trial_value))
 
     def get_current_incumbent(self) -> Incumbent:
+        """Return the current incumbent.
+
+        The incumbent is the current best configuration.
+        In the case of multi-objective, there are multiple best configurations, mostly
+        the Pareto front.
+
+        Returns:
+        -------
+        Incumbent
+            Incumbent tuple(s) containing trial info and trial value.
+        """
         return min(self.history, key=lambda x: x[1].cost)
