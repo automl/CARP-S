@@ -166,7 +166,7 @@ class NevergradOptimizer(Optimizer):
         return TrialInfo(
             config=config,
             name=name,
-            seed=self.nevergrad_cfg.seed,
+            seed=seed,
             budget=budget,
             instance=None,
         )
