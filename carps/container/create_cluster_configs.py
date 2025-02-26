@@ -1,3 +1,5 @@
+"""Create experiments for CARPS and store experiment config in database."""
+
 from __future__ import annotations
 
 import hashlib
@@ -17,9 +19,7 @@ logger = logging.getLogger("create experiments")
 
 @hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
-    """Run optimizer on problem.
-
-    Save trajectory and metadata to database.
+    """Store experiment config in database.
 
     Parameters
     ----------

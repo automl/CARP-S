@@ -1,11 +1,16 @@
+"""Autorank analysis for CARPS."""
+
 from __future__ import annotations
 
+import math
+import warnings
 from pathlib import Path
 
 import fire
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from autorank._util import RankResult, get_sorted_rank_groups, rank_multiple_nonparametric, test_normality
 
 from carps.analysis.process_data import load_logs
 from carps.analysis.utils import filter_only_final_performance
@@ -64,7 +69,7 @@ def custom_latex_table(result, *, decimal_places=3, label=None, only_tabular: bo
     table_df["CI"] = table_df.agg(format_string.format, axis=1)
     table_df = table_df[columns]
     if result.omnibus == "bayes":
-        table_df.at[table_df.index[0], "decision"] = "-"
+        table_df.loc[table_df.index[0], "decision"] = "-"
     table_df = table_df.rename(rename_map, axis="columns")
 
     float_format = lambda x: ("{:0." + str(decimal_places) + "f}").format(x) if not np.isnan(x) else "-"
@@ -85,24 +90,44 @@ def custom_latex_table(result, *, decimal_places=3, label=None, only_tabular: bo
 
     if only_tabular:
         return table_string
-    else:
-        return final_str
+    return final_str
 
 
 def get_df_crit(
     df: pd.DataFrame,
     budget_var: str = "n_trials_norm",
     max_budget: float = 1,
-    soft: bool = True,
+    soft: bool = True,  # noqa: FBT001, FBT002
     perf_col: str = "trial_value__cost_inc",
     nan_handling: str = "remove",
 ) -> pd.DataFrame:
-    df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)
+    """Get the critical difference dataframe.
+
+    1. Filter all rundata for the final performance (objective function value of incumbent at the end of the
+        optimization run).
+    2. Calculate the mean performance for the different seeds per optimizer and problem.
+    3. Pivot the table such that we have 2D table with problems as rows and optimizers as columns.
+    4. Handle nans: Remove rows with nans, replace nans by highest (worst) value, or keep them.
+
+    Args:
+        df (pd.DataFrame): The dataframe.
+        budget_var (str, optional): The budget variable. Defaults to "n_trials_norm".
+        max_budget (float, optional): The maximum budget. Defaults to 1.
+        soft (bool, optional): Whether to use a soft filter: If no entry at max_budget is available, use the performance
+            at the last trial. Defaults to True.
+        perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc".
+        nan_handling (str, optional): How to handle nans. Can be "remove", "keep", "replace_by_highest".
+            Defaults to "remove".
+
+    Returns:
+        pd.DataFrame: The critical difference dataframe.
+    """
+    df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)  # noqa: PD901
 
     # Work on mean of different seeds
     df_crit = df.groupby(["optimizer_id", "problem_id"])[perf_col].apply(np.nanmean).reset_index()
 
-    df_crit = df_crit.pivot(index="problem_id", columns="optimizer_id", values=perf_col)
+    df_crit = df_crit.pivot_table(index="problem_id", columns="optimizer_id", values=perf_col)
 
     if nan_handling == "remove":
         nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])
@@ -130,8 +155,20 @@ def calc_critical_difference(
     identifier: str | None = None,
     figsize=(12, 8),
     perf_col: str = "trial_value__cost_inc_norm",
-    plot_diagram: bool = True,
+    plot_diagram: bool = True,  # noqa: FBT001, FBT002
 ) -> RankResult:
+    """Calculate the critical difference.
+
+    Args:
+        df (pd.DataFrame): The dataframe.
+        identifier (str, optional): Identifier for the plot. Defaults to None.
+        figsize (tuple, optional): Figure size. Defaults to (12, 8).
+        perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc_norm".
+        plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
+
+    Returns:
+        RankResult: The rank result.
+    """
     df_crit = get_df_crit(df, perf_col=perf_col)
 
     # result = autorank(df_crit, alpha=0.05, verbose=True)
@@ -159,6 +196,12 @@ def calc_critical_difference(
 
 
 def calc(rundir: str, scenario: str = "blackbox") -> None:
+    """Calculate the critical difference for a specific scenario.
+
+    Args:
+        rundir (str): The run directory.
+        scenario (str, optional): The scenario. Defaults to "blackbox".
+    """
     df, df_cfg = load_logs(rundir=rundir)
     calc_critical_difference(df=df[df["scenario"] == scenario], identifier=scenario)
 
@@ -169,13 +212,8 @@ Requirements: the usual (pandas, matplotlib, numpy) and autorank==1.1.3
 Source: https://gist.github.com/LennartPurucker/cf4616512529e29c123608b6c2c4a7e9
 """
 
-import math
-import warnings
 
-from autorank._util import RankResult, get_sorted_rank_groups, rank_multiple_nonparametric, test_normality
-
-
-def _custom_cd_diagram(result, reverse, ax, width):
+def _custom_cd_diagram(result, reverse, ax, width):  # noqa: C901, PLR0915
     """!TAKEN FROM AUTORANK WITH MODIFICATIONS!"""
 
     def plot_line(line, color="k", **kwargs):
@@ -269,7 +307,7 @@ def _custom_cd_diagram(result, reverse, ax, width):
     side = 0.05
     no_sig_height = 0.1
     start = cline + 0.2
-    for l, r in groups:
+    for l, r in groups:  # noqa: E741
         plot_line([(rankpos(sorted_ranks[l]) - side, start), (rankpos(sorted_ranks[r]) + side, start)], linewidth=2.5)
         start += no_sig_height
 
@@ -277,18 +315,33 @@ def _custom_cd_diagram(result, reverse, ax, width):
 
 
 def cd_evaluation(
-    performance_per_dataset,
-    maximize_metric,
-    output_path=None,
-    ignore_non_significance=False,
-    plt_title=None,
-    figsize=(12, 8),
-    plot_diagram=True,
-    verbose=False,
+    performance_per_dataset: pd.DataFrame,
+    maximize_metric: bool,  # noqa: FBT001
+    output_path: str | None = None,
+    ignore_non_significance: bool = False,  # noqa: FBT001, FBT002
+    plt_title: str | None = None,
+    figsize: tuple[int] = (12, 8),
+    plot_diagram: bool = True,  # noqa: FBT001, FBT002
+    verbose: bool = False,  # noqa: FBT001, FBT002
 ) -> RankResult:
-    """Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
+    """Run critical difference evaluation.
+
+    Performance per dataset is  a dataframe that stores the performance (with respect to a metric) for  set of
     configurations / models / algorithms per dataset. In  detail, the columns are individual configurations.
     rows are datasets and a cell is the performance of the configuration for  dataset.
+
+    Args:
+        performance_per_dataset (pd.DataFrame): Performance per dataset.
+        maximize_metric (bool): Whether to maximize the metric.
+        output_path (str, optional): Path to save the figure. Defaults to None.
+        ignore_non_significance (bool, optional): Whether to ignore non-significance. Defaults to False.
+        plt_title (str, optional): Title of the plot. Defaults to None.
+        figsize (tuple[int], optional): Figure size. Defaults to (12, 8).
+        plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
+        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+
+    Returns:
+        RankResult: Rank result.
     """
     # -- Preprocess data for autorank
     rank_data = performance_per_dataset.copy() * -1 if maximize_metric else performance_per_dataset.copy()
@@ -330,19 +383,19 @@ def cd_evaluation(
     is_significant = True
     if result.pvalue >= result.alpha:
         if ignore_non_significance:
-            warnings.warn("Result is not significant and results of the plot may be misleading!")
+            warnings.warn("Result is not significant and results of the plot may be misleading!", stacklevel=2)
             is_significant = False
         else:
             raise ValueError(
-                "Result is not significant and results of the plot may be misleading. If you still want to see the CD plot, set"
-                + " ignore_non_significance to True."
+                "Result is not significant and results of the plot may be misleading. If you still want to see the "
+                "CD plot, set ignore_non_significance to True."
             )
 
     # -- Plot
     if plot_diagram:
         fig, ax = plt.subplots(figsize=figsize)
         plt.rcParams.update({"font.size": 16})
-        _custom_cd_diagram(result, False, ax, figsize[0])  # order == "descending", ax, 8)
+        _custom_cd_diagram(result=result, reverse=False, ax=ax, width=figsize[0])  # order == "descending", ax, 8)
         if plt_title or not is_significant:
             plt_title = ""
             if not is_significant:
@@ -359,15 +412,6 @@ def cd_evaluation(
 
     return result
 
-
-# if __name__ == "__main__":
-#     input_data = pd.read_csv("./benchmark_binary_1hour.csv")  # assume table format where each row represents some experiment run
-
-#     # Pivot for desired metric to create the performance per dataset table
-#     performance_per_dataset = input_data.pivot(index="task", columns="framework", values="result")
-
-#     # shows the plot by default
-#     cd_evaluation(performance_per_dataset, maximize_metric=True, output_path=None, ignore_non_significance=False)
 
 if __name__ == "__main__":
     fire.Fire(calc)

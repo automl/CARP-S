@@ -1,3 +1,5 @@
+"""Database logger for logging trials and incumbents to a database."""
+
 from __future__ import annotations
 
 import json
@@ -17,7 +19,21 @@ setup_logging()
 logger = get_logger("DatabaseLogger")
 
 
-def convert_trial_info(trial_info, trial_value):
+def convert_trial_info(trial_info: TrialInfo, trial_value: TrialValue) -> dict:
+    """Convert trial info and trial value to a dictionary.
+
+    Parameters
+    ----------
+    trial_info : TrialInfo
+        The trial info (config, seed, budget, instance, additional info).
+    trial_value : TrialValue
+        The trial value (status, cost, additional info).
+
+    Returns:
+    -------
+    dict
+        The converted trial info and trial value which is serializable.
+    """
     info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
     info["trial_info"]["config"] = json.dumps(asdict(trial_info)["config"].get_dictionary(), cls=CustomEncoder)
     info["trial_value"]["status"] = info["trial_value"]["status"].name
@@ -40,7 +56,16 @@ def convert_trial_info(trial_info, trial_value):
 
 
 class DatabaseLogger(AbstractLogger):
+    """Database logger for logging trials and incumbents to a database."""
+
     def __init__(self, result_processor: ResultProcessor | None = None) -> None:
+        """Initialize the database logger.
+
+        Parameters
+        ----------
+        result_processor : ResultProcessor | None, optional
+            The result processor, by default None
+        """
         super().__init__()
         self.result_processor = result_processor
         if self.result_processor is None:
@@ -74,6 +99,15 @@ class DatabaseLogger(AbstractLogger):
             self.result_processor.process_logs({"trials": info})
 
     def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+        """Log the incumbent.
+
+        Parameters
+        ----------
+        n_trials : int
+            The number of trials that have been run so far.
+        incumbent : Incumbent
+            The incumbent (best) configuration with associated cost.
+        """
         if incumbent is None:
             return
 
@@ -88,5 +122,14 @@ class DatabaseLogger(AbstractLogger):
                 self.result_processor.process_logs({"trajectory": info})
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
+        """Log arbitrary data to the database.
+
+        Parameters
+        ----------
+        data : dict
+            The data to log.
+        entity : str
+            The entity to log the data to. This is the table name in the database.
+        """
         if self.result_processor:
             self.result_processor.process_logs({entity: data})

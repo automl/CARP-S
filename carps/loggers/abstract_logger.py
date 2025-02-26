@@ -1,3 +1,5 @@
+"""AbstractLogger."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -9,11 +11,10 @@ if TYPE_CHECKING:
 
 
 class AbstractLogger(ABC):
-    def __init__(self) -> None:
-        """AbstractLogger.
+    """AbstractLogger.
 
-        Intercepts the trial info and value during evaluate.
-        """
+    Intercepts the trial info and value during evaluate.
+    """
 
     @abstractmethod
     def log_trial(

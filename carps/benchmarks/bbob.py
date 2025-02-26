@@ -1,9 +1,11 @@
+"""BBOB problem."""
+
 from __future__ import annotations
 
 import time
 from typing import TYPE_CHECKING, Any
 
-import ioh
+import ioh  # type: ignore
 from ConfigSpace import ConfigurationSpace, Float
 
 from carps.benchmarks.manyaffinebbob import register_many_affine_functions
@@ -17,13 +19,33 @@ register_many_affine_functions()
 
 
 class BBOBProblem(Problem):
-    def __init__(self, fid: int, instance: int, dimension: int, seed: int, loggers: list[AbstractLogger] | None = None):
+    """BBBOB problem."""
+
+    def __init__(
+        self, fid: int, instance: int, dimension: int, seed: int, loggers: list[AbstractLogger] | None = None
+    ) -> None:
+        r"""Initialize BBOB problem.
+
+        Parameters
+        ----------
+        fid : int
+            Function id $\in$ [1,24].
+        instance : int
+            Function instance.
+        dimension : int
+            Dimension. 1-x
+        seed : int
+            Seed for configuration space.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None
+        """
         super().__init__(loggers)
 
         self._configspace, self._problem = get_bbob_problem(fid=fid, instance=instance, dimension=dimension, seed=seed)
 
     @property
     def f_min(self) -> float | None:
+        """Return the minimum function value."""
         return self._problem.optimum.y
 
     @property
@@ -51,9 +73,9 @@ class BBOBProblem(Problem):
             Cost
         """
         configuration = trial_info.config
-        input = list(dict(configuration).values())
+        x = list(dict(configuration).values())
         starttime = time.time()
-        cost = self._problem(input)
+        cost = self._problem(x)
         endtime = time.time()
         T = endtime - starttime
 

@@ -1,6 +1,4 @@
-"""* Not immeditaly obvious where I even create the "solver" for optuna
-* Is it always minimize?
-"""
+"""Optuna optimizer."""
 
 from __future__ import annotations
 
@@ -19,8 +17,13 @@ from ConfigSpace.hyperparameters import (
     UniformFloatHyperparameter,
     UniformIntegerHyperparameter,
 )
-from optuna.distributions import BaseDistribution, CategoricalDistribution, FloatDistribution, IntDistribution
-from optuna.trial import TrialState as OptunaTrialState
+from optuna.distributions import (  # type: ignore
+    BaseDistribution,
+    CategoricalDistribution,
+    FloatDistribution,
+    IntDistribution,
+)
+from optuna.trial import TrialState as OptunaTrialState  # type: ignore
 from rich import print as printr
 
 from carps.optimizers.optimizer import Optimizer
@@ -29,7 +32,7 @@ from carps.utils.trials import StatusType, TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig
-    from optuna.study import Study
+    from optuna.study import Study  # type: ignore
 
     from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
@@ -50,37 +53,33 @@ optuna_trial_states: dict[StatusType, OptunaTrialState] = {
 
 
 def hp_to_optuna_distribution(hp: Hyperparameter) -> BaseDistribution:
-    """Parse a Node and its children into a ConfigurationSpace.
+    """Parse a ConfigSpace hyperparameter to an Optuna distribution.
 
-    Args:
-        node: The Node to parse
-        flat: Whether to have a hierarchical naming scheme for nodes and their children.
-        conditionals: Whether to include conditionals in the space from a
-            [`Choice`][amltk.pipeline.Choice]. If this is `False`, this will
-            also remove all forbidden clauses and other conditional clauses.
-            The primary use of this functionality is that some optimizers do not
-            support these features.
+    Parameters
+    ----------
+    hp : Hyperparameter
+        The ConfigSpace hyperparameter to parse.
 
-            !!! TODO "Not yet supported"
-
-                This functionality is not yet supported as we can't encode this into
-                a static Optuna search space.
-
-        delim: The delimiter to use for the names of the hyperparameters.
+    Returns:
+    -------
+    BaseDistribution
+        The Optuna distribution.
     """
     if isinstance(hp, UniformIntegerHyperparameter):
         return IntDistribution(hp.lower, hp.upper, log=hp.log)
-    elif isinstance(hp, UniformFloatHyperparameter):
+    if isinstance(hp, UniformFloatHyperparameter):
         return FloatDistribution(hp.lower, hp.upper, log=hp.log)
-    elif isinstance(hp, CategoricalHyperparameter):
+    if isinstance(hp, CategoricalHyperparameter):
         if hp.weights is not None:
             raise NotImplementedError(f"Weights are not supported in Optuna ({hp})")
 
         return CategoricalDistribution(hp.choices)
-    elif isinstance(hp, OrdinalHyperparameter):
-        warnings.warn(f"Ordinal hyperparameters are not supported in Optuna, use Categorical instead for {hp}.")
+    if isinstance(hp, OrdinalHyperparameter):
+        warnings.warn(
+            f"Ordinal hyperparameters are not supported in Optuna, use Categorical instead for {hp}.", stacklevel=2
+        )
         return CategoricalDistribution(hp.sequence)
-    elif isinstance(hp, Constant):
+    if isinstance(hp, Constant):
         return CategoricalDistribution([hp.value])
 
     raise NotImplementedError(f"Can't handle hyperparameter {hp}")
@@ -96,6 +95,18 @@ class OptunaOptimizer(Optimizer):
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
+        """Initialize the optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            The problem to optimize.
+        optuna_cfg : DictConfig
+            The configuration for the Optuna optimizer.
+        task : Task
+        loggers : list[AbstractLogger] | None
+            The loggers to use during optimization.
+        """
         super().__init__(problem, task, loggers)
         self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
@@ -198,7 +209,13 @@ class OptunaOptimizer(Optimizer):
         self._solver.tell(trial=optuna_trial, values=cost, state=optuna_status)
 
     def get_pareto_front(self) -> list[tuple[TrialInfo, TrialValue]]:
-        """Return the pareto front for multi-objective optimization."""
+        """Return the pareto front for multi-objective optimization.
+
+        Returns:
+        -------
+        list[tuple[TrialInfo, TrialValue]]
+            The pareto front.
+        """
         non_none_entries = [[config, cost] for optuna_trial, config, cost in self.history.values() if cost is not None]
         costs = np.array([v[1] for v in non_none_entries])
         ids_bool = pareto(costs)

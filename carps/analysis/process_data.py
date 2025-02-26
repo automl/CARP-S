@@ -1,3 +1,5 @@
+"""Process raw logs and configs for analysis."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,6 +16,19 @@ logger = get_logger(__file__)
 
 
 def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
+    """Add scenario type to logs.
+
+    Parameters
+    ----------
+    logs : pd.DataFrame
+        Raw logs.
+
+    Returns:
+    -------
+    pd.DataFrame
+        Logs with scenario type.
+    """
+
     def determine_scenario_type(x: pd.Series) -> str:
         if x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
             scenario = "blackbox"
@@ -41,6 +56,18 @@ def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
 
 
 def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
+    """Post-add task columns to logs.
+
+    Parameters
+    ----------
+    logs : pd.DataFrame
+        Raw logs.
+
+    Returns:
+    -------
+    pd.DataFrame
+        Logs with task columns.
+    """
     index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
     if not index_fn.is_file():
         raise ValueError("Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
@@ -70,13 +97,27 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
 
 
 def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
+    """Process raw logs.
+
+    Normalize n_trials and costs. Calculate trajectory (incumbent cost). Maybe add scenario.
+
+    Parameters
+    ----------
+    logs : pd.DataFrame
+        Raw logs.
+
+    Returns:
+    -------
+    pd.DataFrame
+        Processed logs
+    """
     logger.info("Processing raw logs. Normalize n_trials and costs. Calculate trajectory (incumbent cost).")
     # logs= logs.drop(columns=["config"])
     # Filter MO costs
     logs = logs[~logs["problem_id"].str.startswith("DUMMY")]
     logs = logs[~logs["benchmark_id"].str.startswith("DUMMY")]
     logs = logs[~logs["optimizer_id"].str.startswith("DUMMY")]
-    logs["trial_value__cost"] = logs["trial_value__cost"].apply(lambda x: x if isinstance(x, float) else eval(x))
+    logs["trial_value__cost"] = logs["trial_value__cost"].apply(lambda x: x if isinstance(x, float) else eval(x))  # noqa: S307
     logs = logs[logs["trial_value__cost"].apply(lambda x: isinstance(x, float))]
     logs["trial_value__cost"] = logs["trial_value__cost"].apply(float)
     logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
@@ -98,7 +139,19 @@ def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     return logs
 
 
-def calc_time(D: pd.DataFrame) -> pd.Series:
+def calc_time(D: pd.DataFrame) -> pd.Series:  # noqa: N803
+    """Calculate time elapsed.
+
+    Parameters
+    ----------
+    D : pd.DataFrame
+        Logs for a single problem, optimizer, seed.
+
+    Returns:
+    -------
+    pd.Series
+        D with time elapsed as "time" column.
+    """
     trialtime = D["trial_value__virtual_time"]
     nulltime = D["trial_value__starttime"] - D["trial_value__starttime"].min()
     trialtime_cum = trialtime.cumsum()
@@ -108,7 +161,21 @@ def calc_time(D: pd.DataFrame) -> pd.Series:
     return D
 
 
-def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:
+def normalize(S: pd.Series, epsilon: float = 1e-8) -> pd.Series:  # noqa: N803
+    """Normalize series.
+
+    Parameters
+    ----------
+    S : pd.Series
+        Series to normalize.
+    epsilon : float, optional
+        Small value to avoid division by zero, by default 1e-8.
+
+    Returns:
+    -------
+    pd.Series
+        Normalized series
+    """
     return (S - S.min()) / (S.max() - S.min() + epsilon)
 
 
@@ -141,7 +208,10 @@ def get_interpolated_performance_df(
     logger.info("Create dataframe for neat plotting by aligning x-axis / interpolating budget.")
 
     if x_column not in logs:
-        msg = f"x_column `{x_column}` not in logs! Did you call `carps.analysis.process_data.process_logs` on the raw logs?"
+        msg = (
+            f"x_column `{x_column}` not in logs! Did you call "
+            "`carps.analysis.process_data.process_logs` on the raw logs?"
+        )
         raise ValueError(msg)
 
     interpolation_columns = [
@@ -170,18 +240,34 @@ def get_interpolated_performance_df(
     return pd.concat(D).reset_index(drop=True)
 
 
-def load_logs(rundir: str):
+def load_logs(rundir: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load logs and associated configs from rundir.
+
+    Parameters
+    ----------
+    rundir : str
+        Run directory.
+
+    Returns:
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Logs, configs
+    """
     logs_fn = Path(rundir) / "logs.csv"
     logs_cfg_fn = logs_fn.parent / "logs_cfg.csv"
 
     logger.info(f"Load logs from `{logs_fn}` and associated configs from {logs_cfg_fn}. Preprocess logs.")
 
     if not logs_fn.is_file() or not logs_cfg_fn.is_file():
-        msg = f"No logs found at rundir '{rundir}'. If you used the file logger, you can gather the data with `python -m carps.analysis.gather_data <rundir>`."
+        msg = (
+            f"No logs found at rundir '{rundir}'. "
+            "If you used the file logger, you can gather the data "
+            "with `python -m carps.analysis.gather_data <rundir>`."
+        )
         raise RuntimeError(msg)
 
-    df = pd.read_csv(logs_fn)
-    df = process_logs(df)
+    df = pd.read_csv(logs_fn)  # noqa: PD901
+    df = process_logs(df)  # noqa: PD901
     df_cfg = pd.read_csv(logs_cfg_fn)
     return df, df_cfg
 

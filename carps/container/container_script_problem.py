@@ -1,10 +1,12 @@
+"""Container script for the problem container."""
+
 from __future__ import annotations
 
 import json
 import os
 
 from ConfigSpace.read_and_write import json as cs_json
-from flask import Flask, request
+from flask import Flask, request  # type: ignore
 from omegaconf import OmegaConf
 
 from carps.utils.loggingutils import CustomEncoder
@@ -32,5 +34,4 @@ def _request_evaluation() -> str:
     if request.is_json:
         trial_info = TrialInfo(**json.loads(request.get_json()))
         return json.dumps(problem.evaluate(trial_info).to_json(), cls=CustomEncoder)
-    else:
-        raise ValueError("Request is not JSON.")
+    raise ValueError("Request is not JSON.")

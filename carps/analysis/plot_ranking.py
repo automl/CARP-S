@@ -1,3 +1,5 @@
+"""Plot ranking of optimizers."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,6 +23,18 @@ def plot_ranking(
     perf_col: str = "trial_value__cost_inc_norm",
     problem_prefix: str = "",
 ) -> RankResult:
+    """Plot ranking of optimizers.
+
+    Args:
+        gdf (pd.DataFrame): Dataframe with the logs.
+        scenario (str): Scenario name, e.g. blackbox.
+        set_id (str): Set ID, e.g. test or dev.
+        perf_col (str, optional): Performance column. Defaults to "trial_value__cost_inc_norm".
+        problem_prefix (str, optional): Problem prefix. Defaults to "". If set, will be removed from the problem IDs.
+
+    Returns:
+        RankResult: Rank result.
+    """
     fpath = Path("figures/ranking")
     fpath.mkdir(exist_ok=True, parents=True)
     identifier = f"{scenario}_{set_id}"

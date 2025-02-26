@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ConfigSpace.hyperparameters as CSH
+import ConfigSpace.hyperparameters as CSH  # noqa: N812
 import nevergrad as ng
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
@@ -23,11 +23,11 @@ from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
-    from nevergrad.optimization.base import (
+    from nevergrad.optimization.base import (  # type: ignore
         ConfiguredOptimizer as ConfNGOptimizer,
         Optimizer as NGOptimizer,
     )
-    from nevergrad.parametrization import parameter
+    from nevergrad.parametrization import parameter  # type: ignore
     from omegaconf import DictConfig
 
     from carps.benchmarks.problem import Problem
@@ -46,26 +46,34 @@ ext_opts = {
 }
 
 
-def CS_to_nevergrad_space(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:
-    """Convert ConfigSpace to Nevergrad Parameter."""
+def configspace_hp_to_nevergrad_hp(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:  # noqa: PLR0911
+    """Convert ConfigSpace to Nevergrad Parameter.
+
+    Parameters
+    ----------
+    hp : CSH.Hyperparameter
+        Hyperparameter from ConfigSpace.
+
+    Returns:
+    -------
+    ng.p.Instrumentation
+        Hyperparameter from Nevergrad.
+    """
     if isinstance(hp, CSH.FloatHyperparameter):
         if hp.log:
             return ng.p.Log(lower=hp.lower, upper=hp.upper)
-        else:
-            return ng.p.Scalar(lower=hp.lower, upper=hp.upper)
-    elif isinstance(hp, CSH.IntegerHyperparameter):
+        return ng.p.Scalar(lower=hp.lower, upper=hp.upper)
+    if isinstance(hp, CSH.IntegerHyperparameter):
         if hp.log:
             return ng.p.Log(lower=hp.lower, upper=hp.upper).set_integer_casting()
-        else:
-            return ng.p.Scalar(lower=hp.lower, upper=hp.upper).set_integer_casting()
-    elif isinstance(hp, CSH.CategoricalHyperparameter):
+        return ng.p.Scalar(lower=hp.lower, upper=hp.upper).set_integer_casting()
+    if isinstance(hp, CSH.CategoricalHyperparameter):
         return ng.p.Choice(hp.choices)
-    elif isinstance(hp, CSH.OrdinalHyperparameter):
+    if isinstance(hp, CSH.OrdinalHyperparameter):
         return ng.p.TransitionChoice(hp.sequence)
-    elif isinstance(hp, CSH.Constant):
+    if isinstance(hp, CSH.Constant):
         return ng.p.Choice([hp.value])
-    else:
-        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
+    raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class NevergradOptimizer(Optimizer):
@@ -79,6 +87,20 @@ class NevergradOptimizer(Optimizer):
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
+        """Initialize the optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            The problem to optimize.
+        nevergrad_cfg : DictConfig
+            The configuration for the Nevergrad optimizer.
+        optimizer_cfg : DictConfig
+            The configuration for the optimizer.
+        task : Task
+            The task to optimize.
+        loggers : list[AbstractLogger] | None
+        """
         super().__init__(problem, task, loggers)
 
         self.fidelity_enabled = False
@@ -115,7 +137,7 @@ class NevergradOptimizer(Optimizer):
         """
         ng_param = ng.p.Dict()
         for hp in configspace.get_hyperparameters():
-            ng_param[hp.name] = CS_to_nevergrad_space(hp)
+            ng_param[hp.name] = configspace_hp_to_nevergrad_hp(hp)
         return ng_param
 
     def _setup_optimizer(self) -> NGOptimizer | ConfNGOptimizer:

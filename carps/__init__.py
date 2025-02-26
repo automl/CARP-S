@@ -10,5 +10,5 @@ project_urls = {
     "Documentation": "https://AutoML.github.io/SMACBenchmarking/main",
     "Source Code": "https://github.com/AutoML/carps",
 }
-copyright = f"Copyright {datetime.date.today().strftime('%Y')}, AutoML"
+copyright = f"Copyright {datetime.date.today().strftime('%Y')}, AutoML"  # noqa: A001
 version = "0.0.1"

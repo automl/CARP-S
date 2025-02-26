@@ -291,6 +291,8 @@ class SMAC3Optimizer(Optimizer):
 
         Parameters
         ----------
+        trial_info : TrialInfo
+            trial info (config, seed, instance, budget)
         trial_value : TrialValue
             trial value (cost, time, ...)
         """

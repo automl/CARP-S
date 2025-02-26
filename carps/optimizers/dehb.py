@@ -44,6 +44,19 @@ class DEHBOptimizer(Optimizer):
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
+        """Initialize DEHB Optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            Problem to optimize.
+        dehb_cfg : DictConfig
+            DEHB configuration.
+        task : Task
+            Task to optimize.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None
+        """
         super().__init__(problem, task, loggers)
 
         self.fidelity_enabled = True

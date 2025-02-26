@@ -23,12 +23,13 @@ setup_logging()
 logger = get_logger("Run from DB")
 
 
-def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor):
+def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor, custom_config: dict) -> None:  # noqa: ARG001
     """Run one experiment from the database.
 
     Args:
         parameters (dict): Parameters from the database.
         result_processor (ResultProcessor): Result processor.
+        custom_config (dict): Custom configuration.
     """
     try:
         config = parameters["config"]

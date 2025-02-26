@@ -39,6 +39,22 @@ LOWER_IS_BETTER = {
 
 
 def maybe_invert(value: float, target: str) -> float:
+    """Maybe invert the objective.
+
+    E.g., in carps we minimize, but accuracy needs to be maximized.
+
+    Parameters
+    ----------
+    value : float
+        Value to maybe invert.
+    target : str
+        Target metric.
+
+    Returns:
+    -------
+    float
+        Maybe negated objective function value.
+    """
     sign = 1
     if not LOWER_IS_BETTER[target]:
         sign = -1
@@ -54,7 +70,7 @@ class YahpoProblem(Problem):
         instance: str,
         metric: str | list[str],
         budget_type: str | None = None,
-        lower_is_better: bool = True,
+        lower_is_better: bool = True,  # noqa: FBT001, FBT002
         yahpo_data_path: str | None = None,
         loggers: list[AbstractLogger] | None = None,
     ):
