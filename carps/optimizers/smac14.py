@@ -1,3 +1,5 @@
+"""SMAC3-1.4 Optimizer."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -6,12 +8,12 @@ import numpy as np
 from omegaconf import DictConfig, OmegaConf
 
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.exceptions import AskAndTellNotSupportedError
+from carps.utils.exceptions import AskAndTellNotSupportedError, NotSupportedError
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
-    from smac.facade.smac_ac_facade import SMAC4AC
+    from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
 
     from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
@@ -19,11 +21,9 @@ if TYPE_CHECKING:
     from carps.utils.types import Incumbent
 
 
-class NotSupportedError(Exception):
-    pass
-
-
 class SMAC314Optimizer(Optimizer):
+    """SMAC3-1.4 Optimizer."""
+
     def __init__(
         self,
         problem: Problem,
@@ -31,6 +31,19 @@ class SMAC314Optimizer(Optimizer):
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
+        """Initialize SMAC3-1.4 Optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            Problem to optimize.
+        smac_cfg : DictConfig
+            SMAC configuration.
+        task : Task
+            Task to optimize.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None
+        """
         super().__init__(problem, task, loggers)
 
         self.configspace = self.problem.configspace
@@ -115,11 +128,11 @@ class SMAC314Optimizer(Optimizer):
             Instance of a SMAC facade.
 
         """
-        from smac.facade.smac_ac_facade import SMAC4AC
-        from smac.facade.smac_bb_facade import SMAC4BB
-        from smac.facade.smac_hpo_facade import SMAC4HPO
-        from smac.facade.smac_mf_facade import SMAC4MF
-        from smac.scenario.scenario import Scenario
+        from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
+        from smac.facade.smac_bb_facade import SMAC4BB  # type: ignore
+        from smac.facade.smac_hpo_facade import SMAC4HPO  # type: ignore
+        from smac.facade.smac_mf_facade import SMAC4MF  # type: ignore
+        from smac.scenario.scenario import Scenario  # type: ignore
 
         if self.smac_cfg.scenario.n_workers > 1 and self.smac_cfg.optimization_type != "mf":
             raise NotSupportedError("SMAC 1.4 does not support parallel execution natively.")
@@ -174,7 +187,7 @@ class SMAC314Optimizer(Optimizer):
         if self.smac_cfg.intensifier is None:
             intensifier = None
         elif self.smac_cfg.intensifier == "successive_halving":
-            from smac.intensification.successive_halving import SuccessiveHalving
+            from smac.intensification.successive_halving import SuccessiveHalving  # type: ignore
 
             intensifier = SuccessiveHalving
         else:
@@ -189,9 +202,29 @@ class SMAC314Optimizer(Optimizer):
         )
 
     def ask(self) -> TrialInfo:
+        """Ask the optimizer for a new trial to evaluate.
+
+        Raises:
+        -------
+        AskAndTellNotSupportedError
+
+        Returns:
+        -------
+        TrialInfo
+            trial info (config, seed, instance, budget)
+        """
         raise AskAndTellNotSupportedError
 
-    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:  # noqa: ARG002
+        """Tell the optimizer a new trial.
+
+
+
+        Parameters
+        ----------
+        trial_value : TrialValue
+            trial value (cost, time, ...)
+        """
         raise AskAndTellNotSupportedError
 
     def _run(self) -> Incumbent:
@@ -200,6 +233,17 @@ class SMAC314Optimizer(Optimizer):
         return self.get_current_incumbent()
 
     def get_current_incumbent(self) -> Incumbent:
+        """Return the current incumbent.
+
+        The incumbent is the current best configuration.
+        In the case of multi-objective, there are multiple best configurations, mostly
+        the Pareto front.
+
+        Returns:
+        -------
+        Incumbent
+            Incumbent tuple(s) containing trial info and trial value.
+        """
         trial_info = TrialInfo(config=self.solver.solver.incumbent)
         trial_value = TrialValue(cost=self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))
         return (trial_info, trial_value)

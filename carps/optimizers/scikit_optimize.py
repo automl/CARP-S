@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-import ConfigSpace as CS
-import ConfigSpace.hyperparameters as CSH
+import ConfigSpace as CS  # noqa: N817
+import ConfigSpace.hyperparameters as CSH  # noqa: N812
 import numpy as np
-import skopt
-from skopt.space.space import Categorical, Integer, Real, Space
+import skopt  # type: ignore
+from skopt.space.space import Categorical, Dimension, Integer, Real, Space  # type: ignore
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
@@ -31,29 +31,37 @@ acq_funcs = ["LCB", "EI", "PI", "gp_hedge"]
 acq_optimizers = ["sampling", "lbfgs", "auto"]
 
 
-def CS_to_skopt_space(hp: CSH.Hyperparameter) -> Space:
-    """Convert ConfigSpace hyperparameter to skopt Space."""
+def configspace_hp_to_skoptspace_hp(hp: CSH.Hyperparameter) -> Dimension:  # noqa: PLR0911
+    """Convert ConfigSpace hyperparameter to skopt Space.
+
+    Parameters
+    ----------
+    hp : CSH.Hyperparameter
+        ConfigSpace hyperparameter.
+
+    Returns:
+    -------
+    Dimension
+        Skopt hyperparameter.
+    """
     if isinstance(hp, CSH.FloatHyperparameter):
         if hp.log:
             return Real(hp.lower, hp.upper, name=hp.name, prior="log-uniform")
-        else:
-            return Real(hp.lower, hp.upper, name=hp.name)
-    elif isinstance(hp, CSH.IntegerHyperparameter):
+        return Real(hp.lower, hp.upper, name=hp.name)
+    if isinstance(hp, CSH.IntegerHyperparameter):
         if hp.log:
             return Integer(hp.lower, hp.upper, name=hp.name, prior="log-uniform")
-        else:
-            return Integer(hp.lower, hp.upper, name=hp.name)
-    elif isinstance(hp, CSH.CategoricalHyperparameter):
+        return Integer(hp.lower, hp.upper, name=hp.name)
+    if isinstance(hp, CSH.CategoricalHyperparameter):
         weights = None
         if hp.weights is not None:
             weights = np.asarray(hp.weights) / np.sum(hp.weights)
         return Categorical(hp.choices, name=hp.name, prior=weights)
-    elif isinstance(hp, CSH.OrdinalHyperparameter):
+    if isinstance(hp, CSH.OrdinalHyperparameter):
         return Categorical(list(hp.sequence), name=hp.name)
-    elif isinstance(hp, CSH.Constant):
+    if isinstance(hp, CSH.Constant):
         return Categorical([hp.value], name=hp.name)
-    else:
-        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
+    raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class SkoptOptimizer(Optimizer):
@@ -96,7 +104,7 @@ class SkoptOptimizer(Optimizer):
         """
         space = []
         for hp in configspace.get_hyperparameters():
-            space.append(CS_to_skopt_space(hp))
+            space.append(configspace_hp_to_skoptspace_hp(hp))
         return space
 
     def convert_to_trial(  # type: ignore[override]

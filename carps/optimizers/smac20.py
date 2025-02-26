@@ -1,3 +1,5 @@
+"""SMAC3 Optimizer."""
+
 from __future__ import annotations
 
 from dataclasses import asdict
@@ -34,12 +36,33 @@ setup_logging()
 
 
 def maybe_inst_add_scenario(smac_kwargs: dict[str, Any], key: str, scenario: Scenario) -> dict[str, Any]:
+    """If key is in smac_kwargs, instantiate it with the scenario.
+
+    smac_kwargs can contain nodes that are partially instantiated classes, where only
+    the scenario is missing.
+
+    Parameters
+    ----------
+    smac_kwargs : dict[str, Any]
+        SMAC kwargs.
+    key : str
+        Key to check.
+    scenario : Scenario
+        SMAC Scenario.
+
+    Returns:
+    -------
+    dict[str, Any]
+        SMAC kwargs.
+    """
     if key in smac_kwargs:
         smac_kwargs[key] = smac_kwargs[key](scenario=scenario)
     return smac_kwargs
 
 
 class SMAC3Optimizer(Optimizer):
+    """SMAC3 Optimizer."""
+
     def __init__(
         self,
         problem: Problem,
@@ -47,6 +70,22 @@ class SMAC3Optimizer(Optimizer):
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
+        """Initialize SMAC3 Optimizer.
+
+        See the configuration files for examples of setting up SMAC with different facades and
+        of the structure of smac_cfg.
+
+        Parameters
+        ----------
+        problem : Problem
+            Problem to optimize.
+        smac_cfg : DictConfig
+            SMAC configuration.
+        task : Task
+            Task to optimize.
+        loggers : list[AbstractLogger], optional
+            Loggers to log information, by default None
+        """
         super().__init__(problem, task, loggers)
 
         self.configspace = self.problem.configspace
@@ -177,24 +216,27 @@ class SMAC3Optimizer(Optimizer):
         # lists.
         if "callbacks" not in smac_kwargs:
             smac_kwargs["callbacks"] = []
-        elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == dict:
+        elif "callbacks" in smac_kwargs and isinstance(smac_kwargs["callbacks"], dict):
             smac_kwargs["callbacks"] = list(smac_kwargs["callbacks"].values())
-        elif "callbacks" in smac_kwargs and type(smac_kwargs["callbacks"]) == list:
+        elif "callbacks" in smac_kwargs and isinstance(smac_kwargs["callbacks"], list):
             pass
 
         # If we have a custom intensifier we need to instantiate ourselves
         # because the helper methods in the facades expect a scenario.
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "intensifier", scenario)
 
-        if "acquisition_function" in smac_kwargs and "acquisition_maximizer" in smac_kwargs:
-            if "acquisition_maximizer" in smac_kwargs:
-                smac_kwargs["acquisition_maximizer"] = smac_kwargs["acquisition_maximizer"](
-                    configspace=self.configspace, acquisition_function=smac_kwargs["acquisition_function"]
-                )
-                if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(
-                    smac_kwargs["acquisition_maximizer"].selector, "expl2callback"
-                ):
-                    smac_kwargs["callbacks"].append(smac_kwargs["acquisition_maximizer"].selector.expl2callback)
+        if (
+            "acquisition_function" in smac_kwargs
+            and "acquisition_maximizer" in smac_kwargs
+            and "acquisition_maximizer" in smac_kwargs
+        ):
+            smac_kwargs["acquisition_maximizer"] = smac_kwargs["acquisition_maximizer"](
+                configspace=self.configspace, acquisition_function=smac_kwargs["acquisition_function"]
+            )
+            if hasattr(smac_kwargs["acquisition_maximizer"], "selector") and hasattr(
+                smac_kwargs["acquisition_maximizer"].selector, "expl2callback"
+            ):
+                smac_kwargs["callbacks"].append(smac_kwargs["acquisition_maximizer"].selector.expl2callback)
 
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "config_selector", scenario)
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "initial_design", scenario)
@@ -273,6 +315,17 @@ class SMAC3Optimizer(Optimizer):
             callback.on_iteration_end(self.solver.optimizer)
 
     def get_current_incumbent(self) -> Incumbent:
+        """Return the current incumbent.
+
+        The incumbent is the current best configuration.
+        In the case of multi-objective, there are multiple best configurations, mostly
+        the Pareto front.
+
+        Returns:
+        -------
+        Incumbent
+            Incumbent tuple(s) containing trial info and trial value.
+        """
         if self.solver.scenario.count_objectives() == 1:
             inc = self.solver.intensifier.get_incumbent()
             cost = self.solver.runhistory.get_cost(config=inc)
@@ -280,10 +333,13 @@ class SMAC3Optimizer(Optimizer):
             trial_value = TrialValue(cost=cost)
             incumbent_tuple = (trial_info, trial_value)
         else:
-            if (mo := self.solver._runhistory_encoder.multi_objective_algorithm) is not None:
-                if isinstance(mo, ParEGO) and mo._theta is None:
-                    # Initialize weights of ParEGO
-                    mo.update_on_iteration_start()
+            if (
+                (mo := self.solver._runhistory_encoder.multi_objective_algorithm) is not None
+                and isinstance(mo, ParEGO)
+                and mo._theta is None
+            ):
+                # Initialize weights of ParEGO
+                mo.update_on_iteration_start()
             incs = self.solver.intensifier.get_incumbents()
             tis = [
                 self.solver.runhistory.get_trials(c)[0] for c in incs

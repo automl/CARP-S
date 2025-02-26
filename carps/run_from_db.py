@@ -1,3 +1,5 @@
+"""Run the optimization from the database."""
+
 from __future__ import annotations
 
 import json
@@ -21,7 +23,13 @@ setup_logging()
 logger = get_logger("Run from DB")
 
 
-def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor, custom_config: dict):
+def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor):
+    """Run one experiment from the database.
+
+    Args:
+        parameters (dict): Parameters from the database.
+        result_processor (ResultProcessor): Result processor.
+    """
     try:
         config = parameters["config"]
         cfg_dict = json.loads(config)
@@ -50,6 +58,15 @@ def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor
 def main(
     pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | None = None
 ) -> None:
+    """Run the optimization from the database.
+
+    Connect to the database, pull one experiment and run this experiment.
+
+    Args:
+        pyexperimenter_configuration_file_path (str, optional): Path to the py_experimenter configuration file.
+            Defaults to None.
+        database_credential_file_path (str, optional): Path to the database credential file. Defaults to None.
+    """
     slurm_job_id = getattr(os.environ, "SLURM_JOB_ID", None)
 
     experiment_configuration_file_path = (

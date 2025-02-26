@@ -1,3 +1,5 @@
+"""Reset experiments that have errored out in the database."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,6 +13,13 @@ from py_experimenter.experimenter import PyExperimenter
 def main(
     pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | None = None
 ) -> None:
+    """Reset experiments that have errored out in the database.
+
+    Args:
+        pyexperimenter_configuration_file_path (str, optional): Path to the py_experimenter configuration file.
+            Defaults to None.
+        database_credential_file_path (str, optional): Path to the database credential file. Defaults to None.
+    """
     experiment_configuration_file_path = (
         pyexperimenter_configuration_file_path or Path(__file__).parent.parent.parent / "container/py_experimenter.yaml"
     )

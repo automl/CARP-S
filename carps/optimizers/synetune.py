@@ -1,3 +1,5 @@
+"""SyneTune Optimizer."""
+
 from __future__ import annotations
 
 import copy
@@ -17,12 +19,12 @@ from ConfigSpace.hyperparameters import (
     IntegerHyperparameter,
     OrdinalHyperparameter,
 )
-from syne_tune.backend.trial_status import (
+from syne_tune.backend.trial_status import (  # type: ignore
     Status,
     Trial as SyneTrial,
     TrialResult,
 )
-from syne_tune.config_space import (
+from syne_tune.config_space import (  # type: ignore
     choice,
     lograndint,
     loguniform,
@@ -30,7 +32,7 @@ from syne_tune.config_space import (
     randint,
     uniform,
 )
-from syne_tune.optimizer.baselines import (
+from syne_tune.optimizer.baselines import (  # type: ignore
     ASHA,
     BOHB,
     BORE,
@@ -50,7 +52,7 @@ from carps.utils.pareto_front import pareto
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
-    from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler
+    from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler  # type: ignore
 
     from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
@@ -79,28 +81,35 @@ mf_optimizer_dicts = {
 }
 
 
-def configspaceHP2syneTuneHP(hp: Hyperparameter) -> Callable:
+def configspace_hp_to_synetune_hp(hp: Hyperparameter) -> Callable:  # noqa: PLR0911
+    """Convert ConfigSpace hyperparameter to SyneTune hyperparameter.
+
+    Args:
+        hp (Hyperparameter): ConfigSpace hyperparameter.
+
+    Returns:
+        Callable: SyneTune hyperparameter.
+    """
     if isinstance(hp, IntegerHyperparameter):
         if hp.log:
             return lograndint(hp.lower, hp.upper)
-        else:
-            return randint(hp.lower, hp.upper)
-    elif isinstance(hp, FloatHyperparameter):
+        return randint(hp.lower, hp.upper)
+    if isinstance(hp, FloatHyperparameter):
         if hp.log:
             return loguniform(hp.lower, hp.upper)
-        else:
-            return uniform(hp.lower, hp.upper)
-    elif isinstance(hp, CategoricalHyperparameter):
+        return uniform(hp.lower, hp.upper)
+    if isinstance(hp, CategoricalHyperparameter):
         return choice(hp.choices)
-    elif isinstance(hp, OrdinalHyperparameter):
+    if isinstance(hp, OrdinalHyperparameter):
         return ordinal(hp.sequence)
-    elif isinstance(hp, Constant):
+    if isinstance(hp, Constant):
         return choice([hp.value])
-    else:
-        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
+    raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class SynetuneOptimizer(Optimizer):
+    """SyneTune Optimizer."""
+
     def __init__(
         self,
         problem: Problem,
@@ -110,6 +119,24 @@ class SynetuneOptimizer(Optimizer):
         loggers: list[AbstractLogger] | None = None,
         conversion_factor: int = 1000,
     ) -> None:
+        """Initialize SyneTune Optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            Problem to optimize.
+        optimizer_name : str
+            Name of the optimizer.
+        task : Task
+            Task to optimize.
+        optimizer_kwargs : dict, optional
+            Optimizer kwargs, by default None
+        loggers : list[AbstractLogger], optional
+            Loggers, by default None
+        conversion_factor : int, optional
+            Conversion factor, by default 1000. Some fidelity types are a fraction of the max budget but need to be
+            converted to integer for synetune.
+        """
         super().__init__(problem, task, loggers)
         self.fidelity_enabled = False
         self.max_budget = task.max_budget
@@ -158,7 +185,7 @@ class SynetuneOptimizer(Optimizer):
         """
         configspace_st = {}
         for k, v in configspace.items():
-            configspace_st[k] = configspaceHP2syneTuneHP(v)
+            configspace_st[k] = configspace_hp_to_synetune_hp(v)
         if self.fidelity_enabled:
             configspace_st[self.fidelity_type] = (
                 self.max_budget if not self.convert else int(self.conversion_factor * self.max_budget)
@@ -332,7 +359,8 @@ class SynetuneOptimizer(Optimizer):
 
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
             _optimizer_kwargs["resource_attr"] = self.fidelity_type
-            # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit for synetune
+            # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit
+            # for synetune
 
             # for floating point resources like trainsize, we need to convert them to integer for synetune
             if "grace_period" in self.optimizer_kwargs and isinstance(self.optimizer_kwargs["grace_period"], float):
@@ -359,14 +387,19 @@ class SynetuneOptimizer(Optimizer):
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
 
-        if self.optimizer_name in ["SyncMOBSTER"]:
-            # del self.optimizer_kwargs["metric"]
-            if "time_attr" in self.optimizer_kwargs:
-                del self.optimizer_kwargs["time_attr"]
+        if self.optimizer_name in ["SyncMOBSTER"] and "time_attr" in self.optimizer_kwargs:
+            del self.optimizer_kwargs["time_attr"]
 
         return optimizers_dict[self.optimizer_name](**self.optimizer_kwargs)
 
     def get_current_incumbent(self) -> Incumbent:
+        """Return the current incumbent.
+
+        Returns:
+        -------
+        Incumbent
+            Incumbent tuple(s) containing trial info and trial value.
+        """
         if self.task.n_objectives == 1:
             trial_result = self.best_trial(metric=self.task.objectives[0])
             trial_info = self.convert_to_trial(trial=trial_result)
