@@ -178,7 +178,7 @@ class Task:
 
     # Multi-Objective
     n_objectives: int = 1
-    objectives: tuple[str] = ("quality")
+    objectives: tuple[str] = ("quality",)
 
     # Multi-Fidelity
     is_multifidelity: bool | None = None
