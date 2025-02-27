@@ -3,6 +3,7 @@
 # run this :)
 # Run from root of repo
 CONDA_ENV_NAME=$1
+CARPS_ROOT=$CARPS_ROOT
 if [ -z "$CONDA_ENV_NAME" ]
 then
     CONDA_RUN_COMMAND=
@@ -12,10 +13,10 @@ fi
 $CONDA_RUN_COMMAND pip install yahpo-gym
 git clone https://github.com/benjamc/yahpo_gym.git lib/yahpo_gym
 $CONDA_RUN_COMMAND pip install -e lib/yahpo_gym/yahpo_gym
-cd carps
+cd $CARPS_ROOT/carps
 mkdir benchmark_data
 cd benchmark_data
 git clone https://github.com/slds-lmu/yahpo_data.git
 cd ../..
-$CONDA_RUN_COMMAND python scripts/patch_yahpo_configspace.py
+$CONDA_RUN_COMMAND python $CARPS_ROOT/scripts/patch_yahpo_configspace.py
 $CONDA_RUN_COMMAND pip install ConfigSpace --upgrade
