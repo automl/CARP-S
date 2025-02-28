@@ -66,7 +66,7 @@ def main(cfg: DictConfig) -> None:
             "config": cfg_str,
             "config_hash": cfg_hash,
             "benchmark_id": cfg_dict["benchmark_id"],
-            "problem_id": cfg_dict["problem_id"],
+            "task_id": cfg_dict["task_id"],
             "optimizer_id": cfg_dict["optimizer_id"],
             "optimizer_container_id": cfg_dict["optimizer_container_id"],
             "seed": cfg_dict["seed"],

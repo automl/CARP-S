@@ -11,7 +11,7 @@ from omegaconf import OmegaConf
     ("path", "key"),
     [
         ("carps/configs/optimizer", "optimizer_id"),
-        ("carps/configs/problem", "problem_id"),
+        ("carps/configs/problem", "task_id"),
     ],
 )
 def test_unique_ids(path, key):

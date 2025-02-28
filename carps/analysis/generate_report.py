@@ -130,7 +130,7 @@ def plot_ranks_over_time(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "rank_over_time",
                 "plot_type_pretty": "Rank over Time",
@@ -190,7 +190,7 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str | Path = "figures", replot: bool
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "ecdf",
                 "plot_type_pretty": "Proportion of Incumbent Cost",
@@ -248,7 +248,7 @@ def plot_critical_difference(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": fig_filename,
                 "plot_type": "critical_difference",
                 "plot_type_pretty": "Critical Difference",
@@ -307,7 +307,7 @@ def plot_performance_per_problem(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "performance_per_problem",
                 "plot_type_pretty": "Performance per Task",
@@ -399,7 +399,7 @@ def plot_boxplot_violinplot(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename_boxplot,
                 "plot_type": "finalperformance_boxplot",
                 "plot_type_pretty": "Final Performance (Normalized, Boxplot)",
@@ -412,7 +412,7 @@ def plot_boxplot_violinplot(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename_violinplot,
                 "plot_type": "finalperformance_violinplot",
                 "plot_type_pretty": "Final Performance (Normalized, Violinplot)",
@@ -483,7 +483,7 @@ def plot_finalperfbarplot(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "finalperformance_barplot",
                 "plot_type_pretty": "Final Performance (Normalized, Barplot)",
@@ -547,7 +547,7 @@ def plot_spearman_rank_correlation(
             {
                 "scenario": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "spearman_rank_correlation",
                 "plot_type_pretty": "Spearman Rank Correlation",
@@ -606,7 +606,7 @@ def load_results(result_path: str) -> pd.DataFrame:
 
     df = normalize_logs(df)  # noqa: PD901
     if "set" not in df.columns:
-        df["set"] = df["problem_id"].apply(lambda x: "dev" if "dev" in x else "test")
+        df["set"] = df["task_id"].apply(lambda x: "dev" if "dev" in x else "test")
     return df
 
 

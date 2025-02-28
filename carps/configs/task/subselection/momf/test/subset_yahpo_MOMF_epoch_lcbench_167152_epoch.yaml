@@ -2,7 +2,7 @@
 scenario: momf
 subset_id: test
 benchmark_id: YAHPO
-problem_id: momf/9/test/yahpo/MOMF/epoch/lcbench/167152/epoch
+task_id: momf/9/test/yahpo/MOMF/epoch/lcbench/167152/epoch
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: lcbench

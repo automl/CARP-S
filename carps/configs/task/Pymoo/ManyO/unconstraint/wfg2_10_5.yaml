@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: Pymoo
-problem_id: Pymoo/ManyO/unconstraint/wfg2_10_5
+task_id: Pymoo/ManyO/unconstraint/wfg2_10_5
 problem:
   _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
   problem_name: wfg2

@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: BBOB
-problem_id: bbob/noiseless/32/22/2
+task_id: bbob/noiseless/32/22/2
 problem:
   _target_: carps.benchmarks.bbob.BBOBObjectiveFunction
   dimension: 32

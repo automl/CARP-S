@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: MFPBench
-problem_id: mfpbench/SO/pd1/lm1b_transformer_2048
+task_id: mfpbench/SO/pd1/lm1b_transformer_2048
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchObjectiveFunction
   benchmark_name: pd1

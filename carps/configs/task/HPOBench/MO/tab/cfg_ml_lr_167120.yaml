@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: hpobench/MO/tab/ml/lr/167120
+task_id: hpobench/MO/tab/ml/lr/167120
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   model: lr

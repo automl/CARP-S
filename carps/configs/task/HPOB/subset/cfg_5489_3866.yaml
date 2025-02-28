@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOB
-problem_id: hpob/subset/5489/3866
+task_id: hpob/subset/5489/3866
 problem:
   _target_: carps.benchmarks.hpo_b.HPOBObjectiveFunction
   model_id: '5489'

@@ -2,7 +2,7 @@
 scenario: multifidelity
 subset_id: dev
 benchmark_id: YAHPO
-problem_id: multifidelity/20/dev/yahpo/rbv2_super/40984/repl
+task_id: multifidelity/20/dev/yahpo/rbv2_super/40984/repl
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_super

@@ -83,6 +83,6 @@ def filter_only_final_performance(
     if not soft:
         df = df[np.isclose(df[budget_var], max_budget)]  # noqa: PD901
     else:
-        df = df[df.groupby(["optimizer_id", "problem_id", "seed"])[budget_var].transform(lambda x: x == x.max())]  # noqa: PD901
+        df = df[df.groupby(["optimizer_id", "task_id", "seed"])[budget_var].transform(lambda x: x == x.max())]  # noqa: PD901
         df = df[df[budget_var] <= max_budget]  # noqa: PD901
     return df

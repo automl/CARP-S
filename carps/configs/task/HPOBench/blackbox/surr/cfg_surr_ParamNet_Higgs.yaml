@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: hpobench/bb/surr/ParamNet/Higgs
+task_id: hpobench/bb/surr/ParamNet/Higgs
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   problem:

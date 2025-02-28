@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: BBOBVizier
-problem_id: bbobvizier/20/20/0
+task_id: bbobvizier/20/20/0
 problem:
   _target_: carps.benchmarks.bbob.BBOBObjectiveFunction
   dimension: 20

@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: Pymoo
-problem_id: Pymoo/MO/unconstraint/kursawe
+task_id: Pymoo/MO/unconstraint/kursawe
 problem:
   _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
   problem_name: kursawe

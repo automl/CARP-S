@@ -2,7 +2,7 @@
 scenario: multiobjective
 subset_id: dev
 benchmark_id: YAHPO
-problem_id: multiobjective/10/dev/yahpo/mo/rbv2_rpart/1476/None
+task_id: multiobjective/10/dev/yahpo/mo/rbv2_rpart/1476/None
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_rpart

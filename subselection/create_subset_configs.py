@@ -14,22 +14,22 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
 
     def write_subsets(subset_fn: str, identifier: str):
         subset = pd.read_csv(subset_fn)
-        subset["problem_id"] = subset["problem_id"].apply(lambda x: "bbob/" + x if x.startswith("noiseless") else x)
+        subset["task_id"] = subset["task_id"].apply(lambda x: "bbob/" + x if x.startswith("noiseless") else x)
         subset_size = len(subset)
-        problem_ids = subset["problem_id"].to_list()
+        task_ids = subset["task_id"].to_list()
 
         index_fn = config_target_path.parent.parent / "index.csv"
         if not index_fn.is_file():
             raise ValueError(f"Could not find {index_fn}. ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
         problem_index = pd.read_csv(index_fn)
-        ids = [np.where(problem_index["problem_id"]==pid)[0][0] for pid in problem_ids]
+        ids = [np.where(problem_index["task_id"]==pid)[0][0] for pid in task_ids]
         config_fns = problem_index["config_fn"][ids].to_list()
 
         for config_fn in config_fns:
             cfg = OmegaConf.load(config_fn)
-            new_name = f"subset_{cfg.problem_id}.yaml".replace("/", "_")
-            new_problem_id = f"{scenario}/{subset_size}/{identifier}/{cfg.problem_id}"
-            cfg.problem_id = new_problem_id
+            new_name = f"subset_{cfg.task_id}.yaml".replace("/", "_")
+            new_task_id = f"{scenario}/{subset_size}/{identifier}/{cfg.task_id}"
+            cfg.task_id = new_task_id
             new_fn = config_target_path / identifier / new_name
             new_fn.parent.mkdir(exist_ok=True, parents=True)
             yaml_str = OmegaConf.to_yaml(cfg)

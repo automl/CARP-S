@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: YAHPO
-problem_id: yahpo/fcnet/fcnet_naval_propulsion/epoch
+task_id: yahpo/fcnet/fcnet_naval_propulsion/epoch
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: fcnet

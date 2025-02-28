@@ -13,7 +13,7 @@ from pymoo.indicators.hv import HV
 
 from carps.analysis.gather_data import convert_mixed_types_to_str
 
-run_id = ["scenario", "benchmark_id", "problem_id", "optimizer_id", "seed"]
+run_id = ["scenario", "benchmark_id", "task_id", "optimizer_id", "seed"]
 
 
 def gather_trajectory(x: pd.DataFrame) -> pd.DataFrame:
@@ -156,9 +156,7 @@ def calculate_hypervolume(rundir: str) -> None:
     if df["scenario"].nunique() > 2 or df["scenario"].unique()[0] != "multi-objective":  # noqa: PLR2004
         raise ValueError(f"Oops, found some non multi-objective logs in {fn}. This might not work...")
     trajectory_df = df.groupby(by=run_id).apply(gather_trajectory).reset_index(drop=True)
-    trajectory_df = (
-        trajectory_df.groupby(by=["scenario", "problem_id"]).apply(add_reference_point).reset_index(drop=True)
-    )
+    trajectory_df = trajectory_df.groupby(by=["scenario", "task_id"]).apply(add_reference_point).reset_index(drop=True)
     trajectory_df = trajectory_df.groupby(by=[*run_id, "n_trials"]).apply(calc_hv).reset_index(drop=True)
     trajectory_df.to_csv(Path(rundir) / "trajectory.csv")
     trajectory_df = convert_mixed_types_to_str(trajectory_df)

@@ -18,12 +18,12 @@ config_folder_problem = config_folder / "problem"
 config_folder_optimizer = config_folder / "optimizer"
 
 
-def find_override(problem_id: str | None = None, optimizer_id: str | None = None) -> str | None:
+def find_override(task_id: str | None = None, optimizer_id: str | None = None) -> str | None:
     """Find the override string for a problem or optimizer based on its ID.
 
     Parameters
     ----------
-    problem_id : str, optional
+    task_id : str, optional
         The ID of the problem to find the override for.
     optimizer_id : str, optional
         The ID of the optimizer to find the override for.
@@ -33,16 +33,16 @@ def find_override(problem_id: str | None = None, optimizer_id: str | None = None
     str
         The override string for the problem or optimizer or None if nothing is found.
     """
-    if problem_id is not None:
-        key = "problem_id"
+    if task_id is not None:
+        key = "task_id"
         path = config_folder_problem
-        to_find = problem_id
+        to_find = task_id
     elif optimizer_id is not None:
         key = "optimizer_id"
         path = config_folder_optimizer
         to_find = optimizer_id
     else:
-        raise ValueError("Please specify either `problem_id` or `optimizer_id`.")
+        raise ValueError("Please specify either `task_id` or `optimizer_id`.")
 
     index_fn = path / "index.csv"
     if not index_fn.is_file():

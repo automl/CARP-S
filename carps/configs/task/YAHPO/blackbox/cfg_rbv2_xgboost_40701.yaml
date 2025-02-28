@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: YAHPO
-problem_id: yahpo/rbv2_xgboost/40701/None
+task_id: yahpo/rbv2_xgboost/40701/None
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_xgboost

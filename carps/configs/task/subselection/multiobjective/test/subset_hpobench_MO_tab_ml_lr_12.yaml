@@ -2,7 +2,7 @@
 scenario: multiobjective
 subset_id: test
 benchmark_id: HPOBench
-problem_id: multiobjective/10/test/hpobench/MO/tab/ml/lr/12
+task_id: multiobjective/10/test/hpobench/MO/tab/ml/lr/12
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   model: lr

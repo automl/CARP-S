@@ -2,7 +2,7 @@
 scenario: momf
 subset_id: dev
 benchmark_id: YAHPO
-problem_id: momf/9/dev/yahpo/MOMF/trainsize/rbv2_ranger/6/trainsize
+task_id: momf/9/dev/yahpo/MOMF/trainsize/rbv2_ranger/6/trainsize
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_ranger

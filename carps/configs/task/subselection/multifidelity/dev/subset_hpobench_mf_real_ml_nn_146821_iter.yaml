@@ -2,7 +2,7 @@
 scenario: multifidelity
 subset_id: dev
 benchmark_id: HPOBench
-problem_id: multifidelity/20/dev/hpobench/mf/real/ml/nn/146821/iter
+task_id: multifidelity/20/dev/hpobench/mf/real/ml/nn/146821/iter
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   model: nn

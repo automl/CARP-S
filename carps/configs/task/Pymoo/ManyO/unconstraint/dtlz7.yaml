@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: Pymoo
-problem_id: Pymoo/ManyO/unconstraint/dtlz7
+task_id: Pymoo/ManyO/unconstraint/dtlz7
 problem:
   _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
   problem_name: dtlz7

@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: hpobench/mf/real/ml/rf/146212/n_estimators
+task_id: hpobench/mf/real/ml/rf/146212/n_estimators
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   model: rf

@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: MFPBench
-problem_id: mfpbench/SO/mfh/mfh6_moderate
+task_id: mfpbench/SO/mfh/mfh6_moderate
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchObjectiveFunction
   benchmark_name: mfh

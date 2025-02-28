@@ -40,7 +40,7 @@ def get_fullset(
     perf_col = "trial_value__cost_inc_norm" if normalize_performance else "trial_value__cost_inc"
 
     df_crit = get_df_crit(df, perf_col=perf_col)
-    # index: problem_id, columns: optimizer_ids
+    # index: task_id, columns: optimizer_ids
 
     filename = Path(output_dir) / "df_crit.csv"
     filename.parent.mkdir(exist_ok=True, parents=True)

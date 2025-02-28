@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: Pymoo
-problem_id: Pymoo/SO/unconstraint/zakharov
+task_id: Pymoo/SO/unconstraint/zakharov
 problem:
   _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
   problem_name: zakharov

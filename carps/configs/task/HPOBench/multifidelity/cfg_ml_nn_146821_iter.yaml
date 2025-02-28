@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: HPOBench
-problem_id: hpobench/mf/real/ml/nn/146821/iter
+task_id: hpobench/mf/real/ml/nn/146821/iter
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   model: nn

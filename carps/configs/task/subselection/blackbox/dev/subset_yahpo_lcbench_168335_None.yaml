@@ -2,7 +2,7 @@
 scenario: blackbox
 subset_id: dev
 benchmark_id: YAHPO
-problem_id: blackbox/20/dev/yahpo/lcbench/168335/None
+task_id: blackbox/20/dev/yahpo/lcbench/168335/None
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: lcbench

@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: YAHPO
-problem_id: yahpo/iaml_super/41146/trainsize
+task_id: yahpo/iaml_super/41146/trainsize
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: iaml_super

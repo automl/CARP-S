@@ -2,7 +2,7 @@
 scenario: blackbox
 subset_id: test
 benchmark_id: YAHPO
-problem_id: blackbox/20/test/yahpo/rbv2_rpart/4534/None
+task_id: blackbox/20/test/yahpo/rbv2_rpart/4534/None
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_rpart

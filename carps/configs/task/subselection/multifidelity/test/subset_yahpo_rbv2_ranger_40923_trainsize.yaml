@@ -2,7 +2,7 @@
 scenario: multifidelity
 subset_id: test
 benchmark_id: YAHPO
-problem_id: multifidelity/20/test/yahpo/rbv2_ranger/40923/trainsize
+task_id: multifidelity/20/test/yahpo/rbv2_ranger/40923/trainsize
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_ranger

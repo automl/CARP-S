@@ -14,7 +14,7 @@ fullset_fn = rundir / "df_crit.csv"
 
 print(fullset_fn)
 
-fullset = pd.read_csv(fullset_fn, index_col="problem_id")
+fullset = pd.read_csv(fullset_fn, index_col="task_id")
 
 points = fullset.values
 n_points, dimension = points.shape

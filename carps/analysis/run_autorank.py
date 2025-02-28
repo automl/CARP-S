@@ -132,9 +132,9 @@ def get_df_crit(
     df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)  # noqa: PD901
 
     # Work on mean of different seeds
-    df_crit = df.groupby(["optimizer_id", "problem_id"])[perf_col].apply(np.nanmean).reset_index()
+    df_crit = df.groupby(["optimizer_id", "task_id"])[perf_col].apply(np.nanmean).reset_index()
 
-    df_crit = df_crit.pivot_table(index="problem_id", columns="optimizer_id", values=perf_col)
+    df_crit = df_crit.pivot_table(index="task_id", columns="optimizer_id", values=perf_col)
 
     if nan_handling == "remove":
         nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])

@@ -2,7 +2,7 @@
 scenario: blackbox
 subset_id: dev
 benchmark_id: YAHPO
-problem_id: blackbox/20/dev/yahpo/rbv2_xgboost/23512/None
+task_id: blackbox/20/dev/yahpo/rbv2_xgboost/23512/None
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: rbv2_xgboost

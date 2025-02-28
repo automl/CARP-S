@@ -14,7 +14,7 @@ PY_EXPERIMENTER:
           type: VARCHAR(64)
         benchmark_id:
           type: VARCHAR(50)
-        problem_id:
+        task_id:
           type: VARCHAR(50)
         optimizer_id:
           type: VARCHAR(50)

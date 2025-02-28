@@ -46,7 +46,7 @@ def get_experiment_status(path: Path) -> dict:
     return {
         "status": status.name,
         "benchmark_id": cfg.benchmark_id,
-        "problem_id": cfg.problem_id,
+        "task_id": cfg.task_id,
         "optimizer_id": cfg.optimizer_id,
         "seed": cfg.seed,
         "overrides": " ".join(overrides),
@@ -84,7 +84,7 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     data = missing_data
     missing = data[data["status"].isin([runstatus.name])]
     runcommands = []
-    for _gid, gdf in missing.groupby(by=["optimizer_id", "problem_id"]):
+    for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
         seeds = list(gdf["seed"].unique())
         seeds.sort()
         overrides = gdf["overrides"].iloc[0].split(" ")

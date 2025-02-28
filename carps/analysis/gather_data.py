@@ -323,7 +323,7 @@ def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.Data
             scenario = "blackbox"
         else:
             print(
-                x["problem_id"],
+                x["task_id"],
                 x["optimizer_id"],
                 x["seed"],
                 x[task_prefix + "is_multifidelity"],
@@ -351,25 +351,25 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
         raise ValueError("ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
     problem_index = pd.read_csv(index_fn)
 
-    def load_task_cfg(problem_id: str) -> DictConfig:
-        subset = problem_index["config_fn"][problem_index["problem_id"] == problem_id]
+    def load_task_cfg(task_id: str) -> DictConfig:
+        subset = problem_index["config_fn"][problem_index["task_id"] == task_id]
         if len(subset) == 0:
             raise ValueError(
-                f"Can't find config_fn for {problem_id}. Maybe the index is old. Run "
+                f"Can't find config_fn for {task_id}. Maybe the index is old. Run "
                 "`python -m carps.utils.index_configs` to refresh."
             )
         config_fn = subset.iloc[0]
         if not Path(config_fn).is_file():
             raise ValueError(
-                f"Can't find config_fn for {problem_id}. Maybe the index is old. Run "
+                f"Can't find config_fn for {task_id}. Maybe the index is old. Run "
                 "`python -m carps.utils.index_configs` to refresh."
             )
         cfg = OmegaConf.load(config_fn)
         return cfg.task
 
     new_logs = []
-    for gid, gdf in logs.groupby(by="problem_id"):
-        task_cfg = load_task_cfg(problem_id=gid)
+    for gid, gdf in logs.groupby(by="task_id"):
+        task_cfg = load_task_cfg(task_id=gid)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         if overwrite:
             task_dict = asdict(Task(**task_cfg))
@@ -509,7 +509,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     # logs= logs.drop(columns=["config"])
     # Filter MO costs
     logger.debug("Remove DUMMY logs...")
-    logs = logs[~logs["problem_id"].str.startswith("DUMMY")]
+    logs = logs[~logs["task_id"].str.startswith("DUMMY")]
     logs = logs[~logs["benchmark_id"].str.startswith("DUMMY")]
     logs = logs[~logs["optimizer_id"].str.startswith("DUMMY")]
 
@@ -517,9 +517,9 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
     logs["trial_value__cost"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
     logger.debug("Determine incumbent cost...")
-    logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
-        "trial_value__cost"
-    ].transform("cummin")
+    logs["trial_value__cost_inc"] = logs.groupby(by=["task_id", "optimizer_id", "seed"])["trial_value__cost"].transform(
+        "cummin"
+    )
 
     logger.debug("Maybe add task info...")
     logs = maybe_postadd_task(logs)
@@ -548,7 +548,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     # Add time
     logger.debug("Calculate the elapsed time...")
     logs = (
-        logs.groupby(by=["problem_id", "optimizer_id", "seed"])
+        logs.groupby(by=["task_id", "optimizer_id", "seed"])
         .apply(calc_time, include_groups=False)
         .reset_index(drop=False)
     )
@@ -568,7 +568,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     """
     logger.info("Start normalization...")
     logger.info("Normalize n_trials...")
-    logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
+    logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
     ids_mo = logs["scenario"] == "multi-objective"
@@ -577,29 +577,29 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
         logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
-    logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
+    logs["trial_value__cost_norm"] = logs.groupby("task_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
 
     # logs["trial_value__cost_log"] = logs["trial_value__cost"].apply(lambda x: np.log(x + 1e-10))
-    logs["trial_value__cost_log"] = logs.groupby(by=["problem_id"])["trial_value__cost"].transform(
+    logs["trial_value__cost_log"] = logs.groupby(by=["task_id"])["trial_value__cost"].transform(
         lambda x: np.log(x - x.min() + 1e-10)
     )
-    logs["trial_value__cost_inc_log"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+    logs["trial_value__cost_inc_log"] = logs.groupby(by=["task_id", "optimizer_id", "seed"])[
         "trial_value__cost_log"
     ].transform("cummin")
-    logs["trial_value__cost_log_norm"] = logs.groupby("problem_id")["trial_value__cost_log"].transform(normalize)
-    logs["trial_value__cost_inc_log_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+    logs["trial_value__cost_log_norm"] = logs.groupby("task_id")["trial_value__cost_log"].transform(normalize)
+    logs["trial_value__cost_inc_log_norm"] = logs.groupby(by=["task_id", "optimizer_id", "seed"])[
         "trial_value__cost_log_norm"
     ].transform("cummin")
 
-    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["task_id", "optimizer_id", "seed"])[
         "trial_value__cost_norm"
     ].transform("cummin")
     logs["trial_value__cost_inc_norm_log"] = logs["trial_value__cost_inc_norm"].apply(lambda x: np.log(x + 1e-10))
     if "time" not in logs:
         logs["time"] = 0
     logger.info("Normalize time...")
-    logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
+    logs["time_norm"] = logs.groupby("task_id")["time"].transform(normalize)
     logs = convert_mixed_types_to_str(logs, logger)
     logger.info("Done.")
     return logs
@@ -686,7 +686,7 @@ def get_interpolated_performance_df(
 
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
-    group_keys = ["scenario", "set", "benchmark_id", "optimizer_id", "problem_id", "seed"]
+    group_keys = ["scenario", "set", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []
     for gid, gdf in logs.groupby(by=group_keys):

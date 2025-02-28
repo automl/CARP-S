@@ -17,11 +17,9 @@ def index_configs() -> None:
     """Index all problem and optimizer configs.
 
     Create `index.csv` containing the config filename `config_fn` and the
-    `problem_id` or `optimizer_id` for all problem and optimizer configs.
+    `task_id` or `optimizer_id` for all problem and optimizer configs.
     """
-    for key, path in zip(
-        ["problem_id", "optimizer_id"], [config_folder_problem, config_folder_optimizer], strict=False
-    ):
+    for key, path in zip(["task_id", "optimizer_id"], [config_folder_problem, config_folder_optimizer], strict=False):
         paths = list(path.glob("**/*.yaml"))
 
         table_list = []

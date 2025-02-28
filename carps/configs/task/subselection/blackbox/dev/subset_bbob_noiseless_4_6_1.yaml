@@ -2,7 +2,7 @@
 scenario: blackbox
 subset_id: dev
 benchmark_id: BBOB
-problem_id: blackbox/20/dev/bbob/noiseless/4/6/1
+task_id: blackbox/20/dev/bbob/noiseless/4/6/1
 problem:
   _target_: carps.benchmarks.bbob.BBOBObjectiveFunction
   dimension: 4

@@ -2,7 +2,7 @@
 scenario: multifidelity
 subset_id: dev
 benchmark_id: MFPBench
-problem_id: multifidelity/20/dev/mfpbench/SO/mfh/mfh6_moderate
+task_id: multifidelity/20/dev/mfpbench/SO/mfh/mfh6_moderate
 problem:
   _target_: carps.benchmarks.mfpbench.MFPBenchObjectiveFunction
   benchmark_name: mfh

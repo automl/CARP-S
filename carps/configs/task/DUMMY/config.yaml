@@ -1,6 +1,6 @@
 # @package _global_
 benchmark_id: DUMMY_ObjectiveFunction
-problem_id: dummy
+task_id: dummy
 problem:
   _target_: carps.benchmarks.dummy_problem.DummyObjectiveFunction
   return_value: 42

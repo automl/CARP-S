@@ -2,7 +2,7 @@
 scenario: momf
 subset_id: test
 benchmark_id: YAHPO
-problem_id: momf/9/test/yahpo/MOMF/trainsize/iaml_glmnet/1067/trainsize
+task_id: momf/9/test/yahpo/MOMF/trainsize/iaml_glmnet/1067/trainsize
 problem:
   _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
   bench: iaml_glmnet

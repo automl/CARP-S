@@ -114,9 +114,9 @@ def create_tables(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budge
     # Aggregate all
 
     # Calculate mean over seeds per optimizer and problem
-    df_mean = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].mean()
+    df_mean = df.groupby(["optimizer_id", "task_id"])[perf_col_norm].mean()
     df_mean.name = "mean"
-    df_var = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].var()
+    df_var = df.groupby(["optimizer_id", "task_id"])[perf_col_norm].var()
     df_var.name = "var"
 
     print(pd.concat((df_mean, df_var), axis=1))

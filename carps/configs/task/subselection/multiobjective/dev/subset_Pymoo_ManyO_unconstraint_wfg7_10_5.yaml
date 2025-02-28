@@ -2,7 +2,7 @@
 scenario: multiobjective
 subset_id: dev
 benchmark_id: Pymoo
-problem_id: multiobjective/10/dev/Pymoo/ManyO/unconstraint/wfg7_10_5
+task_id: multiobjective/10/dev/Pymoo/ManyO/unconstraint/wfg7_10_5
 problem:
   _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
   problem_name: wfg7

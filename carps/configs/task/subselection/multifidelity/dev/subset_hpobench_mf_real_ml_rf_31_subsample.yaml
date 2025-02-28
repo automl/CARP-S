@@ -2,7 +2,7 @@
 scenario: multifidelity
 subset_id: dev
 benchmark_id: HPOBench
-problem_id: multifidelity/20/dev/hpobench/mf/real/ml/rf/31/subsample
+task_id: multifidelity/20/dev/hpobench/mf/real/ml/rf/31/subsample
 problem:
   _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
   model: rf
