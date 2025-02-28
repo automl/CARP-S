@@ -35,7 +35,7 @@ check:
 	pre-commit run --all-files
 
 install-dev:
-	pip install -e ".[dev]"
+	$(PIP) install -e ".[dev]"
 	pre-commit install
 
 clean-build:
@@ -43,7 +43,7 @@ clean-build:
 
 # Build a distribution in ./dist
 build:
-	$(PYTHON) -m pip install build
+	$(PYTHON) -m $(PIP) install build
 	$(PYTHON) -m build --sdist
 
 # Publish to testpypi
@@ -65,3 +65,67 @@ publish: clean-build build
 	@echo
 	@echo "Once you have decided it works, publish to actual pypi with"
 	@echo "--- python -m twine upload dist/*"
+
+
+OS := $(shell uname)
+
+install:
+	pip install uv
+	uv venv --python=3.12 env_smbm
+	. env_smbm/bin/activate
+	$(MAKE) install-swig
+	uv pip install setuptools wheel
+	git clone --branch $(SMACBRANCH) git@github.com:automl/SMAC3.git repos/SMAC3
+	git clone git@github.com:automl/CARP-S.git repos/CARP-S
+	cd repos/CARP-S && uv pip install -e '.[dev]' && pre-commit install
+	cd repos/SMAC3 && uv pip install -e '.[dev]' && pre-commit install
+	$(MAKE) benchmark_bbob
+	# $(MAKE) benchmark_yahpo
+	$(MAKE) welcome
+
+install-swig:
+	@if [ "$(OS)" = "Darwin" ]; then \
+		echo "Detected macOS: Installing SWIG via Homebrew"; \
+		brew install swig; \
+	elif [ "$(OS)" = "Linux" ]; then \
+		echo "Detected Linux: Installing SWIG via APT"; \
+		# sudo apt update && sudo apt install -y swig; \
+		uv pip install swig; \
+	elif [ "$(OS)" = "Windows_NT" ]; then \
+		echo "Detected Windows: Installing SWIG via Chocolatey"; \
+		choco install swig -y; \
+	else \
+		echo "Unsupported OS: Please install SWIG manually."; \
+	fi
+
+
+benchmark_bbob:
+	# Install BBOB
+	$(PIP) install ioh
+	$(PIP) install numpy --upgrade
+
+benchmark_yahpo:
+# Needs 2GB of space for the surrogate models of YAHPO
+	# Install yahpo
+	CARPS_ROOT="." . container_recipes/benchmarks/YAHPO/install_yahpo.sh
+	$(PIP) install ConfigSpace --upgrade
+
+benchmark_pymoo:
+	# Install pymoo
+	$(PIP) install -r container_recipes/benchmarks/Pymoo/Pymoo_requirements.txt
+
+benchmark_mfpbench:
+	# Install mfpbench
+	$(PIP) install -r container_recipes/benchmarks/MFPBench/MFPBench_requirements.txt
+	$(PIP) install ConfigSpace --upgrade
+	. container_recipes/benchmarks/MFPBench/download_data.sh
+
+benchmark_hpobench:
+	# Install hpobench
+	. container_recipes/benchmarks/HPOBench/install_HPOBench.sh
+
+benchmark_hpob:
+	# Install hpob
+	$(PIP) install -r container_recipes/benchmarks/HPOB/HPOB_requirements.txt
+	. container_recipes/benchmarks/HPOB/download_data.sh
+
