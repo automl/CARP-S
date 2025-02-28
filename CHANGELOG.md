@@ -4,15 +4,21 @@
 - HPOBench: Add rl, nasbench_101, nasbench_201, nasbench1shot1, and nas_hpo (#155, fix for benchmarks #158)
 - Pymoo: Add all unconstraint problems (#162)
 
+## Subsets
+- Updated subsets for black-box and multi-objective (#164)
+
 ## Optimizers
 - Add Ax as optimizer (#166)
+- More optimizer configs (#164)
 
 ## Improvements
 - Update/clean optimizer configs, update HEBO+Skopt a bit (#161, #163)
 - Add BBOB-Vizier setup (but using BBOB from ioh; d=20, n_trials=100, #163)
+- Clean analysis pipeline (data collection and plotting) (#164)
 
 ## Fixes
  - Fix SMAC3 callbacks (#167)
+ - Several small fixes for benchmarks (#164)
 
 # v0.1.1
 
