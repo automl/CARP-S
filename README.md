@@ -14,7 +14,7 @@ The main topics of this README are:
 - [Adding a new Optimizer or Benchmark](#adding-a-new-optimizer-or-benchmark)
 
 For more details on CARP-S, please have a look at the 
-[documentation](https://AutoML.github.io/CARP-S/latest/).
+[documentation](https://AutoML.github.io/CARP-S/latest/) or our [blog post](https://automl.space/carps-a-framework-for-comparing-n-hyperparameter-optimizers-on-m-benchmarks/).
 
 ## Installation
 
