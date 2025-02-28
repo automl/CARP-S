@@ -1,3 +1,5 @@
+"""Database logger for logging trials and incumbents to a database."""
+
 from __future__ import annotations
 
 import json
@@ -5,7 +7,7 @@ from dataclasses import asdict
 from typing import TYPE_CHECKING
 
 from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.loggingutils import get_logger, setup_logging, CustomEncoder
+from carps.utils.loggingutils import CustomEncoder, get_logger, setup_logging
 
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
@@ -17,12 +19,28 @@ setup_logging()
 logger = get_logger("DatabaseLogger")
 
 
-def convert_trial_info(trial_info, trial_value):
+def convert_trial_info(trial_info: TrialInfo, trial_value: TrialValue) -> dict:
+    """Convert trial info and trial value to a dictionary.
+
+    Parameters
+    ----------
+    trial_info : TrialInfo
+        The trial info (config, seed, budget, instance, additional info).
+    trial_value : TrialValue
+        The trial value (status, cost, additional info).
+
+    Returns:
+    -------
+    dict
+        The converted trial info and trial value which is serializable.
+    """
     info = {"trial_info": asdict(trial_info), "trial_value": asdict(trial_value)}
     info["trial_info"]["config"] = json.dumps(asdict(trial_info)["config"].get_dictionary(), cls=CustomEncoder)
     info["trial_value"]["status"] = info["trial_value"]["status"].name
     info["trial_value"]["additional_info"] = json.dumps(info["trial_value"]["additional_info"], cls=CustomEncoder)
-    info["trial_value"]["cost"] = json.dumps({"cost": json.dumps(info["trial_value"]["cost"], cls=CustomEncoder)}, cls=CustomEncoder)
+    info["trial_value"]["cost"] = json.dumps(
+        {"cost": json.dumps(info["trial_value"]["cost"], cls=CustomEncoder)}, cls=CustomEncoder
+    )
     keys = ["trial_info", "trial_value"]
     for key in keys:
         d = info.pop(key)
@@ -38,14 +56,23 @@ def convert_trial_info(trial_info, trial_value):
 
 
 class DatabaseLogger(AbstractLogger):
+    """Database logger for logging trials and incumbents to a database."""
+
     def __init__(self, result_processor: ResultProcessor | None = None) -> None:
+        """Initialize the database logger.
+
+        Parameters
+        ----------
+        result_processor : ResultProcessor | None, optional
+            The result processor, by default None
+        """
         super().__init__()
         self.result_processor = result_processor
         if self.result_processor is None:
             logger.info("Not logging to database (result processor is None).")
 
     def log_trial(
-        self, n_trials: int, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+        self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
     ) -> None:
         """Evaluate the problem and log the trial.
 
@@ -71,7 +98,16 @@ class DatabaseLogger(AbstractLogger):
         if self.result_processor:
             self.result_processor.process_logs({"trials": info})
 
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
+        """Log the incumbent.
+
+        Parameters
+        ----------
+        n_trials : int
+            The number of trials that have been run so far.
+        incumbent : Incumbent
+            The incumbent (best) configuration with associated cost.
+        """
         if incumbent is None:
             return
 
@@ -86,5 +122,14 @@ class DatabaseLogger(AbstractLogger):
                 self.result_processor.process_logs({"trajectory": info})
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
+        """Log arbitrary data to the database.
+
+        Parameters
+        ----------
+        data : dict
+            The data to log.
+        entity : str
+            The entity to log the data to. This is the table name in the database.
+        """
         if self.result_processor:
             self.result_processor.process_logs({entity: data})

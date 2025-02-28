@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
-import xgboost as xgb
+import xgboost as xgb  # type: ignore
 from ConfigSpace import ConfigurationSpace
 
 from carps.benchmarks.problem import Problem
@@ -207,23 +207,26 @@ HPOB_SEARCH_SPACE_DIMS = {
 
 
 class HPOBProblem(Problem):
+    """HPO-B Problem."""
+
     def __init__(
         self,
-        dataset_id: tuple[str, int],
-        model_id: tuple[str, int],
+        dataset_id: str | int,
+        model_id: str | int,
         surrogates_dir: Path = Path("carps/benchmark_data/HPO-B/saved-surrogates"),
         loggers: list[AbstractLogger] | None = None,
     ):
-        """Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset is not generated
-        from grid, we only consider surrogate benchmark.
+        """Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset
+        is not generated from grid, we only consider surrogate benchmark.
+
         Parameters.
         ----------
-            dataset_id: tuple[str, int]
-                dataset id, the ids can be found under surrogate_model summary directory
-            model_id: tuple[str, int]
-                model id, each model corresponds to a search space, the search space dimensions can be found under
-            surrogates_dir: Path
-                path to directory with surrogates models.
+        dataset_id: str | int
+            dataset id, the ids can be found under surrogate_model summary directory
+        model_id: str | int
+            model id, each model corresponds to a search space, the search space dimensions can be found under
+        surrogates_dir: Path
+            path to directory with surrogates models.
         """
         super().__init__(loggers)
         self.model_id = str(model_id)
@@ -244,7 +247,7 @@ class HPOBProblem(Problem):
         self.surrogate_model = self._get_surrogate_model(self.dataset_id, self.model_id)
 
         # generate configuration space, all the feature values range from [0,1] according to the setting
-        search_space_dims = HPOB_SEARCH_SPACE_DIMS[model_id]
+        search_space_dims = HPOB_SEARCH_SPACE_DIMS[self.model_id]
         self.search_space_dims = search_space_dims
 
         self._configspace = self._get_configspace(search_space_dims)
@@ -259,8 +262,21 @@ class HPOBProblem(Problem):
         bst_surrogate.load_model(str(self.surrogate_dir / (surrogate_name + ".json")))
         return bst_surrogate
 
-    def _get_configspace(self, search_space_dims: int):
-        # generate configuration space, all the feature values range 0 to 1
+    def _get_configspace(self, search_space_dims: int) -> ConfigurationSpace:
+        """Generate the configuration space for the problem.
+
+        All the feature values range 0 to 1.
+
+        Parameters
+        ----------
+        search_space_dims: int
+            The number of dimensions in the search space.
+
+        Returns:
+        -------
+        ConfigurationSpace
+            The configuration space for the problem.
+        """
         bounds = tuple([(0, 1) for _ in range(search_space_dims)])
         cs = ConfigurationSpace()
         cs.generate_all_continuous_from_bounds(bounds)
@@ -291,9 +307,9 @@ class HPOBProblem(Problem):
             Cost
         """
         configuration = trial_info.config
-        input = np.asarray(list(dict(configuration).values()))
+        input_ = np.asarray(list(dict(configuration).values()))
         starttime = time.time()
-        x_q = xgb.DMatrix(input.reshape(-1, self.search_space_dims))
+        x_q = xgb.DMatrix(input_.reshape(-1, self.search_space_dims))
         predicted_output = self.surrogate_model.predict(x_q)
         endtime = time.time()
         T = endtime - starttime

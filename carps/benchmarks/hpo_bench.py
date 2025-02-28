@@ -5,11 +5,11 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
+from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.container.benchmarks.ml.lr_benchmark import LRBenchmark
 from hpobench.container.benchmarks.ml.nn_benchmark import NNBenchmark
 from hpobench.container.benchmarks.ml.rf_benchmark import RandomForestBenchmark
 from hpobench.container.benchmarks.ml.svm_benchmark import SVMBenchmark
-from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.container.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
 from omegaconf import ListConfig
 
@@ -42,7 +42,7 @@ class HPOBenchProblem(Problem):
 
         Parameters
         ----------
-        model : str Model name.
+        model : str | None, Model name.
         task_id : str Task ID, see https://arxiv.org/pdf/2109.06716.pdf, page 22.
         problem : AbstractBenchmarkClient
             Instantiated benchmark problem, e.g.
@@ -57,12 +57,11 @@ class HPOBenchProblem(Problem):
 
         if problem is None and model is None and task_id is None:
             raise ValueError("Please specify either problem or model and task_id.")
-
-        self._problem = (
-            problem
-            if problem
-            else get_hpobench_problem(task_id=task_id, model=model, seed=seed, budget_type=self.budget_type)
-        )
+        if problem is None:
+            assert model is not None
+            assert task_id is not None
+            problem = get_hpobench_problem(task_id=task_id, model=model, seed=seed, budget_type=self.budget_type)
+        self._problem = problem
         if not isinstance(metric, list | ListConfig):
             metric = [metric]
         self.metric = metric

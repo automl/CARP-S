@@ -1,3 +1,5 @@
+"""Check missing runs and regenerate runcommands for missing or truncated runs."""
+
 from __future__ import annotations
 
 from enum import Enum, auto
@@ -16,12 +18,19 @@ logger = get_logger(__file__)
 
 
 class RunStatus(Enum):
+    """Enum for the status of a run."""
+
     COMPLETED = auto()
     MISSING = auto()
     TRUNCATED = auto()
 
 
 def get_experiment_status(path: Path) -> dict:
+    """Get the status of an experiment from its hydra config file.
+
+    Args:
+        path (Path): Path to the hydra config file.
+    """
     status = RunStatus.MISSING
 
     cfg = OmegaConf.load(path)
@@ -44,17 +53,33 @@ def get_experiment_status(path: Path) -> dict:
     }
 
 
-def check_missing(rundir: str, n_processes: int = 4) -> pd.DataFrame:
+def check_missing(rundir: str | Path, n_processes: int = 4) -> pd.DataFrame:
+    """Check missing runs in the given rundir.
+
+    Args:
+        rundir (str | Path): Path to the rundir.
+        n_processes (int, optional): Number of processes to use. Defaults to 4.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the status of the runs. This is also saved to 'runstatus.csv'.
+    """
     rundir = Path(rundir)
     paths = rundir.glob("**/.hydra/config.yaml")
     with Pool(processes=n_processes) as pool:
         data = pool.map(get_experiment_status, paths)
-    data = pd.DataFrame(data)
-    data.to_csv("runstatus.csv", index=False)
+    data_df = pd.DataFrame(data)
+    data_df.to_csv("runstatus.csv", index=False)
     return data
 
 
-def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: str = "") -> None:
+def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: str = ".") -> None:
+    """Generate runcommands for missing or truncated runs.
+
+    Args:
+        missing_data (pd.DataFrame): DataFrame containing the status of the runs.
+        runstatus (RunStatus): Status of the runs to generate commands for.
+        rundir (str, optional): Path to the rundir. Defaults to ".".
+    """
     logger.info(f"Regenerate commands for {runstatus.name} runs...")
     data = missing_data
     missing = data[data["status"].isin([runstatus.name])]
@@ -74,7 +99,13 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     logger.info(f"Done! Regenerated runcommands at {runcommand_fn}.")
 
 
-def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:
+def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:  # noqa: FBT001, FBT002
+    """Regenerate runcommands for missing or truncated runs.
+
+    Args:
+        rundir (str): Path to the rundir.
+        from_cached (bool, optional): Load experiment status data from 'runstatus.csv'. Defaults to False.
+    """
     if from_cached:
         logger.info("Loading experiment status data from 'runstatus.csv'...")
         data = pd.read_csv("runstatus.csv")

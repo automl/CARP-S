@@ -39,6 +39,22 @@ LOWER_IS_BETTER = {
 
 
 def maybe_invert(value: float, target: str) -> float:
+    """Maybe invert the objective.
+
+    E.g., in carps we minimize, but accuracy needs to be maximized.
+
+    Parameters
+    ----------
+    value : float
+        Value to maybe invert.
+    target : str
+        Target metric.
+
+    Returns:
+    -------
+    float
+        Maybe negated objective function value.
+    """
     sign = 1
     if not LOWER_IS_BETTER[target]:
         sign = -1
@@ -54,7 +70,7 @@ class YahpoProblem(Problem):
         instance: str,
         metric: str | list[str],
         budget_type: str | None = None,
-        lower_is_better: bool = True,
+        lower_is_better: bool = True,  # noqa: FBT001, FBT002
         yahpo_data_path: str | None = None,
         loggers: list[AbstractLogger] | None = None,
     ):
@@ -79,11 +95,11 @@ class YahpoProblem(Problem):
 
         assert bench in list_scenarios(), f"The scenario {bench} you choose is not available."
 
-        yahpo_data_path = yahpo_data_path or Path(__file__).parent.parent / "benchmark_data/yahpo_data"
+        yahpo_data_path_path = yahpo_data_path or Path(__file__).parent.parent / "benchmark_data/yahpo_data"
 
         # setting up meta data for surrogate benchmarks
         local_config.init_config()
-        local_config.set_data_path(yahpo_data_path)
+        local_config.set_data_path(yahpo_data_path_path)
 
         self.scenario = bench
         self.instance = str(instance)
@@ -91,7 +107,7 @@ class YahpoProblem(Problem):
         self._problem = BenchmarkSet(scenario=bench, instance=self.instance, check=False)
         self._configspace = self._problem.get_opt_space(drop_fidelity_params=True)
         self.fidelity_space = self._problem.get_fidelity_space()
-        self.fidelity_dims = list(self._problem.get_fidelity_space()._hyperparameters.keys())
+        self.fidelity_dims = list(self._problem.get_fidelity_space().keys())
 
         self.budget_type = budget_type
         self.lower_is_better = lower_is_better
@@ -106,7 +122,7 @@ class YahpoProblem(Problem):
             other_fidelities = [fid for fid in self.fidelity_dims if fid != self.budget_type]
             self.max_other_fidelities = {}
             for fidelity in other_fidelities:
-                self.max_other_fidelities[fidelity] = self.fidelity_space.get_hyperparameter(fidelity).upper
+                self.max_other_fidelities[fidelity] = self.fidelity_space[fidelity].upper
 
         if not isinstance(metric, list | ListConfig):
             metric = [metric]
@@ -146,7 +162,7 @@ class YahpoProblem(Problem):
             Cost
         """
         configuration = trial_info.config
-        xs = configuration.get_dictionary()
+        xs = dict(configuration)
 
         # If there are multiple fidelities, we take maximum fidelity value for the respective other fidelity dimensions
         # If we are in the blackbox setting, we take maximum fidelity value for all fidelity dimensions
@@ -166,7 +182,7 @@ class YahpoProblem(Problem):
         costs = [maybe_invert(ret[target], target) for target in self.metrics]
         virtual_time = ret.get("time", 0.0)
         if len(costs) == 1:
-            costs = costs[0]
+            costs = costs[0]  # type: ignore[assignment]
 
         endtime = time.time()
         T = endtime - starttime

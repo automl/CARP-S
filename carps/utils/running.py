@@ -1,3 +1,5 @@
+"""Run optimizer, make problem and optimizer."""
+
 from __future__ import annotations
 
 import os
@@ -45,8 +47,8 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
                 kwargs = {"directory": cfg.outdir}
             else:
                 kwargs = {}
-            logger = instantiate(logger)(**kwargs)
-            loggers.append(logger)
+            logger_instantiated = instantiate(logger)(**kwargs)
+            loggers.append(logger_instantiated)
     return instantiate(problem_cfg, loggers=loggers)
 
 

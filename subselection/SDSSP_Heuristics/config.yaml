@@ -1,0 +1,35 @@
+
+# @package _global_
+defaults:
+  - override /hydra/launcher: joblib
+  - override /hydra/job_logging: colorlog
+
+identifier: default
+
+# Subselection config
+k: 10
+fullset_csv_fn: "run-data/df_crit.csv"
+n_reps: !!int 5000
+executable: ./a.out
+n_subsets: 2
+
+# Hydra output directories
+outdir: results/${identifier}
+hydra:
+  run:
+    dir: ${outdir}/${k}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ${outdir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${k}
+
+# Cluster config
+  launcher:
+    # Slurm
+    # partition: normal
+    # cpus_per_task: 1
+    # name: carpssubset
+    # timeout_min: 720
+    # mem_per_cpu: 4G
+
+    # Joblib
+    n_jobs: 4

@@ -138,6 +138,7 @@ containers
 data
 outputs
 runs
+results
 runsold
 *.json
 *.code-workspace
@@ -168,3 +169,6 @@ runs*
 *.parquet
 run-data*
 *.txt
+slurm-*
+tmp*
+*.aux

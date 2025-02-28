@@ -1,7 +1,11 @@
+"""ManyAffineBBOB benchmark functions."""
+
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 # https://github.com/Dvermetten/Many-affine-BBOB/blob/master/affine_barebones.py
-import ioh
+import ioh  # type: ignore
 import numpy as np
 
 scale_factors = [
@@ -33,17 +37,53 @@ scale_factors = [
 
 
 class ManyAffine:
-    def __init__(self, weights, instances, opt_loc=1, dim=5, sf_type="min_max"):
+    """ManyAffineBBOB benchmark function."""
+
+    def __init__(
+        self,
+        weights: np.ndarray,
+        instances: Sequence[int],
+        opt_loc: float | int = 1,
+        dim: int = 5,
+        sf_type: str = "min_max",  # noqa: ARG002
+    ) -> None:
+        """Initialize ManyAffineBBOB benchmark function.
+
+        Parameters
+        ----------
+        weights : np.ndarray
+            Weights for the functions.
+        instances : Sequence[int]
+            Instances for the functions.
+        opt_loc : int | float, optional
+            Optimum location, by default 1.
+        dim : int, optional
+            Dimension of the function, by default 5.
+        sf_type : str, optional
+            Scale factor type, by default "min_max".
+        """
         self.weights = weights / np.sum(weights)
         self.fcts = [ioh.get_problem(fid, int(iid), dim) for fid, iid in zip(range(1, 25), instances, strict=False)]
         self.opts = [f.optimum.y for f in self.fcts]
         self.scale_factors = scale_factors
-        if type(opt_loc) == int:
+        if isinstance(opt_loc, int):
             self.opt_x = self.fcts[opt_loc].optimum.x
         else:
             self.opt_x = opt_loc
 
-    def __call__(self, x):
+    def __call__(self, x: np.ndarray) -> float:
+        """Evaluate ManyAffineBBOB benchmark function.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            Input.
+
+        Returns:
+        -------
+        float
+            Output.
+        """
         raw_vals = np.array(
             [
                 np.clip(f(x + f.optimum.x - self.opt_x) - o, 1e-12, 1e20)
@@ -54,7 +94,8 @@ class ManyAffine:
         return 10 ** (10 * np.sum(weighted) - 8)
 
 
-def register_many_affine_functions():
+def register_many_affine_functions() -> None:
+    """Register ManyAffineBBOB benchmark functions in ioh."""
     n_functions = 24
     dimensions = np.arange(2, 11)
 

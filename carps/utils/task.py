@@ -1,3 +1,5 @@
+"""Task Definition."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -16,6 +18,23 @@ from dataclasses_json import dataclass_json
 
 
 def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
+    """Get info about the search space.
+
+    Number of dimensions, which hyperparameters and whether it has conditions or forbiddens.
+
+    Parameters
+    ----------
+    configspace : ConfigurationSpace
+        The configuration space.
+
+    Returns.
+    -------
+    dict[str, Any]
+        Info dict with keys
+        dimensions, search_space_n_categoricals, search_space_n_ordinals, search_space_n_integers,
+        search_space_n_floats, search_space_has_conditionals,
+        search_space_has_forbiddens, search_space_has_priors
+    """
     hps = dict(configspace)
     dimension = len(hps)
     search_space_has_priors = False
@@ -67,7 +86,7 @@ class Task:
 
     For general optimization, only `n_trials` or `time_budget` needs
     to be defined. The optimizers receive the search space.
-    For multi-fidelity, at least `is_multifidelity` and `max_budget´
+    For multi-fidelity, at least `is_multifidelity` and `max_budget`
     need to be specified.
     For multi-objecitve, at least `n_objectives` needs to be specified.
     The remaining parameters are meta-data and not necessarily needed
@@ -79,11 +98,11 @@ class Task:
     n_trials : int
         The number of trials aka calls to the objective function.
         Specify this for classic blackbox problems.
-        Either `n_trials´ or `time_budget` needs to be specified.
+        Either `n_trials` or `time_budget` needs to be specified.
     time_budget : float
         The time budget in minutes for optimization.
         Specify this for multi-fidelity problems.
-        Either `n_trials´ or `time_budget` needs to be specified.
+        Either `n_trials` or `time_budget` needs to be specified.
 
     # Parallelism
     n_workers : int = 1
@@ -92,7 +111,7 @@ class Task:
 
     # Multi-objective
     n_objectives : int
-        The number of optimization objectives.
+        The number of optimization objectives, by default 1.
     objectives : list[str]
         Optional names of objectives.
 
@@ -158,8 +177,8 @@ class Task:
     n_workers: int = 1
 
     # Multi-Objective
-    n_objectives: int | None = None
-    objectives: list[str] | None = None
+    n_objectives: int = 1
+    objectives: tuple[str] = ("quality",)
 
     # Multi-Fidelity
     is_multifidelity: bool | None = None
@@ -186,7 +205,7 @@ class Task:
     search_space_has_forbiddens: bool | None = None
     search_space_has_priors: bool | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.is_multifidelity and self.max_budget is None:
             raise ValueError("Please specify max budget for multifidelity.")
         if self.n_trials is None and self.time_budget is None:

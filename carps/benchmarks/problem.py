@@ -1,3 +1,5 @@
+"""Problem to optimize (base definition)."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -14,11 +16,21 @@ class Problem(ABC):
     """Problem to optimize."""
 
     def __init__(self, loggers: list[AbstractLogger] | None = None) -> None:
+        """Initialize Problem.
+
+        Counts the number of function calls and trials.
+        The number of trials can be fractional in the case for multi-fidelity optimization.
+
+        Parameters
+        ----------
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None
+        """
         super().__init__()
 
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
         self.n_trials: float = 0
-        self.n_function_calls: int = 0.0
+        self.n_function_calls: int = 0
 
     @property
     def f_min(self) -> float | None:
@@ -70,6 +82,24 @@ class Problem(ABC):
         raise NotImplementedError
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
+        """Evaluate problem.
+
+        Parameters
+        ----------
+        trial_info : TrialInfo
+            Dataclass with configuration, seed, budget, instance, name, checkpoint.
+
+        Returns:
+        -------
+        TrialValue
+            Value of the trial, i.e.:
+                - cost : float | list[float]
+                - time : float, defaults to 0.0
+                - status : StatusType, defaults to StatusType.SUCCESS
+                - starttime : float, defaults to 0.0
+                - endtime : float, defaults to 0.0
+                - additional_info : dict[str, Any], defaults to {}
+        """
         trial_value = self._evaluate(trial_info=trial_info)
         self.n_function_calls += 1
         if trial_info.normalized_budget is not None:

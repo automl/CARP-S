@@ -1,3 +1,5 @@
+"""Base class for all optimizers."""
+
 from __future__ import annotations
 
 import time
@@ -18,9 +20,27 @@ if TYPE_CHECKING:
 
 
 class Optimizer(ABC):
+    """Base class for all optimizers."""
+
     def __init__(
         self, problem: Problem, task: Task | dict | DictConfig, loggers: list[AbstractLogger] | None = None
     ) -> None:
+        """Optimizer.
+
+        Parameters
+        ----------
+        problem : Problem
+            Optimization problem aka the function to be optimized.
+        task : Task | dict | DictConfig
+            Task definition, e.g. specifiying the number of trials, etc.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None
+
+        Raises:
+        ------
+        ValueError
+            Unknown task type, must be either `Task`, `dict` or `DictConfig`.
+        """
         super().__init__()
         self.problem = problem
 
@@ -38,8 +58,8 @@ class Optimizer(ABC):
 
         # Convert min to seconds
         self.time_budget = self.task.time_budget * 60 if self.task.time_budget is not None else None
-        self.virtual_time_elapsed_seconds: float | None = 0.0
-        self.trial_counter: float = 0
+        self.virtual_time_elapsed_seconds: float = 0.0
+        self.trial_counter: int | float = 0
 
         # This indicates if the optimizer can deal with multi-fidelity optimization
         self.fidelity_enabled = False
@@ -49,13 +69,28 @@ class Optimizer(ABC):
 
     @property
     def solver(self) -> Any:
+        """Solver instance.
+
+        Returns.
+        -------
+        Any
+            Solver instance.
+        """
         return self._solver
 
     @solver.setter
     def solver(self, value: Any) -> None:
+        """Set the solver instance.
+
+        Parameters
+        ----------
+        value : Any
+            Solver instance.
+        """
         self._solver = value
 
-    def setup_optimizer(self):
+    def setup_optimizer(self) -> None:
+        """Setup the optimizer."""
         self.solver = self._setup_optimizer()
 
     @abstractmethod
@@ -103,14 +138,40 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     def run(self) -> Incumbent:
+        """Run the optimizer.
+
+        Setup if not already done and run the optimizer.
+
+        Returns.
+        -------
+        Incumbent
+            Best performing configuration(s).
+        """
         if self.solver is None:
             self.setup_optimizer()
         return self._run()
 
-    def _time_left(self, start_time) -> bool:
-        return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
+    def _time_left(self, start_time: float) -> bool:
+        if self.time_budget is not None:
+            return (time.time() - start_time) + self.virtual_time_elapsed_seconds < self.time_budget
+        return True
 
-    def continue_optimization(self, start_time) -> bool:
+    def continue_optimization(self, start_time: float) -> bool:
+        """Check whether to continue optimization.
+
+        (a) Based on time budget if specified.
+        (b) Based on number of trials if specified.
+
+        Parameters
+        ----------
+        start_time : float
+            Starting time.
+
+        Returns:
+        -------
+        bool
+            True when optimization should continue, false otherwise.
+        """
         cont = True
         if self.time_budget is not None and not self._time_left(start_time):
             cont = False
@@ -124,7 +185,7 @@ class Optimizer(ABC):
         start_time = time.time()
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()
-            normalized_budget = 1
+            normalized_budget = 1.0
             if self.task.max_budget is not None and trial_info.budget is not None:
                 normalized_budget = trial_info.budget / self.task.max_budget
             if self.task.is_multifidelity:
@@ -143,13 +204,17 @@ class Optimizer(ABC):
 
             new_incumbent = self.get_current_incumbent()
             if new_incumbent != self._last_incumbent:
-                self._last_incumbent = new_incumbent
+                self._last_incumbent = new_incumbent  # type: ignore[assignment]
                 for logger in self.loggers:
                     logger.log_incumbent(self.trial_counter, new_incumbent)
 
             if not self.task.is_multifidelity:
                 self.trial_counter += 1
             else:
+                assert (
+                    self.task.max_budget is not None
+                ), "Define max_budget for multi-fidelity optimization in your problem setup."
+                assert trial_info.budget is not None
                 self.trial_counter += trial_info.budget / self.task.max_budget
         return self.get_current_incumbent()
 
@@ -184,9 +249,3 @@ class Optimizer(ABC):
             trial value (cost, time, ...)
         """
         raise NotImplementedError
-
-    # def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
-    # def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
-    # def ask(self) -> TrialInfo:
-    # def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
-    # def get_current_incumbent(self) -> Incumbent:

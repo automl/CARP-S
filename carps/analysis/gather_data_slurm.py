@@ -20,6 +20,14 @@ if TYPE_CHECKING:
 
 @hydra.main(config_path="configs", config_name="gather_data_slurm.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Gather data from multiple runs.
+
+    Args:
+        cfg (DictConfig): Hydra config.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]: Logs, configs
+    """
     return filelogs_to_df(cfg.rundir)
 
 

@@ -1,9 +1,11 @@
+"""Definitions of Exceptions used in the carps package."""
+
 from __future__ import annotations
 
 
 class NotSupportedError(Exception):
-    pass
+    """Generic exception for when a feature is not supported."""
 
 
 class AskAndTellNotSupportedError(NotSupportedError):
-    pass
+    """Exception for when Ask and Tell is not supported."""
