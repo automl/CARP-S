@@ -1,4 +1,4 @@
-"""MF-Prior-Bench Problem.
+"""MF-Prior-Bench ObjectiveFunction.
 
 * HOW TO USE:
 * ------------
@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 import mfpbench
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -59,8 +59,8 @@ benchmarks = [
 C = TypeVar("C", bound=mfpbench.Config)
 
 
-class MFPBenchProblem(Problem):
-    """MF-Prior-Bench Problem class."""
+class MFPBenchObjectiveFunction(ObjectiveFunction):
+    """MF-Prior-Bench ObjectiveFunction class."""
 
     def __init__(
         self,

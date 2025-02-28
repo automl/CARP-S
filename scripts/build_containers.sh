@@ -38,8 +38,8 @@ mkdir -p $CONT_OPT_PATH
 # --------------------------------------------------------------------------------------------
 # PROBLEMS
 # --------------------------------------------------------------------------------------------
-# Dummy Problem
-./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/DUMMY_Problem.sif ${CONT_BENCH_RECIPE_PATH}/DUMMY_Problem/DUMMY_Problem.recipe
+# Dummy ObjectiveFunction
+./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/DUMMY_ObjectiveFunction.sif ${CONT_BENCH_RECIPE_PATH}/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
 
 # HPOB
 ./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/HPOB.sif ${CONT_BENCH_RECIPE_PATH}/HPOB/HPOB.recipe ${CONT_BENCH_RECIPE_PATH}/HPOB/download_data.sh

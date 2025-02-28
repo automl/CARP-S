@@ -13,7 +13,7 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent, SearchSpace
@@ -24,7 +24,7 @@ class RandomSearchOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
@@ -32,8 +32,8 @@ class RandomSearchOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        problem : ObjectiveFunction
+            ObjectiveFunction to optimize.
         task : Task
             Task to optimize.
         loggers : list[AbstractLogger] | None, optional

@@ -23,7 +23,7 @@ from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
 
 if TYPE_CHECKING:
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
 
 setup_logging()
 logger = get_logger(__file__)
@@ -92,14 +92,14 @@ def annotate_with_cfg(
     return df
 
 
-def get_Y(X: np.ndarray, problem: Problem) -> np.ndarray:  # noqa: N802, N803
+def get_Y(X: np.ndarray, problem: ObjectiveFunction) -> np.ndarray:  # noqa: N802, N803
     """Get objective function values.
 
     Beware, remember runtime when problem is not synthetic, a table or a surrogate.
 
     Args:
         X (np.ndarray): Design points.
-        problem (Problem): Problem instance.
+        problem (ObjectiveFunction): ObjectiveFunction instance.
 
     Returns:
         np.ndarray: Objective function values.
@@ -348,7 +348,7 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     """
     index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
     if not index_fn.is_file():
-        raise ValueError("Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
+        raise ValueError("ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
     problem_index = pd.read_csv(index_fn)
 
     def load_task_cfg(problem_id: str) -> DictConfig:

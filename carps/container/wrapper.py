@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import requests  # type: ignore[import-untyped]
 from ConfigSpace.read_and_write import json as cs_json
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -16,11 +16,11 @@ if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
 
 
-class ContainerizedProblemClient(Problem):
+class ContainerizedObjectiveFunctionClient(ObjectiveFunction):
     """Wrapper for containerized problems."""
 
     def __init__(self, n_workers: int = 1, loggers: list[AbstractLogger] | None = None):
-        """Initialize ContainerizedProblemClient.
+        """Initialize ContainerizedObjectiveFunctionClient.
 
         Parameters
         ----------
@@ -61,6 +61,6 @@ class ContainerizedProblemClient(Problem):
         Reises
         ------
         NotImplementedError
-            f_min is not yet implemented for ContainerizedProblemClient
+            f_min is not yet implemented for ContainerizedObjectiveFunctionClient
         """
-        raise NotImplementedError("f_min is not yet implemented for ContainerizedProblemClient")
+        raise NotImplementedError("f_min is not yet implemented for ContainerizedObjectiveFunctionClient")

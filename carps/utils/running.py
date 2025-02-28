@@ -17,12 +17,12 @@ from carps.utils.exceptions import NotSupportedError
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.optimizers.optimizer import Optimizer
 
 
-def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> Problem:
-    """Make Problem.
+def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> ObjectiveFunction:
+    """Make ObjectiveFunction.
 
     Parameters
     ----------
@@ -34,7 +34,7 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
 
     Returns:
     -------
-    Problem
+    ObjectiveFunction
         Target problem.
     """
     problem_cfg = cfg.problem
@@ -52,7 +52,7 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
     return instantiate(problem_cfg, loggers=loggers)
 
 
-def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
+def make_optimizer(cfg: DictConfig, problem: ObjectiveFunction) -> Optimizer:
     """Make Optimizer.
 
     Parameters
@@ -61,7 +61,7 @@ def make_optimizer(cfg: DictConfig, problem: Problem) -> Optimizer:
         List of loggers to use.
     cfg : DictConfig
         Global configuration
-    problem : Problem
+    problem : ObjectiveFunction
         Target problem
 
     Returns:

@@ -7,20 +7,20 @@ from typing import TYPE_CHECKING
 
 from ConfigSpace import ConfigurationSpace, Float
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
 
 
-class DummyProblem(Problem):
+class DummyObjectiveFunction(ObjectiveFunction):
     """Dummy problem for testing purposes."""
 
     def __init__(
         self, return_value: float = 0, budget_type: str | None = "dummy", loggers: list[AbstractLogger] | None = None
     ) -> None:
-        """Initialize Dummy Problem.
+        """Initialize Dummy ObjectiveFunction.
 
         Parameters
         ----------

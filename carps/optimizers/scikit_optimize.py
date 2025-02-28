@@ -20,7 +20,7 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -69,7 +69,7 @@ class SkoptOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         skopt_cfg: DictConfig,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
@@ -95,7 +95,7 @@ class SkoptOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------

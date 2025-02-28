@@ -14,7 +14,7 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.types import Incumbent, SearchSpace
 
@@ -23,13 +23,13 @@ class Optimizer(ABC):
     """Base class for all optimizers."""
 
     def __init__(
-        self, problem: Problem, task: Task | dict | DictConfig, loggers: list[AbstractLogger] | None = None
+        self, problem: ObjectiveFunction, task: Task | dict | DictConfig, loggers: list[AbstractLogger] | None = None
     ) -> None:
         """Optimizer.
 
         Parameters
         ----------
-        problem : Problem
+        problem : ObjectiveFunction
             Optimization problem aka the function to be optimized.
         task : Task | dict | DictConfig
             Task definition, e.g. specifiying the number of trials, etc.
@@ -104,7 +104,7 @@ class Optimizer(ABC):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -181,7 +181,7 @@ class Optimizer(ABC):
         return cont
 
     def _run(self) -> Incumbent:
-        """Run Optimizer on Problem."""
+        """Run Optimizer on ObjectiveFunction."""
         start_time = time.time()
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()

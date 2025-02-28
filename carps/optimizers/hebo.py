@@ -36,7 +36,7 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -166,7 +166,7 @@ class HEBOOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         task: Task,
         hebo_cfg: DictConfig | None = None,
         loggers: list[AbstractLogger] | None = None,
@@ -181,7 +181,7 @@ class HEBOOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
+        problem : ObjectiveFunction
             The objective function.
         task : Task
             The task description.
@@ -215,7 +215,7 @@ class HEBOOptimizer(Optimizer):
         self.completed_experiments: OrderedDict[str, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> DesignSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Convert the configspace from ConfigSpace to HEBO. However, given that syne-tune does not support
         conditions and forbidden clauses, we only add hyperparameters here
@@ -223,7 +223,7 @@ class HEBOOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         dict[str, Any]
         -------
@@ -270,7 +270,7 @@ class HEBOOptimizer(Optimizer):
         Returns:
         -------
         TrialInfo
-            trial info, needed to interact with the Problem
+            trial info, needed to interact with the ObjectiveFunction
         """
         if len(rec) > 1:
             raise ValueError(f"Only one suggestion is ok, got {len(rec)}.")

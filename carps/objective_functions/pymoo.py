@@ -1,4 +1,4 @@
-"""Pymoo Problem."""
+"""Pymoo ObjectiveFunction."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from ConfigSpace import ConfigurationSpace, Float
 from pymoo.problems.multi.omnitest import OmniTest
 from pymoo.problems.multi.sympart import SYMPART, SYMPARTRotated
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -25,8 +25,8 @@ extra_probs = {
 }
 
 
-class PymooProblem(Problem):
-    """Pymoo Problem class."""
+class PymooObjectiveFunction(ObjectiveFunction):
+    """Pymoo ObjectiveFunction class."""
 
     def __init__(
         self,

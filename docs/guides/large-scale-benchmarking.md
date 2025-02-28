@@ -3,7 +3,7 @@
 ## Parallel
 You can run your optimization via
 ```bash
-conda run -n automlsuite_DUMMY_Optimizer_DUMMY_Problem python carps/run.py \
+conda run -n automlsuite_DUMMY_Optimizer_DUMMY_ObjectiveFunction python carps/run.py \
     +optimizer/DUMMY=config +problem/DUMMY=config \
     'seed=range(1,11)' \
     +cluster=local -m

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -39,7 +39,7 @@ class DEHBOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         dehb_cfg: DictConfig,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
@@ -48,8 +48,8 @@ class DEHBOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        problem : ObjectiveFunction
+            ObjectiveFunction to optimize.
         dehb_cfg : DictConfig
             DEHB configuration.
         task : Task
@@ -81,14 +81,14 @@ class DEHBOptimizer(Optimizer):
         )
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------

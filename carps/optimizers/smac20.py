@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from smac.facade.abstract_facade import AbstractFacade
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -65,7 +65,7 @@ class SMAC3Optimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         smac_cfg: DictConfig,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
@@ -77,8 +77,8 @@ class SMAC3Optimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        problem : ObjectiveFunction
+            ObjectiveFunction to optimize.
         smac_cfg : DictConfig
             SMAC configuration.
         task : Task
@@ -98,14 +98,14 @@ class SMAC3Optimizer(Optimizer):
             callback.on_end(self.solver.optimizer)
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -143,7 +143,7 @@ class SMAC3Optimizer(Optimizer):
     ) -> float | list[float]:
         """Target Function.
 
-        Interface for the Problem.
+        Interface for the ObjectiveFunction.
 
         Parameters
         ----------

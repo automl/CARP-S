@@ -30,7 +30,7 @@ def plot_ranking(
         scenario (str): Scenario name, e.g. blackbox.
         set_id (str): Set ID, e.g. test or dev.
         perf_col (str, optional): Performance column. Defaults to "trial_value__cost_inc_norm".
-        problem_prefix (str, optional): Problem prefix. Defaults to "". If set, will be removed from the problem IDs.
+        problem_prefix (str, optional): Task prefix. Defaults to "". If set, will be removed from the problem IDs.
 
     Returns:
         RankResult: Rank result.
@@ -60,8 +60,8 @@ def plot_ranking(
     # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
     # plt.figure(figsize=(12, 12))
     # sns.heatmap(df_crit, annot=False, fmt="g", cmap="viridis_r")
-    # plt.title("Performance of Optimizers per Problem (Normalized)")
-    # plt.ylabel("Problem ID")
+    # plt.title("Performance of Optimizers per Task (Normalized)")
+    # plt.ylabel("Task ID")
     # plt.xlabel("Optimizer")
     # savefig(plt.gcf(), fpath / f"perf_opt_per_problem_{identifier}")
     # plt.show()
@@ -76,8 +76,8 @@ def plot_ranking(
 
     # plt.figure(figsize=(12, 12))
     # sns.heatmap(ranked_df, annot=True, fmt="g", cmap="viridis_r")
-    # plt.title("Ranking of Optimizers per Problem")
-    # plt.ylabel("Problem ID")
+    # plt.title("Ranking of Optimizers per Task")
+    # plt.ylabel("Task ID")
     # plt.xlabel("Optimizer")
     # savefig(plt.gcf(), fpath / f"rank_opt_per_problem_{identifier}")
     # plt.show()
@@ -110,8 +110,8 @@ def plot_ranking(
     df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
     df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
     ax0 = sns.heatmap(df_crit, annot=False, fmt="g", cmap="viridis_r", ax=ax0, cbar_kws={"shrink": 0.8, "aspect": 30})
-    ax0.set_title("Final Performance per Problem (Normalized)")
-    ax0.set_ylabel("Problem ID")
+    ax0.set_title("Final Performance per Task (Normalized)")
+    ax0.set_ylabel("Task ID")
     ax0.set_xlabel("Optimizer")
 
     df_finalperf = filter_only_final_performance(df=gdf)

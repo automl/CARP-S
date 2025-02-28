@@ -19,7 +19,7 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
 
         index_fn = config_target_path.parent.parent / "index.csv"
         if not index_fn.is_file():
-            raise ValueError(f"Could not find {index_fn}. Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
+            raise ValueError(f"Could not find {index_fn}. ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
         problem_index = pd.read_csv(index_fn)
         ids = [np.where(problem_index["problem_id"]==pid)[0][0] for pid in problem_ids]
         config_fns = problem_index["config_fn"][ids].to_list()

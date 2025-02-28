@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from nevergrad.parametrization import parameter  # type: ignore
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -81,7 +81,7 @@ class NevergradOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         nevergrad_cfg: DictConfig,
         optimizer_cfg: DictConfig,
         task: Task,
@@ -91,7 +91,7 @@ class NevergradOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
+        problem : ObjectiveFunction
             The problem to optimize.
         nevergrad_cfg : DictConfig
             The configuration for the Nevergrad optimizer.
@@ -127,7 +127,7 @@ class NevergradOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------

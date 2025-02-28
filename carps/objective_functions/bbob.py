@@ -9,7 +9,7 @@ import ioh  # type: ignore
 from ConfigSpace import ConfigurationSpace, Float
 
 from carps.benchmarks.manyaffinebbob import register_many_affine_functions
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 register_many_affine_functions()
 
 
-class BBOBProblem(Problem):
+class BBOBObjectiveFunction(ObjectiveFunction):
     """BBBOB problem."""
 
     def __init__(
@@ -105,7 +105,7 @@ def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tupl
         fid=fid,
         instance=instance,
         dimension=dimension,
-        # problem_type=ProblemType.BBOB,
+        # problem_type=ObjectiveFunctionType.BBOB,
     )
 
     # Configuration space

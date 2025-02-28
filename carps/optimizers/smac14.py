@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -26,7 +26,7 @@ class SMAC314Optimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         smac_cfg: DictConfig,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
@@ -35,8 +35,8 @@ class SMAC314Optimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        problem : ObjectiveFunction
+            ObjectiveFunction to optimize.
         smac_cfg : DictConfig
             SMAC configuration.
         task : Task
@@ -51,14 +51,14 @@ class SMAC314Optimizer(Optimizer):
         self._solver: SMAC4AC | None = None
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -96,7 +96,7 @@ class SMAC314Optimizer(Optimizer):
     ) -> float | list[float]:
         """Target Function.
 
-        Interface for the Problem.
+        Interface for the ObjectiveFunction.
 
         Parameters
         ----------
@@ -229,7 +229,7 @@ class SMAC314Optimizer(Optimizer):
         raise AskAndTellNotSupportedError
 
     def _run(self) -> Incumbent:
-        """Run SMAC on Problem."""
+        """Run SMAC on ObjectiveFunction."""
         incumbent = self.solver.optimize()  # noqa: F841
         return self.get_current_incumbent()
 

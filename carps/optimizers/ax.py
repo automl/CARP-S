@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -107,7 +107,7 @@ class AxOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         ax_cfg: DictConfig,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
@@ -116,8 +116,8 @@ class AxOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        problem : ObjectiveFunction
+            ObjectiveFunction to optimize.
         ax_cfg : DictConfig
             (Hydra) Configuration for Ax.
         task : Task

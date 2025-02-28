@@ -310,7 +310,7 @@ def plot_performance_per_problem(
                 "problem_id": None,
                 "filename": figure_filename,
                 "plot_type": "performance_per_problem",
-                "plot_type_pretty": "Performance per Problem",
+                "plot_type_pretty": "Performance per Task",
                 "explanation": "The heatmap shows the performance of the optimizers per problem. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. "
                 "The performance is shown as a heatmap, where the colors indicate the performance of the optimizer "
@@ -349,11 +349,11 @@ def plot_performance_per_problem(
         _annotate_heatmap(ax0, mesh, {"fontsize": 8}, ".6g", annot_data)
 
         ax0.set_title(
-            f"Final Performance per Problem for Scenario {gid[0]} and Set {gid[1]}\n"
+            f"Final Performance per Task for Scenario {gid[0]} and Set {gid[1]}\n"
             "Annotations: Raw Values, Colormap: Normalized Values"
         )
 
-        ax0.set_title(f"Final Performance per Problem for Scenario {gid[0]} and Set {gid[1]}")
+        ax0.set_title(f"Final Performance per Task for Scenario {gid[0]} and Set {gid[1]}")
         ax0.text(
             0.5,
             1.05,
@@ -364,7 +364,7 @@ def plot_performance_per_problem(
             transform=ax0.transAxes,
         )
 
-        ax0.set_ylabel("Problem ID")
+        ax0.set_ylabel("Task ID")
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
         plt.close(fig)
@@ -738,11 +738,11 @@ def generate_report(
     logger.info("\t...critical difference")
     resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=True)
 
-    # Final Performance per Problem (Mean over seeds, heatmap)
+    # Final Performance per Task (Mean over seeds, heatmap)
     logger.info("\t...performance per problem")
     resulting_files_performance_per_problem = plot_performance_per_problem(df, output_dir=figure_dir, replot=True)
 
-    # Final Performance Barplot per Problem (Mean over seeds with std)
+    # Final Performance Barplot per Task (Mean over seeds with std)
     logger.info("\t...barplot")
     resulting_files_finalperfbarplot = plot_finalperfbarplot(df, output_dir=figure_dir, replot=True)
 

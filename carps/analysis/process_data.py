@@ -70,7 +70,7 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
     """
     index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
     if not index_fn.is_file():
-        raise ValueError("Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
+        raise ValueError("Task ids have not been indexed. Run `python -m carps.utils.index_configs`.")
     problem_index = pd.read_csv(index_fn)
 
     def load_task_cfg(problem_id: str) -> DictConfig:

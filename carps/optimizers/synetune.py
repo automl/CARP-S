@@ -54,7 +54,7 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler  # type: ignore
 
-    from carps.benchmarks.problem import Problem
+    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -112,7 +112,7 @@ class SynetuneOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        problem: ObjectiveFunction,
         optimizer_name: str,
         task: Task,
         optimizer_kwargs: dict | None = None,
@@ -123,8 +123,8 @@ class SynetuneOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        problem : ObjectiveFunction
+            ObjectiveFunction to optimize.
         optimizer_name : str
             Name of the optimizer.
         task : Task
@@ -168,7 +168,7 @@ class SynetuneOptimizer(Optimizer):
         self.convert = False
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> dict[str, Any]:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Convert the configspace from ConfigSpace to syne-tune. However, given that syne-tune does not support
         conditions and forbidden clauses, we only add hyperparameters here
@@ -176,7 +176,7 @@ class SynetuneOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         dict[str, Any]
         -------

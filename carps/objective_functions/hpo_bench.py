@@ -13,7 +13,7 @@ from hpobench.container.benchmarks.ml.svm_benchmark import SVMBenchmark
 from hpobench.container.benchmarks.ml.xgboost_benchmark import XGBoostBenchmark
 from omegaconf import ListConfig
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
 
 
-class HPOBenchProblem(Problem):
+class HPOBenchObjectiveFunction(ObjectiveFunction):
     """HPOBench problem."""
 
     def __init__(

@@ -20,7 +20,7 @@ import numpy as np
 import xgboost as xgb  # type: ignore
 from ConfigSpace import ConfigurationSpace
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -206,8 +206,8 @@ HPOB_SEARCH_SPACE_DIMS = {
 }
 
 
-class HPOBProblem(Problem):
-    """HPO-B Problem."""
+class HPOBObjectiveFunction(ObjectiveFunction):
+    """HPO-B ObjectiveFunction."""
 
     def __init__(
         self,

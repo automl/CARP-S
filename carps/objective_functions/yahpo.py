@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
-from carps.benchmarks.problem import Problem
+from carps.benchmarks.problem import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -61,8 +61,8 @@ def maybe_invert(value: float, target: str) -> float:
     return sign * value
 
 
-class YahpoProblem(Problem):
-    """Yahpo Problem."""
+class YahpoObjectiveFunction(ObjectiveFunction):
+    """Yahpo ObjectiveFunction."""
 
     def __init__(
         self,

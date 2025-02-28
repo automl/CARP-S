@@ -1,4 +1,4 @@
-"""Problem to optimize (base definition)."""
+"""ObjectiveFunction to optimize (base definition)."""
 
 from __future__ import annotations
 
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
     from carps.utils.trials import TrialInfo, TrialValue
 
 
-class Problem(ABC):
-    """Problem to optimize."""
+class ObjectiveFunction(ABC):
+    """ObjectiveFunction to optimize."""
 
     def __init__(self, loggers: list[AbstractLogger] | None = None) -> None:
-        """Initialize Problem.
+        """Initialize ObjectiveFunction.
 
         Counts the number of function calls and trials.
         The number of trials can be fractional in the case for multi-fidelity optimization.
