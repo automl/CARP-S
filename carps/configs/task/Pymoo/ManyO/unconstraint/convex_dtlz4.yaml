@@ -2,7 +2,7 @@
 benchmark_id: Pymoo
 task_id: Pymoo/ManyO/unconstraint/convex_dtlz4
 problem:
-  _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
+  _target_: carps.objective_functions.pymoo.PymooObjectiveFunction
   problem_name: convex_dtlz4
   problem_kwargs: {}
   seed: ${seed}

@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/lcbench/7593/None
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: lcbench
   instance: '7593'
   budget_type: null

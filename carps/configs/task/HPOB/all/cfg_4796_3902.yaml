@@ -2,7 +2,7 @@
 benchmark_id: HPOB
 task_id: hpob/all/4796/3902
 problem:
-  _target_: carps.benchmarks.hpo_b.HPOBObjectiveFunction
+  _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
   model_id: '4796'
   dataset_id: '3902'
   surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates

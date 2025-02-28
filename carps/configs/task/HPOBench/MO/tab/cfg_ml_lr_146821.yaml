@@ -2,7 +2,7 @@
 benchmark_id: HPOBench
 task_id: hpobench/MO/tab/ml/lr/146821
 problem:
-  _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
+  _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
   model: lr
   task_id: 146821
   metric:

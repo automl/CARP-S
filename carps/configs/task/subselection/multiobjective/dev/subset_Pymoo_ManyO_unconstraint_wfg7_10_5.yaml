@@ -4,7 +4,7 @@ subset_id: dev
 benchmark_id: Pymoo
 task_id: multiobjective/10/dev/Pymoo/ManyO/unconstraint/wfg7_10_5
 problem:
-  _target_: carps.benchmarks.pymoo.PymooObjectiveFunction
+  _target_: carps.objective_functions.pymoo.PymooObjectiveFunction
   problem_name: wfg7
   problem_kwargs:
     n_var: 10

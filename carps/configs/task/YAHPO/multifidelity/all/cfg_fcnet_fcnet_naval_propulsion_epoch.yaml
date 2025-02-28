@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/fcnet/fcnet_naval_propulsion/epoch
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: fcnet
   instance: fcnet_naval_propulsion
   budget_type: epoch

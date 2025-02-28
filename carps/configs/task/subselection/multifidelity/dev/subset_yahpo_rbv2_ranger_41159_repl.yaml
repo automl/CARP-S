@@ -4,7 +4,7 @@ subset_id: dev
 benchmark_id: YAHPO
 task_id: multifidelity/20/dev/yahpo/rbv2_ranger/41159/repl
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: rbv2_ranger
   instance: '41159'
   budget_type: repl

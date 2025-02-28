@@ -2,7 +2,7 @@
 benchmark_id: BBOBVizier
 task_id: bbobvizier/20/8/0
 problem:
-  _target_: carps.benchmarks.bbob.BBOBObjectiveFunction
+  _target_: carps.objective_functions.bbob.BBOBObjectiveFunction
   dimension: 20
   fid: 8
   instance: 0

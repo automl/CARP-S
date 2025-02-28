@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/lcbench/189866/epoch
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: lcbench
   instance: '189866'
   budget_type: epoch

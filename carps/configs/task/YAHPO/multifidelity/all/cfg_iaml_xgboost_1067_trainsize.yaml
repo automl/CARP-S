@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/iaml_xgboost/1067/trainsize
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: iaml_xgboost
   instance: '1067'
   budget_type: trainsize

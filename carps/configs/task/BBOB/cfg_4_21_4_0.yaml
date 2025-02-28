@@ -2,7 +2,7 @@
 benchmark_id: BBOB
 task_id: bbob/noiseless/4/21/0
 problem:
-  _target_: carps.benchmarks.bbob.BBOBObjectiveFunction
+  _target_: carps.objective_functions.bbob.BBOBObjectiveFunction
   dimension: 4
   fid: 21
   instance: 0

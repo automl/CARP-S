@@ -4,7 +4,7 @@ subset_id: test
 benchmark_id: YAHPO
 task_id: momf/9/test/yahpo/MOMF/epoch/lcbench/167152/epoch
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: lcbench
   instance: '167152'
   budget_type: epoch

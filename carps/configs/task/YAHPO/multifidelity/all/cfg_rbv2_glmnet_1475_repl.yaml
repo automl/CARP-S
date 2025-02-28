@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/rbv2_glmnet/1475/repl
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: rbv2_glmnet
   instance: '1475'
   budget_type: repl

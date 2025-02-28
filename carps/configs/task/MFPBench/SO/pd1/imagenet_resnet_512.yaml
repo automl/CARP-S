@@ -2,7 +2,7 @@
 benchmark_id: MFPBench
 task_id: mfpbench/SO/pd1/imagenet_resnet_512
 problem:
-  _target_: carps.benchmarks.mfpbench.MFPBenchObjectiveFunction
+  _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
   benchmark_name: pd1
   metric:
   - valid_error_rate

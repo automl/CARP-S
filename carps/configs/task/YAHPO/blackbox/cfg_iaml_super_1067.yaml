@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/iaml_super/1067/None
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: iaml_super
   instance: '1067'
   budget_type: null

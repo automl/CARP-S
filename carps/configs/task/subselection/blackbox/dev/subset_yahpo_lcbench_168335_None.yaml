@@ -4,7 +4,7 @@ subset_id: dev
 benchmark_id: YAHPO
 task_id: blackbox/20/dev/yahpo/lcbench/168335/None
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: lcbench
   instance: '168335'
   budget_type: null

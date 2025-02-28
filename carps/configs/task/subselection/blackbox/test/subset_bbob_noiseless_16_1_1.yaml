@@ -4,7 +4,7 @@ subset_id: test
 benchmark_id: BBOB
 task_id: blackbox/20/test/bbob/noiseless/16/1/1
 problem:
-  _target_: carps.benchmarks.bbob.BBOBObjectiveFunction
+  _target_: carps.objective_functions.bbob.BBOBObjectiveFunction
   dimension: 16
   fid: 1
   instance: 1

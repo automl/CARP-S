@@ -2,7 +2,7 @@
 benchmark_id: HPOBench
 task_id: hpobench/bb/tab/ml/rf/146818
 problem:
-  _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
+  _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
   model: rf
   task_id: 146818
   budget_type: null

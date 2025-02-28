@@ -4,7 +4,7 @@ subset_id: dev
 benchmark_id: HPOBench
 task_id: multiobjective/10/dev/hpobench/MO/tab/ml/rf/12
 problem:
-  _target_: carps.benchmarks.hpo_bench.HPOBenchObjectiveFunction
+  _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
   model: rf
   task_id: 12
   metric:

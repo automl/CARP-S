@@ -2,7 +2,7 @@
 benchmark_id: MFPBench
 task_id: mfpbench/SO/mfh/mfh3_moderate
 problem:
-  _target_: carps.benchmarks.mfpbench.MFPBenchObjectiveFunction
+  _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
   benchmark_name: mfh
   metric:
   - value

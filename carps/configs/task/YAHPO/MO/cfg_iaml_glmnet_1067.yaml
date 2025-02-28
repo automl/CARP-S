@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/mo/iaml_glmnet/1067/None
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: iaml_glmnet
   instance: '1067'
   budget_type: null

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 import ioh  # type: ignore
 from ConfigSpace import ConfigurationSpace, Float
 
-from carps.benchmarks.manyaffinebbob import register_many_affine_functions
+from carps.objective_functions.manyaffinebbob import register_many_affine_functions
 from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 

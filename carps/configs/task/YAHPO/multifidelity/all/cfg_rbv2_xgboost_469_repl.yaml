@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/rbv2_xgboost/469/repl
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: rbv2_xgboost
   instance: '469'
   budget_type: repl

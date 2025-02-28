@@ -2,7 +2,7 @@
 benchmark_id: YAHPO
 task_id: yahpo/multifidelity/so/trainsize/rbv2_super/1063/trainsize
 problem:
-  _target_: carps.benchmarks.yahpo.YahpoObjectiveFunction
+  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
   bench: rbv2_super
   instance: '1063'
   budget_type: trainsize
