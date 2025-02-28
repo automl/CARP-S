@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 # ---
 # jupyter:
 #   jupytext:
@@ -13,8 +12,10 @@
 # ---
 
 # %%
-from decimal import Decimal
+from __future__ import annotations
+
 import argparse
+from decimal import Decimal
 
 
 # %%
@@ -40,8 +41,7 @@ def distance_inf(point1, point2):
     return ans, point
 
 def isclose(a, b, rel_tol=1e-15, abs_tol=0.0):
-    ans = abs(a-b) <= max(Decimal(rel_tol) * max(abs(a), abs(b)), abs_tol)
-    return ans
+    return abs(a-b) <= max(Decimal(rel_tol) * max(abs(a), abs(b)), abs_tol)
 
 # %%
 def match_index(index_list, values):
@@ -70,30 +70,30 @@ def match_index(index_list, values):
 
 
 # %%
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('origin_csv', type=str)
-    parser.add_argument('remaining_points', type=str)
-    parser.add_argument('output_csv', type=str)
-    parser.add_argument('complement_csv', type=str)
+    parser.add_argument("origin_csv", type=str)
+    parser.add_argument("remaining_points", type=str)
+    parser.add_argument("output_csv", type=str)
+    parser.add_argument("complement_csv", type=str)
     args = parser.parse_args()
-    with open(args.origin_csv, 'r') as f:
+    with open(args.origin_csv) as f:
         origin_csv = f.readlines()
-    with open(args.remaining_points, 'r') as f:
+    with open(args.remaining_points) as f:
         remaining_points = f.readlines()
-    index_list = build_list([tuple(map(Decimal, x.strip().split(',')[1:])) for x in origin_csv[1:]])
+    index_list = build_list([tuple(map(Decimal, x.strip().split(",")[1:])) for x in origin_csv[1:]])
     ans = match_index(index_list, [tuple(map(Decimal, x.split())) for x in remaining_points[1:]])
-    with open(args.output_csv, 'w') as f:
+    with open(args.output_csv, "w") as f:
         f.write(origin_csv[0])
         for i in ans:
             f.write(origin_csv[i+1])
-    
-    with open(args.complement_csv, 'w') as f:
+
+    with open(args.complement_csv, "w") as f:
         f.write(origin_csv[0])
         ans = set(ans)
         for i in range(len(origin_csv)-1):
             if i not in ans:
                 f.write(origin_csv[i+1])
-    
+
 

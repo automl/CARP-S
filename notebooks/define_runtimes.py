@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import numpy as np
-from omegaconf import OmegaConf
-from pathlib import Path
-from carps.utils.running import make_problem
-from carps.utils.trials import TrialInfo
 import time
 from multiprocessing import Pool
+from pathlib import Path
+
+import numpy as np
 import pandas as pd
+from carps.utils.running import make_problem
+from carps.utils.trials import TrialInfo
+from omegaconf import OmegaConf
 
 path = Path("carps/configs/problem/HPOBench/multifidelity")
 config_fns = list(path.glob("*.yaml"))
@@ -22,9 +23,9 @@ def measure_time(config_fn: Path, n: int = 5) -> float:
     config = problem.configspace.sample_configuration()
     trial_info = TrialInfo(config=config)
     durations = []
-    for i in range(n):
+    for _i in range(n):
         start = time.time()
-        trial_value = problem.evaluate(trial_info)
+        problem.evaluate(trial_info)
         end = time.time()
         duration = end - start
         durations.append(duration)

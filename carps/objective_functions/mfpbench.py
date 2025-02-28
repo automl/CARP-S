@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 import mfpbench
 
-from carps.benchmarks.problem import ObjectiveFunction
+from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:

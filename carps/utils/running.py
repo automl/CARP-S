@@ -17,7 +17,7 @@ from carps.utils.exceptions import NotSupportedError
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
 
-    from carps.benchmarks.problem import ObjectiveFunction
+    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.optimizers.optimizer import Optimizer
 
 

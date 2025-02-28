@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from hpobench.benchmarks.nas.nasbench_201 import NASBench_201Data
+
 # from hpobench.benchmarks.nas.nasbench_101 import NASBench_101DataManager
 
 # Load nasbench201 data

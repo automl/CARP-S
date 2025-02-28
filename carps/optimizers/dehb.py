@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
+    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 

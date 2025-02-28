@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pandas as pd
-
-import carps
-
-from carps.analysis.run_autorank import get_df_crit
 from carps.analysis.gather_data import convert_mixed_types_to_str
-
 
 if __name__=="__main__":
     paths = {
@@ -51,18 +47,18 @@ if __name__=="__main__":
             print("Convert", fn_csv, "to", fn_pq)
             df = pd.read_csv(fn_csv)
             df = convert_mixed_types_to_str(df)
-            df.to_parquet(fn_pq)  
+            df.to_parquet(fn_pq)
 
-    for scenario, _paths in paths.items():
+    for _scenario, _paths in paths.items():
         for p in _paths:
-            log_fn_pq = Path(p) / _log_fn_pq    
-            log_cfg_fn_pq = Path(p) / _log_cfg_fn_pq  
-            log_fn_csv = Path(p) / _log_fn_csv    
+            log_fn_pq = Path(p) / _log_fn_pq
+            log_cfg_fn_pq = Path(p) / _log_cfg_fn_pq
+            log_fn_csv = Path(p) / _log_fn_csv
             log_cfg_fn_csv = Path(p) / _log_cfg_fn_csv
 
             convert(log_fn_pq, log_fn_csv, always_convert)
             convert(log_cfg_fn_pq, log_cfg_fn_csv, always_convert)
 
-            
+
 
 

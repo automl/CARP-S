@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+
+import fire
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
-import fire
 
 
 def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str) -> None:

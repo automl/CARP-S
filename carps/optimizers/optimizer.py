@@ -14,8 +14,8 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
 
-    from carps.benchmarks.problem import ObjectiveFunction
     from carps.loggers.abstract_logger import AbstractLogger
+    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.types import Incumbent, SearchSpace
 
 

@@ -11,16 +11,18 @@
 # ---
 
 # %%
+from __future__ import annotations
+
 import argparse
 
 # %%
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('input', type=str, help='input file')
-    parser.add_argument('output', type=str, help='output file')
+    parser.add_argument("input", type=str, help="input file")
+    parser.add_argument("output", type=str, help="output file")
     args = parser.parse_args()
     with open(args.input) as f:
         lines = f.readlines()
-    with open(args.output, 'w') as f:
+    with open(args.output, "w") as f:
         for line in lines[1:]:
-            f.write(' '.join(line.strip().split(',')[1:]) + '\n')
+            f.write(" ".join(line.strip().split(",")[1:]) + "\n")

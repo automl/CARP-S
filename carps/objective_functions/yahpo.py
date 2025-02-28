@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
-from carps.benchmarks.problem import ObjectiveFunction
+from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:

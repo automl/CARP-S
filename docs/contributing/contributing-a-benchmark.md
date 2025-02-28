@@ -35,7 +35,7 @@ Here's a basic example of what your `my_benchmark.py` file might look like:
 
 ```python
 from ConfigSpace import ConfigurationSpace
-from carps.benchmarks.problem import ObjectiveFunction
+from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 class MyBenchmarkObjectiveFunction(ObjectiveFunction):

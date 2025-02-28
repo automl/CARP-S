@@ -1,5 +1,4 @@
-"""
-Hello World
+"""Hello World
 -----------
 .. warning::
     This page is under construction.

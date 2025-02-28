@@ -12,7 +12,7 @@ from ConfigSpace import ConfigurationSpace, Float
 from pymoo.problems.multi.omnitest import OmniTest
 from pymoo.problems.multi.sympart import SYMPART, SYMPARTRotated
 
-from carps.benchmarks.problem import ObjectiveFunction
+from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:

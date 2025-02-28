@@ -23,7 +23,7 @@ from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
 
 if TYPE_CHECKING:
-    from carps.benchmarks.problem import ObjectiveFunction
+    from carps.objective_functions.objective_function import ObjectiveFunction
 
 setup_logging()
 logger = get_logger(__file__)

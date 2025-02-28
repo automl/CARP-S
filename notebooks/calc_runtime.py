@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from carps.analysis.utils import filter_only_final_performance
 import pandas as pd
-import multiprocessing
+from carps.analysis.utils import filter_only_final_performance
 
 concat_rundata()
 
@@ -24,7 +23,7 @@ df_rt = pd.read_csv("runtimes.csv", index_col="scenario").map(int)
 total = df_rt.sum()
 
 total = pd.DataFrame(total).T
-total.index = ['total']
+total.index = ["total"]
 
 df_rt = pd.concat([df_rt, total], axis=0)
 

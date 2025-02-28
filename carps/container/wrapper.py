@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import requests  # type: ignore[import-untyped]
 from ConfigSpace.read_and_write import json as cs_json
 
-from carps.benchmarks.problem import ObjectiveFunction
+from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
