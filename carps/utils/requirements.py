@@ -6,7 +6,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import pkg_resources
+import pkg_resources  # type: ignore
 
 if TYPE_CHECKING:
     from omegaconf import DictConfig

@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import fire
 import matplotlib.pyplot as plt
@@ -23,19 +23,22 @@ if TYPE_CHECKING:
 logger = get_logger(__file__)
 
 
-def custom_latex_table(result, *, decimal_places=3, label=None, only_tabular: bool = True) -> str:
+def custom_latex_table(
+    result: RankResult, *, decimal_places: int = 3, label: str | None = None, only_tabular: bool = True
+) -> str:
     """Creates a latex table from the results dataframe of the statistical analysis.
 
-    # Parameters
+    Parameters
+    ----------
 
     result (RankResult):
         Should be the return value the autorank function.
-
     decimal_places (int, default=3):
         Number of decimal places that are used for the report.
-
     label (str, default=None):
         Label of the table. Defaults to 'tbl:stat_results' if None.
+    only_tabular (bool, default=True):
+        If True, only the tabular part of the table is returned.
     """
     if label is None:
         label = "tbl:stat_results"
@@ -157,7 +160,7 @@ def get_df_crit(
 def calc_critical_difference(
     df: pd.DataFrame,
     identifier: str | None = None,
-    figsize=(12, 8),
+    figsize: tuple[int | float, int | float] = (12, 8),
     perf_col: str = "trial_value__cost_inc_norm",
     plot_diagram: bool = True,  # noqa: FBT001, FBT002
 ) -> RankResult:
@@ -166,7 +169,7 @@ def calc_critical_difference(
     Args:
         df (pd.DataFrame): The dataframe.
         identifier (str, optional): Identifier for the plot. Defaults to None.
-        figsize (tuple, optional): Figure size. Defaults to (12, 8).
+        figsize (tuple[int | float, int | float], optional): Figure size. Defaults to (12, 8).
         perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc_norm".
         plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
 
@@ -217,13 +220,13 @@ Source: https://gist.github.com/LennartPurucker/cf4616512529e29c123608b6c2c4a7e9
 """
 
 
-def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float):  # noqa: C901, FBT001, PLR0915
+def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float) -> Axis:  # noqa: C901, FBT001, PLR0915
     """!TAKEN FROM AUTORANK WITH MODIFICATIONS!"""
 
-    def plot_line(line, color: str = "k", **kwargs: dict) -> None:
+    def plot_line(line: list[tuple[float, float]], color: str = "k", **kwargs: Any) -> None:
         ax.plot([pos[0] / width for pos in line], [pos[1] / height for pos in line], color=color, **kwargs)
 
-    def plot_text(x: float, y: float, s: str, *args: tuple, **kwargs: dict):
+    def plot_text(x: float, y: float, s: str, *args: tuple, **kwargs: Any) -> None:
         ax.text(x / width, y / height, s, *args, **kwargs)
 
     sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -41,7 +41,7 @@ def plot_performance_over_time(
     figsize: tuple[int, int] = (6, 4),
     show_legend: bool = True,  # noqa: FBT001, FBT002
     title: str | None = None,
-    **lineplot_kwargs,
+    **lineplot_kwargs: Any,
 ) -> tuple[plt.Figure, matplotlib.axes.Axes]:
     """Plot performance over trials/time as a lineplot.
 
@@ -84,7 +84,7 @@ def plot_rank_over_time(
     figure_filename: str = "figures/performance_over_time",
     figsize: tuple[int, int] = (6, 4),
     show_legend: bool = True,  # noqa: FBT001, FBT002
-    **lineplot_kwargs,
+    **lineplot_kwargs: Any,
 ) -> tuple[plt.Figure, matplotlib.axes.Axes]:
     """Plot ranks over trials/time as a lineplot.
 

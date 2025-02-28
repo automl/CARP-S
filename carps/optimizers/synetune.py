@@ -151,7 +151,7 @@ class SynetuneOptimizer(Optimizer):
 
         self.fidelity_type: str | None = self.task.fidelity_type
         self.configspace = self.problem.configspace
-        self.metric: str | list[str] = self.task.objectives
+        self.metric: str | tuple[str] = self.task.objectives
         if len(self.metric) == 1:
             self.metric = self.metric[0]
         self.conversion_factor = conversion_factor

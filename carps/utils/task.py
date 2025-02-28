@@ -205,7 +205,7 @@ class Task:
     search_space_has_forbiddens: bool | None = None
     search_space_has_priors: bool | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.is_multifidelity and self.max_budget is None:
             raise ValueError("Please specify max budget for multifidelity.")
         if self.n_trials is None and self.time_budget is None:

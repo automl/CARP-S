@@ -30,7 +30,7 @@ class Problem(ABC):
 
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
         self.n_trials: float = 0
-        self.n_function_calls: int = 0.0
+        self.n_function_calls: int = 0
 
     @property
     def f_min(self) -> float | None:

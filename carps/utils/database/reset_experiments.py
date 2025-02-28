@@ -11,14 +11,14 @@ from py_experimenter.experimenter import PyExperimenter
 
 
 def main(
-    pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | None = None
+    pyexperimenter_configuration_file_path: str | None = None, database_credential_file_path: str | Path | None = None
 ) -> None:
     """Reset experiments that have errored out in the database.
 
     Args:
         pyexperimenter_configuration_file_path (str, optional): Path to the py_experimenter configuration file.
             Defaults to None.
-        database_credential_file_path (str, optional): Path to the database credential file. Defaults to None.
+        database_credential_file_path (str | Path, optional): Path to the database credential file. Defaults to None.
     """
     experiment_configuration_file_path = (
         pyexperimenter_configuration_file_path or Path(__file__).parent.parent.parent / "container/py_experimenter.yaml"
@@ -27,7 +27,7 @@ def main(
     database_credential_file_path = (
         database_credential_file_path or Path(__file__).parent.parent.parent / "container/credentials.yaml"
     )
-    if database_credential_file_path is not None and not database_credential_file_path.exists():
+    if database_credential_file_path is not None and not Path(database_credential_file_path).exists():
         database_credential_file_path = None
 
     experimenter = PyExperimenter(

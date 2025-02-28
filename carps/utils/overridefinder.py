@@ -81,14 +81,14 @@ def merge_overrides(overrides: list[str | None]) -> str:
     #     "+problem=YAHPO/MO/cfg_rbv2_super_1453",
     #     "+problem=YAHPO/MO/cfg_rbv2_super_1454",
     # ]
-    overrides = [o for o in overrides if o is not None]
-    if len(overrides) > 1:
-        overrides = list(map(str, overrides))
-        common = os.path.commonpath(overrides)
+    overrides_clean: list[str] = [o for o in overrides if o is not None]
+    if len(overrides_clean) > 1:
+        overrides_clean = list(map(str, overrides_clean))
+        common = os.path.commonpath(overrides_clean)
         index = common.find("=")
-        override = common[: index + 1] + ",".join([p[index + 1 :] for p in overrides])
+        override = common[: index + 1] + ",".join([p[index + 1 :] for p in overrides_clean])
     else:
-        override = overrides[0]
+        override = overrides_clean[0]
     return override
 
 

@@ -94,7 +94,7 @@ class ManyAffine:
         return 10 ** (10 * np.sum(weighted) - 8)
 
 
-def register_many_affine_functions():
+def register_many_affine_functions() -> None:
     """Register ManyAffineBBOB benchmark functions in ioh."""
     n_functions = 24
     dimensions = np.arange(2, 11)
