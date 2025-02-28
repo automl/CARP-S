@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ConfigSpace import CategoricalHyperparameter, ConfigurationSpace, Constant, OrdinalHyperparameter
 from ConfigSpace.hyperparameters import (
@@ -15,6 +15,12 @@ from ConfigSpace.hyperparameters import (
     UniformIntegerHyperparameter,
 )
 from dataclasses_json import dataclass_json
+
+from carps.utils.loggingutils import get_logger
+from carps.utils.types import VERY_LARGE_NUMBER, VERY_SMALL_NUMBER
+
+if TYPE_CHECKING:
+    from carps.objective_functions.objective_function import ObjectiveFunction
 
 
 def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
@@ -81,7 +87,7 @@ def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
 
 @dataclass_json
 @dataclass(frozen=True)
-class Task:
+class TaskMetadata:
     """Task information.
 
     For general optimization, only `n_trials` or `time_budget` needs
@@ -170,21 +176,21 @@ class Task:
     """
 
     # General (REQUIRED)
-    n_trials: int | None = None
-    time_budget: float | None = None  # 1 cpu, walltime budget in minutes
+    # n_trials: int | None = None
+    # time_budget: float | None = None  # 1 cpu, walltime budget in minutes
 
-    # Parallelism
-    n_workers: int = 1
+    # # Parallelism
+    # n_workers: int = 1
 
-    # Multi-Objective
-    n_objectives: int = 1
-    objectives: tuple[str] = ("quality",)
+    # # Multi-Objective
+    # n_objectives: int = 1
+    # objectives: tuple[str] = ("quality",)
 
-    # Multi-Fidelity
-    is_multifidelity: bool | None = None
-    fidelity_type: str | None = None
-    min_budget: float | None = None
-    max_budget: float | None = None
+    # # Multi-Fidelity
+    # is_multifidelity: bool | None = None
+    # fidelity_type: str | None = None
+    # min_budget: float | None = None
+    # max_budget: float | None = None
 
     # Constraint BO
     has_constraints: bool | None = None
@@ -205,8 +211,70 @@ class Task:
     search_space_has_forbiddens: bool | None = None
     search_space_has_priors: bool | None = None
 
+input_space_logger = get_logger("InputSpace")
+output_space_logger = get_logger("OutputSpace")
+
+@dataclass_json
+@dataclass(frozen=True)
+class InputSpace:
+    configuration_space: ConfigurationSpace
+    fidelity_space: dict | None = None
+    instance_space: Any | None = None
+
+@dataclass_json
+@dataclass(frozen=True)
+class OptimizationResources:
+    n_trials: int | None = None
+    time_budget: float | None = None  # 1 cpu, walltime budget in minutes
+
+    # Parallelism
+    n_workers: int = 1
+
     def __post_init__(self) -> None:
-        if self.is_multifidelity and self.max_budget is None:
-            raise ValueError("Please specify max budget for multifidelity.")
         if self.n_trials is None and self.time_budget is None:
             raise ValueError("Please specify either `n_trials` or `time_budget`.")
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class OutputSpace:
+    # objective_space: ConfigurationSpace | None = None
+
+    n_objectives: int = 1
+    objectives: tuple[str] = ("quality",)
+
+    # def __post_init__(self) -> None:
+    #     # Set the number of objectives and their names from the objective space
+    #     if self.objective_space is not None:
+    #         object.__setattr__(self, "n_objectives", len(list(self.objective_space.values())))
+    #         object.__setattr__(self, "objectives", tuple(self.objective_space.keys()))
+
+    #     # If no objective space is specified, use a default unbounded space
+    #     else:
+    #         default_space = ConfigurationSpace()
+    #         default_space.add(
+    #             UniformFloatHyperparameter(
+    #                 name="quality",
+    #                 lower=VERY_SMALL_NUMBER,
+    #                 upper=VERY_LARGE_NUMBER,
+    #                 log=False,
+    #             )
+    #         )
+    #         object.__setattr__(self, "objective_space", default_space)
+
+    #         output_space_logger.info("No objective space specified. Using default unbounded space: "\
+    #                                  f"{self.objective_space} ({self.n_objectives}, {self.objectives}).")
+
+
+
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class Task:
+    objective_function: ObjectiveFunction
+    input_space: InputSpace
+    output_space: OutputSpace
+    optimization_resources: OptimizationResources
+    metadata: TaskMetadata
+    seed: int | None = None

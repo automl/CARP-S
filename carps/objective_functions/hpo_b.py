@@ -214,6 +214,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         dataset_id: str | int,
         model_id: str | int,
         surrogates_dir: Path = Path("carps/benchmark_data/HPO-B/saved-surrogates"),
+        seed: int = 1,
         loggers: list[AbstractLogger] | None = None,
     ):
         """Constructor for the HPO-B handler. Given that the configuration space of HPO-B tabular dataset
@@ -227,10 +228,13 @@ class HPOBObjectiveFunction(ObjectiveFunction):
             model id, each model corresponds to a search space, the search space dimensions can be found under
         surrogates_dir: Path
             path to directory with surrogates models.
+        seed : int
+            Seed for configuration space.
         """
         super().__init__(loggers)
         self.model_id = str(model_id)
         self.dataset_id = str(dataset_id)
+        self.seed = seed
 
         surrogates_dir = Path(surrogates_dir)
         surrogates_file = surrogates_dir / "summary-stats.json"
@@ -278,7 +282,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
             The configuration space for the problem.
         """
         bounds = tuple([(0, 1) for _ in range(search_space_dims)])
-        cs = ConfigurationSpace()
+        cs = ConfigurationSpace(seed=self.seed)
         cs.generate_all_continuous_from_bounds(bounds)
         return cs
 

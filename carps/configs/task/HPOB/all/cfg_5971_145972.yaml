@@ -1,32 +1,160 @@
 # @package _global_
 benchmark_id: HPOB
 task_id: hpob/all/5971/145972
-problem:
-  _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
-  model_id: '5971'
-  dataset_id: '145972'
-  surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
 task:
-  n_trials: 100
-  time_budget: null
-  n_workers: 1
-  n_objectives: 1
-  objectives:
-  - quality
-  is_multifidelity: false
-  fidelity_type: null
-  min_budget: null
-  max_budget: null
-  has_constraints: false
-  domain: ML
-  objective_function_approximation: surrogate
-  has_virtual_time: false
-  deterministic: true
-  dimensions: 16
-  search_space_n_categoricals: 0
-  search_space_n_ordinals: 0
-  search_space_n_integers: 0
-  search_space_n_floats: 16
-  search_space_has_conditionals: false
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  _target_: carps.utils.task.Task
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
+    model_id: '5971'
+    dataset_id: '145972'
+    surrogates_dir: ../../../carps/benchmark_data/HPO-B/saved-surrogates
+    seed: 234
+  input_space:
+    configuration_space:
+      name: null
+      hyperparameters:
+      - type: uniform_float
+        name: x0
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x1
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x10
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x11
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x12
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x13
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x14
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x15
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x2
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x3
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x4
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x5
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x6
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x7
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x8
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: x9
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      conditions: []
+      forbiddens: []
+      python_module_version: 1.2.0
+      format_version: 0.4
+    fidelity_space:
+      is_multifidelity: false
+      fidelity_type: null
+      min_budget: null
+      max_budget: null
+    instance_space: null
+  output_space:
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    n_trials: 100
+    time_budget: null
+    n_workers: 1
+  metadata:
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 16
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 16
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
