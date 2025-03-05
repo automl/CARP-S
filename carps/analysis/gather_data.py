@@ -504,7 +504,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
         pd.DataFrame: Processed logs.
     """
     if keep_task_columns is None:
-        keep_task_columns = ["task.n_trials"]
+        keep_task_columns = ["task.optimization_resources.n_trials"]
     logger.debug("Processing raw logs. Normalize n_trials and costs. Calculate trajectory (incumbent cost).")
     # logs= logs.drop(columns=["config"])
     # Filter MO costs

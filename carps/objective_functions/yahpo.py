@@ -70,8 +70,8 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         instance: str,
         metric: str | list[str],
         budget_type: str | None = None,
-        lower_is_better: bool = True,  # noqa: FBT001, FBT002
         yahpo_data_path: str | None = None,
+        seed: int = 0,
         loggers: list[AbstractLogger] | None = None,
     ):
         """Initialize a Yahpo problem.
@@ -86,10 +86,12 @@ class YahpoObjectiveFunction(ObjectiveFunction):
             Metric(s) to optimize for (depends on the Benchmark instance e.g. lcbench).
         budget_type : Optional[str]
             Budget type for the multifidelity setting. Should be None for the blackbox setting.
-        lower_is_better: bool
-            Whether the metric is to be minimized or maximized.
         yahpo_data_path : str | None
             Path to yahpo data, defaults to '../benchmark_data/yahpo_data' (relative to this file).
+        seed : int
+            Seed for configuration space.
+        loggers : list[AbstractLogger] | None
+            List of loggers to log information.
         """
         super().__init__(loggers)
 
@@ -104,13 +106,24 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         self.scenario = bench
         self.instance = str(instance)
 
-        self._problem = BenchmarkSet(scenario=bench, instance=self.instance, check=False)
-        self._configspace = self._problem.get_opt_space(drop_fidelity_params=True)
+        # No multithread in YAHPO Benchmark because this leads to this error:
+        # Traceback (most recent call last):
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carpsenv/lib/python3.12/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target  # noqa: E501
+        #         return _target_(*args, **kwargs)
+        #             ^^^^^^^^^^^^^^^^^^^^^^^^^
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/objective_functions/yahpo.py", line 104, in __init__  # noqa: E501
+        #         local_config.set_data_path(yahpo_data_path_path)
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/lib/yahpo_gym/yahpo_gym/yahpo_gym/local_config.py", line 59, in set_data_path  # noqa: E501
+        #         config.update({'data_path': str(data_path)})
+        #         ^^^^^^^^^^^^^
+        #     AttributeError: 'NoneType' object has no attribute 'update'
+        # Which occurs when having several instances of the same benchmark
+        self._problem = BenchmarkSet(scenario=bench, instance=self.instance, check=False, multithread=False)
+        self._configspace = self._problem.get_opt_space(drop_fidelity_params=True, seed=seed)
         self.fidelity_space = self._problem.get_fidelity_space()
         self.fidelity_dims = list(self._problem.get_fidelity_space().keys())
 
         self.budget_type = budget_type
-        self.lower_is_better = lower_is_better
 
         assert self.budget_type in [*self.fidelity_dims, None], (
             f"The budget type {self.budget_type} you choose is "

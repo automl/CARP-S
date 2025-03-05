@@ -9,7 +9,7 @@ import pandas as pd
 from omegaconf import OmegaConf
 
 config_folder = Path(__file__).parent.parent / "configs"
-config_folder_problem = config_folder / "problem"
+config_folder_problem = config_folder / "task"
 config_folder_optimizer = config_folder / "optimizer"
 
 

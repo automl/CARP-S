@@ -34,7 +34,7 @@ def get_experiment_status(path: Path) -> dict:
     status = RunStatus.MISSING
 
     cfg = OmegaConf.load(path)
-    n_trials = cfg.task.n_trials
+    n_trials = cfg.task.optimization_resources.n_trials
     trial_logs_fn = path.parent.parent / "trial_logs.jsonl"
     if trial_logs_fn.is_file():
         trial_logs = read_jsonl_content(str(trial_logs_fn))

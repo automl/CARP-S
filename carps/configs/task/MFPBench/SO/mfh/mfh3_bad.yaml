@@ -1,39 +1,74 @@
-# @package _global_
 benchmark_id: MFPBench
 task_id: mfpbench/SO/mfh/mfh3_bad
-problem:
-  _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
-  benchmark_name: mfh
-  metric:
-  - value
-  benchmark: mfh3_bad
-  budget_type: z
-  prior: null
-  perturb_prior: null
-  benchmark_kwargs:
-    bias: null
-    noise: null
 task:
-  n_trials: 90
-  time_budget: null
-  n_workers: 1
-  n_objectives: 1
-  objectives:
-  - value
-  is_multifidelity: true
-  fidelity_type: z
-  min_budget: 1
-  max_budget: 100
-  has_constraints: null
-  domain: synthetic
-  objective_function_approximation: surrogate
-  has_virtual_time: true
-  deterministic: true
-  dimensions: 3
-  search_space_n_categoricals: 0
-  search_space_n_ordinals: 0
-  search_space_n_integers: 0
-  search_space_n_floats: 3
-  search_space_has_conditionals: false
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  _target_: carps.utils.task.Task
+  seed: ${seed}
+  objective_function:
+    benchmark_name: mfh
+    metric:
+    - value
+    benchmark: mfh3_bad
+    budget_type: z
+    prior: null
+    perturb_prior: null
+    benchmark_kwargs:
+      bias: null
+      noise: null
+    _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
+  input_space:
+    configuration_space:
+      name: mfh3_bad
+      hyperparameters:
+      - type: uniform_float
+        name: X_0
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: X_1
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      - type: uniform_float
+        name: X_2
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.5
+        log: false
+        meta: null
+      conditions: []
+      forbiddens: []
+      python_module_version: 1.2.0
+      format_version: 0.4
+    fidelity_space:
+      is_multifidelity: true
+      fidelity_type: z
+      min_budget: 1
+      max_budget: 100
+    instance_space: null
+  output_space:
+    n_objectives: 1
+    objectives:
+    - value
+  optimization_resources:
+    n_trials: 90
+    time_budget: null
+    n_workers: 1
+  metadata:
+    has_constraints: false
+    domain: synthetic
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 3
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 3
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

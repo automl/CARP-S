@@ -11,7 +11,7 @@
 *    NOTE: JAHSBench is commented out in the requirements file due to compatibility issues
 * 4. Test example 1 (smac20 multifidelity on PD1 imagenet_resnet_512 benchmark):
 *    `python carps/run.py +optimizer/smac20=multifidelity +problem/MFPBench/pd1=imagenet_resnet_512
-*     seed=1 task.n_trials=25 data_dir=<data_dir_path>`
+*     seed=1 task.optimization_resources.n_trials=25 data_dir=<data_dir_path>`
 *    Test example 2 (smac20 multifidelity on all available MFHartmann benchmarks):
 *    `python carps/run.py +optimizer/smac20=multifidelity '+problem/MFPBench/mfh=glob(*)' 'seed=range(0, 10)' -m`
 """

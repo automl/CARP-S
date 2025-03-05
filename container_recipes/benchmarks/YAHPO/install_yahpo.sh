@@ -10,6 +10,10 @@ if [ -z "$PIP" ]
 then
     PIP="pip"
 fi
+if [ -z "$CARPS_ROOT" ]
+then
+    CARPS_ROOT="."
+fi
 if [ -z "$CONDA_ENV_NAME" ]
 then
     CONDA_RUN_COMMAND=

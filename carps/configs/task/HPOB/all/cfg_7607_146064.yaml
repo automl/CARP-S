@@ -9,7 +9,7 @@ task:
     model_id: '7607'
     dataset_id: '146064'
     surrogates_dir: ../../../carps/benchmark_data/HPO-B/saved-surrogates
-    seed: 234
+    seed: ${seed}
   input_space:
     configuration_space:
       name: null

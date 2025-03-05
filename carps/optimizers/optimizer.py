@@ -6,33 +6,26 @@ import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
-from omegaconf import DictConfig, OmegaConf
-
-from carps.utils.task import Task
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
+    from carps.utils.task import Task
     from carps.utils.types import Incumbent, SearchSpace
 
 
 class Optimizer(ABC):
     """Base class for all optimizers."""
 
-    def __init__(
-        self, problem: ObjectiveFunction, task: Task | dict | DictConfig, loggers: list[AbstractLogger] | None = None
-    ) -> None:
+    def __init__(self, task: Task, loggers: list[AbstractLogger] | None = None) -> None:
         """Optimizer.
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            Optimization problem aka the function to be optimized.
-        task : Task | dict | DictConfig
-            Task definition, e.g. specifiying the number of trials, etc.
+        task : Task
+            Task definition: The objective function with optimization resources and defined input and output space.
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
 
@@ -42,22 +35,16 @@ class Optimizer(ABC):
             Unknown task type, must be either `Task`, `dict` or `DictConfig`.
         """
         super().__init__()
-        self.problem = problem
-
-        if isinstance(task, dict):
-            task = Task(**task)
-        elif isinstance(task, DictConfig):
-            task = Task(**OmegaConf.to_container(cfg=task, resolve=True))
-        elif isinstance(task, Task):
-            pass
-        else:
-            raise ValueError("task must be either `Task`, `dict` or `DictConfig`.")
 
         self.task: Task = task
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
 
         # Convert min to seconds
-        self.time_budget = self.task.time_budget * 60 if self.task.time_budget is not None else None
+        self.time_budget = (
+            self.task.optimization_resources.time_budget * 60
+            if self.task.optimization_resources.time_budget is not None
+            else None
+        )
         self.virtual_time_elapsed_seconds: float = 0.0
         self.trial_counter: int | float = 0
 
@@ -175,7 +162,10 @@ class Optimizer(ABC):
         cont = True
         if self.time_budget is not None and not self._time_left(start_time):
             cont = False
-        if self.task.n_trials is not None and self.trial_counter >= self.task.n_trials:
+        if (
+            self.task.optimization_resources.n_trials is not None
+            and self.trial_counter >= self.task.optimization_resources.n_trials
+        ):
             cont = False
 
         return cont
@@ -186,9 +176,9 @@ class Optimizer(ABC):
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()
             normalized_budget = 1.0
-            if self.task.max_budget is not None and trial_info.budget is not None:
-                normalized_budget = trial_info.budget / self.task.max_budget
-            if self.task.is_multifidelity:
+            if self.task.input_space.fidelity_space.max_budget is not None and trial_info.budget is not None:
+                normalized_budget = trial_info.budget / self.task.input_space.fidelity_space.max_budget
+            if self.task.input_space.fidelity_space.is_multifidelity:
                 trial_info = TrialInfo(
                     config=trial_info.config,
                     instance=trial_info.instance,
@@ -198,7 +188,7 @@ class Optimizer(ABC):
                     checkpoint=trial_info.checkpoint,
                     name=trial_info.name,
                 )
-            trial_value = self.problem.evaluate(trial_info=trial_info)
+            trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
             self.virtual_time_elapsed_seconds += trial_value.virtual_time
             self.tell(trial_info=trial_info, trial_value=trial_value)
 
@@ -208,14 +198,14 @@ class Optimizer(ABC):
                 for logger in self.loggers:
                     logger.log_incumbent(self.trial_counter, new_incumbent)
 
-            if not self.task.is_multifidelity:
+            if not self.task.input_space.fidelity_space.is_multifidelity:
                 self.trial_counter += 1
             else:
                 assert (
-                    self.task.max_budget is not None
+                    self.task.input_space.fidelity_space.max_budget is not None
                 ), "Define max_budget for multi-fidelity optimization in your problem setup."
                 assert trial_info.budget is not None
-                self.trial_counter += trial_info.budget / self.task.max_budget
+                self.trial_counter += trial_info.budget / self.task.input_space.fidelity_space.max_budget
         return self.get_current_incumbent()
 
     @abstractmethod

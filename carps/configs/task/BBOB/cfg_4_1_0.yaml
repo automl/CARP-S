@@ -9,7 +9,7 @@ task:
     dimension: 4
     fid: 1
     instance: 0
-    seed: 234
+    seed: ${seed}
   input_space:
     configuration_space:
       name: null

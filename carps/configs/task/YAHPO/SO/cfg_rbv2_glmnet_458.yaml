@@ -1,34 +1,77 @@
 # @package _global_
 benchmark_id: YAHPO
 task_id: yahpo/so/rbv2_glmnet/458/None
-problem:
-  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
-  bench: rbv2_glmnet
-  instance: '458'
-  budget_type: null
-  metric:
-  - acc
 task:
-  n_trials: 90
-  time_budget: null
-  n_workers: 1
-  n_objectives: 1
-  objectives:
-  - acc
-  is_multifidelity: false
-  fidelity_type: null
-  min_budget: null
-  max_budget: null
-  has_constraints: false
-  domain: ML
-  objective_function_approximation: surrogate
-  has_virtual_time: true
-  deterministic: true
-  dimensions: 3
-  search_space_n_categoricals: 1
-  search_space_n_ordinals: 0
-  search_space_n_integers: 0
-  search_space_n_floats: 2
-  search_space_has_conditionals: false
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  _target_: carps.utils.task.Task
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: rbv2_glmnet
+    instance: '458'
+    budget_type: null
+    metric:
+    - acc
+    seed: ${seed}
+  input_space:
+    configuration_space:
+      name: null
+      hyperparameters:
+      - type: uniform_float
+        name: alpha
+        lower: 0.0
+        upper: 1.0
+        default_value: 1.0
+        log: false
+        meta: null
+      - type: categorical
+        name: num.impute.selected.cpo
+        choices:
+        - impute.mean
+        - impute.median
+        - impute.hist
+        weights: null
+        default_value: impute.mean
+        meta: null
+      - type: uniform_float
+        name: s
+        lower: 0.0009118819656
+        upper: 1096.6331584284585
+        default_value: 1.0
+        log: true
+        meta: null
+      - type: constant
+        name: task_id
+        value: '458'
+        meta: null
+      conditions: []
+      forbiddens: []
+      python_module_version: 1.2.0
+      format_version: 0.4
+    fidelity_space:
+      is_multifidelity: false
+      fidelity_type: null
+      min_budget: null
+      max_budget: null
+    instance_space: null
+  output_space:
+    n_objectives: 1
+    objectives:
+    - acc
+  optimization_resources:
+    n_trials: 90
+    time_budget: 90
+    n_workers: 1
+  metadata:
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 3
+    search_space_n_categoricals: 1
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 2
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

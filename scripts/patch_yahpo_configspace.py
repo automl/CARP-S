@@ -15,6 +15,9 @@ for p in configspace_paths:
     for hp in hps:
         if "q" not in hp:
             hp["q"] = None
+        if "default" in hp:
+            hp["default_value"] = hp["default"]
+            del hp["default"]
         new_hps.append(hp)
     cs["hyperparameters"] = hps
     with open(p, "w") as file:

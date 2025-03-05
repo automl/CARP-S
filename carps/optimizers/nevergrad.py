@@ -31,7 +31,6 @@ if TYPE_CHECKING:
     from omegaconf import DictConfig
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -81,34 +80,31 @@ class NevergradOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
+        task: Task,
         nevergrad_cfg: DictConfig,
         optimizer_cfg: DictConfig,
-        task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         """Initialize the optimizer.
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            The problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         nevergrad_cfg : DictConfig
             The configuration for the Nevergrad optimizer.
         optimizer_cfg : DictConfig
             The configuration for the optimizer.
-        task : Task
-            The task to optimize.
         loggers : list[AbstractLogger] | None
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
 
         self.fidelity_enabled = False
         self.fidelity_type: str | None = None
-        if self.task.is_multifidelity:
+        if self.task.input_space.fidelity_space.is_multifidelity:
             self.fidelity_enabled = True
-            self.fidelity_type = self.task.fidelity_type
-        self.configspace = problem.configspace
+            self.fidelity_type = self.task.input_space.fidelity_space.fidelity_type
+        self.configspace = task.input_space.configuration_space
         self.ng_space = self.convert_configspace(self.configspace)
         self.nevergrad_cfg = nevergrad_cfg
         self.optimizer_cfg = optimizer_cfg
@@ -147,14 +143,14 @@ class NevergradOptimizer(Optimizer):
                 ng_opt = ext_opts[self.nevergrad_cfg.optimizer_name](**self.optimizer_cfg)
             ng_opt = ng_opt(
                 parametrization=self.ng_space,
-                budget=self.task.n_trials,
-                num_workers=self.task.n_workers,
+                budget=self.task.optimization_resources.n_trials,
+                num_workers=self.task.optimization_resources.n_workers,
             )
         else:
             ng_opt = ng.optimizers.registry[self.nevergrad_cfg.optimizer_name](
                 parametrization=self.ng_space,
-                budget=self.task.n_trials,
-                num_workers=self.task.n_workers,
+                budget=self.task.optimization_resources.n_trials,
+                num_workers=self.task.optimization_resources.n_workers,
             )
         ng_opt.parametrization.random_state = np.random.RandomState(self.nevergrad_cfg.seed)
         return ng_opt
@@ -211,7 +207,7 @@ class NevergradOptimizer(Optimizer):
             config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
-            budget=None if not self.fidelity_enabled else self.task.max_budget,
+            budget=None if not self.fidelity_enabled else self.task.input_space.fidelity_space.max_budget,
         )
         self.counter += 1
         return trial_info
@@ -253,7 +249,7 @@ class NevergradOptimizer(Optimizer):
         incumbent = None
         cost = None
         unique_name = None
-        if self.task.n_objectives > 1:
+        if self.task.output_space.n_objectives > 1:
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
             trial_infos = [

@@ -1,34 +1,119 @@
 # @package _global_
 benchmark_id: YAHPO
 task_id: yahpo/so/rbv2_ranger/16/None
-problem:
-  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
-  bench: rbv2_ranger
-  instance: '16'
-  budget_type: null
-  metric:
-  - acc
 task:
-  n_trials: 134
-  time_budget: null
-  n_workers: 1
-  n_objectives: 1
-  objectives:
-  - acc
-  is_multifidelity: false
-  fidelity_type: null
-  min_budget: null
-  max_budget: null
-  has_constraints: false
-  domain: ML
-  objective_function_approximation: surrogate
-  has_virtual_time: true
-  deterministic: true
-  dimensions: 8
-  search_space_n_categoricals: 3
-  search_space_n_ordinals: 0
-  search_space_n_integers: 3
-  search_space_n_floats: 2
-  search_space_has_conditionals: true
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  _target_: carps.utils.task.Task
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: rbv2_ranger
+    instance: '16'
+    budget_type: null
+    metric:
+    - acc
+    seed: ${seed}
+  input_space:
+    configuration_space:
+      name: null
+      hyperparameters:
+      - type: uniform_int
+        name: min.node.size
+        lower: 1
+        upper: 100
+        default_value: 50
+        log: false
+        meta: null
+      - type: uniform_float
+        name: mtry.power
+        lower: 0.0
+        upper: 1.0
+        default_value: 0.0
+        log: false
+        meta: null
+      - type: categorical
+        name: num.impute.selected.cpo
+        choices:
+        - impute.mean
+        - impute.median
+        - impute.hist
+        weights: null
+        default_value: impute.mean
+        meta: null
+      - type: uniform_int
+        name: num.trees
+        lower: 1
+        upper: 2000
+        default_value: 1000
+        log: false
+        meta: null
+      - type: categorical
+        name: respect.unordered.factors
+        choices:
+        - ignore
+        - order
+        - partition
+        weights: null
+        default_value: ignore
+        meta: null
+      - type: uniform_float
+        name: sample.fraction
+        lower: 0.1
+        upper: 1.0
+        default_value: 0.55
+        log: false
+        meta: null
+      - type: categorical
+        name: splitrule
+        choices:
+        - gini
+        - extratrees
+        weights: null
+        default_value: gini
+        meta: null
+      - type: constant
+        name: task_id
+        value: '16'
+        meta: null
+      - type: uniform_int
+        name: num.random.splits
+        lower: 1
+        upper: 100
+        default_value: 1
+        log: false
+        meta: null
+      conditions:
+      - type: EQ
+        child: num.random.splits
+        parent: splitrule
+        value: extratrees
+      forbiddens: []
+      python_module_version: 1.2.0
+      format_version: 0.4
+    fidelity_space:
+      is_multifidelity: false
+      fidelity_type: null
+      min_budget: null
+      max_budget: null
+    instance_space: null
+  output_space:
+    n_objectives: 1
+    objectives:
+    - acc
+  optimization_resources:
+    n_trials: 134
+    time_budget: 134
+    n_workers: 1
+  metadata:
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 8
+    search_space_n_categoricals: 3
+    search_space_n_ordinals: 0
+    search_space_n_integers: 3
+    search_space_n_floats: 2
+    search_space_has_conditionals: true
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -8,7 +8,6 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 
 from carps.utils.loggingutils import get_logger, setup_logging
-from carps.utils.requirements import check_requirements
 from carps.utils.running import optimize
 
 if TYPE_CHECKING:
@@ -33,7 +32,7 @@ def main(cfg: DictConfig) -> None:
     hydra_cfg = HydraConfig.instance().get()
     overrides = hydra_cfg.overrides.task
     logger.info(f"Runcommand: `python -m carps.run {' '.join(overrides)}`")
-    check_requirements(cfg=cfg)
+    # check_requirements(cfg=cfg) # TODO: Update requirement checking
     optimize(cfg=cfg)
 
 

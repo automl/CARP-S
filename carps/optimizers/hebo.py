@@ -1,7 +1,8 @@
 """Implementation of HEBO Optimizer.
 
 [2024-03-27]
-Note that running `python carps/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1 task.n_trials=25`
+Note that running `python carps/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1
+ task.optimization_resources.n_trials=25`
 raises following error:
 "linear_operator.utils.errors.NanError: cholesky_cpu: 4 of 4 elements of the torch.Size([2, 2]) tensor are NaN."
 
@@ -37,7 +38,6 @@ if TYPE_CHECKING:
     from omegaconf import DictConfig
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -166,7 +166,6 @@ class HEBOOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
         task: Task,
         hebo_cfg: DictConfig | None = None,
         loggers: list[AbstractLogger] | None = None,
@@ -181,19 +180,17 @@ class HEBOOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            The objective function.
         task : Task
-            The task description.
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         hebo_cfg : DictConfig, optional
             Optional kwargs for HEBO class.
         loggers : list[AbstractLogger], optional
             List of loggers to use, by default None
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
-        self.configspace = self.problem.configspace
+        self.configspace = self.task.input_space.configuration_space
 
         if len(self.configspace.conditions) > 0:
             logger.warning(
@@ -204,8 +201,7 @@ class HEBOOptimizer(Optimizer):
             # raise RuntimeError(msg)
 
         self.hebo_configspace = self.convert_configspace(self.configspace)
-        self.metric = getattr(problem, "metric", "cost")
-        self.budget_type = getattr(self.problem, "budget_type", None)
+        self.budget_type = getattr(self.task.input_space.fidelity_space, "fidelity_type", None)
         self.trial_counter = 0
         hebo_cfg = {} if hebo_cfg is None else dict(hebo_cfg)
         self.hebo_cfg = hebo_cfg
@@ -277,7 +273,7 @@ class HEBOOptimizer(Optimizer):
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=rec,
             design_space=self.hebo_configspace,
-            config_space=self.problem.configspace,
+            config_space=self.task.input_space.configuration_space,
             allow_inactive_with_values=True,
         )
         return TrialInfo(config=config, instance=None, budget=None, seed=None)
@@ -327,7 +323,7 @@ class HEBOOptimizer(Optimizer):
         TrialValue
             Information about function evaluation
         """
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         self.completed_experiments[str(self.trial_counter)] = (trial_value, trial_info)
         return trial_value
 
@@ -397,7 +393,7 @@ class HEBOOptimizer(Optimizer):
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=best_x,
             design_space=self.hebo_configspace,
-            config_space=self.problem.configspace,
+            config_space=self.task.input_space.configuration_space,
             allow_inactive_with_values=True,
         )
         trial_info = TrialInfo(config=config)

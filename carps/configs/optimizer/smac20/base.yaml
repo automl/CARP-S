@@ -6,7 +6,7 @@ optimizer:
   smac_cfg:
     scenario:
       seed: ${seed}
-      n_trials: ${task.n_trials}
+      n_trials: ${task.optimization_resources.n_trials}
       objectives: ${task.objectives}
       deterministic: true
       n_workers: 1

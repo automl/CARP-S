@@ -30,6 +30,7 @@ dependencies = [
   "pymoo",
   "GitPython",
   "fire",
+  "ipywidgets",
 ]
 
 requires-python = ">=3.9"

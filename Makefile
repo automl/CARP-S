@@ -98,6 +98,9 @@ install-swig:
 		echo "Unsupported OS: Please install SWIG manually."; \
 	fi
 
+optimizer_smac:
+	$(MAKE) install-swig
+	$(PIP) install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
 
 benchmark_bbob:
 	# Install BBOB

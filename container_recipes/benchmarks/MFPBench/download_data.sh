@@ -8,5 +8,5 @@ else
     CONDA_RUN_COMMAND="${CONDA_COMMAND} run ${CONDA_ENV_NAME}"
 fi
 
-$CONDA_RUN_COMMAND python -m mfpbench download --status --data-dir data
+$CONDA_RUN_COMMAND python -m mfpbench download --status --data-dir carps/benchmark_data/mfpbench
 $CONDA_RUN_COMMAND python -m mfpbench download --benchmark pd1
