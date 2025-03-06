@@ -1,0 +1,454 @@
+# @package _global_
+benchmark_id: YAHPO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: yahpo/MOMF/trainsize/iaml_super/1067/trainsize
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: iaml_super
+    instance: '1067'
+    budget_type: trainsize
+    metric:
+    - mmce
+    - nf
+    - ias
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: categorical
+          name: learner
+          choices:
+          - ranger
+          - glmnet
+          - xgboost
+          - rpart
+          weights: null
+          default_value: ranger
+          meta: null
+        - type: constant
+          name: task_id
+          value: '1067'
+          meta: null
+        - type: uniform_float
+          name: glmnet.alpha
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: glmnet.s
+          lower: 0.0001
+          upper: 999.9999999999998
+          default_value: 0.316227766
+          log: true
+          meta: null
+        - type: uniform_int
+          name: ranger.min.node.size
+          lower: 1
+          upper: 100
+          default_value: 50
+          log: false
+          meta: null
+        - type: uniform_float
+          name: ranger.mtry.ratio
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_int
+          name: ranger.num.trees
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: categorical
+          name: ranger.replace
+          choices:
+          - 'TRUE'
+          - 'FALSE'
+          weights: null
+          default_value: 'TRUE'
+          meta: null
+        - type: categorical
+          name: ranger.respect.unordered.factors
+          choices:
+          - ignore
+          - order
+          - partition
+          weights: null
+          default_value: ignore
+          meta: null
+        - type: uniform_float
+          name: ranger.sample.fraction
+          lower: 0.1
+          upper: 1.0
+          default_value: 0.55
+          log: false
+          meta: null
+        - type: categorical
+          name: ranger.splitrule
+          choices:
+          - gini
+          - extratrees
+          weights: null
+          default_value: gini
+          meta: null
+        - type: uniform_float
+          name: rpart.cp
+          lower: 0.0001
+          upper: 1.0
+          default_value: 0.01
+          log: true
+          meta: null
+        - type: uniform_int
+          name: rpart.maxdepth
+          lower: 1
+          upper: 30
+          default_value: 16
+          log: false
+          meta: null
+        - type: uniform_int
+          name: rpart.minbucket
+          lower: 1
+          upper: 100
+          default_value: 50
+          log: false
+          meta: null
+        - type: uniform_int
+          name: rpart.minsplit
+          lower: 1
+          upper: 100
+          default_value: 50
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.alpha
+          lower: 0.0001
+          upper: 999.9999999999998
+          default_value: 0.316227766
+          log: true
+          meta: null
+        - type: categorical
+          name: xgboost.booster
+          choices:
+          - gblinear
+          - gbtree
+          - dart
+          weights: null
+          default_value: gblinear
+          meta: null
+        - type: uniform_float
+          name: xgboost.lambda
+          lower: 0.0001
+          upper: 999.9999999999998
+          default_value: 0.316227766
+          log: true
+          meta: null
+        - type: uniform_int
+          name: xgboost.nrounds
+          lower: 3
+          upper: 2000
+          default_value: 77
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.subsample
+          lower: 0.1
+          upper: 1.0
+          default_value: 0.55
+          log: false
+          meta: null
+        - type: uniform_int
+          name: ranger.num.random.splits
+          lower: 1
+          upper: 100
+          default_value: 50
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.colsample_bylevel
+          lower: 0.01
+          upper: 1.0
+          default_value: 0.505
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.colsample_bytree
+          lower: 0.01
+          upper: 1.0
+          default_value: 0.505
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.eta
+          lower: 0.0001
+          upper: 1.0
+          default_value: 0.01
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.gamma
+          lower: 0.0001
+          upper: 7.0
+          default_value: 0.0264575131
+          log: true
+          meta: null
+        - type: uniform_int
+          name: xgboost.max_depth
+          lower: 1
+          upper: 15
+          default_value: 8
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.min_child_weight
+          lower: 2.718281828459
+          upper: 150.0
+          default_value: 20.1926292064
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.rate_drop
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.skip_drop
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        conditions:
+        - type: EQ
+          child: glmnet.alpha
+          parent: learner
+          value: glmnet
+        - type: EQ
+          child: glmnet.s
+          parent: learner
+          value: glmnet
+        - type: EQ
+          child: ranger.min.node.size
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: ranger.mtry.ratio
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: ranger.num.trees
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: ranger.replace
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: ranger.respect.unordered.factors
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: ranger.sample.fraction
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: ranger.splitrule
+          parent: learner
+          value: ranger
+        - type: EQ
+          child: rpart.cp
+          parent: learner
+          value: rpart
+        - type: EQ
+          child: rpart.maxdepth
+          parent: learner
+          value: rpart
+        - type: EQ
+          child: rpart.minbucket
+          parent: learner
+          value: rpart
+        - type: EQ
+          child: rpart.minsplit
+          parent: learner
+          value: rpart
+        - type: EQ
+          child: xgboost.alpha
+          parent: learner
+          value: xgboost
+        - type: EQ
+          child: xgboost.booster
+          parent: learner
+          value: xgboost
+        - type: EQ
+          child: xgboost.lambda
+          parent: learner
+          value: xgboost
+        - type: EQ
+          child: xgboost.nrounds
+          parent: learner
+          value: xgboost
+        - type: EQ
+          child: xgboost.subsample
+          parent: learner
+          value: xgboost
+        - type: AND
+          child: ranger.num.random.splits
+          conditions:
+          - type: EQ
+            child: ranger.num.random.splits
+            parent: ranger.splitrule
+            value: extratrees
+          - type: EQ
+            child: ranger.num.random.splits
+            parent: learner
+            value: ranger
+        - type: AND
+          child: xgboost.colsample_bylevel
+          conditions:
+          - type: IN
+            child: xgboost.colsample_bylevel
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.colsample_bylevel
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.colsample_bytree
+          conditions:
+          - type: IN
+            child: xgboost.colsample_bytree
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.colsample_bytree
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.eta
+          conditions:
+          - type: IN
+            child: xgboost.eta
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.eta
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.gamma
+          conditions:
+          - type: IN
+            child: xgboost.gamma
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.gamma
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.max_depth
+          conditions:
+          - type: IN
+            child: xgboost.max_depth
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.max_depth
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.min_child_weight
+          conditions:
+          - type: IN
+            child: xgboost.min_child_weight
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.min_child_weight
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.rate_drop
+          conditions:
+          - type: EQ
+            child: xgboost.rate_drop
+            parent: xgboost.booster
+            value: dart
+          - type: EQ
+            child: xgboost.rate_drop
+            parent: learner
+            value: xgboost
+        - type: AND
+          child: xgboost.skip_drop
+          conditions:
+          - type: EQ
+            child: xgboost.skip_drop
+            parent: xgboost.booster
+            value: dart
+          - type: EQ
+            child: xgboost.skip_drop
+            parent: learner
+            value: xgboost
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: trainsize
+      min_budget: 0.03
+      max_budget: 1.0
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 3
+    objectives:
+    - mmce
+    - nf
+    - ias
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 232
+    time_budget: 232
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 28
+    search_space_n_categoricals: 5
+    search_space_n_ordinals: 0
+    search_space_n_integers: 8
+    search_space_n_floats: 15
+    search_space_has_conditionals: true
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -1,0 +1,280 @@
+# @package _global_
+benchmark_id: BBOB
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: bbob/32/22/1
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.bbob.BBOBObjectiveFunction
+    dimension: 32
+    fid: 22
+    instance: 1
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: x0
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x1
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x10
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x11
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x12
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x13
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x14
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x15
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x16
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x17
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x18
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x19
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x2
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x20
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x21
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x22
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x23
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x24
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x25
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x26
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x27
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x28
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x29
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x3
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x30
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x31
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x4
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x5
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x6
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x7
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x8
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x9
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_budget: null
+      max_budget: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 247
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: synthetic
+    objective_function_approximation: real
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 32
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 32
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
