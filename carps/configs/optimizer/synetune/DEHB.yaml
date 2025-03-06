@@ -6,10 +6,10 @@ optimizer:
   optimizer_name: 'DEHB'
   optimizer_kwargs:
     random_seed: ${seed}
-    max_resource_attr: ${task.fidelity_type}
-    grace_period: ${task.min_budget}
-    #max_resource_level: ${task.max_budget}
-  # max_budget: ${task.max_budget}
+    max_resource_attr: ${task.input_space.fidelity_space.fidelity_type}
+    grace_period: ${task.input_space.fidelity_space.min_budget}
+    #max_resource_level: ${task.input_space.fidelity_space.max_budget}
+  # max_budget: ${task.input_space.fidelity_space.max_budget}
 
 
 

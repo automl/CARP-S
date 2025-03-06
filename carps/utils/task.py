@@ -205,6 +205,9 @@ class InputSpace:
     fidelity_space: FidelitySpace = field(default_factory=FidelitySpace)
     instance_space: Any | None = None
 
+    def __post_init__(self) -> None:
+        assert isinstance(self.configuration_space, ConfigurationSpace)
+
 
 @dataclass_json
 @dataclass(frozen=True)

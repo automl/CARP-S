@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from smac.facade.abstract_facade import AbstractFacade
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -65,9 +64,8 @@ class SMAC3Optimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
-        smac_cfg: DictConfig,
         task: Task,
+        smac_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         """Initialize SMAC3 Optimizer.
@@ -77,18 +75,16 @@ class SMAC3Optimizer(Optimizer):
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            ObjectiveFunction to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         smac_cfg : DictConfig
             SMAC configuration.
-        task : Task
-            Task to optimize.
         loggers : list[AbstractLogger], optional
             Loggers to log information, by default None
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
 
-        self.configspace = self.problem.configspace
+        self.configspace = self.task.input_space.configuration_space
         self.smac_cfg = smac_cfg
         self._solver: AbstractFacade | None = None
         self._cb_on_start_called: bool = False
@@ -162,7 +158,7 @@ class SMAC3Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         return trial_value.cost
 
     def _setup_optimizer(self) -> AbstractFacade:
@@ -301,7 +297,7 @@ class SMAC3Optimizer(Optimizer):
             config=trial_info.config, instance=trial_info.instance, budget=trial_info.budget, seed=trial_info.seed
         )
         additional_info = trial_value.additional_info
-        if self.task.n_objectives > 1:
+        if self.task.output_space.n_objectives > 1:
             # Save costs for multi-objective because SMAC might scalarize the cost
             additional_info["cost"] = trial_value.cost
         smac_trial_value = SmacTrialValue(

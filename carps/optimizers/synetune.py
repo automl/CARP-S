@@ -55,7 +55,6 @@ if TYPE_CHECKING:
     from syne_tune.optimizer.scheduler import TrialScheduler as SyneTrialScheduler  # type: ignore
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -112,9 +111,8 @@ class SynetuneOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
-        optimizer_name: str,
         task: Task,
+        optimizer_name: str,
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
         conversion_factor: int = 1000,
@@ -123,12 +121,10 @@ class SynetuneOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            ObjectiveFunction to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         optimizer_name : str
             Name of the optimizer.
-        task : Task
-            Task to optimize.
         optimizer_kwargs : dict, optional
             Optimizer kwargs, by default None
         loggers : list[AbstractLogger], optional
@@ -137,21 +133,21 @@ class SynetuneOptimizer(Optimizer):
             Conversion factor, by default 1000. Some fidelity types are a fraction of the max budget but need to be
             converted to integer for synetune.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
         self.fidelity_enabled = False
-        self.max_budget = task.max_budget
+        self.max_budget = task.input_space.fidelity_space.max_budget
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts["with_mf"]:
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
             self.fidelity_enabled = True
-            if self.task.fidelity_type is None:
+            if self.task.input_space.fidelity_space.fidelity_type is None:
                 raise ValueError("To run multi-fidelity optimizer, the problem must define a fidelity type!")
             if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
-        self.fidelity_type: str | None = self.task.fidelity_type
-        self.configspace = self.problem.configspace
-        self.metric: str | tuple[str] = self.task.objectives
+        self.fidelity_type: str | None = self.task.input_space.fidelity_space.fidelity_type
+        self.configspace = self.task.objective_function.configspace
+        self.metric: str | tuple[str] = self.task.output_space.objectives
         if len(self.metric) == 1:
             self.metric = self.metric[0]
         self.conversion_factor = conversion_factor
@@ -290,18 +286,18 @@ class SynetuneOptimizer(Optimizer):
         cost = trial_value.cost
         trial = self.convert_to_synetrial(trial_info=trial_info)
         experiment_result = {}
-        if self.task.n_objectives == 1:
-            experiment_result = {self.task.objectives[0]: cost}
+        if self.task.output_space.n_objectives == 1:
+            experiment_result = {self.task.output_space.objectives[0]: cost}
         else:
-            experiment_result = {self.task.objectives[i]: cost[i] for i in range(len(cost))}  # type: ignore[arg-type,index]
+            experiment_result = {self.task.output_space.objectives[i]: cost[i] for i in range(len(cost))}  # type: ignore[arg-type,index]
 
-        if self.task.is_multifidelity:
+        if self.task.input_space.fidelity_space.is_multifidelity:
             assert trial_info.budget is not None
             assert self.fidelity_type is not None
             experiment_result[self.fidelity_type] = (
                 trial_info.budget if not self.convert else int(self.conversion_factor * trial_info.budget)
             )
-            # del experiment_result[self.task.objectives]
+            # del experiment_result[self.task.output_space.objectives]
 
             self._solver.on_trial_add(trial=trial)
         self.trial_counter += 1
@@ -328,7 +324,7 @@ class SynetuneOptimizer(Optimizer):
 
     def get_pareto_front(self) -> list[TrialResult]:
         """Return the pareto front for multi-objective optimization."""
-        if self.task.is_multifidelity:
+        if self.task.input_space.fidelity_space.is_multifidelity:
             # Determine maximum budget run
             max_budget = np.max([v.metrics[self.fidelity_type] for v in self.completed_experiments.values()])
             # Get only those trial results that ran on max budget
@@ -336,7 +332,9 @@ class SynetuneOptimizer(Optimizer):
                 [v for v in self.completed_experiments.values() if v.metrics[self.fidelity_type] == max_budget]
             )
             # Get costs, exclude fidelity
-            costs = np.array([[v.metrics[m] for m in self.task.objectives] for v in results_on_highest_fidelity])
+            costs = np.array(
+                [[v.metrics[m] for m in self.task.output_space.objectives] for v in results_on_highest_fidelity]
+            )
             # Determine pareto front of the trials run on max budget
             front = results_on_highest_fidelity[pareto(costs)]
         else:
@@ -361,7 +359,9 @@ class SynetuneOptimizer(Optimizer):
 
         _optimizer_kwargs: dict[str, Any] = {
             "metric": self.metric,
-            "mode": "min" if self.task.n_objectives == 1 else list(np.repeat("min", self.task.n_objectives)),
+            "mode": "min"
+            if self.task.output_space.n_objectives == 1
+            else list(np.repeat("min", self.task.output_space.n_objectives)),
         }
 
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
@@ -408,8 +408,8 @@ class SynetuneOptimizer(Optimizer):
         Incumbent
             Incumbent tuple(s) containing trial info and trial value.
         """
-        if self.task.n_objectives == 1:
-            objective = self.task.objectives[0]
+        if self.task.output_space.n_objectives == 1:
+            objective = self.task.output_space.objectives[0]
             trial_result = self.best_trial(metric=objective)
             trial_info = self.convert_to_trial(trial=trial_result)
             cost = trial_result.metrics[objective]

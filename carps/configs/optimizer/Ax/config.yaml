@@ -7,4 +7,4 @@ optimizer:
   ax_cfg:
     scenario:
       seed: ${seed}
-      objectives: ${task.objectives}
+      objectives: ${task.output_space.objectives}

@@ -35,7 +35,6 @@ if TYPE_CHECKING:
     from optuna.study import Study  # type: ignore
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -90,28 +89,26 @@ class OptunaOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
-        optuna_cfg: DictConfig,
         task: Task,
+        optuna_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         """Initialize the optimizer.
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            The problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         optuna_cfg : DictConfig
             The configuration for the Optuna optimizer.
-        task : Task
         loggers : list[AbstractLogger] | None
             The loggers to use during optimization.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
         self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
 
-        configspace = self.problem.configspace
+        configspace = self.task.objective_function.configspace
         if any(configspace.forbidden_clauses):
             raise NotImplementedError("Forbidden clauses are not yet supported in Optuna")
 
@@ -138,7 +135,9 @@ class OptunaOptimizer(Optimizer):
             directions: Sequence[str | StudyDirection] | None = None
         ) -> Study.
         """
-        study = optuna.create_study(**self.optuna_cfg.study, directions=["minimize"] * self.task.n_objectives)
+        study = optuna.create_study(
+            **self.optuna_cfg.study, directions=["minimize"] * self.task.output_space.n_objectives
+        )
         printr(study)
 
         return study
@@ -231,7 +230,7 @@ class OptunaOptimizer(Optimizer):
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
         """
-        if self.task.n_objectives == 1:
+        if self.task.output_space.n_objectives == 1:
             non_none_entries = [(config, cost) for _, config, cost in self.history.values() if cost is not None]
             if len(non_none_entries) == 0:
                 return None

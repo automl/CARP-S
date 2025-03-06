@@ -1,8 +1,9 @@
 # @package _global_
 benchmark_id: HPOB
-task_id: hpob/all/7189/9976
+task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
+  name: hpob/all/7189/9976
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
@@ -11,49 +12,56 @@ task:
     surrogates_dir: ../../../carps/benchmark_data/HPO-B/saved-surrogates
     seed: ${seed}
   input_space:
+    _target_: carps.utils.task.InputSpace
     configuration_space:
-      name: null
-      hyperparameters:
-      - type: uniform_float
-        name: x0
-        lower: 0.0
-        upper: 1.0
-        default_value: 0.5
-        log: false
-        meta: null
-      - type: uniform_float
-        name: x1
-        lower: 0.0
-        upper: 1.0
-        default_value: 0.5
-        log: false
-        meta: null
-      - type: uniform_float
-        name: x2
-        lower: 0.0
-        upper: 1.0
-        default_value: 0.5
-        log: false
-        meta: null
-      conditions: []
-      forbiddens: []
-      python_module_version: 1.2.0
-      format_version: 0.4
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: x0
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x1
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x2
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
     fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
       is_multifidelity: false
       fidelity_type: null
       min_budget: null
       max_budget: null
     instance_space: null
   output_space:
+    _target_: carps.utils.task.OutputSpace
     n_objectives: 1
     objectives:
     - quality
   optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
     n_trials: 100
     time_budget: null
     n_workers: 1
   metadata:
+    _target_: carps.utils.task.TaskMetadata
     has_constraints: false
     domain: ML
     objective_function_approximation: surrogate

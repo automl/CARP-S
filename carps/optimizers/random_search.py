@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent, SearchSpace
 
@@ -24,7 +23,6 @@ class RandomSearchOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
@@ -32,21 +30,19 @@ class RandomSearchOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            ObjectiveFunction to optimize.
         task : Task
-            Task to optimize.
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
 
-        self.configspace: ConfigurationSpace = self.problem.configspace
+        self.configspace: ConfigurationSpace = self.task.objective_function.configspace
         self.history: list[tuple[TrialInfo, TrialValue]] = []
-        self.is_multifidelity = task.is_multifidelity
+        self.is_multifidelity = task.input_space.fidelity_space.is_multifidelity
 
-        if hasattr(task, "n_objectives") and task.n_objectives is not None:
-            self.is_multiobjective = task.n_objectives > 1
+        if hasattr(task, "n_objectives") and task.output_space.n_objectives is not None:
+            self.is_multiobjective = task.output_space.n_objectives > 1
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> SearchSpace:
         """Convert ConfigSpace's configuration space to the configuration space of the task.
@@ -73,8 +69,8 @@ class RandomSearchOptimizer(Optimizer):
         """
         budget = None
         if self.is_multifidelity:
-            budget = self.task.max_budget
-            # budget = np.random.choice(np.linspace(self.task.min_budget, self.task.max_budget, 5))
+            budget = self.task.input_space.fidelity_space.max_budget
+            # budget = np.random.choice(np.linspace(self.task.input_space.fidelity_space.min_budget, self.task.input_space.fidelity_space.max_budget, 5))  # noqa: E501
         return TrialInfo(config=config, budget=budget)
 
     def ask(self) -> TrialInfo:
@@ -87,7 +83,7 @@ class RandomSearchOptimizer(Optimizer):
         TrialInfo
             trial info (config, seed, instance, budget)
         """
-        config = self.problem.configspace.sample_configuration()
+        config = self.task.objective_function.configspace.sample_configuration()
         return self.convert_to_trial(config=config)
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
@@ -113,7 +109,7 @@ class RandomSearchOptimizer(Optimizer):
         list[tuple[TrialInfo, TrialValue]]
             Pareto front containing trial info and trial value.
         """
-        if self.task.is_multifidelity:
+        if self.task.input_space.fidelity_space.is_multifidelity:
             max_budget = np.max([v[0].budget for v in self.history])
             results_on_highest_fidelity = np.array([v for v in self.history if v[0].budget == max_budget])
             costs = np.array([v[1].cost for v in results_on_highest_fidelity])
@@ -136,7 +132,7 @@ class RandomSearchOptimizer(Optimizer):
         Incumbent
             Incumbent tuple(s) containing trial info and trial value.
         """
-        if self.task.n_objectives == 1:
+        if self.task.output_space.n_objectives == 1:
             incumbent_tuple = min(self.history, key=lambda x: x[1].cost)
         else:
             incumbent_tuple = self.get_pareto_front()  # type: ignore[assignment]

@@ -351,7 +351,7 @@ class HEBOOptimizer(Optimizer):
         tuple[list[float], list[float]]
 
         """
-        # if len(self.task.objectives) > 1:
+        # if len(self.task.output_space.objectives) > 1:
         #     raise NotSupportedError
 
         X: list[int | float] = []

@@ -17,11 +17,11 @@ from carps.utils.exceptions import NotSupportedError
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
 
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.optimizers.optimizer import Optimizer
+    from carps.utils.task import Task
 
 
-def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> ObjectiveFunction:
+def make_task(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> Task:
     """Make ObjectiveFunction.
 
     Parameters
@@ -34,10 +34,11 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
 
     Returns:
     -------
-    ObjectiveFunction
+    Task
         Target problem.
     """
-    problem_cfg = cfg.problem
+    task_cfg = cfg.task
+
     loggers = []
     if "loggers" in cfg:
         for logger in cfg.loggers:
@@ -49,10 +50,10 @@ def make_problem(cfg: DictConfig, result_processor: ResultProcessor | None = Non
                 kwargs = {}
             logger_instantiated = instantiate(logger)(**kwargs)
             loggers.append(logger_instantiated)
-    return instantiate(problem_cfg, loggers=loggers)
+    return instantiate(task_cfg, objective_function={"loggers": loggers})
 
 
-def make_optimizer(cfg: DictConfig, problem: ObjectiveFunction) -> Optimizer:
+def make_optimizer(cfg: DictConfig, task: Task) -> Optimizer:
     """Make Optimizer.
 
     Parameters
@@ -60,9 +61,9 @@ def make_optimizer(cfg: DictConfig, problem: ObjectiveFunction) -> Optimizer:
     loggers : list[AbstractLogger]
         List of loggers to use.
     cfg : DictConfig
-        Global configuration
-    problem : ObjectiveFunction
-        Target problem
+        Global configuration.
+    task : Task
+        Task to optimize.
 
     Returns:
     -------
@@ -70,7 +71,7 @@ def make_optimizer(cfg: DictConfig, problem: ObjectiveFunction) -> Optimizer:
         Instantiated optimizer.
     """
     optimizer_cfg = cfg.optimizer
-    optimizer = instantiate(optimizer_cfg)(problem=problem, task=cfg.task, loggers=problem.loggers)
+    optimizer = instantiate(optimizer_cfg)(task=task, loggers=task.objective_function.loggers)
     if "optimizer_wrappers" in cfg:
         for wrapper in cfg.optimizer_wrappers:
             optimizer = wrapper(optimizer)
@@ -98,10 +99,10 @@ def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -
     # hydra_cfg = HydraConfig.instance().get()
     # printr(hydra_cfg.run.dir)
 
-    problem = make_problem(cfg=cfg, result_processor=result_processor)
-    inspect(problem)
+    task = make_task(cfg=cfg, result_processor=result_processor)
+    inspect(task)
 
-    optimizer = make_optimizer(cfg=cfg, problem=problem)
+    optimizer = make_optimizer(cfg=cfg, task=task)
     inspect(optimizer)
 
     try:

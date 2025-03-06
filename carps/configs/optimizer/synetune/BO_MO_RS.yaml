@@ -6,7 +6,7 @@ optimizer:
   optimizer_name: 'BO-MO-RS'
   optimizer_kwargs:
     random_seed: ${seed}
-  # max_budget: ${task.max_budget}
+  # max_budget: ${task.input_space.fidelity_space.max_budget}
 
 
 

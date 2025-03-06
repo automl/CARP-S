@@ -523,8 +523,8 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
 
     logger.debug("Maybe add task info...")
     logs = maybe_postadd_task(logs)
-    if "task.n_objectives" in logs:
-        logs["task.is_multiobjective"] = logs["task.n_objectives"] > 1
+    if "task.output_space.n_objectives" in logs:
+        logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
     logger.debug("Infer scenario...")
     logs = add_scenario_type(logs)
 

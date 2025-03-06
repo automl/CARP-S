@@ -1,251 +1,259 @@
 # @package _global_
 benchmark_id: HPOBench
-task_id: hpobench/bb/tab/nas/NASCifar10ABenchmark
+task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
+  name: hpobench/bb/tab/nas/NASCifar10ABenchmark
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
     problem:
       _target_: hpobench.container.benchmarks.nas.nasbench_101.NASCifar10ABenchmark
       rng: ${seed}
-    seed: 234
+    seed: ${seed}
   input_space:
+    _target_: carps.utils.task.InputSpace
     configuration_space:
-      name: null
-      hyperparameters:
-      - type: categorical
-        name: edge_0
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_1
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_10
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_11
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_12
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_13
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_14
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_15
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_16
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_17
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_18
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_19
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_2
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_20
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_3
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_4
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_5
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_6
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_7
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_8
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: edge_9
-        choices:
-        - 0
-        - 1
-        weights: null
-        default_value: 0
-        meta: null
-      - type: categorical
-        name: op_node_0
-        choices:
-        - conv1x1-bn-relu
-        - conv3x3-bn-relu
-        - maxpool3x3
-        weights: null
-        default_value: conv1x1-bn-relu
-        meta: null
-      - type: categorical
-        name: op_node_1
-        choices:
-        - conv1x1-bn-relu
-        - conv3x3-bn-relu
-        - maxpool3x3
-        weights: null
-        default_value: conv1x1-bn-relu
-        meta: null
-      - type: categorical
-        name: op_node_2
-        choices:
-        - conv1x1-bn-relu
-        - conv3x3-bn-relu
-        - maxpool3x3
-        weights: null
-        default_value: conv1x1-bn-relu
-        meta: null
-      - type: categorical
-        name: op_node_3
-        choices:
-        - conv1x1-bn-relu
-        - conv3x3-bn-relu
-        - maxpool3x3
-        weights: null
-        default_value: conv1x1-bn-relu
-        meta: null
-      - type: categorical
-        name: op_node_4
-        choices:
-        - conv1x1-bn-relu
-        - conv3x3-bn-relu
-        - maxpool3x3
-        weights: null
-        default_value: conv1x1-bn-relu
-        meta: null
-      conditions: []
-      forbiddens: []
-      python_module_version: 1.2.0
-      format_version: 0.4
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: categorical
+          name: edge_0
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_1
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_10
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_11
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_12
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_13
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_14
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_15
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_16
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_17
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_18
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_19
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_2
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_20
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_3
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_4
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_5
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_6
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_7
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_8
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: edge_9
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: op_node_0
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_1
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_2
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_3
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_4
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
     fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
       is_multifidelity: false
       fidelity_type: null
       min_budget: null
       max_budget: null
     instance_space: null
   output_space:
+    _target_: carps.utils.task.OutputSpace
     n_objectives: 1
     objectives:
     - quality
   optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
     n_trials: 224
     time_budget: null
     n_workers: 1
   metadata:
+    _target_: carps.utils.task.TaskMetadata
     has_constraints: false
     domain: ML
     objective_function_approximation: tabular

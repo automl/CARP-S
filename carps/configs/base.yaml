@@ -6,8 +6,7 @@ defaults:
 
 seed: 1
 
-# Set in problem cfg
-problem: ???
+# Set in task cfg
 task: ???
 
 benchmark_id: ??? # Set in problem cfg.

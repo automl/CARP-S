@@ -7,12 +7,12 @@ optimizer:
     scenario:
       seed: ${seed}
       n_trials: ${task.optimization_resources.n_trials}
-      objectives: ${task.objectives}
+      objectives: ${task.output_space.objectives}
       deterministic: true
       n_workers: 1
       output_directory: ${outdir}/${seed}/smac3_output
-      min_budget: ${task.min_budget}
-      max_budget: ${task.max_budget}
+      min_budget: ${task.input_space.fidelity_space.min_budget}
+      max_budget: ${task.input_space.fidelity_space.max_budget}
     smac_kwargs:
         dask_client: null
         overwrite: true

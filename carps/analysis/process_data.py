@@ -30,23 +30,23 @@ def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
     """
 
     def determine_scenario_type(x: pd.Series) -> str:
-        if x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
+        if x["task.input_space.fidelity_space.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
             scenario = "blackbox"
-        elif x["task.is_multifidelity"] is True and x["task.is_multiobjective"] is False:
+        elif x["task.input_space.fidelity_space.is_multifidelity"] is True and x["task.is_multiobjective"] is False:
             scenario = "multi-fidelity"
-        elif x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is True:
+        elif x["task.input_space.fidelity_space.is_multifidelity"] is False and x["task.is_multiobjective"] is True:
             scenario = "multi-objective"
-        elif x["task.is_multifidelity"] is True and x["task.is_multiobjective"] is True:
+        elif x["task.input_space.fidelity_space.is_multifidelity"] is True and x["task.is_multiobjective"] is True:
             scenario = "multi-fidelity-objective"
-        elif np.isnan(x["task.is_multifidelity"]) or np.isnan(x["task.is_multiobjective"]):
+        elif np.isnan(x["task.input_space.fidelity_space.is_multifidelity"]) or np.isnan(x["task.is_multiobjective"]):
             scenario = "blackbox"
         else:
             print(
                 x["task_id"],
                 x["optimizer_id"],
                 x["seed"],
-                x["task.is_multifidelity"],
-                type(x["task.is_multifidelity"]),
+                x["task.input_space.fidelity_space.is_multifidelity"],
+                type(x["task.input_space.fidelity_space.is_multifidelity"]),
             )
             raise ValueError("Unknown scenario")
         return scenario
@@ -129,8 +129,8 @@ def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
         "trial_value__cost_norm"
     ].transform("cummin")
     logs = maybe_postadd_task(logs)
-    if "task.n_objectives" in logs:
-        logs["task.is_multiobjective"] = logs["task.n_objectives"] > 1
+    if "task.output_space.n_objectives" in logs:
+        logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
     logs = add_scenario_type(logs)
 
     # Add time

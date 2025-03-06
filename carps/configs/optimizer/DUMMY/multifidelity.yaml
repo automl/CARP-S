@@ -7,4 +7,4 @@ optimizer:
 
   dummy_cfg:
    timeout: 10
-   budget: ${task.max_budget}
+   budget: ${task.input_space.fidelity_space.max_budget}

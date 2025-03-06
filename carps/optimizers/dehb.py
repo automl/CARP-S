@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from omegaconf import DictConfig
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -39,34 +38,31 @@ class DEHBOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
-        dehb_cfg: DictConfig,
         task: Task,
+        dehb_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
         """Initialize DEHB Optimizer.
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            ObjectiveFunction to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         dehb_cfg : DictConfig
             DEHB configuration.
-        task : Task
-            Task to optimize.
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(task, loggers)
 
         self.fidelity_enabled = True
         self.task = task
         self.dehb_cfg = dehb_cfg
-        self.configspace = self.convert_configspace(problem.configspace)
+        self.configspace = self.convert_configspace(task.objective_function.configspace)
         self.configspace.seed(dehb_cfg.seed)
-        if self.task.max_budget is None:
+        if self.task.input_space.fidelity_space.max_budget is None:
             raise ValueError("max_budget must be specified to run DEHB!")
-        if self.task.min_budget is None:
+        if self.task.input_space.fidelity_space.min_budget is None:
             raise ValueError("min_budget must be specified to run DEHB!")
         self._solver: DEHB | None = None
         self.history: dict[str, dict[str, Any]] = {}
@@ -74,9 +70,9 @@ class DEHBOptimizer(Optimizer):
     def _setup_optimizer(self) -> Any:
         return DEHB(
             cs=self.configspace,
-            min_fidelity=self.task.min_budget,
-            max_fidelity=self.task.max_budget,
-            n_workers=self.task.n_workers,
+            min_fidelity=self.task.input_space.fidelity_space.min_budget,
+            max_fidelity=self.task.input_space.fidelity_space.max_budget,
+            n_workers=self.task.optimization_resources.n_workers,
             **self.dehb_cfg,
         )
 
