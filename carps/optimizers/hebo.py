@@ -169,6 +169,8 @@ class HEBOOptimizer(Optimizer):
         task: Task,
         hebo_cfg: DictConfig | None = None,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Interface to HEBO (https://github.com/huawei-noah/HEBO) [1].
 
@@ -185,9 +187,18 @@ class HEBOOptimizer(Optimizer):
         hebo_cfg : DictConfig, optional
             Optional kwargs for HEBO class.
         loggers : list[AbstractLogger], optional
-            List of loggers to use, by default None
+            List of loggers to use, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
         self.configspace = self.task.input_space.configuration_space

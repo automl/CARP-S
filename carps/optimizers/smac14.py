@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -26,27 +25,35 @@ class SMAC314Optimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
-        smac_cfg: DictConfig,
         task: Task,
+        smac_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize SMAC3-1.4 Optimizer.
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            ObjectiveFunction to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         smac_cfg : DictConfig
             SMAC configuration.
-        task : Task
-            Task to optimize.
         loggers : list[AbstractLogger] | None, optional
-            Loggers, by default None
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
-        self.configspace = self.problem.configspace
+        self.configspace = self.task.objective_function.configspace
         self.smac_cfg = smac_cfg
         self._solver: SMAC4AC | None = None
 
@@ -115,7 +122,7 @@ class SMAC314Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         return trial_value.cost
 
     def _setup_optimizer(self) -> SMAC4AC:

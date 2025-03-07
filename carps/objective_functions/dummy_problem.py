@@ -17,23 +17,18 @@ if TYPE_CHECKING:
 class DummyObjectiveFunction(ObjectiveFunction):
     """Dummy problem for testing purposes."""
 
-    def __init__(
-        self, return_value: float = 0, budget_type: str | None = "dummy", loggers: list[AbstractLogger] | None = None
-    ) -> None:
+    def __init__(self, return_value: float | list[float] = 0, loggers: list[AbstractLogger] | None = None) -> None:
         """Initialize Dummy ObjectiveFunction.
 
         Parameters
         ----------
         return_value : float, optional
             Return value for the objective function evaluation, by default 0.
-        budget_type : str | None, optional
-            Budget type, by default "dummy"
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
         """
         super().__init__(loggers)
-        self.budget_type = budget_type
-        self._return_value = return_value
+        self._return_value: float | list[float] = return_value
         self._configspace = ConfigurationSpace(
             space={
                 "a": Float("a", bounds=(-1, 1)),

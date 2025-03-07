@@ -92,6 +92,8 @@ class OptunaOptimizer(Optimizer):
         task: Task,
         optuna_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize the optimizer.
 
@@ -103,8 +105,17 @@ class OptunaOptimizer(Optimizer):
             The configuration for the Optuna optimizer.
         loggers : list[AbstractLogger] | None
             The loggers to use during optimization.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
         self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
 

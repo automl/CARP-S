@@ -67,6 +67,8 @@ class SMAC3Optimizer(Optimizer):
         task: Task,
         smac_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize SMAC3 Optimizer.
 
@@ -81,8 +83,17 @@ class SMAC3Optimizer(Optimizer):
             SMAC configuration.
         loggers : list[AbstractLogger], optional
             Loggers to log information, by default None
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.configspace = self.task.input_space.configuration_space
         self.smac_cfg = smac_cfg

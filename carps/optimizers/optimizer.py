@@ -19,7 +19,13 @@ if TYPE_CHECKING:
 class Optimizer(ABC):
     """Base class for all optimizers."""
 
-    def __init__(self, task: Task, loggers: list[AbstractLogger] | None = None) -> None:
+    def __init__(
+        self,
+        task: Task,
+        loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
+    ) -> None:
         """Optimizer.
 
         Parameters
@@ -28,6 +34,10 @@ class Optimizer(ABC):
             Task definition: The objective function with optimization resources and defined input and output space.
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
 
         Raises:
         ------
@@ -38,6 +48,9 @@ class Optimizer(ABC):
 
         self.task: Task = task
         self.loggers: list[AbstractLogger] = loggers if loggers is not None else []
+
+        self.expects_multiple_objectives = expects_multiple_objectives
+        self.expects_fidelities = expects_fidelities
 
         # Convert min to seconds
         self.time_budget = (
@@ -53,6 +66,13 @@ class Optimizer(ABC):
 
         self._solver: Any = None
         self._last_incumbent: tuple[TrialInfo, TrialValue] | None = None
+
+    def __post_init__(self) -> None:
+        """Post initialization."""
+        if self.expects_multiple_objectives and self.task.output_space.n_objectives == 1:
+            raise ValueError("Optimizer expects multiple objectives, but task does not define multiple objectives.")
+        if self.expects_fidelities and not self.task.input_space.fidelity_space.is_multifidelity:
+            raise ValueError("Optimizer expects fidelities, but task does not define multi-fidelity.")
 
     @property
     def solver(self) -> Any:

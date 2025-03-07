@@ -25,6 +25,8 @@ class RandomSearchOptimizer(Optimizer):
         self,
         task: Task,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize Random Search Optimizer.
 
@@ -33,9 +35,18 @@ class RandomSearchOptimizer(Optimizer):
         task : Task
             The task (objective function with specific input and output space and optimization resources) to optimize.
         loggers : list[AbstractLogger] | None, optional
-            Loggers, by default None
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.configspace: ConfigurationSpace = self.task.objective_function.configspace
         self.history: list[tuple[TrialInfo, TrialValue]] = []

@@ -7,7 +7,7 @@ task:
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.dummy_problem.DummyObjectiveFunction
-    return_value: 42
+    return_value: [42.0, 42.0, 42.0]
   input_space:
     _target_: carps.utils.task.InputSpace
     configuration_space:
@@ -35,9 +35,11 @@ task:
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace
-    n_objectives: 1
+    n_objectives: 3
     objectives:
-    - quality
+    - quality1
+    - quality2
+    - quality3
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 10

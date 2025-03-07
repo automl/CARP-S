@@ -28,7 +28,7 @@ task:
         format_version: 0.4
     fidelity_space:
       _target_: carps.utils.task.FidelitySpace
-      is_multifidelity: false
+      is_multifidelity: true
       fidelity_type: n_bongos
       min_budget: 1
       max_budget: 10

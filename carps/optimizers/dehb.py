@@ -41,6 +41,8 @@ class DEHBOptimizer(Optimizer):
         task: Task,
         dehb_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize DEHB Optimizer.
 
@@ -51,9 +53,18 @@ class DEHBOptimizer(Optimizer):
         dehb_cfg : DictConfig
             DEHB configuration.
         loggers : list[AbstractLogger] | None, optional
-            Loggers, by default None
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.fidelity_enabled = True
         self.task = task

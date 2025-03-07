@@ -116,6 +116,8 @@ class SynetuneOptimizer(Optimizer):
         optimizer_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
         conversion_factor: int = 1000,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize SyneTune Optimizer.
 
@@ -132,8 +134,17 @@ class SynetuneOptimizer(Optimizer):
         conversion_factor : int, optional
             Conversion factor, by default 1000. Some fidelity types are a fraction of the max budget but need to be
             converted to integer for synetune.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
         self.fidelity_enabled = False
         self.max_budget = task.input_space.fidelity_space.max_budget
         assert optimizer_name in optimizers_dict
@@ -145,7 +156,10 @@ class SynetuneOptimizer(Optimizer):
             if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
-        self.fidelity_type: str | None = self.task.input_space.fidelity_space.fidelity_type
+        self.fidelity_type: str | None = None
+        if self.task.input_space.fidelity_space.is_multifidelity:
+            self.fidelity_enabled = True
+            self.fidelity_type = self.task.input_space.fidelity_space.fidelity_type
         self.configspace = self.task.objective_function.configspace
         self.metric: str | tuple[str] = self.task.output_space.objectives
         if len(self.metric) == 1:

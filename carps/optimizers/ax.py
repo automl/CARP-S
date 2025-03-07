@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     from omegaconf import DictConfig
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.objective_functions.objective_function import ObjectiveFunction
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
@@ -94,7 +93,7 @@ def configspace2ax(name: str, parameter: Hyperparameter) -> dict[str, TParamValu
 
 
 class AxOptimizer(Optimizer):
-    """Ax optimizer. Supports single- and multi-objective problems.
+    """Ax optimizer. Supports single- and multi-objective tasks.
 
     Random Seed
     -------
@@ -107,31 +106,39 @@ class AxOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: ObjectiveFunction,
-        ax_cfg: DictConfig,
         task: Task,
+        ax_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize the AxOptimizer.
 
         Parameters
         ----------
-        problem : ObjectiveFunction
-            ObjectiveFunction to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         ax_cfg : DictConfig
             (Hydra) Configuration for Ax.
-        task : Task
-            Task information.
         loggers : list[AbstractLogger] | None, optional
             A list of loggers for tracking. Defaults to None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self._parameters: list[dict[str, TParamValue | Sequence[TParamValue]]] = []
         self._parameter_constraints: list[str] = []
 
         self.task = task
-        self.ax_configspace = self.convert_configspace(self.problem.configspace)
+        self.ax_configspace = self.convert_configspace(self.task.objective_function.configspace)
         self.ax_cfg = ax_cfg
         self._solver: AxClient | None = None
         self.history: dict[str, dict[str, Any]] = {}
@@ -188,7 +195,7 @@ class AxOptimizer(Optimizer):
         """
         # Allow inactivate parameter values for optimizers that cannot handle conditions
         # In that case they will propose a value for each HP, whether it is active or not.
-        config = Configuration(self.problem.configspace, values=trial, allow_inactive_with_values=True)
+        config = Configuration(self.task.objective_function.configspace, values=trial, allow_inactive_with_values=True)
 
         return TrialInfo(config=config, seed=self.ax_cfg.scenario.seed, name=str(trial_index))
 

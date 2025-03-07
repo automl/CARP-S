@@ -7,6 +7,9 @@ optimizer:
   optimizer_name: 'BO-MO-LS'
   optimizer_kwargs:
     random_seed: ${seed}
+
+  expects_multiple_objectives: true
+  expects_fidelities: false
   # max_budget: ${task.input_space.fidelity_space.max_budget}
 
 
