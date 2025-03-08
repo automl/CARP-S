@@ -102,6 +102,31 @@ optimizer_smac:
 	$(MAKE) install-swig
 	$(PIP) install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
 
+optimizer_optuna:
+	$(PIP) install -r container_recipes/optimizers/Optuna/Optuna_requirements.txt
+
+optimizer_dehb:
+	$(PIP) install -r container_recipes/optimizers/DEHB/DEHB_requirements.txt
+	$(PIP) install numpy --upgrade
+
+optimizer_skopt:
+	$(PIP) install -r container_recipes/optimizers/Scikit_Optimize/Scikit_Optimize_requirements.txt
+
+optimizer_synetune:
+	$(PIP) install -r container_recipes/optimizers/SyneTune/SyneTune_requirements.txt
+	$(PIP) install numpy --upgrade
+
+optimizer_ax:
+	$(PIP) install -r container_recipes/optimizers/Ax/Ax_requirements.txt
+	$(PIP) install numpy --upgrade
+
+optimizer_hebo:
+	. container_recipes/optimizers/HEBO/HEBO_install.sh
+
+optimizer_nevergrad:
+	$(PIP) install -r container_recipes/optimizers/Nevergrad/Nevergrad_requirements.txt
+	$(PIP) install numpy --upgrade
+
 benchmark_bbob:
 	# Install BBOB
 	$(PIP) install ioh
@@ -132,3 +157,10 @@ benchmark_hpob:
 	$(PIP) install -r container_recipes/benchmarks/HPOB/HPOB_requirements.txt
 	. container_recipes/benchmarks/HPOB/download_data.sh
 
+benchmarks:
+	$(MAKE) benchmark_bbob
+	$(MAKE) benchmark_yahpo
+	$(MAKE) benchmark_pymoo
+	$(MAKE) benchmark_mfpbench
+	$(MAKE) benchmark_hpobench
+	$(MAKE) benchmark_hpob
