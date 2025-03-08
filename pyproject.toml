@@ -78,8 +78,8 @@ dev = [
   "pytest",
   "pytest-coverage",
   "pytest-cases",
+  "pytest-xdist",
 ]
-dummy = ["scikit-learn"]
 bbob = ["ioh==0.3.14"]
 hpob = ["xgboost==1.5.2"]
 mfpbench = [

@@ -100,8 +100,10 @@ def plot_ranks_over_time(
     df_rank_list = []
     for gid, gdf in perf.groupby(["scenario", "set"]):
         budgets = gdf[x_column].unique()
-        for max_budget in budgets:
-            df_crit = get_df_crit(gdf, max_budget=max_budget, perf_col=key_performance, budget_var=x_column, soft=False)
+        for max_fidelity in budgets:
+            df_crit = get_df_crit(
+                gdf, max_fidelity=max_fidelity, perf_col=key_performance, budget_var=x_column, soft=False
+            )
             rank_result = cd_evaluation(
                 df_crit,
                 maximize_metric=False,
@@ -114,7 +116,7 @@ def plot_ranks_over_time(
                         "scenario": gid[0],
                         "set": gid[1],
                         "optimizer_id": rank_result.rankdf.index,
-                        "n_trials_norm": max_budget,
+                        "n_trials_norm": max_fidelity,
                         "rank": rank_result.rankdf["meanrank"],
                     }
                 )

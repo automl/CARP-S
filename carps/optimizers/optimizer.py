@@ -196,8 +196,8 @@ class Optimizer(ABC):
         while self.continue_optimization(start_time=start_time):
             trial_info = self.ask()
             normalized_budget = 1.0
-            if self.task.input_space.fidelity_space.max_budget is not None and trial_info.budget is not None:
-                normalized_budget = trial_info.budget / self.task.input_space.fidelity_space.max_budget
+            if self.task.input_space.fidelity_space.max_fidelity is not None and trial_info.budget is not None:
+                normalized_budget = trial_info.budget / self.task.input_space.fidelity_space.max_fidelity
             if self.task.input_space.fidelity_space.is_multifidelity:
                 trial_info = TrialInfo(
                     config=trial_info.config,
@@ -222,10 +222,10 @@ class Optimizer(ABC):
                 self.trial_counter += 1
             else:
                 assert (
-                    self.task.input_space.fidelity_space.max_budget is not None
-                ), "Define max_budget for multi-fidelity optimization in your problem setup."
+                    self.task.input_space.fidelity_space.max_fidelity is not None
+                ), "Define max_fidelity for multi-fidelity optimization in your problem setup."
                 assert trial_info.budget is not None
-                self.trial_counter += trial_info.budget / self.task.input_space.fidelity_space.max_budget
+                self.trial_counter += trial_info.budget / self.task.input_space.fidelity_space.max_fidelity
         return self.get_current_incumbent()
 
     @abstractmethod

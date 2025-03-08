@@ -176,8 +176,8 @@ class SMAC314Optimizer(Optimizer):
 
             n_seeds = self.smac_cfg.get("n_seeds", None)
             intensifier_kwargs["n_seeds"] = n_seeds
-            intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_budget
-            intensifier_kwargs["max_budget"] = self.smac_cfg.scenario.max_budget
+            intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_fidelity
+            intensifier_kwargs["max_fidelity"] = self.smac_cfg.scenario.max_fidelity
 
             inc_selection = self.smac_cfg.incumbent_selection
             if inc_selection == "highest_observed_budget":

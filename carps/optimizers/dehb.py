@@ -71,18 +71,18 @@ class DEHBOptimizer(Optimizer):
         self.dehb_cfg = dehb_cfg
         self.configspace = self.convert_configspace(task.objective_function.configspace)
         self.configspace.seed(dehb_cfg.seed)
-        if self.task.input_space.fidelity_space.max_budget is None:
-            raise ValueError("max_budget must be specified to run DEHB!")
-        if self.task.input_space.fidelity_space.min_budget is None:
-            raise ValueError("min_budget must be specified to run DEHB!")
+        if self.task.input_space.fidelity_space.max_fidelity is None:
+            raise ValueError("max_fidelity must be specified to run DEHB!")
+        if self.task.input_space.fidelity_space.min_fidelity is None:
+            raise ValueError("min_fidelity must be specified to run DEHB!")
         self._solver: DEHB | None = None
         self.history: dict[str, dict[str, Any]] = {}
 
     def _setup_optimizer(self) -> Any:
         return DEHB(
             cs=self.configspace,
-            min_fidelity=self.task.input_space.fidelity_space.min_budget,
-            max_fidelity=self.task.input_space.fidelity_space.max_budget,
+            min_fidelity=self.task.input_space.fidelity_space.min_fidelity,
+            max_fidelity=self.task.input_space.fidelity_space.max_fidelity,
             n_workers=self.task.optimization_resources.n_workers,
             **self.dehb_cfg,
         )

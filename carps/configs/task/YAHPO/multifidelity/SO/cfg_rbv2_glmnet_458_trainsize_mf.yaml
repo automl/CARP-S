@@ -55,8 +55,8 @@ task:
       _target_: carps.utils.task.FidelitySpace
       is_multifidelity: true
       fidelity_type: trainsize
-      min_budget: 0.03
-      max_budget: 1.0
+      min_fidelity: 0.03
+      max_fidelity: 1.0
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace

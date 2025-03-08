@@ -145,15 +145,15 @@ class SynetuneOptimizer(Optimizer):
             expects_multiple_objectives=expects_multiple_objectives,
         )
         self.fidelity_enabled = False
-        self.max_budget = task.input_space.fidelity_space.max_budget
+        self.max_fidelity = task.input_space.fidelity_space.max_fidelity
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts["with_mf"]:
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
             self.fidelity_enabled = True
             if self.task.input_space.fidelity_space.fidelity_type is None:
                 raise ValueError("To run multi-fidelity optimizer, the problem must define a fidelity type!")
-            if self.max_budget is None:
-                raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
+            if self.max_fidelity is None:
+                raise ValueError("To run multi-fidelity optimizer, we must specify max_fidelity!")
 
         self.optimizer_kwargs = (
             omegaconf.OmegaConf.to_object(optimizer_kwargs) if optimizer_kwargs is not None else None
@@ -170,7 +170,7 @@ class SynetuneOptimizer(Optimizer):
             grace_period = self.optimizer_kwargs.get("grace_period")
             if grace_period is not None and isinstance(grace_period, float) and grace_period < 1:
                 self.conversion_factor = 1 / grace_period
-                # TODO fix conversion. Scale betweem min_budget and max_budget should stay the same
+                # TODO fix conversion. Scale betweem min_fidelity and max_fidelity should stay the same
 
         # Output Space
         self.metric: str | list[str] | tuple[str] = self.task.output_space.objectives
@@ -211,15 +211,15 @@ class SynetuneOptimizer(Optimizer):
         for k, v in configspace.items():
             configspace_st[k] = configspace_hp_to_synetune_hp(v)
         if self.fidelity_enabled:
-            assert self.max_budget is not None
-            max_budget = self.max_budget if not self.convert else int(self.conversion_factor * self.max_budget)
+            assert self.max_fidelity is not None
+            max_fidelity = self.max_fidelity if not self.convert else int(self.conversion_factor * self.max_fidelity)
             grace_period = 1
             if self.optimizer_kwargs is not None:
                 grace_period = self.optimizer_kwargs.get("grace_period", 1)
             grace_period = grace_period if not self.convert else int(self.conversion_factor * grace_period)
-            # Properly converting the fidelity space does not seem to work, hence just passing max_budget
-            # configspace_st[self.fidelity_type] = uniform(grace_period, max_budget)
-            configspace_st[self.fidelity_type] = max_budget  # type: ignore[assignment]
+            # Properly converting the fidelity space does not seem to work, hence just passing max_fidelity
+            # configspace_st[self.fidelity_type] = uniform(grace_period, max_fidelity)
+            configspace_st[self.fidelity_type] = max_fidelity  # type: ignore[assignment]
         return configspace_st
 
     def convert_to_trial(self, trial: SyneTrial) -> TrialInfo:  # type: ignore[override]
@@ -351,10 +351,10 @@ class SynetuneOptimizer(Optimizer):
         """Return the pareto front for multi-objective optimization."""
         if self.task.input_space.fidelity_space.is_multifidelity:
             # Determine maximum budget run
-            max_budget = np.max([v.metrics[self.fidelity_type] for v in self.completed_experiments.values()])
+            max_fidelity = np.max([v.metrics[self.fidelity_type] for v in self.completed_experiments.values()])
             # Get only those trial results that ran on max budget
             results_on_highest_fidelity = np.array(
-                [v for v in self.completed_experiments.values() if v.metrics[self.fidelity_type] == max_budget]
+                [v for v in self.completed_experiments.values() if v.metrics[self.fidelity_type] == max_fidelity]
             )
             # Get costs, exclude fidelity
             costs = np.array(
@@ -391,7 +391,7 @@ class SynetuneOptimizer(Optimizer):
 
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
             _optimizer_kwargs["resource_attr"] = self.fidelity_type
-            # _optimizer_kwargs["max_t"] = self.max_budget  # TODO check how to set n trials / wallclock limit
+            # _optimizer_kwargs["max_t"] = self.max_fidelity  # TODO check how to set n trials / wallclock limit
             # for synetune
 
             # for floating point resources like trainsize, we need to convert them to integer for synetune
@@ -400,8 +400,8 @@ class SynetuneOptimizer(Optimizer):
                 _optimizer_kwargs["grace_period"] = int(self.conversion_factor * self.optimizer_kwargs["grace_period"])
 
                 if "max_t" in self.optimizer_kwargs:
-                    assert self.max_budget is not None
-                    _optimizer_kwargs["max_t"] = int(self.conversion_factor * self.max_budget)
+                    assert self.max_fidelity is not None
+                    _optimizer_kwargs["max_t"] = int(self.conversion_factor * self.max_fidelity)
 
                 if "max_resource_level" in self.optimizer_kwargs:
                     _optimizer_kwargs["max_resource_level"] = int(

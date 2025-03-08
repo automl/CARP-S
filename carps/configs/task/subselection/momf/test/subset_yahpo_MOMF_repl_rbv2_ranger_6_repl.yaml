@@ -21,8 +21,8 @@ task:
   - memory
   is_multifidelity: true
   fidelity_type: repl
-  min_budget: 1
-  max_budget: 10
+  min_fidelity: 1
+  max_fidelity: 10
   has_constraints: false
   domain: ML
   objective_function_approximation: surrogate

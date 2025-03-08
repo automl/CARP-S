@@ -88,7 +88,7 @@ def convert_trials(
         The number of trials that have been run so far.
         For the case of multi-fidelity, a full trial
         is a configuration evaluated on the maximum budget and
-        the counter is increased by `budget/max_budget` instead
+        the counter is increased by `budget/max_fidelity` instead
         of 1.
     trial_info : TrialInfo
         The trial info.
@@ -167,7 +167,7 @@ class FileLogger(AbstractLogger):
             The number of trials that have been run so far.
             For the case of multi-fidelity, a full trial
             is a configuration evaluated on the maximum budget and
-            the counter is increased by `budget/max_budget` instead
+            the counter is increased by `budget/max_fidelity` instead
             of 1.
         trial_info : TrialInfo
             The trial info.

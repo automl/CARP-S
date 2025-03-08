@@ -7,8 +7,8 @@ optimizer:
   optimizer_kwargs:
     random_seed: ${seed}
     max_resource_attr: ${task.input_space.fidelity_space.fidelity_type}
-    grace_period: ${task.input_space.fidelity_space.min_budget}
-    max_resource_level: ${task.input_space.fidelity_space.max_budget}
+    grace_period: ${task.input_space.fidelity_space.min_fidelity}
+    max_resource_level: ${task.input_space.fidelity_space.max_fidelity}
 
   expects_multiple_objectives: false
   expects_fidelities: true

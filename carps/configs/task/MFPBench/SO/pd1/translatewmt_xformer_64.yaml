@@ -58,8 +58,8 @@ task:
       _target_: carps.utils.task.FidelitySpace
       is_multifidelity: true
       fidelity_type: epoch
-      min_budget: 1
-      max_budget: 19
+      min_fidelity: 1
+      max_fidelity: 19
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace

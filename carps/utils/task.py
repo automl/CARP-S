@@ -166,22 +166,22 @@ class FidelitySpace:
         Whether the task is a multi-fidelity optimization task.
     fidelity_type : str | None
         The type of fidelity, e.g. time, memory, etc.
-    min_budget : int | float | None
+    min_fidelity : int | float | None
         The minimum budget.
-    max_budget : int | float | None
+    max_fidelity : int | float | None
         The maximum budget.
     """
 
     is_multifidelity: bool = False
     fidelity_type: str | None = None
-    min_budget: int | float | None = None
-    max_budget: int | float | None = None
+    min_fidelity: int | float | None = None
+    max_fidelity: int | float | None = None
 
     def __post_init__(self) -> None:
         if self.is_multifidelity:
             assert self.fidelity_type is not None
-            assert self.min_budget is not None
-            assert self.max_budget is not None
+            assert self.min_fidelity is not None
+            assert self.max_fidelity is not None
 
 
 @dataclass_json

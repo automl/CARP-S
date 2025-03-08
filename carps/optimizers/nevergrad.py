@@ -218,7 +218,7 @@ class NevergradOptimizer(Optimizer):
             config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
-            budget=None if not self.fidelity_enabled else self.task.input_space.fidelity_space.max_budget,
+            budget=None if not self.fidelity_enabled else self.task.input_space.fidelity_space.max_fidelity,
         )
         self.counter += 1
         return trial_info

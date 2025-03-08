@@ -80,8 +80,8 @@ class RandomSearchOptimizer(Optimizer):
         """
         budget = None
         if self.is_multifidelity:
-            budget = self.task.input_space.fidelity_space.max_budget
-            # budget = np.random.choice(np.linspace(self.task.input_space.fidelity_space.min_budget, self.task.input_space.fidelity_space.max_budget, 5))  # noqa: E501
+            budget = self.task.input_space.fidelity_space.max_fidelity
+            # budget = np.random.choice(np.linspace(self.task.input_space.fidelity_space.min_fidelity, self.task.input_space.fidelity_space.max_fidelity, 5))  # noqa: E501
         return TrialInfo(config=config, budget=budget)
 
     def ask(self) -> TrialInfo:
@@ -121,8 +121,8 @@ class RandomSearchOptimizer(Optimizer):
             Pareto front containing trial info and trial value.
         """
         if self.task.input_space.fidelity_space.is_multifidelity:
-            max_budget = np.max([v[0].budget for v in self.history])
-            results_on_highest_fidelity = np.array([v for v in self.history if v[0].budget == max_budget])
+            max_fidelity = np.max([v[0].budget for v in self.history])
+            results_on_highest_fidelity = np.array([v for v in self.history if v[0].budget == max_fidelity])
             costs = np.array([v[1].cost for v in results_on_highest_fidelity])
             # Determine pareto front of the trials run on max budget
             front = results_on_highest_fidelity[pareto(costs)]
