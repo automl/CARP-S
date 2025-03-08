@@ -6,6 +6,7 @@ import time
 from typing import TYPE_CHECKING
 
 from ConfigSpace import ConfigurationSpace, Float
+from omegaconf import ListConfig
 
 from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
@@ -29,6 +30,13 @@ class DummyObjectiveFunction(ObjectiveFunction):
         """
         super().__init__(loggers)
         self._return_value: float | list[float] = return_value
+        if isinstance(self._return_value, int):
+            self._return_value = float(self._return_value)
+        if isinstance(self._return_value, ListConfig):
+            self._return_value = list(self._return_value)
+        assert isinstance(
+            self._return_value, float | list
+        ), f"Return value must be a float or a list of floats but is {type(self._return_value)}. {self._return_value}."
         self._configspace = ConfigurationSpace(
             space={
                 "a": Float("a", bounds=(-1, 1)),
