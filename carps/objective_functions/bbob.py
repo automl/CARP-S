@@ -114,6 +114,6 @@ def get_bbob_problem(fid: int, instance: int, dimension: int, seed: int) -> tupl
     n_dim = problem.meta_data.n_variables
     hps = [Float(name=f"x{i}", bounds=[lower_bounds[i], upper_bounds[i]]) for i in range(n_dim)]
     configuration_space = ConfigurationSpace(seed=seed)
-    configuration_space.add_hyperparameters(hps)
+    configuration_space.add(hps)
 
     return configuration_space, problem

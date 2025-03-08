@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,11 @@ from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+
+logging.getLogger("botocore").setLevel(logging.INFO)
+logging.getLogger("boto3").setLevel(logging.INFO)
+logging.getLogger("syne_tune").setLevel(logging.INFO)
+logging.getLogger("urllib3").setLevel(logging.INFO)
 
 SEED = 123
 

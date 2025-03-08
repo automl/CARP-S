@@ -19,6 +19,7 @@ from ConfigSpace.hyperparameters import (
     IntegerHyperparameter,
     OrdinalHyperparameter,
 )
+from omegaconf import ListConfig
 from syne_tune.backend.trial_status import (  # type: ignore
     Status,
     Trial as SyneTrial,
@@ -57,6 +58,7 @@ if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
+
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
@@ -131,9 +133,6 @@ class SynetuneOptimizer(Optimizer):
             Optimizer kwargs, by default None
         loggers : list[AbstractLogger], optional
             Loggers, by default None
-        conversion_factor : int, optional
-            Conversion factor, by default 1000. Some fidelity types are a fraction of the max budget but need to be
-            converted to integer for synetune.
         expects_multiple_objectives : bool, optional
             Metadata. Whether the optimizer expects multiple objectives, by default False.
         expects_fidelities : bool, optional
@@ -156,23 +155,38 @@ class SynetuneOptimizer(Optimizer):
             if self.max_budget is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_budget!")
 
-        self.fidelity_type: str | None = None
-        if self.task.input_space.fidelity_space.is_multifidelity:
-            self.fidelity_enabled = True
-            self.fidelity_type = self.task.input_space.fidelity_space.fidelity_type
-        self.configspace = self.task.objective_function.configspace
-        self.metric: str | tuple[str] = self.task.output_space.objectives
-        if len(self.metric) == 1:
-            self.metric = self.metric[0]
-        self.conversion_factor = conversion_factor
-        self.trial_counter: int = 0
-
-        self.optimizer_name = optimizer_name
-        self._solver: SyneTrialScheduler | None = None
-
         self.optimizer_kwargs = (
             omegaconf.OmegaConf.to_object(optimizer_kwargs) if optimizer_kwargs is not None else None
         )
+
+        # Multi-fidelity settings
+        self.fidelity_type: str | None = None
+        # Some fidelity types are a fraction of the max budget but need to be
+        # converted to integer for synetune.
+        self.conversion_factor = conversion_factor
+        if self.task.input_space.fidelity_space.is_multifidelity:
+            self.fidelity_enabled = True
+            self.fidelity_type = self.task.input_space.fidelity_space.fidelity_type
+            grace_period = self.optimizer_kwargs.get("grace_period")
+            if grace_period is not None and isinstance(grace_period, float) and grace_period < 1:
+                self.conversion_factor = 1 / grace_period
+                # TODO fix conversion. Scale betweem min_budget and max_budget should stay the same
+
+        # Output Space
+        self.metric: str | list[str] | tuple[str] = self.task.output_space.objectives
+        if isinstance(self.metric, tuple | ListConfig):
+            self.metric = list(self.metric)
+        if len(self.metric) == 1:
+            self.metric = self.metric[0]
+        assert isinstance(
+            self.metric, str | list
+        ), f"Metric must be a string or a list of strings, got {type(self.metric)}, {self.metric}"
+
+        self.trial_counter: int = 0
+
+        self.optimizer_name = optimizer_name
+        self.configspace = self.task.objective_function.configspace
+        self._solver: SyneTrialScheduler | None = None
 
         self.completed_experiments: OrderedDict[int, TrialResult] = OrderedDict()
         self.convert = False
@@ -199,10 +213,13 @@ class SynetuneOptimizer(Optimizer):
         if self.fidelity_enabled:
             assert self.max_budget is not None
             max_budget = self.max_budget if not self.convert else int(self.conversion_factor * self.max_budget)
-            max_budget_synetune_hp = choice([max_budget])
-
-            configspace_st[self.fidelity_type] = max_budget_synetune_hp
-
+            grace_period = 1
+            if self.optimizer_kwargs is not None:
+                grace_period = self.optimizer_kwargs.get("grace_period", 1)
+            grace_period = grace_period if not self.convert else int(self.conversion_factor * grace_period)
+            # Properly converting the fidelity space does not seem to work, hence just passing max_budget
+            # configspace_st[self.fidelity_type] = uniform(grace_period, max_budget)
+            configspace_st[self.fidelity_type] = max_budget  # type: ignore[assignment]
         return configspace_st
 
     def convert_to_trial(self, trial: SyneTrial) -> TrialInfo:  # type: ignore[override]
@@ -210,14 +227,8 @@ class SynetuneOptimizer(Optimizer):
 
         Parameters
         ----------
-        config : Configuration
-            Configuration
-        seed : int | None, optional
-            Seed, by default None
-        budget : float | None, optional
-            Budget, by default None
-        instance : str | None, optional
-            Instance, by default None
+        trial : SyneTrial
+            SyneTune trial.
 
         Returns:
         -------
@@ -405,7 +416,6 @@ class SynetuneOptimizer(Optimizer):
         self.optimizer_kwargs.update(_optimizer_kwargs)
 
         if self.optimizer_name == "MOASHA":
-            self.metric = self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["metric"]
             del self.optimizer_kwargs["resource_attr"]
 

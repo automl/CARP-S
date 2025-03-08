@@ -9,10 +9,3 @@ optimizer:
 
   expects_multiple_objectives: true
   expects_fidelities: false
-  # max_budget: ${task.input_space.fidelity_space.max_budget}
-
-
-
-#      walltime_limit: 60,  # After 60 seconds, we stop the hyperparameter optimization
-#      n_trials: 500,  # Evaluate max 500 different trials
-#      n_workers: 8,

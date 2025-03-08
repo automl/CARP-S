@@ -15,6 +15,7 @@ from ConfigSpace.hyperparameters import (
     UniformIntegerHyperparameter,
 )
 from dataclasses_json import dataclass_json
+from omegaconf import ListConfig
 
 from carps.utils.loggingutils import get_logger
 
@@ -277,6 +278,11 @@ class OutputSpace:
 
     #         output_space_logger.info("No objective space specified. Using default unbounded space: "\
     #                                  f"{self.objective_space} ({self.n_objectives}, {self.objectives}).")
+
+    def __post__init__(self) -> None:
+        assert self.n_objectives == len(self.objectives)
+        if isinstance(self.objectives, ListConfig):
+            object.__setattr__(self, "objectives", tuple(self.objectives))
 
 
 @dataclass_json
