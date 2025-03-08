@@ -9,4 +9,4 @@ else
 fi
 
 $CONDA_RUN_COMMAND python -m mfpbench download --status --data-dir carps/benchmark_data/mfpbench
-$CONDA_RUN_COMMAND python -m mfpbench download --benchmark pd1
+$CONDA_RUN_COMMAND python -m mfpbench download --benchmark pd1 --data-dir carps/benchmark_data/mfpbench

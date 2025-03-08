@@ -20,7 +20,6 @@ then
 else
     CONDA_RUN_COMMAND="${CONDA_COMMAND} run ${CONDA_ENV_NAME}"
 fi
-$CONDA_RUN_COMMAND $PIP install yahpo-gym
 git clone https://github.com/benjamc/yahpo_gym.git lib/yahpo_gym
 $CONDA_RUN_COMMAND $PIP install -e lib/yahpo_gym/yahpo_gym
 cd $CARPS_ROOT/carps
