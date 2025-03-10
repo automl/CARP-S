@@ -16,6 +16,7 @@ result_file = "durations.csv"
 # print(config_fns)
 seed = 1
 
+
 def measure_time(config_fn: Path, n: int = 5) -> float:
     cfg = OmegaConf.load(config_fn)
     cfg.task.seed = seed
@@ -30,6 +31,7 @@ def measure_time(config_fn: Path, n: int = 5) -> float:
         duration = end - start
         durations.append(duration)
     return np.mean(durations)
+
 
 with Pool(processes=8) as pool:
     durations = pool.map(measure_time, config_fns)
