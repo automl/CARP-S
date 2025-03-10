@@ -1,3 +1,4 @@
+"""Estimate the runtime of the objective function."""
 from __future__ import annotations
 
 import time
@@ -18,6 +19,15 @@ seed = 1
 
 
 def measure_time(config_fn: Path, n: int = 5) -> float:
+    """Measure the time it takes to evaluate the objective function.
+
+    Args:
+        config_fn (Path): Path to the configuration file.
+        n (int, 5): Number of evaluations.
+
+    Returns:
+        The average time it takes to evaluate the objective function.
+    """
     cfg = OmegaConf.load(config_fn)
     cfg.task.seed = seed
     task = make_task(cfg=cfg)
@@ -36,5 +46,5 @@ def measure_time(config_fn: Path, n: int = 5) -> float:
 with Pool(processes=8) as pool:
     durations = pool.map(measure_time, config_fns)
 
-df = pd.DataFrame({"config_fn": [str(p) for p in config_fns], "duration": durations})
+df = pd.DataFrame({"config_fn": [str(p) for p in config_fns], "duration": durations})  # noqa: PD901
 df.to_csv("durations.csv", index=False)
