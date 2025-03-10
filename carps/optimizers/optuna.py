@@ -277,7 +277,7 @@ class OptunaOptimizer(Optimizer):
     def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
         """Convert proposal by optimizer to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Returns:
         -------

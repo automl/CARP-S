@@ -257,7 +257,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         self._configspace = self._get_configspace(search_space_dims)
 
     def _get_surrogate_model(self, dataset_id: str, model_id: str) -> xgb.Booster:
-        """Get the surrogate model for the problem."""
+        """Get the surrogate model for the objective function."""
         surrogate_name = "surrogate-" + str(model_id) + "-" + str(dataset_id)
         surrogate_dir = self.surrogate_dir / (surrogate_name + ".json")
         if not surrogate_dir.exists():
@@ -267,7 +267,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         return bst_surrogate
 
     def _get_configspace(self, search_space_dims: int) -> ConfigurationSpace:
-        """Generate the configuration space for the problem.
+        """Generate the configuration space for the objective function.
 
         All the feature values range 0 to 1.
 
@@ -279,7 +279,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         Returns:
         -------
         ConfigurationSpace
-            The configuration space for the problem.
+            The configuration space for the objective function.
         """
         bounds = tuple([(0, 1) for _ in range(search_space_dims)])
         cs = ConfigurationSpace(seed=self.seed)
@@ -298,7 +298,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         return self._configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------

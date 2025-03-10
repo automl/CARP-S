@@ -9,8 +9,8 @@ seed: 1
 # Set in task cfg
 task: ???
 
-benchmark_id: ??? # Set in problem cfg.
-task_id: ???  # Set in problem cfg. Can be directory.
+benchmark_id: ??? # Set in task cfg.
+task_id: ???  # Set in task cfg. Can be directory.
 
 # Set in optimizer cfg
 optimizer: ???

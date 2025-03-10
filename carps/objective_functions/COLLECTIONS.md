@@ -1,4 +1,4 @@
-Blackbox problems
+Blackbox tasks
 
 1. YAHPO gym Set Single-Objective
 ```bash
@@ -7,7 +7,7 @@ SMAC14='+optimizer/smac14=blackbox'
 RANDOMSEARCH='+optimizer/randomsearch=config'
 HEBO='+optimizer/hebo=config'
 
-YAHPO_SO='+problem/YAHPO/SO=glob("cfg_*")'
+YAHPO_SO='+task/YAHPO/SO=glob("cfg_*")'
 
 SEED='seed=range(1,11)'
 

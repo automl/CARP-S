@@ -138,8 +138,8 @@ def plot_ranks_over_time(
                 "plot_type_pretty": "Rank over Time",
                 "explanation": "The rank of each optimizer over time compares which optimizer "
                 "performs better, the lower "
-                "the rank the better. For each optimizer and problem, the performance is averaged over seeds to obtain"
-                " an estimate of the performance. The rank is then calculated per step and problem with the same "
+                "the rank the better. For each optimizer and task, the performance is averaged over seeds to obtain"
+                " an estimate of the performance. The rank is then calculated per step and task with the same "
                 "approach as for the critical difference diagram.",
             }
         )
@@ -283,12 +283,12 @@ def plot_critical_difference(
     return resulting_files
 
 
-def plot_performance_per_problem(
+def plot_performance_per_task(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
-    """Plot the performance of the optimizers per problem.
+    """Plot the performance of the optimizers per task.
 
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
@@ -304,19 +304,19 @@ def plot_performance_per_problem(
 
     resulting_files = []
     for gid, gdf in df.groupby(["scenario", "set"]):
-        figure_filename = f"{output_dir}/performanceperproblem_{gid[0]}_{gid[1]}"
+        figure_filename = f"{output_dir}/performancepertask_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
                 "scenario": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
-                "plot_type": "performance_per_problem",
+                "plot_type": "performance_per_task",
                 "plot_type_pretty": "Performance per Task",
-                "explanation": "The heatmap shows the performance of the optimizers per problem. "
+                "explanation": "The heatmap shows the performance of the optimizers per task. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. "
                 "The performance is shown as a heatmap, where the colors indicate the performance of the optimizer "
-                "on a specific problem. "
+                "on a specific task. "
                 "The better the optimizer performs, the lighter/more yellow the color.",
             }
         )
@@ -330,7 +330,7 @@ def plot_performance_per_problem(
         fig = plt.Figure(figsize=(12, 12))
         ax0 = fig.add_subplot(111)
 
-        # Perf per problem (normalized)
+        # Perf per task (normalized)
         df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
         offset = 1e-8
         df_crit[df_crit == 0] = offset
@@ -555,7 +555,7 @@ def plot_spearman_rank_correlation(
                 "plot_type_pretty": "Spearman Rank Correlation",
                 "explanation": "The Spearman rank correlation matrix shows the correlation between the "
                 "ranks of the optimizers. "
-                "The intuition is that optimizers that perform similarly on the problems will have a high correlation. "
+                "The intuition is that optimizers that perform similarly on the tasks will have a high correlation. "
                 "The ranks are calculated based on the final performance of the optimizers. ",
             }
         )
@@ -566,8 +566,8 @@ def plot_spearman_rank_correlation(
         sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
         df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
         df_crit = df_crit.reindex(columns=names)
-        # df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
-        # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+        # df_crit.index = [i.replace(task_prefix + "/dev/", "") for i in df_crit.index]
+        # df_crit.index = [i.replace(task_prefix + "/test/", "") for i in df_crit.index]
 
         fig = plt.Figure(figsize=(6 * 1.5, 4 * 1.5))
         ax3 = fig.add_subplot(111)
@@ -656,7 +656,7 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
         "Final Performance": [
             "critical_difference",
             # "spearman_rank_correlation",
-            "performance_per_problem",
+            "performance_per_task",
             # "finalperformance_boxplot",
             # "finalperformance_violinplot",
             "finalperformance_barplot",
@@ -741,8 +741,8 @@ def generate_report(
     resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=True)
 
     # Final Performance per Task (Mean over seeds, heatmap)
-    logger.info("\t...performance per problem")
-    resulting_files_performance_per_problem = plot_performance_per_problem(df, output_dir=figure_dir, replot=True)
+    logger.info("\t...performance per task")
+    resulting_files_performance_per_task = plot_performance_per_task(df, output_dir=figure_dir, replot=True)
 
     # Final Performance Barplot per Task (Mean over seeds with std)
     logger.info("\t...barplot")
@@ -758,7 +758,7 @@ def generate_report(
     resulting_files = pd.concat(
         [
             pd.DataFrame(resulting_files_critical_difference),
-            pd.DataFrame(resulting_files_performance_per_problem),
+            pd.DataFrame(resulting_files_performance_per_task),
             pd.DataFrame(resulting_files_finalperfbarplot),
             pd.DataFrame(resulting_files_rank_over_time),
         ]

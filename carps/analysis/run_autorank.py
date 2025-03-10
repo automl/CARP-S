@@ -112,8 +112,8 @@ def get_df_crit(
 
     1. Filter all rundata for the final performance (objective function value of incumbent at the end of the
         optimization run).
-    2. Calculate the mean performance for the different seeds per optimizer and problem.
-    3. Pivot the table such that we have 2D table with problems as rows and optimizers as columns.
+    2. Calculate the mean performance for the different seeds per optimizer and task.
+    3. Pivot the table such that we have 2D table with tasks as rows and optimizers as columns.
     4. Handle nans: Remove rows with nans, replace nans by highest (worst) value, or keep them.
 
     Args:
@@ -140,7 +140,7 @@ def get_df_crit(
         nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])
         lost = df_crit[nan_ids]
 
-        # Rows are problems, cols are optimizers
+        # Rows are tasks, cols are optimizers
         if len(lost) > 0:
             df_crit = df_crit[~nan_ids]
             logger.info(f"Lost following experiments: {lost}")

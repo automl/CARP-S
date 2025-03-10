@@ -21,7 +21,7 @@ def plot_ranking(
     scenario: str,
     set_id: str,
     perf_col: str = "trial_value__cost_inc_norm",
-    problem_prefix: str = "",
+    task_prefix: str = "",
 ) -> RankResult:
     """Plot ranking of optimizers.
 
@@ -30,7 +30,7 @@ def plot_ranking(
         scenario (str): Scenario name, e.g. blackbox.
         set_id (str): Set ID, e.g. test or dev.
         perf_col (str, optional): Performance column. Defaults to "trial_value__cost_inc_norm".
-        problem_prefix (str, optional): Task prefix. Defaults to "". If set, will be removed from the problem IDs.
+        task_prefix (str, optional): Task prefix. Defaults to "". If set, will be removed from the task IDs.
 
     Returns:
         RankResult: Rank result.
@@ -56,22 +56,22 @@ def plot_ranking(
     # # DF on normalized perf values
     # df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
     # df_crit = df_crit.reindex(columns=names)
-    # df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
-    # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+    # df_crit.index = [i.replace(task_prefix + "/dev/", "") for i in df_crit.index]
+    # df_crit.index = [i.replace(task_prefix + "/test/", "") for i in df_crit.index]
     # plt.figure(figsize=(12, 12))
     # sns.heatmap(df_crit, annot=False, fmt="g", cmap="viridis_r")
     # plt.title("Performance of Optimizers per Task (Normalized)")
     # plt.ylabel("Task ID")
     # plt.xlabel("Optimizer")
-    # savefig(plt.gcf(), fpath / f"perf_opt_per_problem_{identifier}")
+    # savefig(plt.gcf(), fpath / f"perf_opt_per_task_{identifier}")
     # plt.show()
 
     # # Df on raw values
     # # Optionally, plot the ranked data as a heatmap
     # df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
     # df_crit = df_crit.reindex(columns=names)
-    # df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
-    # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+    # df_crit.index = [i.replace(task_prefix + "/dev/", "") for i in df_crit.index]
+    # df_crit.index = [i.replace(task_prefix + "/test/", "") for i in df_crit.index]
     # ranked_df = df_crit.rank(axis=1, method="min", ascending=True)
 
     # plt.figure(figsize=(12, 12))
@@ -79,7 +79,7 @@ def plot_ranking(
     # plt.title("Ranking of Optimizers per Task")
     # plt.ylabel("Task ID")
     # plt.xlabel("Optimizer")
-    # savefig(plt.gcf(), fpath / f"rank_opt_per_problem_{identifier}")
+    # savefig(plt.gcf(), fpath / f"rank_opt_per_task_{identifier}")
     # plt.show()
 
     # # Plotting the heatmap of the rank correlation matrix
@@ -103,12 +103,12 @@ def plot_ranking(
     fig = plt.figure(layout=None, facecolor="white", figsize=(w * factor, h * factor))
     gs = fig.add_gridspec(nrows=nrows, ncols=ncols, left=0.05, right=right, hspace=hspace, wspace=wspace)
 
-    # Perf per problem (normalized)
+    # Perf per task (normalized)
     ax0 = fig.add_subplot(gs[:, :-1])
     df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
     df_crit = df_crit.reindex(columns=names)
-    df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
-    df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+    df_crit.index = [i.replace(task_prefix + "/dev/", "") for i in df_crit.index]
+    df_crit.index = [i.replace(task_prefix + "/test/", "") for i in df_crit.index]
     ax0 = sns.heatmap(df_crit, annot=False, fmt="g", cmap="viridis_r", ax=ax0, cbar_kws={"shrink": 0.8, "aspect": 30})
     ax0.set_title("Final Performance per Task (Normalized)")
     ax0.set_ylabel("Task ID")

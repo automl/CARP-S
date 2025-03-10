@@ -16,7 +16,7 @@ If you execute it locally, the database file `carps.db` will be created in the c
 needs to be transferred to the cluster.
 
 ```bash
-python carps/container/create_cluster_configs.py +optimizer/DUMMY=config +problem/DUMMY=config 'seed=range(1,21)' --multirun
+python carps/container/create_cluster_configs.py +optimizer/DUMMY=config +task/DUMMY=config 'seed=range(1,21)' --multirun
 ```
 
 If you want to use a personal/local MySQL database, follow these steps:

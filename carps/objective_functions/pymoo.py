@@ -68,7 +68,7 @@ class PymooObjectiveFunction(ObjectiveFunction):
         return configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------

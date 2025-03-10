@@ -1,4 +1,4 @@
-"""Find overrides for problems and optimizers based on their IDs."""
+"""Find overrides for tasks and optimizers based on their IDs."""
 
 from __future__ import annotations
 
@@ -14,28 +14,28 @@ from carps.utils.loggingutils import get_logger
 logger = get_logger(__file__)
 
 config_folder = Path(__file__).parent.parent / "configs"
-config_folder_problem = config_folder / "problem"
+config_folder_task = config_folder / "task"
 config_folder_optimizer = config_folder / "optimizer"
 
 
 def find_override(task_id: str | None = None, optimizer_id: str | None = None) -> str | None:
-    """Find the override string for a problem or optimizer based on its ID.
+    """Find the override string for a task or optimizer based on its ID.
 
     Parameters
     ----------
     task_id : str, optional
-        The ID of the problem to find the override for.
+        The ID of the task to find the override for.
     optimizer_id : str, optional
         The ID of the optimizer to find the override for.
 
     Returns:
     -------
     str
-        The override string for the problem or optimizer or None if nothing is found.
+        The override string for the task or optimizer or None if nothing is found.
     """
     if task_id is not None:
         key = "task_id"
-        path = config_folder_problem
+        path = config_folder_task
         to_find = task_id
     elif optimizer_id is not None:
         key = "optimizer_id"
@@ -76,10 +76,10 @@ def merge_overrides(overrides: list[str | None]) -> str:
         The merged override string.
     """
     # overrides = [
-    #     "+problem=YAHPO/MO/cfg_rbv2_super_1457",
-    #     "+problem=YAHPO/MO/cfg_rbv2_super_1452",
-    #     "+problem=YAHPO/MO/cfg_rbv2_super_1453",
-    #     "+problem=YAHPO/MO/cfg_rbv2_super_1454",
+    #     "+task=YAHPO/MO/cfg_rbv2_super_1457",
+    #     "+task=YAHPO/MO/cfg_rbv2_super_1452",
+    #     "+task=YAHPO/MO/cfg_rbv2_super_1453",
+    #     "+task=YAHPO/MO/cfg_rbv2_super_1454",
     # ]
     overrides_clean: list[str] = [o for o in overrides if o is not None]
     if len(overrides_clean) > 1:

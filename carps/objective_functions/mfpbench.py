@@ -10,10 +10,10 @@
 * 3. Install requirements from "./container_recipes/benchmarks/MFPBench/MFPBench_requirements.txt"
 *    NOTE: JAHSBench is commented out in the requirements file due to compatibility issues
 * 4. Test example 1 (smac20 multifidelity on PD1 imagenet_resnet_512 benchmark):
-*    `python carps/run.py +optimizer/smac20=multifidelity +problem/MFPBench/pd1=imagenet_resnet_512
+*    `python carps/run.py +optimizer/smac20=multifidelity +task/MFPBench/pd1=imagenet_resnet_512
 *     seed=1 task.optimization_resources.n_trials=25 data_dir=<data_dir_path>`
 *    Test example 2 (smac20 multifidelity on all available MFHartmann benchmarks):
-*    `python carps/run.py +optimizer/smac20=multifidelity '+problem/MFPBench/mfh=glob(*)' 'seed=range(0, 10)' -m`
+*    `python carps/run.py +optimizer/smac20=multifidelity '+task/MFPBench/mfh=glob(*)' 'seed=range(0, 10)' -m`
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         benchmark_kwargs: dict | None = None,
         loggers: list[AbstractLogger] | None = None,
     ) -> None:
-        """Initialize a MF-Prior-Bench problem."""
+        """Initialize a MF-Prior-Bench objective function."""
         super().__init__(loggers)
 
         self.benchmark_name = benchmark_name
@@ -91,13 +91,13 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
             # Assumes that the data is stored in the following format:
             benchmark_kwargs["datadir"] = Path(benchmark_kwargs["datadir"]) / benchmark_name
 
-        self._problem = mfpbench.get(
+        self._objective_function = mfpbench.get(
             name=benchmark,
             prior=self.prior,
             perturb_prior=self.perturb_prior,
             **benchmark_kwargs,
         )
-        self._configspace = self._problem.space
+        self._configspace = self._objective_function.space
 
     @property
     def configspace(self) -> ConfigurationSpace:
@@ -111,7 +111,7 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         return self._configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------
@@ -125,7 +125,7 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         """
         configuration = trial_info.config
         start_time = time.time()
-        result = self._problem.query(
+        result = self._objective_function.query(
             configuration.get_dictionary(),
             at=int(trial_info.budget) if trial_info.budget is not None else None,
         ).as_dict()

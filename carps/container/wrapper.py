@@ -1,4 +1,4 @@
-"""Wrapper for containerized problems."""
+"""Wrapper for containerized tasks."""
 
 from __future__ import annotations
 
@@ -16,11 +16,11 @@ if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
 
 
-class ContainerizedObjectiveFunctionClient(ObjectiveFunction):
-    """Wrapper for containerized problems."""
+class ContainerizedTaskClient(ObjectiveFunction):
+    """Wrapper for containerized task with objective functions."""
 
     def __init__(self, n_workers: int = 1, loggers: list[AbstractLogger] | None = None):
-        """Initialize ContainerizedObjectiveFunctionClient.
+        """Initialize ContainerizedTaskClient.
 
         Parameters
         ----------
@@ -35,12 +35,12 @@ class ContainerizedObjectiveFunctionClient(ObjectiveFunction):
 
     @property
     def configspace(self) -> ConfigurationSpace:
-        """Get the configuration space of the problem.
+        """Get the configuration space of the task.
 
         Returns:
         -------
         ConfigurationSpace
-            Configuration space of the problem.
+            Configuration space of the task.
         """
         if self._configspace is None:
             # ask server about configspace

@@ -38,16 +38,16 @@ paths = {
     },
 }
 # subset = "BBsubset"
-# problem_prefix = "blackbox/20"
+# task_prefix = "blackbox/20"
 
 # subset = "MFsubset"
-# problem_prefix = "multifidelity/20"
+# task_prefix = "multifidelity/20"
 
 # subset = "MOsubset"
-# problem_prefix = "multiobjective/10"
+# task_prefix = "multiobjective/10"
 
 # subset = "MOMFsubset"
-# problem_prefix = "momf/9"
+# task_prefix = "momf/9"
 
 def fix_floats(key: str, df: pd.DataFrame) -> pd.DataFrame:
     df[key] = df[key].apply(maybe_convert_cost_dtype)

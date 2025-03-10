@@ -68,13 +68,13 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Logs with task columns.
     """
-    index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
+    index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
     if not index_fn.is_file():
         raise ValueError("Task ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-    problem_index = pd.read_csv(index_fn)
+    task_index = pd.read_csv(index_fn)
 
     def load_task_cfg(task_id: str) -> DictConfig:
-        config_fn = problem_index["config_fn"][problem_index["task_id"] == task_id].iloc[0]
+        config_fn = task_index["config_fn"][task_index["task_id"] == task_id].iloc[0]
         if not Path(config_fn).is_file():
             raise ValueError("Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh.")
         cfg = OmegaConf.load(config_fn)
@@ -145,7 +145,7 @@ def calc_time(D: pd.DataFrame) -> pd.Series:  # noqa: N803
     Parameters
     ----------
     D : pd.DataFrame
-        Logs for a single problem, optimizer, seed.
+        Logs for a single task, optimizer, seed.
 
     Returns:
     -------
@@ -221,7 +221,7 @@ def get_interpolated_performance_df(
         "trial_value__cost_inc_norm",
     ]
     # interpolation_columns = [
-    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
+    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
     group_keys = ["scenario", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []

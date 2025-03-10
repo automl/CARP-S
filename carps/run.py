@@ -1,4 +1,4 @@
-"""Run optimizer on problem."""
+"""Run optimizer on task."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ logger = get_logger(__file__)
 
 @hydra.main(config_path="configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
-    """Run optimizer on problem.
+    """Run optimizer on task.
 
     Save trajectory and metadata to database.
 

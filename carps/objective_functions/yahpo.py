@@ -1,4 +1,4 @@
-"""Yahpo problem class."""
+"""Yahpo objective function class."""
 
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         seed: int = 0,
         loggers: list[AbstractLogger] | None = None,
     ):
-        """Initialize a Yahpo problem.
+        """Initialize a Yahpo objective function.
 
         Parameters
         ----------
@@ -118,10 +118,10 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         #         ^^^^^^^^^^^^^
         #     AttributeError: 'NoneType' object has no attribute 'update'
         # Which occurs when having several instances of the same benchmark
-        self._problem = BenchmarkSet(scenario=bench, instance=self.instance, check=False, multithread=False)
-        self._configspace = self._problem.get_opt_space(drop_fidelity_params=True, seed=seed)
-        self.fidelity_space = self._problem.get_fidelity_space()
-        self.fidelity_dims = list(self._problem.get_fidelity_space().keys())
+        self._objective_function = BenchmarkSet(scenario=bench, instance=self.instance, check=False, multithread=False)
+        self._configspace = self._objective_function.get_opt_space(drop_fidelity_params=True, seed=seed)
+        self.fidelity_space = self._objective_function.get_fidelity_space()
+        self.fidelity_dims = list(self._objective_function.get_fidelity_space().keys())
 
         self.budget_type = budget_type
 
@@ -156,13 +156,13 @@ class YahpoObjectiveFunction(ObjectiveFunction):
     # FIXME: see caro's message:
     #  the idea is somehow to overwrite the optimizer/multifidelity attributes for
     #  budget_variable and min_fidelity, max_fidelity with a FidelitiySpace class without interpolation
-    #  that is based on the problem instance / config file. Similarly find out how to deal with
+    #  that is based on the objective function instance / config file. Similarly find out how to deal with
     #  the metrics.
     # def fidelity_space(self):
     #     return FidelitySpace(self.fidelity_dims)
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------
@@ -191,7 +191,7 @@ class YahpoObjectiveFunction(ObjectiveFunction):
 
         # Benchmarking suite returns a list of results (as potentially more than one config can be passed),
         # as we only pass one config we need to select the first one
-        ret = self._problem.objective_function(configuration=xs, seed=trial_info.seed)[0]
+        ret = self._objective_function.objective_function(configuration=xs, seed=trial_info.seed)[0]
         costs = [maybe_invert(ret[target], target) for target in self.metrics]
         virtual_time = ret.get("time", 0.0)
         if len(costs) == 1:

@@ -131,7 +131,7 @@ class SkoptOptimizer(Optimizer):
     ) -> TrialInfo:
         """Convert proposal by Scikit-Optimize to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Returns:
         -------

@@ -1,14 +1,14 @@
 """Implementation of HEBO Optimizer.
 
 [2024-03-27]
-Note that running `python carps/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1
+Note that running `python carps/run.py +optimizer/hebo=config +task/DUMMY=config seed=1
  task.optimization_resources.n_trials=25`
 raises following error:
 "linear_operator.utils.errors.NanError: cholesky_cpu: 4 of 4 elements of the torch.Size([2, 2]) tensor are NaN."
 
 This is related to this issue: https://github.com/huawei-noah/HEBO/issues/61.
 
-For non-dummy problems HEBO works fine.
+For non-dummy objective functions HEBO works fine.
 """
 
 from __future__ import annotations

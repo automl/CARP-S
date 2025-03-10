@@ -74,7 +74,7 @@ class DatabaseLogger(AbstractLogger):
     def log_trial(
         self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
     ) -> None:
-        """Evaluate the problem and log the trial.
+        """Evaluate the task and log the trial.
 
         Parameters
         ----------

@@ -61,7 +61,7 @@ class ObjectiveFunction(ABC):
 
     @abstractmethod
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------
@@ -82,7 +82,7 @@ class ObjectiveFunction(ABC):
         raise NotImplementedError
 
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------

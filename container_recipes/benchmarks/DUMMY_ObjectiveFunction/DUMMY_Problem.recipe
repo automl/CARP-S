@@ -7,7 +7,7 @@ From: continuumio/anaconda3
 
 %environment
     # this is necessary to start the benchmarking server
-    export FLASK_APP=carps/container/container_script_problem.py
+    export FLASK_APP=carps/container/container_script_task.py
 
 %files
     ./carps /benchmarking/carps
@@ -30,7 +30,7 @@ From: continuumio/anaconda3
     pip install wheel
     pip install -r /benchmarking/requirements.txt
     pip install ../benchmarking
-    pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
+    pip install -r /benchmarking/container_recipes/general/general_requirements_container_task.txt
 
     # log benchmarking version
     BENCHMARKING_VERSION=$(python -c "import carps; print(carps.version)")

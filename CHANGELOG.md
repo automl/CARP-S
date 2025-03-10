@@ -2,7 +2,7 @@
 
 ## Benchmarks
 - HPOBench: Add rl, nasbench_101, nasbench_201, nasbench1shot1, and nas_hpo (#155, fix for benchmarks #158)
-- Pymoo: Add all unconstraint problems (#162)
+- Pymoo: Add all unconstraint tasks (#162)
 
 ## Subsets
 - Updated subsets for black-box and multi-objective (#164)

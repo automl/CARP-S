@@ -1,4 +1,4 @@
-"""Run optimizer, make problem and optimizer."""
+"""Run optimizer, make task and optimizer."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ def make_task(cfg: DictConfig, result_processor: ResultProcessor | None = None) 
     Returns:
     -------
     Task
-        Target problem.
+        Task (objective function with defined input and output space) to optimize.
     """
     task_cfg = cfg.task
 
@@ -79,7 +79,7 @@ def make_optimizer(cfg: DictConfig, task: Task) -> Optimizer:
 
 
 def optimize(cfg: DictConfig, result_processor: ResultProcessor | None = None) -> None:
-    """Run optimizer on problem.
+    """Run optimizer on task.
 
     Save trajectory and metadata to database.
 

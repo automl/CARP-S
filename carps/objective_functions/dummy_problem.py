@@ -1,4 +1,4 @@
-"""Dummy problem for testing purposes."""
+"""Dummy objective function for testing purposes."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class DummyObjectiveFunction(ObjectiveFunction):
-    """Dummy problem for testing purposes."""
+    """Dummy objective function for testing purposes."""
 
     def __init__(self, return_value: float | list[float] = 0, loggers: list[AbstractLogger] | None = None) -> None:
         """Initialize Dummy ObjectiveFunction.
@@ -49,7 +49,7 @@ class DummyObjectiveFunction(ObjectiveFunction):
         return self._configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:  # noqa: ARG002
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Ignore trial_info, just return the return value.
 

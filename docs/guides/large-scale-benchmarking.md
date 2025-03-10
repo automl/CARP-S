@@ -4,7 +4,7 @@
 You can run your optimization via
 ```bash
 conda run -n automlsuite_DUMMY_Optimizer_DUMMY_ObjectiveFunction python carps/run.py \
-    +optimizer/DUMMY=config +problem/DUMMY=config \
+    +optimizer/DUMMY=config +task/DUMMY=config \
     'seed=range(1,11)' \
     +cluster=local -m
 ```

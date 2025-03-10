@@ -151,7 +151,7 @@ class SynetuneOptimizer(Optimizer):
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
             self.fidelity_enabled = True
             if self.task.input_space.fidelity_space.fidelity_type is None:
-                raise ValueError("To run multi-fidelity optimizer, the problem must define a fidelity type!")
+                raise ValueError("To run multi-fidelity optimizer, the task must define a fidelity type!")
             if self.max_fidelity is None:
                 raise ValueError("To run multi-fidelity optimizer, we must specify max_fidelity!")
 

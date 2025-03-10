@@ -6,11 +6,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from carps.utils.running import make_problem
+from carps.utils.running import make_task
 from carps.utils.trials import TrialInfo
 from omegaconf import OmegaConf
 
-path = Path("carps/configs/problem/HPOBench/multifidelity")
+path = Path("carps/configs/task/HPOBench/multifidelity")
 config_fns = list(path.glob("*.yaml"))
 result_file = "durations.csv"
 # print(config_fns)
@@ -18,14 +18,14 @@ seed = 1
 
 def measure_time(config_fn: Path, n: int = 5) -> float:
     cfg = OmegaConf.load(config_fn)
-    cfg.problem.seed = seed
-    problem = make_problem(cfg=cfg)
-    config = problem.configspace.sample_configuration()
+    cfg.task.seed = seed
+    task = make_task(cfg=cfg)
+    config = task.configspace.sample_configuration()
     trial_info = TrialInfo(config=config)
     durations = []
     for _i in range(n):
         start = time.time()
-        problem.evaluate(trial_info)
+        task.objective_function.evaluate(trial_info)
         end = time.time()
         duration = end - start
         durations.append(duration)

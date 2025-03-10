@@ -19,12 +19,12 @@ register_many_affine_functions()
 
 
 class BBOBObjectiveFunction(ObjectiveFunction):
-    """BBBOB problem."""
+    """BBBOB objective function."""
 
     def __init__(
         self, fid: int, instance: int, dimension: int, seed: int, loggers: list[AbstractLogger] | None = None
     ) -> None:
-        r"""Initialize BBOB problem.
+        r"""Initialize BBOB objective function.
 
         Parameters
         ----------
@@ -60,7 +60,7 @@ class BBOBObjectiveFunction(ObjectiveFunction):
         return self._configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------

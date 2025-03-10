@@ -82,7 +82,7 @@ $RUN_COMMAND pip install wheel
 $RUN_COMMAND pip install swig
 $RUN_COMMAND pip install -e .
 $RUN_COMMAND pip install -r requirements.txt
-$RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_problem.txt
+$RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_task.txt
 $RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_optimizer.txt
 
 # Optimizer and benchmark specific

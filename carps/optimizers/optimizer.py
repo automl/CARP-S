@@ -124,7 +124,7 @@ class Optimizer(ABC):
     def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
         """Convert proposal by optimizer to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Returns:
         -------
@@ -223,7 +223,7 @@ class Optimizer(ABC):
             else:
                 assert (
                     self.task.input_space.fidelity_space.max_fidelity is not None
-                ), "Define max_fidelity for multi-fidelity optimization in your problem setup."
+                ), "Define max_fidelity for multi-fidelity optimization in your objective function setup."
                 assert trial_info.budget is not None
                 self.trial_counter += trial_info.budget / self.task.input_space.fidelity_space.max_fidelity
         return self.get_current_incumbent()

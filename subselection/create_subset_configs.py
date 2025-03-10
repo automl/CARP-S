@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 
 
 def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str) -> None:
-    config_target_path = Path("carps/configs/problem/subselection") / scenario
+    config_target_path = Path("carps/configs/task/subselection") / scenario
     config_target_path.mkdir(exist_ok=True, parents=True)
 
     def write_subsets(subset_fn: str, identifier: str):
@@ -21,9 +21,9 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
         index_fn = config_target_path.parent.parent / "index.csv"
         if not index_fn.is_file():
             raise ValueError(f"Could not find {index_fn}. ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-        problem_index = pd.read_csv(index_fn)
-        ids = [np.where(problem_index["task_id"]==pid)[0][0] for pid in task_ids]
-        config_fns = problem_index["config_fn"][ids].to_list()
+        task_index = pd.read_csv(index_fn)
+        ids = [np.where(task_index["task_id"]==pid)[0][0] for pid in task_ids]
+        config_fns = task_index["config_fn"][ids].to_list()
 
         for config_fn in config_fns:
             cfg = OmegaConf.load(config_fn)

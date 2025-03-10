@@ -92,14 +92,14 @@ def annotate_with_cfg(
     return df
 
 
-def get_Y(X: np.ndarray, problem: ObjectiveFunction) -> np.ndarray:  # noqa: N802, N803
+def get_Y(X: np.ndarray, objective_function: ObjectiveFunction) -> np.ndarray:  # noqa: N802, N803
     """Get objective function values.
 
-    Beware, remember runtime when problem is not synthetic, a table or a surrogate.
+    Beware, remember runtime when objective_function is not synthetic, a table or a surrogate.
 
     Args:
         X (np.ndarray): Design points.
-        problem (ObjectiveFunction): ObjectiveFunction instance.
+        objective_function (ObjectiveFunction): ObjectiveFunction instance.
 
     Returns:
         np.ndarray: Objective function values.
@@ -107,8 +107,10 @@ def get_Y(X: np.ndarray, problem: ObjectiveFunction) -> np.ndarray:  # noqa: N80
     return np.array(
         [
             (
-                problem.evaluate(
-                    trial_info=TrialInfo(config=Configuration(configuration_space=problem.configspace, vector=x))
+                objective_function.evaluate(
+                    trial_info=TrialInfo(
+                        config=Configuration(configuration_space=objective_function.configspace, vector=x)
+                    )
                 ).cost
             )
             for x in X
@@ -155,14 +157,13 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
 
         config_keys = [
             "benchmark_id",
-            "problemd_id",
+            "task_id",
             "scenario",
             "subset_id",
             "benchmark",
-            "problem",
+            "task",
             "seed",
             "optimizer_id",
-            "task",
         ]
         config_keys_forbidden = ["_target_", "_partial_"]
         df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
@@ -176,7 +177,7 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         df = df.drop(columns=["problem.function.seed"])  # noqa: PD901
 
     if "problem.function.dim" in df:
-        df = df.rename(columns={"problem.function.dim": "dim"})  # noqa: PD901
+        df = df.rename(columns={"task.function.dim": "dim"})  # noqa: PD901
 
     return process_logs(df)
 
@@ -346,13 +347,13 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     Returns:
         pd.DataFrame: Logs with task
     """
-    index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
+    index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
     if not index_fn.is_file():
         raise ValueError("ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-    problem_index = pd.read_csv(index_fn)
+    task_index = pd.read_csv(index_fn)
 
     def load_task_cfg(task_id: str) -> DictConfig:
-        subset = problem_index["config_fn"][problem_index["task_id"] == task_id]
+        subset = task_index["config_fn"][task_index["task_id"] == task_id]
         if len(subset) == 0:
             raise ValueError(
                 f"Can't find config_fn for {task_id}. Maybe the index is old. Run "
@@ -558,7 +559,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
 
 
 def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
-    """Normalize logs per problem.
+    """Normalize logs per task.
 
     Args:
         logs (pd.DataFrame): Raw logs.
@@ -609,7 +610,7 @@ def calc_time(D: pd.DataFrame) -> pd.Series:  # noqa: N803
     """Calculate time elapsed.
 
     Args:
-        D (pd.DataFrame): Logs for a single problem, optimizer, seed.
+        D (pd.DataFrame): Logs for a single task, optimizer, seed.
 
     Returns:
         pd.Series: D with time elapsed as "time" column.
@@ -685,7 +686,7 @@ def get_interpolated_performance_df(
         raise ValueError(msg)
 
     # interpolation_columns = [
-    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
+    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
     group_keys = ["scenario", "set", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []

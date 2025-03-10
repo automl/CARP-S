@@ -1,9 +1,9 @@
-"""HPOBench problem class."""
+"""HPOBench objective function class."""
 
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from hpobench.benchmarks.ml.tabular_benchmark import TabularBenchmark
 from hpobench.container.benchmarks.ml.lr_benchmark import LRBenchmark
@@ -18,13 +18,14 @@ from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
+    from hpobench.abstract_benchmark import AbstractBenchmark
     from hpobench.container.client_abstract_benchmark import AbstractBenchmarkClient
 
     from carps.loggers.abstract_logger import AbstractLogger
 
 
 class HPOBenchObjectiveFunction(ObjectiveFunction):
-    """HPOBench problem."""
+    """HPOBench objective function."""
 
     def __init__(
         self,
@@ -32,20 +33,20 @@ class HPOBenchObjectiveFunction(ObjectiveFunction):
         model: str | None = None,
         task_id: int | None = None,
         metric: str | list[str] = "function_value",
-        problem: AbstractBenchmarkClient | None = None,
+        benchmark_client: AbstractBenchmarkClient | None = None,
         budget_type: str | None = None,
         loggers: list[AbstractLogger] | None = None,
     ):
-        """Initialize a HPOBench problem.
+        """Initialize a HPOBench objective function.
 
-        Either specify model and task_id for an ML problem or problem.
+        Either specify model and task_id for an ML tabular benchmark objective function or benchmark_client.
 
         Parameters
         ----------
         model : str | None, Model name.
         task_id : str Task ID, see https://arxiv.org/pdf/2109.06716.pdf, page 22.
-        problem : AbstractBenchmarkClient
-            Instantiated benchmark problem, e.g.
+        benchmark_client : AbstractBenchmarkClient
+            Instantiated benchmark/objective function, e.g.
             `hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetAdultOnStepsBenchmark`.
         seed: int Random seed.
         budget_type : Optional[str] Budget type for the multifidelity setting.
@@ -55,17 +56,21 @@ class HPOBenchObjectiveFunction(ObjectiveFunction):
 
         self.budget_type = budget_type
 
-        if problem is None and model is None and task_id is None:
-            raise ValueError("Please specify either problem or model and task_id.")
-        if problem is None:
+        if benchmark_client is None and model is None and task_id is None:
+            raise ValueError("Please specify either benchmark_client or model and task_id.")
+        if benchmark_client is None:
             assert model is not None
             assert task_id is not None
-            problem = get_hpobench_problem(task_id=task_id, model=model, seed=seed, budget_type=self.budget_type)
-        self._problem = problem
+            objective_function = get_tabular_objective_function(
+                task_id=task_id, model=model, seed=seed, budget_type=self.budget_type
+            )
+        else:
+            objective_function = benchmark_client
+        self._benchmark: AbstractBenchmarkClient | AbstractBenchmark = objective_function
         if not isinstance(metric, list | ListConfig):
             metric = [metric]
         self.metric = metric
-        self._configspace = self._problem.get_configuration_space(seed=seed)
+        self._configspace = self._benchmark.get_configuration_space(seed=seed)
 
     @property
     def configspace(self) -> ConfigurationSpace:
@@ -79,7 +84,7 @@ class HPOBenchObjectiveFunction(ObjectiveFunction):
         return self._configspace
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
-        """Evaluate problem.
+        """Evaluate objective function.
 
         Parameters
         ----------
@@ -100,7 +105,7 @@ class HPOBenchObjectiveFunction(ObjectiveFunction):
         else:
             fidelity = None
 
-        result_dict = self._problem.objective_function(
+        result_dict = self._benchmark.objective_function(
             configuration=configuration, fidelity=fidelity, rng=trial_info.seed
         )
         endtime = time.time()
@@ -119,8 +124,10 @@ class HPOBenchObjectiveFunction(ObjectiveFunction):
         )
 
 
-def get_hpobench_problem(model: str, task_id: int, seed: int, budget_type: str | None = None) -> Any:
-    """Get HPOBench problem.
+def get_tabular_objective_function(
+    model: str, task_id: int, seed: int, budget_type: str | None = None
+) -> TabularBenchmark:
+    """Get HPOBench objective function / TabularBenchmark.
 
     Parameters
     ----------
@@ -132,25 +139,31 @@ def get_hpobench_problem(model: str, task_id: int, seed: int, budget_type: str |
 
     Returns:
     -------
-    Any
-        Target function.
+    TabularBenchmark
+        Ojbective function.
     """
     common_args = {"rng": seed, "task_id": task_id}
     if model == "lr":
-        problem = TabularBenchmark(model="lr", **common_args) if budget_type is None else LRBenchmark(**common_args)
+        objective_function = (
+            TabularBenchmark(model="lr", **common_args) if budget_type is None else LRBenchmark(**common_args)
+        )
     elif model == "nn":
-        problem = TabularBenchmark(model="nn", **common_args) if budget_type is None else NNBenchmark(**common_args)
+        objective_function = (
+            TabularBenchmark(model="nn", **common_args) if budget_type is None else NNBenchmark(**common_args)
+        )
     elif model == "rf":
-        problem = (
+        objective_function = (
             TabularBenchmark(model="rf", **common_args) if budget_type is None else RandomForestBenchmark(**common_args)
         )
     elif model == "svm":
-        problem = TabularBenchmark(model="svm", **common_args) if budget_type is None else SVMBenchmark(**common_args)
+        objective_function = (
+            TabularBenchmark(model="svm", **common_args) if budget_type is None else SVMBenchmark(**common_args)
+        )
     elif model == "xgboost":
-        problem = (
+        objective_function = (
             TabularBenchmark(model="xgb", **common_args) if budget_type is None else XGBoostBenchmark(**common_args)
         )
     else:
         raise ValueError(f"Unknown model {model} for HPOBench.")
 
-    return problem
+    return objective_function

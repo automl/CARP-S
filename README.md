@@ -112,14 +112,14 @@ python -m carps.run +optimizer/smac20=blackbox '+task/BBOB=glob(*)' 'seed=range(
 
 For the second command, the Hydra -m (or --multirun) option indicates that multiple runs will be 
 performed over a range of parameter values. In this case, it's indicating that the benchmarking
-should be run for all available BBOB problems (+task/BBOB=glob(*)) and for 10 different 
+should be run for all available BBOB tasks (+task/BBOB=glob(*)) and for 10 different 
 seed values (seed=range(1,11)).
 
 ## Commands
 
-You can run a certain problem and optimizer combination directly with Hydra via:
+You can run a certain task and optimizer combination directly with Hydra via:
 ```bash
-python -m carps.run +problem=... +optimizer=... seed=... -m
+python -m carps.run +task=... +optimizer=... seed=... -m
 ```
 
 To check whether any runs are missing, you can use the following command. It will create
@@ -142,10 +142,10 @@ python -m carps.utils.database.reset_experiments
 ```
 
 ### Running with Containers and Database
-Another option is to fill the database with all possible combinations of problems and optimizers
+Another option is to fill the database with all possible combinations of tasks and optimizers
 you would like to run:
 ```bash
-python -m carps.container.create_cluster_configs +problem=... +optimizer=... -m
+python -m carps.container.create_cluster_configs +task=... +optimizer=... -m
 ```
 
 Then, run them from the database with:
