@@ -11,8 +11,8 @@ optimizer:
       deterministic: true
       n_workers: 1
       output_directory: ${outdir}/${seed}/smac3_output
-      min_fidelity: ${task.input_space.fidelity_space.min_fidelity}
-      max_fidelity: ${task.input_space.fidelity_space.max_fidelity}
+      min_budget: ${task.input_space.fidelity_space.min_fidelity}
+      max_budget: ${task.input_space.fidelity_space.max_fidelity}
     smac_kwargs:
         dask_client: null
         overwrite: true
