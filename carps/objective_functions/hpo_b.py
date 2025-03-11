@@ -12,6 +12,7 @@ for details, please refer to https://github.com/releaunifreiburg/HPO-B
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -242,7 +243,8 @@ class HPOBObjectiveFunction(ObjectiveFunction):
             raise RuntimeError(
                 "It seems that the surrogate files have not been downloaded. Please run "
                 "'bash container_recipes/benchmarks/HPOB/download_data.sh' to download the "
-                "surrogates."
+                f"surrogates. Surrogates file: {surrogates_file}, surrogates files resolved: "
+                f"{surrogates_file.resolve()}, current workdir: {os.getcwd()}. "
             )
         with open(str(surrogates_file)) as f:
             self.surrogates_stats = json.load(f)

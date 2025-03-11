@@ -9,7 +9,7 @@ task:
     _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
     model_id: '7609'
     dataset_id: '146012'
-    surrogates_dir: ../../../carps/benchmark_data/HPO-B/saved-surrogates
+    surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
