@@ -69,19 +69,15 @@ publish: clean-build build
 
 OS := $(shell uname)
 
-install:
+uvenv:
 	pip install uv
-	uv venv --python=3.12 env_smbm
-	. env_smbm/bin/activate
-	$(MAKE) install-swig
+	uv venv --python=3.12 carpsenv
+	. carpsenv/bin/activate
 	uv pip install setuptools wheel
-	git clone --branch $(SMACBRANCH) git@github.com:automl/SMAC3.git repos/SMAC3
-	git clone git@github.com:automl/CARP-S.git repos/CARP-S
-	cd repos/CARP-S && uv pip install -e '.[dev]' && pre-commit install
-	cd repos/SMAC3 && uv pip install -e '.[dev]' && pre-commit install
-	$(MAKE) benchmark_bbob
-	# $(MAKE) benchmark_yahpo
-	$(MAKE) welcome
+
+install-dev:
+	$(PIP) install -e ".[dev]"
+	pre-commit install
 
 install-swig:
 	@if [ "$(OS)" = "Darwin" ]; then \
@@ -121,7 +117,9 @@ optimizer_ax:
 	$(PIP) install numpy --upgrade
 
 optimizer_hebo:
-	. container_recipes/optimizers/HEBO/HEBO_install.sh
+	# . container_recipes/optimizers/HEBO/HEBO_install.sh
+	$(PIP) install -r container_recipes/optimizers/HEBO/HEBO_requirements.txt
+	$(PIP) install numpy --upgrade
 
 optimizer_nevergrad:
 	$(PIP) install -r container_recipes/optimizers/Nevergrad/Nevergrad_requirements.txt
@@ -164,3 +162,13 @@ benchmarks:
 	$(MAKE) benchmark_mfpbench
 	$(MAKE) benchmark_hpobench
 	$(MAKE) benchmark_hpob
+
+optimizers:
+	$(MAKE) optimizer_smac
+	$(MAKE) optimizer_optuna
+	$(MAKE) optimizer_dehb
+	$(MAKE) optimizer_skopt
+	$(MAKE) optimizer_synetune
+	$(MAKE) optimizer_ax
+	$(MAKE) optimizer_nevergrad
+	$(MAKE) optimizer_hebo

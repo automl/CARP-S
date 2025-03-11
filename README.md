@@ -168,7 +168,7 @@ For a custom optimizer check this [example repo](https://github.com/automl/CARP-
 Information is also available [here](https://automl.github.io/CARP-S/guides/using-carps/).
 
 ## Evaluation Results
-For each scenario (blackbox, multi-fidelity, multi-objective and multi-fidelity-multi-objective) and set (dev and test), we run selected optimizers and provide the data.
+For each task_type (blackbox, multi-fidelity, multi-objective and multi-fidelity-multi-objective) and set (dev and test), we run selected optimizers and provide the data.
 Here we provide the link to the [meta data](https://drive.google.com/file/d/17pn48ragmWsyRC39sInsh2fEPUHP3BRT/view?usp=sharing) 
 that contains the detailed optimization setting for each run  
 and the [running results](https://drive.google.com/file/d/1yzJRbwRvdLbpZ9SdQN2Vk3yQSdDP_vck/view?usp=drive_link) that 

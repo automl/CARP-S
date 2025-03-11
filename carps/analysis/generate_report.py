@@ -4,7 +4,7 @@ For this we need the run logs, which are stored in a CSV or parquet file.
 
 To generate this file, call `python -m carps.analysis.gather_results <rundir>`.
 Of course, you can concatenate multiple result files.
-Keep in mind that the results are grouped by scenario and set id.
+Keep in mind that the results are grouped by task_type and set id.
 """
 
 from __future__ import annotations
@@ -98,7 +98,7 @@ def plot_ranks_over_time(
     perf = get_interpolated_performance_df(df)
 
     df_rank_list = []
-    for gid, gdf in perf.groupby(["scenario", "set"]):
+    for gid, gdf in perf.groupby(["task_type", "set"]):
         budgets = gdf[x_column].unique()
         for max_fidelity in budgets:
             df_crit = get_df_crit(
@@ -113,7 +113,7 @@ def plot_ranks_over_time(
             df_rank_list.append(
                 pd.DataFrame(
                     {
-                        "scenario": gid[0],
+                        "task_type": gid[0],
                         "set": gid[1],
                         "optimizer_id": rank_result.rankdf.index,
                         "n_trials_norm": max_fidelity,
@@ -125,12 +125,12 @@ def plot_ranks_over_time(
     df_rank.to_csv("df_rank.csv", index=False)
 
     resulting_files = []
-    for gid, gdf in df_rank.groupby(["scenario", "set"]):
+    for gid, gdf in df_rank.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/rank_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
@@ -185,12 +185,12 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str | Path = "figures", replot: bool
     key_performance = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/ecdf_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
@@ -244,11 +244,11 @@ def plot_critical_difference(
     figsize = (6 * 1.5, 4 * 1.5)
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         fig_filename = f"{output_dir}/criticaldifference_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": fig_filename,
@@ -303,11 +303,11 @@ def plot_performance_per_task(
     perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         figure_filename = f"{output_dir}/performancepertask_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
@@ -394,12 +394,12 @@ def plot_boxplot_violinplot(
     x_column = "n_trials_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename_boxplot,
@@ -412,7 +412,7 @@ def plot_boxplot_violinplot(
         figure_filename_violinplot = f"{output_dir}/finalperfviolinplot_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename_violinplot,
@@ -478,12 +478,12 @@ def plot_finalperfbarplot(
     x_column = "n_trials_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/finalperfbarplot_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
@@ -543,11 +543,11 @@ def plot_spearman_rank_correlation(
     perf_col = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         figure_filename = f"{output_dir}/spearmanrankcorrelation_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
@@ -667,12 +667,12 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
         ],
     }
 
-    for (scenario, set_id), info in resulting_files.groupby(["scenario", "set"]):
+    for (task_type, set_id), info in resulting_files.groupby(["task_type", "set"]):
         report_tex = ""
-        report_filename = report_dir / f"{report_name}_{scenario}_{set_id}.tex"
-        full_report_filename = report_dir / f"full_{report_name}_{scenario}_{set_id}.tex"
+        report_filename = report_dir / f"{report_name}_{task_type}_{set_id}.tex"
+        full_report_filename = report_dir / f"full_{report_name}_{task_type}_{set_id}.tex"
 
-        print(scenario, set_id)
+        print(task_type, set_id)
 
         # Embed plots
         report_tex += "\\section{Plots}\n"
@@ -681,7 +681,7 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
 
             for plot_type in _order:
                 _info = info[info["plot_type"] == plot_type].iloc[0]
-                plot_title = f"Scenario: {_info['scenario']} - Set: {_info['set']} - {_info['plot_type_pretty']}"
+                plot_title = f"Scenario: {_info['task_type']} - Set: {_info['set']} - {_info['plot_type_pretty']}"
                 plot_filename = "figures" + _info["filename"].split("figures")[-1]
                 report_tex += latex_template_plot_block.replace("plot_title", plot_title).replace(
                     "plot_filename", plot_filename

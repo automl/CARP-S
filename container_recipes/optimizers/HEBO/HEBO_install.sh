@@ -5,16 +5,32 @@ then
     PIP="pip"
 fi
 
-# git clone https://github.com/huawei-noah/HEBO.git lib/HEBO
+hebo_root="lib/HEBO"
 
-# Read lines of requirements.txt and install each package
-while read -r line; do
-    # Strip line of anything after a = > or <
-    line=$(echo $line | sed -e 's/[<=>].*//')
-    echo $line >> lib/HEBO/HEBO/requirements_tmp.txt
-done < lib/HEBO/HEBO/requirements.txt
+# git clone https://github.com/huawei-noah/HEBO.git $hebo_root
 
-# Replace the requirements.txt with the stripped version
-mv lib/HEBO/HEBO/requirements_tmp.txt lib/HEBO/HEBO/requirements.txt
+> $hebo_root/HEBO/requirements.txt
+$PIP install scipy --upgrade
+$PIP install numpy pandas pymoo scikit-learn --upgrade
+$PIP install gpytorch
+$PIP install GPy
+$PIP install numpy --upgrade
 
+# Install Catboost
+if [ ! -f "lib/dists/catboost-1.2.7.tar.gz" ]; then
+    echo "catboost source file does not exist at 'lib/dists/catboost-1.2.7.tar.gz'. Installing catboost from source (can take a while)."
+    . $hebo_root/install_catboost.sh
+fi
+$PIP install lib/dists/catboost-1.2.7.tar.gz
+
+# $PIP install setuptools wheel jupyterlab conan --upgrade
+
+# git clone https://github.com/catboost/catboost.git $CATBOOST_SRC_ROOT
+# $PIP install $CATBOOST_SRC_ROOT/catboost/python-package
+
+
+# Install rest of the dependencies
+$PIP install disjoint-set
 $PIP install -e lib/HEBO/HEBO
+$PIP install numpy --upgrade
+$PIP install scipy --upgrade

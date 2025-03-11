@@ -202,15 +202,15 @@ def calc_critical_difference(
     )
 
 
-def calc(rundir: str, scenario: str = "blackbox") -> None:
-    """Calculate the critical difference for a specific scenario.
+def calc(rundir: str, task_type: str = "blackbox") -> None:
+    """Calculate the critical difference for a specific task_type.
 
     Args:
         rundir (str): The run directory.
-        scenario (str, optional): The scenario. Defaults to "blackbox".
+        task_type (str, optional): The task_type. Defaults to "blackbox".
     """
     df, df_cfg = load_logs(rundir=rundir)
-    calc_critical_difference(df=df[df["scenario"] == scenario], identifier=scenario)
+    calc_critical_difference(df=df[df["task_type"] == task_type], identifier=task_type)
 
 
 """Code for CD Plots

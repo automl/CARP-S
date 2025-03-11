@@ -158,7 +158,7 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         config_keys = [
             "benchmark_id",
             "task_id",
-            "scenario",
+            "task_type",
             "subset_id",
             "benchmark",
             "task",
@@ -299,8 +299,8 @@ def maybe_add_n_trials(df: pd.DataFrame, n_initial_design: int, counter_key: str
     return df
 
 
-def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFrame:
-    """Add scenario type to logs.
+def add_task_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFrame:
+    """Add task type to logs.
 
     Args:
         logs (pd.DataFrame): Logs.
@@ -308,20 +308,20 @@ def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.Data
             hydra config.
 
     Returns:
-        pd.DataFrame: Logs with scenario type.
+        pd.DataFrame: Logs with task type.
     """
 
-    def determine_scenario_type(x: pd.Series) -> str:
+    def determine_task_type(x: pd.Series) -> str:
         if x[task_prefix + "is_multifidelity"] is False and x[task_prefix + "is_multiobjective"] is False:
-            scenario = "blackbox"
+            task_type = "blackbox"
         elif x[task_prefix + "is_multifidelity"] is True and x[task_prefix + "is_multiobjective"] is False:
-            scenario = "multi-fidelity"
+            task_type = "multi-fidelity"
         elif x[task_prefix + "is_multifidelity"] is False and x[task_prefix + "is_multiobjective"] is True:
-            scenario = "multi-objective"
+            task_type = "multi-objective"
         elif x[task_prefix + "is_multifidelity"] is True and x[task_prefix + "is_multiobjective"] is True:
-            scenario = "multi-fidelity-objective"
+            task_type = "multi-fidelity-objective"
         elif np.isnan(x[task_prefix + "is_multifidelity"]) or np.isnan(x[task_prefix + "is_multiobjective"]):
-            scenario = "blackbox"
+            task_type = "blackbox"
         else:
             print(
                 x["task_id"],
@@ -330,10 +330,10 @@ def add_scenario_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.Data
                 x[task_prefix + "is_multifidelity"],
                 type(x[task_prefix + "is_multifidelity"]),
             )
-            raise ValueError("Unknown scenario")
-        return scenario
+            raise ValueError("Unknown task_type")
+        return task_type
 
-    logs["scenario"] = logs.apply(determine_scenario_type, axis=1)
+    logs["task_type"] = logs.apply(determine_task_type, axis=1)
     return logs
 
 
@@ -526,12 +526,14 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     logs = maybe_postadd_task(logs)
     if "task.output_space.n_objectives" in logs:
         logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
-    logger.debug("Infer scenario...")
-    logs = add_scenario_type(logs)
+    logger.debug("Infer task_type...")
+    if "scenario" in logs:
+        logs = logs.rename(columns={"scenario": "task_type"})
+    logs = add_task_type(logs)
 
     # Check for scalarized MO, we want to keep the cost vector
     if "trial_value__additional_info" in logs:
-        ids_mo = (logs["scenario"] == "multi-objective") & (
+        ids_mo = (logs["task_type"] == "multi-objective") & (
             logs["trial_value__additional_info"].apply(lambda x: "cost" in x)
         )
         if len(ids_mo) > 0:
@@ -572,7 +574,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
-    ids_mo = logs["scenario"] == "multi-objective"
+    ids_mo = logs["task_type"] == "multi-objective"
     if len(ids_mo) > 0 and "hypervolume" in logs:
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
@@ -687,7 +689,7 @@ def get_interpolated_performance_df(
 
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
-    group_keys = ["scenario", "set", "benchmark_id", "optimizer_id", "task_id", "seed"]
+    group_keys = ["task_type", "set", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []
     for gid, gdf in logs.groupby(by=group_keys):

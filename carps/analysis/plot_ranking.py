@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 def plot_ranking(
     gdf: pd.DataFrame,
-    scenario: str,
+    task_type: str,
     set_id: str,
     perf_col: str = "trial_value__cost_inc_norm",
     task_prefix: str = "",
@@ -27,7 +27,7 @@ def plot_ranking(
 
     Args:
         gdf (pd.DataFrame): Dataframe with the logs.
-        scenario (str): Scenario name, e.g. blackbox.
+        task_type (str): Scenario name, e.g. blackbox.
         set_id (str): Set ID, e.g. test or dev.
         perf_col (str, optional): Performance column. Defaults to "trial_value__cost_inc_norm".
         task_prefix (str, optional): Task prefix. Defaults to "". If set, will be removed from the task IDs.
@@ -37,7 +37,7 @@ def plot_ranking(
     """
     fpath = Path("figures/ranking")
     fpath.mkdir(exist_ok=True, parents=True)
-    identifier = f"{scenario}_{set_id}"
+    identifier = f"{task_type}_{set_id}"
     result = calc_critical_difference(gdf, identifier=identifier, figsize=(8, 3), perf_col=perf_col, plot_diagram=True)
     # print(result)
     # try:

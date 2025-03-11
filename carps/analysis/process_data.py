@@ -15,8 +15,8 @@ setup_logging()
 logger = get_logger(__file__)
 
 
-def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
-    """Add scenario type to logs.
+def add_task_type(logs: pd.DataFrame) -> pd.DataFrame:
+    """Add task_type type to logs.
 
     Parameters
     ----------
@@ -26,20 +26,20 @@ def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
     Returns:
     -------
     pd.DataFrame
-        Logs with scenario type.
+        Logs with task_type type.
     """
 
-    def determine_scenario_type(x: pd.Series) -> str:
+    def determine_task_type(x: pd.Series) -> str:
         if x["task.input_space.fidelity_space.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
-            scenario = "blackbox"
+            task_type = "blackbox"
         elif x["task.input_space.fidelity_space.is_multifidelity"] is True and x["task.is_multiobjective"] is False:
-            scenario = "multi-fidelity"
+            task_type = "multi-fidelity"
         elif x["task.input_space.fidelity_space.is_multifidelity"] is False and x["task.is_multiobjective"] is True:
-            scenario = "multi-objective"
+            task_type = "multi-objective"
         elif x["task.input_space.fidelity_space.is_multifidelity"] is True and x["task.is_multiobjective"] is True:
-            scenario = "multi-fidelity-objective"
+            task_type = "multi-fidelity-objective"
         elif np.isnan(x["task.input_space.fidelity_space.is_multifidelity"]) or np.isnan(x["task.is_multiobjective"]):
-            scenario = "blackbox"
+            task_type = "blackbox"
         else:
             print(
                 x["task_id"],
@@ -48,10 +48,10 @@ def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
                 x["task.input_space.fidelity_space.is_multifidelity"],
                 type(x["task.input_space.fidelity_space.is_multifidelity"]),
             )
-            raise ValueError("Unknown scenario")
-        return scenario
+            raise ValueError("Unknown task_type")
+        return task_type
 
-    logs["scenario"] = logs.apply(determine_scenario_type, axis=1)
+    logs["task_type"] = logs.apply(determine_task_type, axis=1)
     return logs
 
 
@@ -99,7 +99,7 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
 def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     """Process raw logs.
 
-    Normalize n_trials and costs. Calculate trajectory (incumbent cost). Maybe add scenario.
+    Normalize n_trials and costs. Calculate trajectory (incumbent cost). Maybe add task_type.
 
     Parameters
     ----------
@@ -131,7 +131,7 @@ def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logs = maybe_postadd_task(logs)
     if "task.output_space.n_objectives" in logs:
         logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
-    logs = add_scenario_type(logs)
+    logs = add_task_type(logs)
 
     # Add time
     logs = logs.groupby(by=["task_id", "optimizer_id", "seed"]).apply(calc_time).reset_index(drop=True)
@@ -222,7 +222,7 @@ def get_interpolated_performance_df(
     ]
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
-    group_keys = ["scenario", "benchmark_id", "optimizer_id", "task_id", "seed"]
+    group_keys = ["task_type", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []
     for gid, gdf in logs.groupby(by=group_keys):
