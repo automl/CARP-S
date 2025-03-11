@@ -3,6 +3,7 @@ benchmark_id: Pymoo
 task_id: Pymoo/ManyO/unconstraint/dtlz2
 task:
   _target_: carps.utils.task.Task
+  name: Pymoo/ManyO/unconstraint/dtlz2
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.pymoo.PymooObjectiveFunction

@@ -3,6 +3,7 @@ benchmark_id: Pymoo
 task_id: Pymoo/SO/unconstraint/ackley
 task:
   _target_: carps.utils.task.Task
+  name: Pymoo/SO/unconstraint/ackley
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.pymoo.PymooObjectiveFunction
