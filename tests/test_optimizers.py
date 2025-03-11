@@ -32,7 +32,7 @@ def filenames():
     # Replace with your desired pattern, e.g., "*.txt" to match all .txt files
     _filenames = list(Path("carps/configs/optimizer").glob("**/*.yaml"))
     _filenames = [fn for fn in _filenames if "base" not in str(fn)]
-    # _filenames = [fn for fn in _filenames if "hebo" not in str(fn)]
+    _filenames = [fn for fn in _filenames if "hebo" not in str(fn)]
     _filenames.sort()
     return _filenames
 

@@ -16,18 +16,15 @@ $PIP install gpytorch
 $PIP install GPy
 $PIP install numpy --upgrade
 
-# Install Catboost
-if [ ! -f "lib/dists/catboost-1.2.7.tar.gz" ]; then
-    echo "catboost source file does not exist at 'lib/dists/catboost-1.2.7.tar.gz'. Installing catboost from source (can take a while)."
-    . $hebo_root/install_catboost.sh
-fi
-$PIP install lib/dists/catboost-1.2.7.tar.gz
+# # Install Catboost
+# if [ ! -f "lib/dists/catboost-1.2.7.tar.gz" ]; then
+#     echo "catboost source file does not exist at 'lib/dists/catboost-1.2.7.tar.gz'. Installing catboost from source (can take a while)."
+#     . $hebo_root/install_catboost.sh
+# fi
+# $PIP install lib/dists/catboost-1.2.7.tar.gz
 
-# $PIP install setuptools wheel jupyterlab conan --upgrade
-
-# git clone https://github.com/catboost/catboost.git $CATBOOST_SRC_ROOT
-# $PIP install $CATBOOST_SRC_ROOT/catboost/python-package
-
+$PIP install setuptools wheel jupyterlab conan --upgrade
+$PIP install catboost
 
 # Install rest of the dependencies
 $PIP install disjoint-set
