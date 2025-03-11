@@ -10,7 +10,7 @@ task:
     model: ParamNet
     task_id: Higgs
     budget_type: null
-    problem:
+    benchmark_client:
       _target_: hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetHiggsOnStepsBenchmark
       rng: ${seed}
     seed: ${seed}

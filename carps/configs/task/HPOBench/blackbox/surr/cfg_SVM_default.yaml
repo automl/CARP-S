@@ -10,7 +10,7 @@ task:
     model: SVM
     task_id: default
     budget_type: null
-    problem:
+    benchmark_client:
       _target_: hpobench.container.benchmarks.surrogates.svm_benchmark.SurrogateSVMBenchmark
       rng: ${seed}
     seed: ${seed}
