@@ -1,0 +1,575 @@
+# @package _global_
+benchmark_id: YAHPO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: yahpo/rbv2_super/40975/trainsize
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: rbv2_super
+    instance: '40975'
+    budget_type: trainsize
+    metric: acc
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: categorical
+          name: learner_id
+          choices:
+          - aknn
+          - glmnet
+          - ranger
+          - rpart
+          - svm
+          - xgboost
+          weights: null
+          default_value: aknn
+          meta: null
+        - type: categorical
+          name: num.impute.selected.cpo
+          choices:
+          - impute.mean
+          - impute.median
+          - impute.hist
+          weights: null
+          default_value: impute.mean
+          meta: null
+        - type: constant
+          name: task_id
+          value: '40975'
+          meta: null
+        - type: uniform_int
+          name: aknn.M
+          lower: 18
+          upper: 50
+          default_value: 34
+          log: false
+          meta: null
+        - type: categorical
+          name: aknn.distance
+          choices:
+          - l2
+          - cosine
+          - ip
+          weights: null
+          default_value: l2
+          meta: null
+        - type: uniform_int
+          name: aknn.ef
+          lower: 8
+          upper: 256
+          default_value: 48
+          log: true
+          meta: null
+        - type: uniform_int
+          name: aknn.ef_construction
+          lower: 8
+          upper: 512
+          default_value: 96
+          log: true
+          meta: null
+        - type: uniform_int
+          name: aknn.k
+          lower: 1
+          upper: 50
+          default_value: 26
+          log: false
+          meta: null
+        - type: uniform_float
+          name: glmnet.alpha
+          lower: 0.0
+          upper: 1.0
+          default_value: 1.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: glmnet.s
+          lower: 0.0009118819656
+          upper: 1096.6331584284585
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: uniform_int
+          name: ranger.min.node.size
+          lower: 1
+          upper: 100
+          default_value: 50
+          log: false
+          meta: null
+        - type: uniform_float
+          name: ranger.mtry.power
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_int
+          name: ranger.num.trees
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: categorical
+          name: ranger.respect.unordered.factors
+          choices:
+          - ignore
+          - order
+          - partition
+          weights: null
+          default_value: ignore
+          meta: null
+        - type: uniform_float
+          name: ranger.sample.fraction
+          lower: 0.1
+          upper: 1.0
+          default_value: 0.55
+          log: false
+          meta: null
+        - type: categorical
+          name: ranger.splitrule
+          choices:
+          - gini
+          - extratrees
+          weights: null
+          default_value: gini
+          meta: null
+        - type: uniform_float
+          name: rpart.cp
+          lower: 0.0009118819656
+          upper: 1.0
+          default_value: 0.01
+          log: true
+          meta: null
+        - type: uniform_int
+          name: rpart.maxdepth
+          lower: 1
+          upper: 30
+          default_value: 30
+          log: false
+          meta: null
+        - type: uniform_int
+          name: rpart.minbucket
+          lower: 1
+          upper: 100
+          default_value: 1
+          log: false
+          meta: null
+        - type: uniform_int
+          name: rpart.minsplit
+          lower: 1
+          upper: 100
+          default_value: 20
+          log: false
+          meta: null
+        - type: uniform_float
+          name: svm.cost
+          lower: 4.53999298e-05
+          upper: 22026.465794806718
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: categorical
+          name: svm.kernel
+          choices:
+          - linear
+          - polynomial
+          - radial
+          weights: null
+          default_value: linear
+          meta: null
+        - type: uniform_float
+          name: svm.tolerance
+          lower: 4.53999298e-05
+          upper: 2.0
+          default_value: 0.009528896
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.alpha
+          lower: 0.0009118819656
+          upper: 1096.6331584284585
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: categorical
+          name: xgboost.booster
+          choices:
+          - gblinear
+          - gbtree
+          - dart
+          weights: null
+          default_value: gblinear
+          meta: null
+        - type: uniform_float
+          name: xgboost.lambda
+          lower: 0.0009118819656
+          upper: 1096.6331584284585
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: uniform_int
+          name: xgboost.nrounds
+          lower: 7
+          upper: 2981
+          default_value: 144
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.subsample
+          lower: 0.1
+          upper: 1.0
+          default_value: 0.55
+          log: false
+          meta: null
+        - type: uniform_int
+          name: ranger.num.random.splits
+          lower: 1
+          upper: 100
+          default_value: 1
+          log: false
+          meta: null
+        - type: uniform_int
+          name: svm.degree
+          lower: 2
+          upper: 5
+          default_value: 4
+          log: false
+          meta: null
+        - type: uniform_float
+          name: svm.gamma
+          lower: 4.53999298e-05
+          upper: 22026.465794806718
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.colsample_bylevel
+          lower: 0.01
+          upper: 1.0
+          default_value: 0.505
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.colsample_bytree
+          lower: 0.01
+          upper: 1.0
+          default_value: 0.505
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.eta
+          lower: 0.0009118819656
+          upper: 1.0
+          default_value: 0.0301973834
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.gamma
+          lower: 4.53999298e-05
+          upper: 7.3890560989306
+          default_value: 0.0183156389
+          log: true
+          meta: null
+        - type: uniform_int
+          name: xgboost.max_depth
+          lower: 1
+          upper: 15
+          default_value: 8
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.min_child_weight
+          lower: 2.718281828459
+          upper: 148.4131591025766
+          default_value: 20.0855369232
+          log: true
+          meta: null
+        - type: uniform_float
+          name: xgboost.rate_drop
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: xgboost.skip_drop
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        conditions:
+        - type: EQ
+          child: aknn.M
+          parent: learner_id
+          value: aknn
+        - type: EQ
+          child: aknn.distance
+          parent: learner_id
+          value: aknn
+        - type: EQ
+          child: aknn.ef
+          parent: learner_id
+          value: aknn
+        - type: EQ
+          child: aknn.ef_construction
+          parent: learner_id
+          value: aknn
+        - type: EQ
+          child: aknn.k
+          parent: learner_id
+          value: aknn
+        - type: EQ
+          child: glmnet.alpha
+          parent: learner_id
+          value: glmnet
+        - type: EQ
+          child: glmnet.s
+          parent: learner_id
+          value: glmnet
+        - type: EQ
+          child: ranger.min.node.size
+          parent: learner_id
+          value: ranger
+        - type: EQ
+          child: ranger.mtry.power
+          parent: learner_id
+          value: ranger
+        - type: EQ
+          child: ranger.num.trees
+          parent: learner_id
+          value: ranger
+        - type: EQ
+          child: ranger.respect.unordered.factors
+          parent: learner_id
+          value: ranger
+        - type: EQ
+          child: ranger.sample.fraction
+          parent: learner_id
+          value: ranger
+        - type: EQ
+          child: ranger.splitrule
+          parent: learner_id
+          value: ranger
+        - type: EQ
+          child: rpart.cp
+          parent: learner_id
+          value: rpart
+        - type: EQ
+          child: rpart.maxdepth
+          parent: learner_id
+          value: rpart
+        - type: EQ
+          child: rpart.minbucket
+          parent: learner_id
+          value: rpart
+        - type: EQ
+          child: rpart.minsplit
+          parent: learner_id
+          value: rpart
+        - type: EQ
+          child: svm.cost
+          parent: learner_id
+          value: svm
+        - type: EQ
+          child: svm.kernel
+          parent: learner_id
+          value: svm
+        - type: EQ
+          child: svm.tolerance
+          parent: learner_id
+          value: svm
+        - type: EQ
+          child: xgboost.alpha
+          parent: learner_id
+          value: xgboost
+        - type: EQ
+          child: xgboost.booster
+          parent: learner_id
+          value: xgboost
+        - type: EQ
+          child: xgboost.lambda
+          parent: learner_id
+          value: xgboost
+        - type: EQ
+          child: xgboost.nrounds
+          parent: learner_id
+          value: xgboost
+        - type: EQ
+          child: xgboost.subsample
+          parent: learner_id
+          value: xgboost
+        - type: AND
+          child: ranger.num.random.splits
+          conditions:
+          - type: EQ
+            child: ranger.num.random.splits
+            parent: ranger.splitrule
+            value: extratrees
+          - type: EQ
+            child: ranger.num.random.splits
+            parent: learner_id
+            value: ranger
+        - type: AND
+          child: svm.degree
+          conditions:
+          - type: EQ
+            child: svm.degree
+            parent: svm.kernel
+            value: polynomial
+          - type: EQ
+            child: svm.degree
+            parent: learner_id
+            value: svm
+        - type: AND
+          child: svm.gamma
+          conditions:
+          - type: EQ
+            child: svm.gamma
+            parent: svm.kernel
+            value: radial
+          - type: EQ
+            child: svm.gamma
+            parent: learner_id
+            value: svm
+        - type: AND
+          child: xgboost.colsample_bylevel
+          conditions:
+          - type: IN
+            child: xgboost.colsample_bylevel
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.colsample_bylevel
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.colsample_bytree
+          conditions:
+          - type: IN
+            child: xgboost.colsample_bytree
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.colsample_bytree
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.eta
+          conditions:
+          - type: IN
+            child: xgboost.eta
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.eta
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.gamma
+          conditions:
+          - type: IN
+            child: xgboost.gamma
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.gamma
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.max_depth
+          conditions:
+          - type: IN
+            child: xgboost.max_depth
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.max_depth
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.min_child_weight
+          conditions:
+          - type: IN
+            child: xgboost.min_child_weight
+            parent: xgboost.booster
+            values:
+            - dart
+            - gbtree
+          - type: EQ
+            child: xgboost.min_child_weight
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.rate_drop
+          conditions:
+          - type: EQ
+            child: xgboost.rate_drop
+            parent: xgboost.booster
+            value: dart
+          - type: EQ
+            child: xgboost.rate_drop
+            parent: learner_id
+            value: xgboost
+        - type: AND
+          child: xgboost.skip_drop
+          conditions:
+          - type: EQ
+            child: xgboost.skip_drop
+            parent: xgboost.booster
+            value: dart
+          - type: EQ
+            child: xgboost.skip_drop
+            parent: learner_id
+            value: xgboost
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: trainsize
+      min_fidelity: 0.03
+      max_fidelity: 1.0
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 3
+    objectives: acc
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 267
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 38
+    search_space_n_categoricals: 7
+    search_space_n_ordinals: 0
+    search_space_n_integers: 13
+    search_space_n_floats: 18
+    search_space_has_conditionals: true
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
