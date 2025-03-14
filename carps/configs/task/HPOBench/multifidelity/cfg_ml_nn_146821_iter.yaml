@@ -1,0 +1,92 @@
+# @package _global_
+benchmark_id: HPOBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/mf/real/ml/nn/146821/iter
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    model: nn
+    task_id: 146821
+    budget_type: iter
+    benchmark_client: null
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: alpha
+          lower: 1.0e-08
+          upper: 1.0
+          default_value: 0.001
+          log: true
+          meta: null
+        - type: uniform_int
+          name: batch_size
+          lower: 4
+          upper: 256
+          default_value: 32
+          log: true
+          meta: null
+        - type: uniform_int
+          name: depth
+          lower: 1
+          upper: 3
+          default_value: 3
+          log: false
+          meta: null
+        - type: uniform_float
+          name: learning_rate_init
+          lower: 1.0e-05
+          upper: 1.0
+          default_value: 0.001
+          log: true
+          meta: null
+        - type: uniform_int
+          name: width
+          lower: 16
+          upper: 1024
+          default_value: 64
+          log: true
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: iter
+      min_fidelity: 3
+      max_fidelity: 243
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 110
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: real
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 5
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 3
+    search_space_n_floats: 2
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -25,3 +25,6 @@ HPOBENCH_CONTAINER_DIR=$(python container_recipes/benchmarks/HPOBench/get_contai
 echo "Building HPOBench container in $HPOBENCH_CONTAINER_DIR"
 apptainer build $HPOBENCH_CONTAINER_DIR/ml_mmfb_0.0.1 lib/HPOBench/hpobench/container/recipes/ml/Singularity.ml_mmfb
 echo "Built $HPOBENCH_CONTAINER_DIR/ml_mmfb_0.0.1"
+
+apptainer build $HPOBENCH_CONTAINER_DIR/nasbench_201_0.0.5 lib/HPOBench/hpobench/container/recipes/nas/Singularity.nasbench_201 
+echo "Built $HPOBENCH_CONTAINER_DIR/nasbench_201_0.0.5"
