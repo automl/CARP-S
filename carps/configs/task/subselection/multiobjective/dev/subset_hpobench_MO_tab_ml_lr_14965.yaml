@@ -2,7 +2,7 @@
 scenario: multiobjective
 subset_id: dev
 benchmark_id: HPOBench
-task_id: multiobjective/10/dev/hpobench/MO/tab/ml/lr/14965
+task_id: multiobjective/10/dev/hpobench/MO/tabular/ml/lr/14965
 problem:
   _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
   model: lr
