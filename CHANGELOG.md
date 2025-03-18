@@ -1,3 +1,7 @@
+# v1.0.0
+Redefined task as an objective function together with an input and output space. Updated configs. Renamed problem to
+objective function and scenario to task type.
+
 # v0.1.2
 
 ## Benchmarks
