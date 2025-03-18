@@ -48,7 +48,7 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
 
 
 if __name__ == "__main__":
-    # python subselection/create_subset_configs.py subselection/data/BB/default/subset_30.csv subselection/data/BB/default/subset_complement_subset_30.csv blackbox
+    # python subselection/create_subset_configs.py subselection/data/Carps/BBv2_True_train_20_task_ids.csv subselection/data/Carps/BBv2_True_test_20_task_ids.csv blackbox
     # python subselection/create_subset_configs.py subselection/data/MF/lognorm/subset_20.csv subselection/data/MF/lognorm/subset_complement_subset_20.csv multifidelity
     # python subselection/create_subset_configs.py subselection/data/MO/lognorm/subset_10.csv subselection/data/MO/lognorm/subset_complement_subset_10.csv multiobjective
     # python subselection/create_subset_configs.py subselection/data/MOMF/lognorm/subset_9.csv subselection/data/MOMF/lognorm/subset_complement_subset_9.csv momf

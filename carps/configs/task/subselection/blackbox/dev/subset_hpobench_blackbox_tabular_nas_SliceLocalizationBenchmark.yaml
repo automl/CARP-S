@@ -1,0 +1,140 @@
+# @package _global_
+task_type: blackbox
+subset_id: dev
+benchmark_id: HPOBench
+task_id: blackbox/20/dev/hpobench/blackbox/tabular/nas/SliceLocalizationBenchmark
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/blackbox/tabular/nas/SliceLocalizationBenchmark
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    benchmark_client:
+      _target_: hpobench.container.benchmarks.nas.tabular_benchmarks.SliceLocalizationBenchmark
+      rng: ${seed}
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: categorical
+          name: activation_fn_1
+          choices:
+          - tanh
+          - relu
+          weights: null
+          default_value: tanh
+          meta: null
+        - type: categorical
+          name: activation_fn_2
+          choices:
+          - tanh
+          - relu
+          weights: null
+          default_value: tanh
+          meta: null
+        - type: ordinal
+          name: batch_size
+          sequence:
+          - 8
+          - 16
+          - 32
+          - 64
+          default_value: 8
+          meta: null
+        - type: ordinal
+          name: dropout_1
+          sequence:
+          - 0.0
+          - 0.3
+          - 0.6
+          default_value: 0.0
+          meta: null
+        - type: ordinal
+          name: dropout_2
+          sequence:
+          - 0.0
+          - 0.3
+          - 0.6
+          default_value: 0.0
+          meta: null
+        - type: ordinal
+          name: init_lr
+          sequence:
+          - 0.0005
+          - 0.001
+          - 0.005
+          - 0.01
+          - 0.05
+          - 0.1
+          default_value: 0.0005
+          meta: null
+        - type: categorical
+          name: lr_schedule
+          choices:
+          - cosine
+          - const
+          weights: null
+          default_value: cosine
+          meta: null
+        - type: ordinal
+          name: n_units_1
+          sequence:
+          - 16
+          - 32
+          - 64
+          - 128
+          - 256
+          - 512
+          default_value: 16
+          meta: null
+        - type: ordinal
+          name: n_units_2
+          sequence:
+          - 16
+          - 32
+          - 64
+          - 128
+          - 256
+          - 512
+          default_value: 16
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 140
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: tabular
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 9
+    search_space_n_categoricals: 3
+    search_space_n_ordinals: 6
+    search_space_n_integers: 0
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

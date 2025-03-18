@@ -1,18 +1,17 @@
 # @package _global_
 task_type: blackbox
 subset_id: test
-benchmark_id: YAHPO
-task_id: blackbox/20/test/yahpo/rbv2_glmnet/32/None
+benchmark_id: BBOB
+task_id: blackbox/20/test/bbob/2/9/0
 task:
   _target_: carps.utils.task.Task
-  name: yahpo/rbv2_glmnet/32/None
+  name: bbob/2/9/0
   seed: ${seed}
   objective_function:
-    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
-    bench: rbv2_glmnet
-    instance: '32'
-    budget_type: null
-    metric: acc
+    _target_: carps.objective_functions.bbob.BBOBObjectiveFunction
+    dimension: 2
+    fid: 9
+    instance: 0
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
@@ -22,31 +21,18 @@ task:
         name: null
         hyperparameters:
         - type: uniform_float
-          name: alpha
-          lower: 0.0
-          upper: 1.0
-          default_value: 1.0
+          name: x0
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
           log: false
           meta: null
-        - type: categorical
-          name: num.impute.selected.cpo
-          choices:
-          - impute.mean
-          - impute.median
-          - impute.hist
-          weights: null
-          default_value: impute.mean
-          meta: null
         - type: uniform_float
-          name: s
-          lower: 0.0009118819656
-          upper: 1096.6331584284585
-          default_value: 1.0
-          log: true
-          meta: null
-        - type: constant
-          name: task_id
-          value: '32'
+          name: x1
+          lower: -5.0
+          upper: 5.0
+          default_value: 0.0
+          log: false
           meta: null
         conditions: []
         forbiddens: []
@@ -61,22 +47,23 @@ task:
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace
-    n_objectives: 3
-    objectives: acc
+    n_objectives: 1
+    objectives:
+    - quality
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
-    n_trials: 90
+    n_trials: 77
     time_budget: null
     n_workers: 1
   metadata:
     _target_: carps.utils.task.TaskMetadata
     has_constraints: false
-    domain: ML
-    objective_function_approximation: surrogate
+    domain: synthetic
+    objective_function_approximation: real
     has_virtual_time: false
-    deterministic: false
-    dimensions: 3
-    search_space_n_categoricals: 1
+    deterministic: true
+    dimensions: 2
+    search_space_n_categoricals: 0
     search_space_n_ordinals: 0
     search_space_n_integers: 0
     search_space_n_floats: 2
