@@ -29,6 +29,7 @@ def get_logger(logger_name: str) -> logging.Logger:
     logging.Logger
         Logger object.
     """
+    setup_logging()
     return logging.getLogger(logger_name)
 
 

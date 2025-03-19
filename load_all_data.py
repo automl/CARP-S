@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from pathlib import Path
 # from carps.analysis.process_data import get_interpolated_performance_df, load_logs, process_logs
-import importlib
-import carps
-import carps.analysis
-import carps.analysis.gather_data
-
 import time
-from carps.analysis.gather_data import normalize_logs, get_interpolated_performance_df, load_logs, process_logs, load_set, maybe_convert_cost_dtype, convert_mixed_types_to_str
+
+import pandas as pd
+from carps.analysis.gather_data import (
+    convert_mixed_types_to_str,
+    load_set,
+    maybe_convert_cost_dtype,
+)
 
 paths = {
     # "BBfull": {
@@ -41,16 +38,16 @@ paths = {
     },
 }
 # subset = "BBsubset"
-# problem_prefix = "blackbox/20"
+# task_prefix = "blackbox/20"
 
 # subset = "MFsubset"
-# problem_prefix = "multifidelity/20"
+# task_prefix = "multifidelity/20"
 
 # subset = "MOsubset"
-# problem_prefix = "multiobjective/10"
+# task_prefix = "multiobjective/10"
 
 # subset = "MOMFsubset"
-# problem_prefix = "momf/9"
+# task_prefix = "momf/9"
 
 def fix_floats(key: str, df: pd.DataFrame) -> pd.DataFrame:
     df[key] = df[key].apply(maybe_convert_cost_dtype)

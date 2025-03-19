@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from smac.facade.abstract_facade import AbstractFacade
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -65,10 +64,11 @@ class SMAC3Optimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
-        smac_cfg: DictConfig,
         task: Task,
+        smac_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize SMAC3 Optimizer.
 
@@ -77,18 +77,25 @@ class SMAC3Optimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         smac_cfg : DictConfig
             SMAC configuration.
-        task : Task
-            Task to optimize.
         loggers : list[AbstractLogger], optional
             Loggers to log information, by default None
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
-        self.configspace = self.problem.configspace
+        self.configspace = self.task.input_space.configuration_space
         self.smac_cfg = smac_cfg
         self._solver: AbstractFacade | None = None
         self._cb_on_start_called: bool = False
@@ -98,14 +105,14 @@ class SMAC3Optimizer(Optimizer):
             callback.on_end(self.solver.optimizer)
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -143,7 +150,7 @@ class SMAC3Optimizer(Optimizer):
     ) -> float | list[float]:
         """Target Function.
 
-        Interface for the Problem.
+        Interface for the ObjectiveFunction.
 
         Parameters
         ----------
@@ -162,7 +169,7 @@ class SMAC3Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         return trial_value.cost
 
     def _setup_optimizer(self) -> AbstractFacade:
@@ -301,7 +308,7 @@ class SMAC3Optimizer(Optimizer):
             config=trial_info.config, instance=trial_info.instance, budget=trial_info.budget, seed=trial_info.seed
         )
         additional_info = trial_value.additional_info
-        if self.task.n_objectives > 1:
+        if self.task.output_space.n_objectives > 1:
             # Save costs for multi-objective because SMAC might scalarize the cost
             additional_info["cost"] = trial_value.cost
         smac_trial_value = SmacTrialValue(

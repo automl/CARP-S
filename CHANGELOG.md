@@ -1,8 +1,12 @@
+# v1.0.0
+Redefined task as an objective function together with an input and output space. Updated configs. Renamed problem to
+objective function and scenario to task type.
+
 # v0.1.2
 
 ## Benchmarks
 - HPOBench: Add rl, nasbench_101, nasbench_201, nasbench1shot1, and nas_hpo (#155, fix for benchmarks #158)
-- Pymoo: Add all unconstraint problems (#162)
+- Pymoo: Add all unconstraint tasks (#162)
 
 ## Subsets
 - Updated subsets for black-box and multi-objective (#164)

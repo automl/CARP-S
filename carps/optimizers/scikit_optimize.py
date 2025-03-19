@@ -20,7 +20,6 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -69,17 +68,37 @@ class SkoptOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
-        skopt_cfg: DictConfig,
         task: Task,
+        skopt_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
-        """Initialize a Scikit-Optimize optimizer."""
-        super().__init__(problem, task, loggers)
+        """Initialize a Scikit-Optimize optimizer.
+
+        Parameters
+        ----------
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
+        skopt_cfg : DictConfig
+            Scikit Optimize configuration.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
+        """
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.fidelity_enabled = False
 
-        self.configspace = problem.configspace
+        self.configspace = self.task.objective_function.configspace
 
         self.skopt_space = self.convert_configspace(self.configspace)
         self._solver: skopt.optimizer.Optimizer | None = None
@@ -95,7 +114,7 @@ class SkoptOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -103,7 +122,7 @@ class SkoptOptimizer(Optimizer):
             Scikit-Optimize Space.
         """
         space = []
-        for hp in configspace.get_hyperparameters():
+        for hp in list(configspace.values()):
             space.append(configspace_hp_to_skoptspace_hp(hp))
         return space
 
@@ -112,7 +131,7 @@ class SkoptOptimizer(Optimizer):
     ) -> TrialInfo:
         """Convert proposal by Scikit-Optimize to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Returns:
         -------
@@ -121,10 +140,10 @@ class SkoptOptimizer(Optimizer):
         """
         configuration = CS.Configuration(
             configuration_space=self.configspace,
-            values={hp.name: value for hp, value in zip(self.configspace.get_hyperparameters(), config, strict=False)},
+            values={hp.name: value for hp, value in zip(list(self.configspace.values()), config, strict=False)},
             allow_inactive_with_values=True,
         )
-        assert list(configuration.keys()) == list(self.configspace.get_hyperparameter_names())
+        assert list(configuration.keys()) == list(self.configspace.keys())
         assert list(configuration.keys()) == [hp.name for hp in self.skopt_space]
         return TrialInfo(
             config=configuration,
@@ -138,8 +157,8 @@ class SkoptOptimizer(Optimizer):
             self.skopt_cfg = {}
         else:
             self.skopt_cfg = dict(self.skopt_cfg)
-        if "n_jobs" not in self.skopt_cfg and self.task.n_workers is not None:
-            self.skopt_cfg["n_jobs"] = self.task.n_workers
+        if "n_jobs" not in self.skopt_cfg and self.task.optimization_resources.n_workers is not None:
+            self.skopt_cfg["n_jobs"] = self.task.optimization_resources.n_workers
         return skopt.optimizer.Optimizer(dimensions=self.skopt_space, **self.skopt_cfg)
 
     def ask(self) -> TrialInfo:

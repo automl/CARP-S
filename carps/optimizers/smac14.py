@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -26,39 +25,47 @@ class SMAC314Optimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
-        smac_cfg: DictConfig,
         task: Task,
+        smac_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize SMAC3-1.4 Optimizer.
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         smac_cfg : DictConfig
             SMAC configuration.
-        task : Task
-            Task to optimize.
         loggers : list[AbstractLogger] | None, optional
-            Loggers, by default None
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
-        self.configspace = self.problem.configspace
+        self.configspace = self.task.objective_function.configspace
         self.smac_cfg = smac_cfg
         self._solver: SMAC4AC | None = None
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -96,7 +103,7 @@ class SMAC314Optimizer(Optimizer):
     ) -> float | list[float]:
         """Target Function.
 
-        Interface for the Problem.
+        Interface for the ObjectiveFunction.
 
         Parameters
         ----------
@@ -115,7 +122,7 @@ class SMAC314Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         return trial_value.cost
 
     def _setup_optimizer(self) -> SMAC4AC:
@@ -169,8 +176,8 @@ class SMAC314Optimizer(Optimizer):
 
             n_seeds = self.smac_cfg.get("n_seeds", None)
             intensifier_kwargs["n_seeds"] = n_seeds
-            intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_budget
-            intensifier_kwargs["max_budget"] = self.smac_cfg.scenario.max_budget
+            intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_fidelity
+            intensifier_kwargs["max_fidelity"] = self.smac_cfg.scenario.max_fidelity
 
             inc_selection = self.smac_cfg.incumbent_selection
             if inc_selection == "highest_observed_budget":
@@ -229,7 +236,7 @@ class SMAC314Optimizer(Optimizer):
         raise AskAndTellNotSupportedError
 
     def _run(self) -> Incumbent:
-        """Run SMAC on Problem."""
+        """Run SMAC on ObjectiveFunction."""
         incumbent = self.solver.optimize()  # noqa: F841
         return self.get_current_incumbent()
 

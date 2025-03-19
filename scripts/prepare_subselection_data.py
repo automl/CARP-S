@@ -1,13 +1,11 @@
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
+
 import pandas as pd
-
-import carps
-
+from carps.analysis.gather_data import convert_mixed_types_to_str, normalize_logs
 from carps.analysis.run_autorank import get_df_crit
-from carps.analysis.gather_data import normalize_logs, convert_mixed_types_to_str
-
 from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
@@ -49,12 +47,12 @@ if __name__=="__main__":
             dfs_cfg = []
             for p in _paths:
                 p = Path(p)
-                logger.info(f"Load {str(p.resolve())}")
-                log_fn = p / _log_fn    
-                log_cfg_fn = p / _log_cfg_fn    
+                logger.info(f"Load {p.resolve()!s}")
+                log_fn = p / _log_fn
+                log_cfg_fn = p / _log_cfg_fn
                 if not log_fn.is_file() or not log_cfg_fn.is_file():
                     raise ValueError(f"Can't find {log_fn}. Run `python -m carps.analysis.gather_data {p}` to create log file.")
-                
+
                 if extension == ".csv":
                     df = pd.read_csv(log_fn)
                     df_cfg = pd.read_csv(log_cfg_fn)
@@ -70,15 +68,14 @@ if __name__=="__main__":
 
             if extension == ".csv":
                 df.to_csv(identifier + combined_fn)
-                df_cfg.to_csv(identifier + combined_cfg_fn) 
+                df_cfg.to_csv(identifier + combined_cfg_fn)
             else:
                 df.to_parquet(identifier + combined_fn)
-                df_cfg.to_parquet(identifier + combined_cfg_fn) 
+                df_cfg.to_parquet(identifier + combined_cfg_fn)
+        elif extension == ".csv":
+            df = pd.read_csv(identifier + combined_fn)
         else:
-            if extension == ".csv":
-                df = pd.read_csv(identifier + combined_fn)
-            else:
-                df = pd.read_parquet(identifier + combined_fn)
+            df = pd.read_parquet(identifier + combined_fn)
         logger.info("Normalize logs...")
         df = normalize_logs(df)
         df = convert_mixed_types_to_str(df)
@@ -88,8 +85,6 @@ if __name__=="__main__":
         df_crit = get_df_crit(df, perf_col=perf_col)
         df_crit.to_csv(identifier + df_crit_fn, sep=" ", index=False, header=False)
         df_crit.to_csv(identifier + "df_crit.csv")
-        try:
+        with contextlib.suppress(Exception):
             df_crit.to_parquet(identifier + "df_crit.parquet")
-        except:
-            pass
 

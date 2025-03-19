@@ -5,7 +5,7 @@ From: python:3.10-slim
     flask run
 
 %environment
-    export FLASK_APP=carps/container/container_script_problem.py
+    export FLASK_APP=carps/container/container_script_task.py
 
 %files
     ./carps /benchmarking/carps
@@ -27,7 +27,7 @@ From: python:3.10-slim
     pip install wheel
     pip install -r /benchmarking/requirements.txt
     pip install ../benchmarking
-    pip install -r /benchmarking/container_recipes/general/general_requirements_container_problem.txt
+    pip install -r /benchmarking/container_recipes/general/general_requirements_container_task.txt
 
    # log benchmarking version
    BENCHMARKING_VERSION=$(python -c "import carps; print(carps.version)")

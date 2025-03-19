@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter
 
-from carps.container.wrapper import ContainerizedProblemClient
+from carps.container.wrapper import ContainerizedTaskClient
 from carps.loggers.database_logger import DatabaseLogger
 from carps.loggers.file_logger import FileLogger
 from carps.utils.running import make_optimizer
@@ -29,8 +29,8 @@ def optimizer_experiment(parameters: dict, result_processor: ResultProcessor, cu
         The result processor.
     """
     loggers = [DatabaseLogger(result_processor), FileLogger()]
-    problem = ContainerizedProblemClient(loggers=loggers)
-    optimizer = make_optimizer(cfg=cfg, problem=problem)
+    task = ContainerizedTaskClient(loggers=loggers)
+    optimizer = make_optimizer(cfg=cfg, task=task)  # type: ignore[arg-type]
 
     optimizer.run()
 

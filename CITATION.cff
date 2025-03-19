@@ -10,7 +10,7 @@ url: "https://automl.github.io/CARP-S/main/"
 
 repository-code: "https://github.com/automl/CARP-S"
 
-version: "0.1.1"
+version: "1.0.0"
 
 type: "template"
 keywords:

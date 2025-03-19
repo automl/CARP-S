@@ -5,3 +5,6 @@ optimizer_id: SMAC3-Hyperband
 optimizer:
   smac_cfg:
     smac_class: smac.facade.hyperband_facade.HyperbandFacade
+
+  expects_multiple_objectives: false
+  expects_fidelities: true

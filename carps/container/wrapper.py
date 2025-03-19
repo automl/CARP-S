@@ -1,4 +1,4 @@
-"""Wrapper for containerized problems."""
+"""Wrapper for containerized tasks."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import requests  # type: ignore[import-untyped]
 from ConfigSpace.read_and_write import json as cs_json
 
-from carps.benchmarks.problem import Problem
+from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -16,11 +16,11 @@ if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
 
 
-class ContainerizedProblemClient(Problem):
-    """Wrapper for containerized problems."""
+class ContainerizedTaskClient(ObjectiveFunction):
+    """Wrapper for containerized task with objective functions."""
 
     def __init__(self, n_workers: int = 1, loggers: list[AbstractLogger] | None = None):
-        """Initialize ContainerizedProblemClient.
+        """Initialize ContainerizedTaskClient.
 
         Parameters
         ----------
@@ -35,12 +35,12 @@ class ContainerizedProblemClient(Problem):
 
     @property
     def configspace(self) -> ConfigurationSpace:
-        """Get the configuration space of the problem.
+        """Get the configuration space of the task.
 
         Returns:
         -------
         ConfigurationSpace
-            Configuration space of the problem.
+            Configuration space of the task.
         """
         if self._configspace is None:
             # ask server about configspace
@@ -61,6 +61,6 @@ class ContainerizedProblemClient(Problem):
         Reises
         ------
         NotImplementedError
-            f_min is not yet implemented for ContainerizedProblemClient
+            f_min is not yet implemented for ContainerizedObjectiveFunctionClient
         """
-        raise NotImplementedError("f_min is not yet implemented for ContainerizedProblemClient")
+        raise NotImplementedError("f_min is not yet implemented for ContainerizedObjectiveFunctionClient")

@@ -4,7 +4,7 @@ For this we need the run logs, which are stored in a CSV or parquet file.
 
 To generate this file, call `python -m carps.analysis.gather_results <rundir>`.
 Of course, you can concatenate multiple result files.
-Keep in mind that the results are grouped by scenario and set id.
+Keep in mind that the results are grouped by task_type and set id.
 """
 
 from __future__ import annotations
@@ -98,10 +98,12 @@ def plot_ranks_over_time(
     perf = get_interpolated_performance_df(df)
 
     df_rank_list = []
-    for gid, gdf in perf.groupby(["scenario", "set"]):
+    for gid, gdf in perf.groupby(["task_type", "set"]):
         budgets = gdf[x_column].unique()
-        for max_budget in budgets:
-            df_crit = get_df_crit(gdf, max_budget=max_budget, perf_col=key_performance, budget_var=x_column, soft=False)
+        for max_fidelity in budgets:
+            df_crit = get_df_crit(
+                gdf, max_fidelity=max_fidelity, perf_col=key_performance, budget_var=x_column, soft=False
+            )
             rank_result = cd_evaluation(
                 df_crit,
                 maximize_metric=False,
@@ -111,10 +113,10 @@ def plot_ranks_over_time(
             df_rank_list.append(
                 pd.DataFrame(
                     {
-                        "scenario": gid[0],
+                        "task_type": gid[0],
                         "set": gid[1],
                         "optimizer_id": rank_result.rankdf.index,
-                        "n_trials_norm": max_budget,
+                        "n_trials_norm": max_fidelity,
                         "rank": rank_result.rankdf["meanrank"],
                     }
                 )
@@ -123,21 +125,21 @@ def plot_ranks_over_time(
     df_rank.to_csv("df_rank.csv", index=False)
 
     resulting_files = []
-    for gid, gdf in df_rank.groupby(["scenario", "set"]):
+    for gid, gdf in df_rank.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/rank_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "rank_over_time",
                 "plot_type_pretty": "Rank over Time",
                 "explanation": "The rank of each optimizer over time compares which optimizer "
                 "performs better, the lower "
-                "the rank the better. For each optimizer and problem, the performance is averaged over seeds to obtain"
-                " an estimate of the performance. The rank is then calculated per step and problem with the same "
+                "the rank the better. For each optimizer and task, the performance is averaged over seeds to obtain"
+                " an estimate of the performance. The rank is then calculated per step and task with the same "
                 "approach as for the critical difference diagram.",
             }
         )
@@ -183,14 +185,14 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str | Path = "figures", replot: bool
     key_performance = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/ecdf_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "ecdf",
                 "plot_type_pretty": "Proportion of Incumbent Cost",
@@ -242,13 +244,13 @@ def plot_critical_difference(
     figsize = (6 * 1.5, 4 * 1.5)
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         fig_filename = f"{output_dir}/criticaldifference_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": fig_filename,
                 "plot_type": "critical_difference",
                 "plot_type_pretty": "Critical Difference",
@@ -281,12 +283,12 @@ def plot_critical_difference(
     return resulting_files
 
 
-def plot_performance_per_problem(
+def plot_performance_per_task(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
-    """Plot the performance of the optimizers per problem.
+    """Plot the performance of the optimizers per task.
 
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
@@ -301,20 +303,20 @@ def plot_performance_per_problem(
     perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
-        figure_filename = f"{output_dir}/performanceperproblem_{gid[0]}_{gid[1]}"
+    for gid, gdf in df.groupby(["task_type", "set"]):
+        figure_filename = f"{output_dir}/performancepertask_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
-                "plot_type": "performance_per_problem",
-                "plot_type_pretty": "Performance per Problem",
-                "explanation": "The heatmap shows the performance of the optimizers per problem. "
+                "plot_type": "performance_per_task",
+                "plot_type_pretty": "Performance per Task",
+                "explanation": "The heatmap shows the performance of the optimizers per task. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. "
                 "The performance is shown as a heatmap, where the colors indicate the performance of the optimizer "
-                "on a specific problem. "
+                "on a specific task. "
                 "The better the optimizer performs, the lighter/more yellow the color.",
             }
         )
@@ -328,7 +330,7 @@ def plot_performance_per_problem(
         fig = plt.Figure(figsize=(12, 12))
         ax0 = fig.add_subplot(111)
 
-        # Perf per problem (normalized)
+        # Perf per task (normalized)
         df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
         offset = 1e-8
         df_crit[df_crit == 0] = offset
@@ -349,11 +351,11 @@ def plot_performance_per_problem(
         _annotate_heatmap(ax0, mesh, {"fontsize": 8}, ".6g", annot_data)
 
         ax0.set_title(
-            f"Final Performance per Problem for Scenario {gid[0]} and Set {gid[1]}\n"
+            f"Final Performance per Task for Scenario {gid[0]} and Set {gid[1]}\n"
             "Annotations: Raw Values, Colormap: Normalized Values"
         )
 
-        ax0.set_title(f"Final Performance per Problem for Scenario {gid[0]} and Set {gid[1]}")
+        ax0.set_title(f"Final Performance per Task for Scenario {gid[0]} and Set {gid[1]}")
         ax0.text(
             0.5,
             1.05,
@@ -364,7 +366,7 @@ def plot_performance_per_problem(
             transform=ax0.transAxes,
         )
 
-        ax0.set_ylabel("Problem ID")
+        ax0.set_ylabel("Task ID")
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
         plt.close(fig)
@@ -392,14 +394,14 @@ def plot_boxplot_violinplot(
     x_column = "n_trials_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename_boxplot,
                 "plot_type": "finalperformance_boxplot",
                 "plot_type_pretty": "Final Performance (Normalized, Boxplot)",
@@ -410,9 +412,9 @@ def plot_boxplot_violinplot(
         figure_filename_violinplot = f"{output_dir}/finalperfviolinplot_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename_violinplot,
                 "plot_type": "finalperformance_violinplot",
                 "plot_type_pretty": "Final Performance (Normalized, Violinplot)",
@@ -476,14 +478,14 @@ def plot_finalperfbarplot(
     x_column = "n_trials_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
         figure_filename = f"{output_dir}/finalperfbarplot_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "finalperformance_barplot",
                 "plot_type_pretty": "Final Performance (Normalized, Barplot)",
@@ -541,19 +543,19 @@ def plot_spearman_rank_correlation(
     perf_col = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["scenario", "set"]):
+    for gid, gdf in df.groupby(["task_type", "set"]):
         figure_filename = f"{output_dir}/spearmanrankcorrelation_{gid[0]}_{gid[1]}"
         resulting_files.append(
             {
-                "scenario": gid[0],
+                "task_type": gid[0],
                 "set": gid[1],
-                "problem_id": None,
+                "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "spearman_rank_correlation",
                 "plot_type_pretty": "Spearman Rank Correlation",
                 "explanation": "The Spearman rank correlation matrix shows the correlation between the "
                 "ranks of the optimizers. "
-                "The intuition is that optimizers that perform similarly on the problems will have a high correlation. "
+                "The intuition is that optimizers that perform similarly on the tasks will have a high correlation. "
                 "The ranks are calculated based on the final performance of the optimizers. ",
             }
         )
@@ -564,8 +566,8 @@ def plot_spearman_rank_correlation(
         sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
         df_crit = get_df_crit(gdf, nan_handling="keep", perf_col=perf_col)
         df_crit = df_crit.reindex(columns=names)
-        # df_crit.index = [i.replace(problem_prefix + "/dev/", "") for i in df_crit.index]
-        # df_crit.index = [i.replace(problem_prefix + "/test/", "") for i in df_crit.index]
+        # df_crit.index = [i.replace(task_prefix + "/dev/", "") for i in df_crit.index]
+        # df_crit.index = [i.replace(task_prefix + "/test/", "") for i in df_crit.index]
 
         fig = plt.Figure(figsize=(6 * 1.5, 4 * 1.5))
         ax3 = fig.add_subplot(111)
@@ -606,7 +608,7 @@ def load_results(result_path: str) -> pd.DataFrame:
 
     df = normalize_logs(df)  # noqa: PD901
     if "set" not in df.columns:
-        df["set"] = df["problem_id"].apply(lambda x: "dev" if "dev" in x else "test")
+        df["set"] = df["task_id"].apply(lambda x: "dev" if "dev" in x else "test")
     return df
 
 
@@ -654,7 +656,7 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
         "Final Performance": [
             "critical_difference",
             # "spearman_rank_correlation",
-            "performance_per_problem",
+            "performance_per_task",
             # "finalperformance_boxplot",
             # "finalperformance_violinplot",
             "finalperformance_barplot",
@@ -665,12 +667,12 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
         ],
     }
 
-    for (scenario, set_id), info in resulting_files.groupby(["scenario", "set"]):
+    for (task_type, set_id), info in resulting_files.groupby(["task_type", "set"]):
         report_tex = ""
-        report_filename = report_dir / f"{report_name}_{scenario}_{set_id}.tex"
-        full_report_filename = report_dir / f"full_{report_name}_{scenario}_{set_id}.tex"
+        report_filename = report_dir / f"{report_name}_{task_type}_{set_id}.tex"
+        full_report_filename = report_dir / f"full_{report_name}_{task_type}_{set_id}.tex"
 
-        print(scenario, set_id)
+        print(task_type, set_id)
 
         # Embed plots
         report_tex += "\\section{Plots}\n"
@@ -679,7 +681,7 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
 
             for plot_type in _order:
                 _info = info[info["plot_type"] == plot_type].iloc[0]
-                plot_title = f"Scenario: {_info['scenario']} - Set: {_info['set']} - {_info['plot_type_pretty']}"
+                plot_title = f"Scenario: {_info['task_type']} - Set: {_info['set']} - {_info['plot_type_pretty']}"
                 plot_filename = "figures" + _info["filename"].split("figures")[-1]
                 report_tex += latex_template_plot_block.replace("plot_title", plot_title).replace(
                     "plot_filename", plot_filename
@@ -738,11 +740,11 @@ def generate_report(
     logger.info("\t...critical difference")
     resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=True)
 
-    # Final Performance per Problem (Mean over seeds, heatmap)
-    logger.info("\t...performance per problem")
-    resulting_files_performance_per_problem = plot_performance_per_problem(df, output_dir=figure_dir, replot=True)
+    # Final Performance per Task (Mean over seeds, heatmap)
+    logger.info("\t...performance per task")
+    resulting_files_performance_per_task = plot_performance_per_task(df, output_dir=figure_dir, replot=True)
 
-    # Final Performance Barplot per Problem (Mean over seeds with std)
+    # Final Performance Barplot per Task (Mean over seeds with std)
     logger.info("\t...barplot")
     resulting_files_finalperfbarplot = plot_finalperfbarplot(df, output_dir=figure_dir, replot=True)
 
@@ -756,7 +758,7 @@ def generate_report(
     resulting_files = pd.concat(
         [
             pd.DataFrame(resulting_files_critical_difference),
-            pd.DataFrame(resulting_files_performance_per_problem),
+            pd.DataFrame(resulting_files_performance_per_task),
             pd.DataFrame(resulting_files_finalperfbarplot),
             pd.DataFrame(resulting_files_rank_over_time),
         ]

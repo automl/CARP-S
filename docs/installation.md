@@ -20,12 +20,12 @@ pip install carps[smac,bbob]
 
 All possible install options for benchmarks are:
 ```bash
-dummy,bhob,hpob,mfpbench,pymoo,yahpo
+bhob,hpob,mfpbench,pymoo,yahpo
 ```
 
 All possible install options for optimizers are:
 ```bash
-dummy,dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
+dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
 ```
 
 Please note that installing all requirements for all benchmarks and optimizers in a single 

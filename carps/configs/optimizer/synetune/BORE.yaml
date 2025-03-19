@@ -6,4 +6,3 @@ optimizer:
   optimizer_name: 'BORE'
   optimizer_kwargs:
     random_seed: ${seed}
-  # max_budget: ${task.max_budget}

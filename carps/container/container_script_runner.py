@@ -37,7 +37,7 @@ def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor
     with open(f"{job_id}_pyexperimenter_id.txt", "w+") as f:
         f.write(str(result_processor.experiment_id))
 
-    with open(f"{job_id}_problem_container.txt", "w+") as f:
+    with open(f"{job_id}_task_container.txt", "w+") as f:
         f.write(cfg_dict["benchmark_id"])
 
     with open(f"{job_id}_optimizer_container.txt", "w+") as f:

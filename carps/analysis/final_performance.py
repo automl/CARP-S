@@ -17,7 +17,7 @@ def plot_final_performance_boxplot(
     y: str = "trial_value__cost_inc_norm",
     hue: str = "optimizer_id",
     budget_var: str = "n_trials_norm",
-    max_budget: float = 1,
+    max_fidelity: float = 1,
     figure_filename: str = "figures/final_performance_boxplot.pdf",
     figsize: tuple[int, int] = (6, 4),
     **boxplot_kwargs: dict,
@@ -31,7 +31,7 @@ def plot_final_performance_boxplot(
         hue (str, optional): Hue column. Defaults to "optimizer_id".
         budget_var (str, optional): Budget variable. Defaults to "n_trials_norm". Necessary to get the final performance
             of the optimizers.
-        max_budget (float, optional): Maximum budget. Defaults to 1.
+        max_fidelity (float, optional): Maximum budget. Defaults to 1.
         figure_filename (str, optional): Figure filename. Defaults to "figures/final_performance_boxplot.pdf".
         figsize (tuple[int, int], optional): Figure size. Defaults to (6, 4).
         **boxplot_kwargs: Additional boxplot arguments.
@@ -44,7 +44,7 @@ def plot_final_performance_boxplot(
     fig = plt.figure(figsize=figsize, dpi=300)
     ax = fig.add_subplot(111)
     ax = sns.boxplot(
-        data=df[np.isclose(df[budget_var], max_budget)], y=y, x=x, hue=hue, palette=palette, ax=ax, **boxplot_kwargs
+        data=df[np.isclose(df[budget_var], max_fidelity)], y=y, x=x, hue=hue, palette=palette, ax=ax, **boxplot_kwargs
     )
     savefig(fig, figure_filename)
     return fig, ax
@@ -56,7 +56,7 @@ def plot_final_performance_violinplot(
     y: str = "trial_value__cost_inc_norm",
     hue: str = "optimizer_id",
     budget_var: str = "n_trials_norm",
-    max_budget: float = 1,
+    max_fidelity: float = 1,
     figure_filename: str = "figures/final_performance_boxplot.pdf",
     figsize: tuple[int, int] = (6, 4),
     **violinplot_kwargs: dict,
@@ -70,7 +70,7 @@ def plot_final_performance_violinplot(
         hue (str, optional): Hue column. Defaults to "optimizer_id".
         budget_var (str, optional): Budget variable. Defaults to "n_trials_norm". Necessary to get the final performance
             of the optimizers.
-        max_budget (float, optional): Maximum budget. Defaults to 1.
+        max_fidelity (float, optional): Maximum budget. Defaults to 1.
         figure_filename (str, optional): Figure filename. Defaults to "figures/final_performance_boxplot.pdf".
         figsize (tuple[int, int], optional): Figure size. Defaults to (6, 4).
         **violinplot_kwargs: Additional violinplot arguments.
@@ -83,7 +83,7 @@ def plot_final_performance_violinplot(
     fig = plt.figure(figsize=figsize, dpi=300)
     ax = fig.add_subplot(111)
     ax = sns.violinplot(
-        data=df[np.isclose(df[budget_var], max_budget)],
+        data=df[np.isclose(df[budget_var], max_fidelity)],
         y=y,
         x=x,
         hue=hue,
@@ -96,7 +96,7 @@ def plot_final_performance_violinplot(
     return fig, ax
 
 
-def create_tables(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budget: float = 1) -> None:
+def create_tables(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_fidelity: float = 1) -> None:
     """Create tables for final performance.
 
     Might be unfinished?
@@ -104,24 +104,24 @@ def create_tables(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_budge
     Args:
         df (pd.DataFrame): Dataframe with the logs.
         budget_var (str, optional): Budget variable. Defaults to "n_trials_norm".
-        max_budget (float, optional): Maximum budget. Defaults
+        max_fidelity (float, optional): Maximum budget. Defaults
     """
     perf_col_norm: str = "trial_value__cost_inc_norm"
 
     print(df[budget_var].max())
-    df = df[np.isclose(df[budget_var], max_budget)]  # noqa: PD901
+    df = df[np.isclose(df[budget_var], max_fidelity)]  # noqa: PD901
 
     # Aggregate all
 
-    # Calculate mean over seeds per optimizer and problem
-    df_mean = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].mean()
+    # Calculate mean over seeds per optimizer and task
+    df_mean = df.groupby(["optimizer_id", "task_id"])[perf_col_norm].mean()
     df_mean.name = "mean"
-    df_var = df.groupby(["optimizer_id", "problem_id"])[perf_col_norm].var()
+    df_var = df.groupby(["optimizer_id", "task_id"])[perf_col_norm].var()
     df_var.name = "var"
 
     print(pd.concat((df_mean, df_var), axis=1))
 
-    # Calculate mean over problems
+    # Calculate mean over tasks
 
     # Aggregate over benchmarks
 

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 from ConfigSpace import CategoricalHyperparameter, ConfigurationSpace, Constant, OrdinalHyperparameter
 from ConfigSpace.hyperparameters import (
@@ -15,6 +15,15 @@ from ConfigSpace.hyperparameters import (
     UniformIntegerHyperparameter,
 )
 from dataclasses_json import dataclass_json
+from omegaconf import ListConfig
+
+from carps.utils.loggingutils import get_logger
+
+if TYPE_CHECKING:
+    from carps.objective_functions.objective_function import ObjectiveFunction
+
+input_space_logger = get_logger("InputSpace")
+output_space_logger = get_logger("OutputSpace")
 
 
 def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
@@ -81,50 +90,12 @@ def get_search_space_info(configspace: ConfigurationSpace) -> dict[str, Any]:
 
 @dataclass_json
 @dataclass(frozen=True)
-class Task:
-    """Task information.
-
-    For general optimization, only `n_trials` or `time_budget` needs
-    to be defined. The optimizers receive the search space.
-    For multi-fidelity, at least `is_multifidelity` and `max_budget`
-    need to be specified.
-    For multi-objecitve, at least `n_objectives` needs to be specified.
-    The remaining parameters are meta-data and not necessarily needed
-    by the optimizer but useful to order tasks.
+class TaskMetadata:
+    """Task metadata.
 
     Parameters
     ----------
-    # General
-    n_trials : int
-        The number of trials aka calls to the objective function.
-        Specify this for classic blackbox problems.
-        Either `n_trials` or `time_budget` needs to be specified.
-    time_budget : float
-        The time budget in minutes for optimization.
-        Specify this for multi-fidelity problems.
-        Either `n_trials` or `time_budget` needs to be specified.
-
-    # Parallelism
-    n_workers : int = 1
-        The number of workers allowed for this task. Not every optimizer
-        allows parallelism.
-
-    # Multi-objective
-    n_objectives : int
-        The number of optimization objectives, by default 1.
-    objectives : list[str]
-        Optional names of objectives.
-
-    # Multi-fidelity
-    is_multifidelity : bool
-        Whether the task is a multi-fidelity problem.
-    fidelity_type : str
-        The kind of fidelity used.
-    min_budget : float
-        Minimum fidelity. Not used by every optimizer.
-    max_budget : float
-        Maximum fidelity. Required for multi-fidelity.
-
+    # Constraint BO
     has_constraints : bool
         Whether the task has any constraints.
 
@@ -160,31 +131,7 @@ class Task:
     search_space_has_priors: bool
         Whether there are any priors on HPs, e.g. beta or normal.
 
-    Raises:
-    ------
-    ValueError
-        When `is_multifidelity` is set and `max_budget` not specified.
-        In order to use multi-fidelity, both need to be specified.
-    ValueError
-        When neither `n_trials` nor `time_budget` are specified.
     """
-
-    # General (REQUIRED)
-    n_trials: int | None = None
-    time_budget: float | None = None  # 1 cpu, walltime budget in minutes
-
-    # Parallelism
-    n_workers: int = 1
-
-    # Multi-Objective
-    n_objectives: int = 1
-    objectives: tuple[str] = ("quality",)
-
-    # Multi-Fidelity
-    is_multifidelity: bool | None = None
-    fidelity_type: str | None = None
-    min_budget: float | None = None
-    max_budget: float | None = None
 
     # Constraint BO
     has_constraints: bool | None = None
@@ -205,8 +152,168 @@ class Task:
     search_space_has_forbiddens: bool | None = None
     search_space_has_priors: bool | None = None
 
+
+@dataclass_json
+@dataclass(frozen=True)
+class FidelitySpace:
+    """Fidelity Space.
+
+    Determines if and how multi-fidelity optimization should be performed.
+
+    Parameters
+    ----------
+    is_multifidelity : bool
+        Whether the task is a multi-fidelity optimization task.
+    fidelity_type : str | None
+        The type of fidelity, e.g. time, memory, etc.
+    min_fidelity : int | float | None
+        The minimum budget.
+    max_fidelity : int | float | None
+        The maximum budget.
+    """
+
+    is_multifidelity: bool = False
+    fidelity_type: str | None = None
+    min_fidelity: int | float | None = None
+    max_fidelity: int | float | None = None
+
     def __post_init__(self) -> None:
-        if self.is_multifidelity and self.max_budget is None:
-            raise ValueError("Please specify max budget for multifidelity.")
+        if self.is_multifidelity:
+            assert self.fidelity_type is not None
+            assert self.min_fidelity is not None
+            assert self.max_fidelity is not None
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class InputSpace:
+    """Input Space.
+
+    This is the input to the objective function.
+    In general, only the configuration space is subject to optimization.
+
+    Parameters
+    ----------
+    configuration_space : ConfigurationSpace
+        The configuration space.
+    fidelity_space : FidelitySpace | None
+        The fidelity space. Determines if and how multi-fidelity optimization should be performed.
+    instance_space : Any | None
+        The instance space. This is relevant for algorithm configuration.
+    """
+
+    configuration_space: ConfigurationSpace
+    fidelity_space: FidelitySpace = field(default_factory=FidelitySpace)
+    instance_space: Any | None = None
+
+    def __post_init__(self) -> None:
+        assert isinstance(self.configuration_space, ConfigurationSpace)
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class OptimizationResources:
+    """Optimization Resources.
+
+    Parameters
+    ----------
+    n_trials : int | None
+        The number of trials (objective function evaluations) (full trials == at the highest fidelity in the case of
+        multi-fidelity).
+    time_budget : float | None
+        The time budget in minutes.
+    n_workers : int
+        The number of workers.
+    """
+
+    n_trials: int | None = None
+    time_budget: float | None = None  # 1 cpu, walltime budget in minutes
+
+    # Parallelism
+    n_workers: int = 1
+
+    def __post_init__(self) -> None:
         if self.n_trials is None and self.time_budget is None:
             raise ValueError("Please specify either `n_trials` or `time_budget`.")
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class OutputSpace:
+    """Output Space.
+
+    This is the output of the objective function.
+
+    Parameters
+    ----------
+    n_objectives : int
+        The number of objectives.
+    objectives : tuple[str]
+        The names of the objectives.
+    """
+
+    # objective_space: ConfigurationSpace | None = None
+
+    n_objectives: int = 1
+    objectives: tuple[str] = ("quality",)
+
+    # def __post_init__(self) -> None:
+    #     # Set the number of objectives and their names from the objective space
+    #     if self.objective_space is not None:
+    #         object.__setattr__(self, "n_objectives", len(list(self.objective_space.values())))
+    #         object.__setattr__(self, "objectives", tuple(self.objective_space.keys()))
+
+    #     # If no objective space is specified, use a default unbounded space
+    #     else:
+    #         default_space = ConfigurationSpace()
+    #         default_space.add(
+    #             UniformFloatHyperparameter(
+    #                 name="quality",
+    #                 lower=VERY_SMALL_NUMBER,
+    #                 upper=VERY_LARGE_NUMBER,
+    #                 log=False,
+    #             )
+    #         )
+    #         object.__setattr__(self, "objective_space", default_space)
+
+    #         output_space_logger.info("No objective space specified. Using default unbounded space: "\
+    #                                  f"{self.objective_space} ({self.n_objectives}, {self.objectives}).")
+
+    def __post__init__(self) -> None:
+        assert self.n_objectives == len(self.objectives)
+        if isinstance(self.objectives, ListConfig):
+            object.__setattr__(self, "objectives", tuple(self.objectives))
+
+
+@dataclass_json
+@dataclass(frozen=True)
+class Task:
+    """Task.
+
+    The optimization task with optimization resources.
+
+    Parameters
+    ----------
+    name : str
+        The name of the task.
+    objective_function : ObjectiveFunction
+        The objective function.
+    input_space : InputSpace
+        The input space.
+    output_space : OutputSpace
+        The output space.
+    optimization_resources : OptimizationResources
+        The optimization resources.
+    metadata : TaskMetadata
+        The task metadata containing extra information like hyperparameter types.
+    seed : int | None
+        The seed.
+    """
+
+    name: str
+    objective_function: ObjectiveFunction
+    input_space: InputSpace
+    output_space: OutputSpace
+    optimization_resources: OptimizationResources
+    metadata: TaskMetadata
+    seed: int | None = None

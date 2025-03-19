@@ -10,10 +10,10 @@ cleanup_files() {
   echo "Cleaning up temporary files and containers"
   rm "${BENCHMARKING_JOB_ID}_hydra_config.yaml"
   rm "${BENCHMARKING_JOB_ID}_pyexperimenter_id.txt"
-  rm "${BENCHMARKING_JOB_ID}_problem_container.txt"
+  rm "${BENCHMARKING_JOB_ID}_task_container.txt"
   rm "${BENCHMARKING_JOB_ID}_optimizer_container.txt"
 
-  singularity instance stop problem
+  singularity instance stop task
 }
 
 trap "cleanup_files" EXIT
@@ -30,13 +30,13 @@ done
 echo "Runner container finished"
 
 # Read PROBLEM_CONTAINER from file
-PROBLEM_CONTAINER="$(cat "${BENCHMARKING_JOB_ID}_problem_container.txt")"
+PROBLEM_CONTAINER="$(cat "${BENCHMARKING_JOB_ID}_task_container.txt")"
 OPTIMIZER_CONTAINER="$(cat "${BENCHMARKING_JOB_ID}_optimizer_container.txt")"
 
 
-# Start the problem container & wait for the flask server to start
-echo "Starting problem container"
-singularity instance start "containers/benchmarks/${PROBLEM_CONTAINER}.sif" problem
+# Start the task container & wait for the flask server to start
+echo "Starting task container"
+singularity instance start "containers/benchmarks/${PROBLEM_CONTAINER}.sif" task
 
 API_URL="localhost:5000/configspace"
 
@@ -51,7 +51,7 @@ else
     LOG_ERR_PATH=$(singularity instance list -j |
      python -c "import sys, json;\
      output = json.load(sys.stdin)['instances'];\
-     print(next(item['logErrPath'] for item in output if item.get('instance', None) == 'problem'))"
+     print(next(item['logErrPath'] for item in output if item.get('instance', None) == 'task'))"
     )
 
     printf "#%.0s" {1..100}; echo

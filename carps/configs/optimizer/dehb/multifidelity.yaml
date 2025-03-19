@@ -12,3 +12,6 @@ optimizer:
     seed: ${seed}
     eta: 3
     output_path: ${outdir}/${seed}/dehb_output
+
+  expects_multiple_objectives: false
+  expects_fidelities: true

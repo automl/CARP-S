@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -39,56 +38,64 @@ class DEHBOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
-        dehb_cfg: DictConfig,
         task: Task,
+        dehb_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize DEHB Optimizer.
 
         Parameters
         ----------
-        problem : Problem
-            Problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         dehb_cfg : DictConfig
             DEHB configuration.
-        task : Task
-            Task to optimize.
         loggers : list[AbstractLogger] | None, optional
-            Loggers, by default None
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.fidelity_enabled = True
         self.task = task
         self.dehb_cfg = dehb_cfg
-        self.configspace = self.convert_configspace(problem.configspace)
+        self.configspace = self.convert_configspace(task.objective_function.configspace)
         self.configspace.seed(dehb_cfg.seed)
-        if self.task.max_budget is None:
-            raise ValueError("max_budget must be specified to run DEHB!")
-        if self.task.min_budget is None:
-            raise ValueError("min_budget must be specified to run DEHB!")
+        if self.task.input_space.fidelity_space.max_fidelity is None:
+            raise ValueError("max_fidelity must be specified to run DEHB!")
+        if self.task.input_space.fidelity_space.min_fidelity is None:
+            raise ValueError("min_fidelity must be specified to run DEHB!")
         self._solver: DEHB | None = None
         self.history: dict[str, dict[str, Any]] = {}
 
     def _setup_optimizer(self) -> Any:
         return DEHB(
             cs=self.configspace,
-            min_fidelity=self.task.min_budget,
-            max_fidelity=self.task.max_budget,
-            n_workers=self.task.n_workers,
+            min_fidelity=self.task.input_space.fidelity_space.min_fidelity,
+            max_fidelity=self.task.input_space.fidelity_space.max_fidelity,
+            n_workers=self.task.optimization_resources.n_workers,
             **self.dehb_cfg,
         )
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -106,7 +113,7 @@ class DEHBOptimizer(Optimizer):
     ) -> TrialInfo:
         """Convert proposal from DEHB to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Parameters
         ----------

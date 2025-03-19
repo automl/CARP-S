@@ -74,7 +74,7 @@ class DatabaseLogger(AbstractLogger):
     def log_trial(
         self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
     ) -> None:
-        """Evaluate the problem and log the trial.
+        """Evaluate the task and log the trial.
 
         Parameters
         ----------
@@ -82,7 +82,7 @@ class DatabaseLogger(AbstractLogger):
             The number of trials that have been run so far.
             For the case of multi-fidelity, a full trial
             is a configuration evaluated on the maximum budget and
-            the counter is increased by `budget/max_budget` instead
+            the counter is increased by `budget/max_fidelity` instead
             of 1.
         trial_info : TrialInfo
             The trial info.

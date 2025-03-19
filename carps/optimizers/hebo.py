@@ -1,13 +1,14 @@
 """Implementation of HEBO Optimizer.
 
 [2024-03-27]
-Note that running `python carps/run.py +optimizer/hebo=config +problem/DUMMY=config seed=1 task.n_trials=25`
+Note that running `python carps/run.py +optimizer/hebo=config +task/DUMMY=config seed=1
+ task.optimization_resources.n_trials=25`
 raises following error:
 "linear_operator.utils.errors.NanError: cholesky_cpu: 4 of 4 elements of the torch.Size([2, 2]) tensor are NaN."
 
 This is related to this issue: https://github.com/huawei-noah/HEBO/issues/61.
 
-For non-dummy problems HEBO works fine.
+For non-dummy objective functions HEBO works fine.
 """
 
 from __future__ import annotations
@@ -36,7 +37,6 @@ from carps.utils.trials import TrialInfo, TrialValue
 if TYPE_CHECKING:
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -166,10 +166,11 @@ class HEBOOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
         task: Task,
         hebo_cfg: DictConfig | None = None,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Interface to HEBO (https://github.com/huawei-noah/HEBO) [1].
 
@@ -181,19 +182,26 @@ class HEBOOptimizer(Optimizer):
 
         Parameters
         ----------
-        problem : Problem
-            The objective function.
         task : Task
-            The task description.
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         hebo_cfg : DictConfig, optional
             Optional kwargs for HEBO class.
         loggers : list[AbstractLogger], optional
-            List of loggers to use, by default None
+            List of loggers to use, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         # TODO: Extend HEBO to MO (maybe just adding a config suffices)
-        self.configspace = self.problem.configspace
+        self.configspace = self.task.input_space.configuration_space
 
         if len(self.configspace.conditions) > 0:
             logger.warning(
@@ -204,8 +212,7 @@ class HEBOOptimizer(Optimizer):
             # raise RuntimeError(msg)
 
         self.hebo_configspace = self.convert_configspace(self.configspace)
-        self.metric = getattr(problem, "metric", "cost")
-        self.budget_type = getattr(self.problem, "budget_type", None)
+        self.budget_type = getattr(self.task.input_space.fidelity_space, "fidelity_type", None)
         self.trial_counter = 0
         hebo_cfg = {} if hebo_cfg is None else dict(hebo_cfg)
         self.hebo_cfg = hebo_cfg
@@ -215,7 +222,7 @@ class HEBOOptimizer(Optimizer):
         self.completed_experiments: OrderedDict[str, tuple[TrialValue, TrialInfo]] = OrderedDict()
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> DesignSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Convert the configspace from ConfigSpace to HEBO. However, given that syne-tune does not support
         conditions and forbidden clauses, we only add hyperparameters here
@@ -223,7 +230,7 @@ class HEBOOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         dict[str, Any]
         -------
@@ -270,14 +277,14 @@ class HEBOOptimizer(Optimizer):
         Returns:
         -------
         TrialInfo
-            trial info, needed to interact with the Problem
+            trial info, needed to interact with the ObjectiveFunction
         """
         if len(rec) > 1:
             raise ValueError(f"Only one suggestion is ok, got {len(rec)}.")
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=rec,
             design_space=self.hebo_configspace,
-            config_space=self.problem.configspace,
+            config_space=self.task.input_space.configuration_space,
             allow_inactive_with_values=True,
         )
         return TrialInfo(config=config, instance=None, budget=None, seed=None)
@@ -327,7 +334,7 @@ class HEBOOptimizer(Optimizer):
         TrialValue
             Information about function evaluation
         """
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         self.completed_experiments[str(self.trial_counter)] = (trial_value, trial_info)
         return trial_value
 
@@ -355,7 +362,7 @@ class HEBOOptimizer(Optimizer):
         tuple[list[float], list[float]]
 
         """
-        # if len(self.task.objectives) > 1:
+        # if len(self.task.output_space.objectives) > 1:
         #     raise NotSupportedError
 
         X: list[int | float] = []
@@ -397,7 +404,7 @@ class HEBOOptimizer(Optimizer):
         config = HEBOcfg2ConfigSpacecfg(
             hebo_suggestion=best_x,
             design_space=self.hebo_configspace,
-            config_space=self.problem.configspace,
+            config_space=self.task.input_space.configuration_space,
             allow_inactive_with_values=True,
         )
         trial_info = TrialInfo(config=config)

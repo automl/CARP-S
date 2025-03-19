@@ -42,11 +42,18 @@ Here's a basic example of what your `my_optimizer.py` file might look like:
 from ConfigSpace import Configuration, ConfigurationSpace
 from carps.utils.trials import TrialInfo, TrialValue
 from carps.optimizers.optimizer import Optimizer
+from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.types import Incumbent
 
 class MyOptimizer(Optimizer):
-    def __init__(self, problem, task, loggers=None):
-        super().__init__(problem, task, loggers)
+    def __init__(
+        self,
+        task: Task,
+        loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
+    ) -> None:
+        super().__init__(task, loggers, expects_multiple_objectives, expects_fidelities)
         # Initialize any additional attributes your optimizer needs here
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> OptimizerSearchSpace:

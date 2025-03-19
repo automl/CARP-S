@@ -1,0 +1,103 @@
+benchmark_id: MFPBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: mfpbench/SO/mfh/mfh6_bad
+  seed: ${seed}
+  objective_function:
+    benchmark_name: mfh
+    metric:
+    - value
+    benchmark: mfh6_bad
+    budget_type: z
+    prior: null
+    perturb_prior: null
+    benchmark_kwargs:
+      bias: null
+      noise: null
+    _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: mfh6_bad
+        hyperparameters:
+        - type: uniform_float
+          name: X_0
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: X_1
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: X_2
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: X_3
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: X_4
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: X_5
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: z
+      min_fidelity: 1
+      max_fidelity: 100
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - value
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 118
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: synthetic
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 6
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 6
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

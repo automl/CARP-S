@@ -34,7 +34,7 @@ def get_experiment_status(path: Path) -> dict:
     status = RunStatus.MISSING
 
     cfg = OmegaConf.load(path)
-    n_trials = cfg.task.n_trials
+    n_trials = cfg.task.optimization_resources.n_trials
     trial_logs_fn = path.parent.parent / "trial_logs.jsonl"
     if trial_logs_fn.is_file():
         trial_logs = read_jsonl_content(str(trial_logs_fn))
@@ -46,7 +46,7 @@ def get_experiment_status(path: Path) -> dict:
     return {
         "status": status.name,
         "benchmark_id": cfg.benchmark_id,
-        "problem_id": cfg.problem_id,
+        "task_id": cfg.task_id,
         "optimizer_id": cfg.optimizer_id,
         "seed": cfg.seed,
         "overrides": " ".join(overrides),
@@ -84,7 +84,7 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     data = missing_data
     missing = data[data["status"].isin([runstatus.name])]
     runcommands = []
-    for _gid, gdf in missing.groupby(by=["optimizer_id", "problem_id"]):
+    for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
         seeds = list(gdf["seed"].unique())
         seeds.sort()
         overrides = gdf["overrides"].iloc[0].split(" ")

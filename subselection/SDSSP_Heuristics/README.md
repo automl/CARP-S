@@ -34,7 +34,7 @@ This will run the subselection (i.e. choose k points the n-k remaining k points 
 ```bash
 mkdir run-data
 
-# Copy the performance of optimizer per problem file into the dir
+# Copy the performance of optimizer per task file into the dir
 cp df_crit.csv run-data/
 # $1: folder to run stuff in, $2: number of points in full set, $3: different ks
 bash commands.sh run-data 106 10,20 

@@ -1,0 +1,122 @@
+# @package _global_
+benchmark_id: HPOBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/blackbox/tabular/nas/Cifar100NasBench201Benchmark
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    benchmark_client:
+      _target_: hpobench.container.benchmarks.nas.nasbench_201.Cifar100NasBench201Benchmark
+      rng: ${seed}
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: categorical
+          name: 1<-0
+          choices:
+          - none
+          - skip_connect
+          - nor_conv_1x1
+          - nor_conv_3x3
+          - avg_pool_3x3
+          weights: null
+          default_value: none
+          meta: null
+        - type: categorical
+          name: 2<-0
+          choices:
+          - none
+          - skip_connect
+          - nor_conv_1x1
+          - nor_conv_3x3
+          - avg_pool_3x3
+          weights: null
+          default_value: none
+          meta: null
+        - type: categorical
+          name: 2<-1
+          choices:
+          - none
+          - skip_connect
+          - nor_conv_1x1
+          - nor_conv_3x3
+          - avg_pool_3x3
+          weights: null
+          default_value: none
+          meta: null
+        - type: categorical
+          name: 3<-0
+          choices:
+          - none
+          - skip_connect
+          - nor_conv_1x1
+          - nor_conv_3x3
+          - avg_pool_3x3
+          weights: null
+          default_value: none
+          meta: null
+        - type: categorical
+          name: 3<-1
+          choices:
+          - none
+          - skip_connect
+          - nor_conv_1x1
+          - nor_conv_3x3
+          - avg_pool_3x3
+          weights: null
+          default_value: none
+          meta: null
+        - type: categorical
+          name: 3<-2
+          choices:
+          - none
+          - skip_connect
+          - nor_conv_1x1
+          - nor_conv_3x3
+          - avg_pool_3x3
+          weights: null
+          default_value: none
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 118
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: tabular
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 6
+    search_space_n_categoricals: 6
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

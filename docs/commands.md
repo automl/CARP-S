@@ -1,14 +1,14 @@
 # Commands
 
-You can run a certain problem and optimizer combination directly with Hydra via:
+You can run a certain task and optimizer combination directly with Hydra via:
 ```bash
-python -m carps.run +problem=... +optimizer=... seed=... -m
+python -m carps.run +task=... +optimizer=... seed=... -m
 ```
 
-Another option is to fill the database with all possible combinations of problems and optimizers
+Another option is to fill the database with all possible combinations of tasks and optimizers
 you would like to run:
 ```bash
-python -m carps.container.create_cluster_configs +problem=... +optimizer=... -m
+python -m carps.container.create_cluster_configs +task=... +optimizer=... -m
 ```
 
 Then, run them from the database with:

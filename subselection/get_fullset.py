@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import fire
 import pandas as pd
-from pathlib import Path
+from carps.analysis.gather_data import normalize_logs
 from carps.analysis.run_autorank import get_df_crit
-from carps.analysis.gather_data import normalize_logs, get_interpolated_performance_df, load_logs, process_logs
 
 
 def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -21,11 +22,11 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
     return df, df_cfg
 
 def get_fullset(
-        rundir: str, 
+        rundir: str,
         optimizer_ids: list[str],
         output_dir: str = ".",
         normalize_performance: bool = True,
-        
+
 ) -> pd.DataFrame:
     if len(optimizer_ids) != 3:
         raise ValueError(f"Please select only three optimizers for the benchmark subselection. Current selection: {optimizer_ids}."\
@@ -39,7 +40,7 @@ def get_fullset(
     perf_col = "trial_value__cost_inc_norm" if normalize_performance else "trial_value__cost_inc"
 
     df_crit = get_df_crit(df, perf_col=perf_col)
-    # index: problem_id, columns: optimizer_ids
+    # index: task_id, columns: optimizer_ids
 
     filename = Path(output_dir) / "df_crit.csv"
     filename.parent.mkdir(exist_ok=True, parents=True)

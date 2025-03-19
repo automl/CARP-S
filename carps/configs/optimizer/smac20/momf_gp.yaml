@@ -14,3 +14,7 @@ optimizer:
         _partial_: true
         eta: 3
         incumbent_selection: 'any_budget'
+
+
+  expects_multiple_objectives: true
+  expects_fidelities: true

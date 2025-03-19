@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "carps"
-version = "0.1.1"
+version = "1.0.0"
 dependencies = [
   "autorank",
   "ConfigSpace>=1.0.0",
@@ -21,15 +21,13 @@ dependencies = [
   "omegaconf",
   "pandas",
   "pyarrow",
-  "py-experimenter>=1.4.1",
-  "pymysql",
   "rich",
   "seaborn",
   "tomli",
   "typing_extensions",
   "pymoo",
-  "GitPython",
   "fire",
+  "ipywidgets",
 ]
 
 requires-python = ">=3.9"
@@ -77,8 +75,13 @@ dev = [
   "pytest",
   "pytest-coverage",
   "pytest-cases",
+  "pytest-xdist",
 ]
-dummy = ["scikit-learn"]
+containers = [
+  "GitPython",
+  "py-experimenter>=1.4.1",
+  "pymysql",
+]
 bbob = ["ioh==0.3.14"]
 hpob = ["xgboost==1.5.2"]
 mfpbench = [

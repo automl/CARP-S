@@ -34,7 +34,6 @@ if TYPE_CHECKING:
     from omegaconf import DictConfig
     from optuna.study import Study  # type: ignore
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -90,28 +89,37 @@ class OptunaOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
-        optuna_cfg: DictConfig,
         task: Task,
+        optuna_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize the optimizer.
 
         Parameters
         ----------
-        problem : Problem
-            The problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         optuna_cfg : DictConfig
             The configuration for the Optuna optimizer.
-        task : Task
         loggers : list[AbstractLogger] | None
             The loggers to use during optimization.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
         self._solver: Study | None = None
         self.optuna_cfg = optuna_cfg
 
-        configspace = self.problem.configspace
+        configspace = self.task.objective_function.configspace
         if any(configspace.forbidden_clauses):
             raise NotImplementedError("Forbidden clauses are not yet supported in Optuna")
 
@@ -138,7 +146,9 @@ class OptunaOptimizer(Optimizer):
             directions: Sequence[str | StudyDirection] | None = None
         ) -> Study.
         """
-        study = optuna.create_study(**self.optuna_cfg.study, directions=["minimize"] * self.task.n_objectives)
+        study = optuna.create_study(
+            **self.optuna_cfg.study, directions=["minimize"] * self.task.output_space.n_objectives
+        )
         printr(study)
 
         return study
@@ -231,7 +241,7 @@ class OptunaOptimizer(Optimizer):
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
         """
-        if self.task.n_objectives == 1:
+        if self.task.output_space.n_objectives == 1:
             non_none_entries = [(config, cost) for _, config, cost in self.history.values() if cost is not None]
             if len(non_none_entries) == 0:
                 return None
@@ -254,7 +264,7 @@ class OptunaOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -267,7 +277,7 @@ class OptunaOptimizer(Optimizer):
     def convert_to_trial(self, *args: tuple, **kwargs: dict) -> TrialInfo:
         """Convert proposal by optimizer to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Returns:
         -------

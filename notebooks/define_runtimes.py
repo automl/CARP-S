@@ -1,37 +1,50 @@
+"""Estimate the runtime of the objective function."""
 from __future__ import annotations
 
-import numpy as np
-from omegaconf import OmegaConf
-from pathlib import Path
-from carps.utils.running import make_problem
-from carps.utils.trials import TrialInfo
 import time
 from multiprocessing import Pool
-import pandas as pd
+from pathlib import Path
 
-path = Path("carps/configs/problem/HPOBench/multifidelity")
+import numpy as np
+import pandas as pd
+from carps.utils.running import make_task
+from carps.utils.trials import TrialInfo
+from omegaconf import OmegaConf
+
+path = Path("carps/configs/task/HPOBench/multifidelity")
 config_fns = list(path.glob("*.yaml"))
 result_file = "durations.csv"
 # print(config_fns)
 seed = 1
 
+
 def measure_time(config_fn: Path, n: int = 5) -> float:
+    """Measure the time it takes to evaluate the objective function.
+
+    Args:
+        config_fn (Path): Path to the configuration file.
+        n (int, 5): Number of evaluations.
+
+    Returns:
+        The average time it takes to evaluate the objective function.
+    """
     cfg = OmegaConf.load(config_fn)
-    cfg.problem.seed = seed
-    problem = make_problem(cfg=cfg)
-    config = problem.configspace.sample_configuration()
+    cfg.task.seed = seed
+    task = make_task(cfg=cfg)
+    config = task.configspace.sample_configuration()
     trial_info = TrialInfo(config=config)
     durations = []
-    for i in range(n):
+    for _i in range(n):
         start = time.time()
-        trial_value = problem.evaluate(trial_info)
+        task.objective_function.evaluate(trial_info)
         end = time.time()
         duration = end - start
         durations.append(duration)
     return np.mean(durations)
 
+
 with Pool(processes=8) as pool:
     durations = pool.map(measure_time, config_fns)
 
-df = pd.DataFrame({"config_fn": [str(p) for p in config_fns], "duration": durations})
+df = pd.DataFrame({"config_fn": [str(p) for p in config_fns], "duration": durations})  # noqa: PD901
 df.to_csv("durations.csv", index=False)

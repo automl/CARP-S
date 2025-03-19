@@ -15,8 +15,8 @@ setup_logging()
 logger = get_logger(__file__)
 
 
-def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
-    """Add scenario type to logs.
+def add_task_type(logs: pd.DataFrame) -> pd.DataFrame:
+    """Add task_type type to logs.
 
     Parameters
     ----------
@@ -26,32 +26,32 @@ def add_scenario_type(logs: pd.DataFrame) -> pd.DataFrame:
     Returns:
     -------
     pd.DataFrame
-        Logs with scenario type.
+        Logs with task_type type.
     """
 
-    def determine_scenario_type(x: pd.Series) -> str:
-        if x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
-            scenario = "blackbox"
-        elif x["task.is_multifidelity"] is True and x["task.is_multiobjective"] is False:
-            scenario = "multi-fidelity"
-        elif x["task.is_multifidelity"] is False and x["task.is_multiobjective"] is True:
-            scenario = "multi-objective"
-        elif x["task.is_multifidelity"] is True and x["task.is_multiobjective"] is True:
-            scenario = "multi-fidelity-objective"
-        elif np.isnan(x["task.is_multifidelity"]) or np.isnan(x["task.is_multiobjective"]):
-            scenario = "blackbox"
+    def determine_task_type(x: pd.Series) -> str:
+        if x["task.input_space.fidelity_space.is_multifidelity"] is False and x["task.is_multiobjective"] is False:
+            task_type = "blackbox"
+        elif x["task.input_space.fidelity_space.is_multifidelity"] is True and x["task.is_multiobjective"] is False:
+            task_type = "multi-fidelity"
+        elif x["task.input_space.fidelity_space.is_multifidelity"] is False and x["task.is_multiobjective"] is True:
+            task_type = "multi-objective"
+        elif x["task.input_space.fidelity_space.is_multifidelity"] is True and x["task.is_multiobjective"] is True:
+            task_type = "multi-fidelity-objective"
+        elif np.isnan(x["task.input_space.fidelity_space.is_multifidelity"]) or np.isnan(x["task.is_multiobjective"]):
+            task_type = "blackbox"
         else:
             print(
-                x["problem_id"],
+                x["task_id"],
                 x["optimizer_id"],
                 x["seed"],
-                x["task.is_multifidelity"],
-                type(x["task.is_multifidelity"]),
+                x["task.input_space.fidelity_space.is_multifidelity"],
+                type(x["task.input_space.fidelity_space.is_multifidelity"]),
             )
-            raise ValueError("Unknown scenario")
-        return scenario
+            raise ValueError("Unknown task_type")
+        return task_type
 
-    logs["scenario"] = logs.apply(determine_scenario_type, axis=1)
+    logs["task_type"] = logs.apply(determine_task_type, axis=1)
     return logs
 
 
@@ -68,21 +68,21 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Logs with task columns.
     """
-    index_fn = Path(__file__).parent.parent / "configs/problem/index.csv"
+    index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
     if not index_fn.is_file():
-        raise ValueError("Problem ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-    problem_index = pd.read_csv(index_fn)
+        raise ValueError("Task ids have not been indexed. Run `python -m carps.utils.index_configs`.")
+    task_index = pd.read_csv(index_fn)
 
-    def load_task_cfg(problem_id: str) -> DictConfig:
-        config_fn = problem_index["config_fn"][problem_index["problem_id"] == problem_id].iloc[0]
+    def load_task_cfg(task_id: str) -> DictConfig:
+        config_fn = task_index["config_fn"][task_index["task_id"] == task_id].iloc[0]
         if not Path(config_fn).is_file():
             raise ValueError("Maybe the index is old. Run `python -m carps.utils.index_configs` to refresh.")
         cfg = OmegaConf.load(config_fn)
         return cfg.task
 
     new_logs = []
-    for gid, gdf in logs.groupby(by="problem_id"):
-        task_cfg = load_task_cfg(problem_id=gid)
+    for gid, gdf in logs.groupby(by="task_id"):
+        task_cfg = load_task_cfg(task_id=gid)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         for c in task_columns:
             key = c.split(".")[1]
@@ -99,7 +99,7 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
 def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     """Process raw logs.
 
-    Normalize n_trials and costs. Calculate trajectory (incumbent cost). Maybe add scenario.
+    Normalize n_trials and costs. Calculate trajectory (incumbent cost). Maybe add task_type.
 
     Parameters
     ----------
@@ -114,28 +114,28 @@ def process_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Processing raw logs. Normalize n_trials and costs. Calculate trajectory (incumbent cost).")
     # logs= logs.drop(columns=["config"])
     # Filter MO costs
-    logs = logs[~logs["problem_id"].str.startswith("DUMMY")]
+    logs = logs[~logs["task_id"].str.startswith("DUMMY")]
     logs = logs[~logs["benchmark_id"].str.startswith("DUMMY")]
     logs = logs[~logs["optimizer_id"].str.startswith("DUMMY")]
     logs["trial_value__cost"] = logs["trial_value__cost"].apply(lambda x: x if isinstance(x, float) else eval(x))  # noqa: S307
     logs = logs[logs["trial_value__cost"].apply(lambda x: isinstance(x, float))]
     logs["trial_value__cost"] = logs["trial_value__cost"].apply(float)
-    logs["n_trials_norm"] = logs.groupby("problem_id")["n_trials"].transform(normalize)
-    logs["trial_value__cost_norm"] = logs.groupby("problem_id")["trial_value__cost"].transform(normalize)
-    logs["trial_value__cost_inc"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
-        "trial_value__cost"
-    ].transform("cummin")
-    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["problem_id", "optimizer_id", "seed"])[
+    logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
+    logs["trial_value__cost_norm"] = logs.groupby("task_id")["trial_value__cost"].transform(normalize)
+    logs["trial_value__cost_inc"] = logs.groupby(by=["task_id", "optimizer_id", "seed"])["trial_value__cost"].transform(
+        "cummin"
+    )
+    logs["trial_value__cost_inc_norm"] = logs.groupby(by=["task_id", "optimizer_id", "seed"])[
         "trial_value__cost_norm"
     ].transform("cummin")
     logs = maybe_postadd_task(logs)
-    if "task.n_objectives" in logs:
-        logs["task.is_multiobjective"] = logs["task.n_objectives"] > 1
-    logs = add_scenario_type(logs)
+    if "task.output_space.n_objectives" in logs:
+        logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
+    logs = add_task_type(logs)
 
     # Add time
-    logs = logs.groupby(by=["problem_id", "optimizer_id", "seed"]).apply(calc_time).reset_index(drop=True)
-    logs["time_norm"] = logs.groupby("problem_id")["time"].transform(normalize)
+    logs = logs.groupby(by=["task_id", "optimizer_id", "seed"]).apply(calc_time).reset_index(drop=True)
+    logs["time_norm"] = logs.groupby("task_id")["time"].transform(normalize)
     return logs
 
 
@@ -145,7 +145,7 @@ def calc_time(D: pd.DataFrame) -> pd.Series:  # noqa: N803
     Parameters
     ----------
     D : pd.DataFrame
-        Logs for a single problem, optimizer, seed.
+        Logs for a single task, optimizer, seed.
 
     Returns:
     -------
@@ -221,8 +221,8 @@ def get_interpolated_performance_df(
         "trial_value__cost_inc_norm",
     ]
     # interpolation_columns = [
-    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("problem")]
-    group_keys = ["scenario", "benchmark_id", "optimizer_id", "problem_id", "seed"]
+    #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
+    group_keys = ["task_type", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []
     for gid, gdf in logs.groupby(by=group_keys):

@@ -10,3 +10,6 @@ optimizer:
         _target_: smac.intensifier.hyperband.Hyperband
         _partial_: true
         eta: 3
+
+  expects_multiple_objectives: false
+  expects_fidelities: true

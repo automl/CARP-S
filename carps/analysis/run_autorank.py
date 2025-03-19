@@ -103,7 +103,7 @@ def custom_latex_table(
 def get_df_crit(
     df: pd.DataFrame,
     budget_var: str = "n_trials_norm",
-    max_budget: float = 1,
+    max_fidelity: float = 1,
     soft: bool = True,  # noqa: FBT001, FBT002
     perf_col: str = "trial_value__cost_inc",
     nan_handling: str = "remove",
@@ -112,16 +112,16 @@ def get_df_crit(
 
     1. Filter all rundata for the final performance (objective function value of incumbent at the end of the
         optimization run).
-    2. Calculate the mean performance for the different seeds per optimizer and problem.
-    3. Pivot the table such that we have 2D table with problems as rows and optimizers as columns.
+    2. Calculate the mean performance for the different seeds per optimizer and task.
+    3. Pivot the table such that we have 2D table with tasks as rows and optimizers as columns.
     4. Handle nans: Remove rows with nans, replace nans by highest (worst) value, or keep them.
 
     Args:
         df (pd.DataFrame): The dataframe.
         budget_var (str, optional): The budget variable. Defaults to "n_trials_norm".
-        max_budget (float, optional): The maximum budget. Defaults to 1.
-        soft (bool, optional): Whether to use a soft filter: If no entry at max_budget is available, use the performance
-            at the last trial. Defaults to True.
+        max_fidelity (float, optional): The maximum budget. Defaults to 1.
+        soft (bool, optional): Whether to use a soft filter: If no entry at max_fidelity is available,
+            use the performance at the last trial. Defaults to True.
         perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc".
         nan_handling (str, optional): How to handle nans. Can be "remove", "keep", "replace_by_highest".
             Defaults to "remove".
@@ -129,18 +129,18 @@ def get_df_crit(
     Returns:
         pd.DataFrame: The critical difference dataframe.
     """
-    df = filter_only_final_performance(df=df, budget_var=budget_var, max_budget=max_budget, soft=soft)  # noqa: PD901
+    df = filter_only_final_performance(df=df, budget_var=budget_var, max_fidelity=max_fidelity, soft=soft)  # noqa: PD901
 
     # Work on mean of different seeds
-    df_crit = df.groupby(["optimizer_id", "problem_id"])[perf_col].apply(np.nanmean).reset_index()
+    df_crit = df.groupby(["optimizer_id", "task_id"])[perf_col].apply(np.nanmean).reset_index()
 
-    df_crit = df_crit.pivot_table(index="problem_id", columns="optimizer_id", values=perf_col)
+    df_crit = df_crit.pivot_table(index="task_id", columns="optimizer_id", values=perf_col)
 
     if nan_handling == "remove":
         nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])
         lost = df_crit[nan_ids]
 
-        # Rows are problems, cols are optimizers
+        # Rows are tasks, cols are optimizers
         if len(lost) > 0:
             df_crit = df_crit[~nan_ids]
             logger.info(f"Lost following experiments: {lost}")
@@ -202,15 +202,15 @@ def calc_critical_difference(
     )
 
 
-def calc(rundir: str, scenario: str = "blackbox") -> None:
-    """Calculate the critical difference for a specific scenario.
+def calc(rundir: str, task_type: str = "blackbox") -> None:
+    """Calculate the critical difference for a specific task_type.
 
     Args:
         rundir (str): The run directory.
-        scenario (str, optional): The scenario. Defaults to "blackbox".
+        task_type (str, optional): The task_type. Defaults to "blackbox".
     """
     df, df_cfg = load_logs(rundir=rundir)
-    calc_critical_difference(df=df[df["scenario"] == scenario], identifier=scenario)
+    calc_critical_difference(df=df[df["task_type"] == task_type], identifier=task_type)
 
 
 """Code for CD Plots

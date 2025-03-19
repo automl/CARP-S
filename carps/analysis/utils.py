@@ -66,23 +66,23 @@ def setup_seaborn(font_scale: float | None = None) -> None:
 def filter_only_final_performance(
     df: pd.DataFrame,
     budget_var: str = "n_trials_norm",
-    max_budget: float = 1,
+    max_fidelity: float = 1,
     soft: bool = True,  # noqa: FBT001, FBT002
 ) -> pd.DataFrame:
-    """Filter only the final performance of the optimizers (performance at budget_var==max_budget).
+    """Filter only the final performance of the optimizers (performance at budget_var==max_fidelity).
 
     Args:
         df (pd.DataFrame): Results dataframe.
         budget_var (str, optional): The budget variable. Defaults to "n_trials_norm".
-        max_budget (float, optional): The maximum budget. Defaults to 1.
+        max_fidelity (float, optional): The maximum budget. Defaults to 1.
         soft (bool, optional): Whether to use a soft filter. Defaults to True.
 
     Returns:
         pd.DataFrame: Filtered dataframe
     """
     if not soft:
-        df = df[np.isclose(df[budget_var], max_budget)]  # noqa: PD901
+        df = df[np.isclose(df[budget_var], max_fidelity)]  # noqa: PD901
     else:
-        df = df[df.groupby(["optimizer_id", "problem_id", "seed"])[budget_var].transform(lambda x: x == x.max())]  # noqa: PD901
-        df = df[df[budget_var] <= max_budget]  # noqa: PD901
+        df = df[df.groupby(["optimizer_id", "task_id", "seed"])[budget_var].transform(lambda x: x == x.max())]  # noqa: PD901
+        df = df[df[budget_var] <= max_fidelity]  # noqa: PD901
     return df

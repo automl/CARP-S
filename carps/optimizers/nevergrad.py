@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     from nevergrad.parametrization import parameter  # type: ignore
     from omegaconf import DictConfig
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -81,34 +80,42 @@ class NevergradOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        task: Task,
         nevergrad_cfg: DictConfig,
         optimizer_cfg: DictConfig,
-        task: Task,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """Initialize the optimizer.
 
         Parameters
         ----------
-        problem : Problem
-            The problem to optimize.
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
         nevergrad_cfg : DictConfig
             The configuration for the Nevergrad optimizer.
         optimizer_cfg : DictConfig
             The configuration for the optimizer.
-        task : Task
-            The task to optimize.
         loggers : list[AbstractLogger] | None
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
         """
-        super().__init__(problem, task, loggers)
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.fidelity_enabled = False
         self.fidelity_type: str | None = None
-        if self.task.is_multifidelity:
+        if self.task.input_space.fidelity_space.is_multifidelity:
             self.fidelity_enabled = True
-            self.fidelity_type = self.task.fidelity_type
-        self.configspace = problem.configspace
+            self.fidelity_type = self.task.input_space.fidelity_space.fidelity_type
+        self.configspace = task.input_space.configuration_space
         self.ng_space = self.convert_configspace(self.configspace)
         self.nevergrad_cfg = nevergrad_cfg
         self.optimizer_cfg = optimizer_cfg
@@ -127,7 +134,7 @@ class NevergradOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -147,14 +154,14 @@ class NevergradOptimizer(Optimizer):
                 ng_opt = ext_opts[self.nevergrad_cfg.optimizer_name](**self.optimizer_cfg)
             ng_opt = ng_opt(
                 parametrization=self.ng_space,
-                budget=self.task.n_trials,
-                num_workers=self.task.n_workers,
+                budget=self.task.optimization_resources.n_trials,
+                num_workers=self.task.optimization_resources.n_workers,
             )
         else:
             ng_opt = ng.optimizers.registry[self.nevergrad_cfg.optimizer_name](
                 parametrization=self.ng_space,
-                budget=self.task.n_trials,
-                num_workers=self.task.n_workers,
+                budget=self.task.optimization_resources.n_trials,
+                num_workers=self.task.optimization_resources.n_workers,
             )
         ng_opt.parametrization.random_state = np.random.RandomState(self.nevergrad_cfg.seed)
         return ng_opt
@@ -168,7 +175,7 @@ class NevergradOptimizer(Optimizer):
     ) -> TrialInfo:
         """Convert proposal from Nevergrad to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Parameters
         ----------
@@ -211,7 +218,7 @@ class NevergradOptimizer(Optimizer):
             config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
-            budget=None if not self.fidelity_enabled else self.task.max_budget,
+            budget=None if not self.fidelity_enabled else self.task.input_space.fidelity_space.max_fidelity,
         )
         self.counter += 1
         return trial_info
@@ -253,7 +260,7 @@ class NevergradOptimizer(Optimizer):
         incumbent = None
         cost = None
         unique_name = None
-        if self.task.n_objectives > 1:
+        if self.task.output_space.n_objectives > 1:
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
             trial_infos = [

@@ -38,12 +38,12 @@ pip install carps[smac,bbob]
 
 All possible install options for benchmarks are:
 ```bash
-dummy,bhob,hpob,mfpbench,pymoo,yahpo
+bbob,hpobench,hpob,mfpbench,pymoo,yahpo
 ```
 
 All possible install options for optimizers are:
 ```bash
-dummy,dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
+dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
 ```
 
 Please note that installing all requirements for all benchmarks and optimizers in a single 
@@ -103,23 +103,23 @@ Once the requirements for both an optimizer and a benchmark, e.g. `SMAC2.0` and 
 one of the following minimal examples to benchmark `SMAC2.0` on `BBOB` directly with Hydra:
 
 ```bash
-# Run SMAC BlackBoxFacade on certain BBOB problem
-python -m carps.run +optimizer/smac20=blackbox +problem/BBOB=cfg_4_1_4_0 seed=1 task.n_trials=25
+# Run SMAC BlackBoxFacade on certain BBOB task
+python -m carps.run +optimizer/smac20=blackbox +task/BBOB=cfg_4_1_0 seed=1 task.optimization_resources.n_trials=25
 
-# Run SMAC BlackBoxFacade on all available BBOB problems for 10 seeds
-python -m carps.run +optimizer/smac20=blackbox '+problem/BBOB=glob(*)' 'seed=range(1,11)' -m
+# Run SMAC BlackBoxFacade on all available BBOB tasks for 10 seeds
+python -m carps.run +optimizer/smac20=blackbox '+task/BBOB=glob(*)' 'seed=range(1,11)' -m
 ```
 
 For the second command, the Hydra -m (or --multirun) option indicates that multiple runs will be 
 performed over a range of parameter values. In this case, it's indicating that the benchmarking
-should be run for all available BBOB problems (+problem/BBOB=glob(*)) and for 10 different 
+should be run for all available BBOB tasks (+task/BBOB=glob(*)) and for 10 different 
 seed values (seed=range(1,11)).
 
 ## Commands
 
-You can run a certain problem and optimizer combination directly with Hydra via:
+You can run a certain task and optimizer combination directly with Hydra via:
 ```bash
-python -m carps.run +problem=... +optimizer=... seed=... -m
+python -m carps.run +task=... +optimizer=... seed=... -m
 ```
 
 To check whether any runs are missing, you can use the following command. It will create
@@ -142,10 +142,10 @@ python -m carps.utils.database.reset_experiments
 ```
 
 ### Running with Containers and Database
-Another option is to fill the database with all possible combinations of problems and optimizers
+Another option is to fill the database with all possible combinations of tasks and optimizers
 you would like to run:
 ```bash
-python -m carps.container.create_cluster_configs +problem=... +optimizer=... -m
+python -m carps.container.create_cluster_configs +task=... +optimizer=... -m
 ```
 
 Then, run them from the database with:
@@ -168,7 +168,7 @@ For a custom optimizer check this [example repo](https://github.com/automl/CARP-
 Information is also available [here](https://automl.github.io/CARP-S/guides/using-carps/).
 
 ## Evaluation Results
-For each scenario (blackbox, multi-fidelity, multi-objective and multi-fidelity-multi-objective) and set (dev and test), we run selected optimizers and provide the data.
+For each task_type (blackbox, multi-fidelity, multi-objective and multi-fidelity-multi-objective) and set (dev and test), we run selected optimizers and provide the data.
 Here we provide the link to the [meta data](https://drive.google.com/file/d/17pn48ragmWsyRC39sInsh2fEPUHP3BRT/view?usp=sharing) 
 that contains the detailed optimization setting for each run  
 and the [running results](https://drive.google.com/file/d/1yzJRbwRvdLbpZ9SdQN2Vk3yQSdDP_vck/view?usp=drive_link) that 

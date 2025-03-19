@@ -1,0 +1,131 @@
+# @package _global_
+benchmark_id: Pymoo
+task_id: Pymoo/ManyO/unconstraint/wfg2_10_5
+task:
+  _target_: carps.utils.task.Task
+  name: Pymoo/ManyO/unconstraint/wfg2_10_5
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.pymoo.PymooObjectiveFunction
+    problem_name: wfg2
+    problem_kwargs:
+      n_var: 10
+      n_obj: 5
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: x0
+          lower: 0.0
+          upper: 2.0
+          default_value: 1.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x1
+          lower: 0.0
+          upper: 4.0
+          default_value: 2.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x2
+          lower: 0.0
+          upper: 6.0
+          default_value: 3.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x3
+          lower: 0.0
+          upper: 8.0
+          default_value: 4.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x4
+          lower: 0.0
+          upper: 10.0
+          default_value: 5.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x5
+          lower: 0.0
+          upper: 12.0
+          default_value: 6.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x6
+          lower: 0.0
+          upper: 14.0
+          default_value: 7.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x7
+          lower: 0.0
+          upper: 16.0
+          default_value: 8.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x8
+          lower: 0.0
+          upper: 18.0
+          default_value: 9.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x9
+          lower: 0.0
+          upper: 20.0
+          default_value: 10.0
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 5
+    objectives:
+    - objective_0
+    - objective_1
+    - objective_2
+    - objective_3
+    - objective_4
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 147
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: synthetic
+    objective_function_approximation: real
+    has_virtual_time: true
+    deterministic: true
+    dimensions: 10
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 10
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

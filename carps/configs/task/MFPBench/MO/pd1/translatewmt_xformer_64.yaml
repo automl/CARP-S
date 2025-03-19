@@ -1,0 +1,90 @@
+benchmark_id: MFPBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: mfpbench/MO/pd1/translatewmt_xformer_64
+  seed: ${seed}
+  objective_function:
+    benchmark_name: pd1
+    metric:
+    - valid_error_rate
+    - train_cost
+    benchmark: translatewmt_xformer_64
+    budget_type: epoch
+    prior: null
+    perturb_prior: null
+    benchmark_kwargs:
+      datadir: carps/benchmark_data/mfpbench
+    _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: lr_decay_factor
+          lower: 0.0100221257
+          upper: 0.988565263
+          default_value: 0.49929369435
+          log: false
+          meta: null
+        - type: uniform_float
+          name: lr_initial
+          lower: 1.00276e-05
+          upper: 9.8422475735
+          default_value: 0.0099344915204
+          log: true
+          meta: null
+        - type: uniform_float
+          name: lr_power
+          lower: 0.1004250993
+          upper: 1.9985927056
+          default_value: 1.04950890245
+          log: false
+          meta: null
+        - type: uniform_float
+          name: opt_momentum
+          lower: 5.86114e-05
+          upper: 0.9989999746
+          default_value: 0.0076519792937
+          log: true
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 2
+    objectives:
+    - valid_error_rate
+    - train_cost
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 100
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: DL
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 4
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 4
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -8,3 +8,6 @@ optimizer:
       sampler:
         _target_: optuna.samplers.TPESampler
         seed: ${seed}
+
+  expects_multiple_objectives: true
+  expects_fidelities: false

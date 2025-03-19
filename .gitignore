@@ -172,3 +172,4 @@ run-data*
 slurm-*
 tmp*
 *.aux
+*.zip
