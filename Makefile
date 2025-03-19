@@ -11,6 +11,7 @@ DIST := dist
 
 .PHONY: help install-dev clean-build check build docs publish test
 
+# TODO update help in Makefile
 help:
 	@echo "Makefile ${NAME}"
 	@echo "* install-dev      to install all dev requirements and install pre-commit"
@@ -25,7 +26,7 @@ PYTHON ?= python
 PIP ?= pip
 
 test:
-	$(PYTHON) -m pytest tests
+	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8
 
 docs:
 	$(PYTHON) -m webbrowser -t "http://127.0.0.1:8000/"
@@ -74,10 +75,6 @@ uvenv:
 	uv venv --python=3.12 carpsenv
 	. carpsenv/bin/activate
 	uv pip install setuptools wheel
-
-install-dev:
-	$(PIP) install -e ".[dev]"
-	pre-commit install
 
 install-swig:
 	@if [ "$(OS)" = "Darwin" ]; then \
@@ -172,3 +169,11 @@ optimizers:
 	$(MAKE) optimizer_ax
 	$(MAKE) optimizer_nevergrad
 	# $(MAKE) optimizer_hebo
+
+all:
+	$(MAKE) benchmarks
+	$(MAKE) optimizers
+
+default:
+	echo "Installed carps. If you want to install the benchmarks and optimizers, pass 'all' or e.g."
+	echo "'benchmark_bbob optimizer_smac'"
