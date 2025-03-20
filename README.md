@@ -29,24 +29,25 @@ To install CARP-S, you can simply use `pip`:
 conda create -n carps python=3.12
 conda activate carps
 
+# -OR -
+
 # uv
 pip install uv
 export PIP="uv pip"  # Env var needed for Makefile commands
 uv venv --python=3.12 carpsenv
-source carpsenv/bin/activate```
+source carpsenv/bin/activate
+```
 
-1. Install  carps.
+2. Install  carps.
 ```bash
 pip install carps
 ```
 
 Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
-For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark, you need to install the
+For example, if you want to use the `SMAC3` optimizer and the `BBOB` benchmark, you need to install the
 requirements for both of them via:
 
 ```bash
-pip install carps
-
 # Install options for optimizers and benchmarks (these are Makefile commands, check the Makefile for more commands)
 # The commands should be separated by a whitespace
 python -m carps.build.make benchmark_bbob optimizer_smac
@@ -54,20 +55,17 @@ python -m carps.build.make benchmark_bbob optimizer_smac
 The benchmarks and optimizers can all be installed in one environment (tested with python3.12).
 
 All possible install options for benchmarks are:
-```bash
+```
 benchmark_bbob benchmark_hpobench benchmark_hpob benchmark_mfpbench benchmark_pymoo benchmark_yahpo
 ```
 ⚠ Some benchmarks require to download surrogate models and/or containers and thus might take disk space and time to
 download.
 
 All possible install options for optimizers are:
-```bash
+```
 optimizer_smac optimizer_dehb optimizer_nevergrad optimizer_optuna optimizer_ax optimizer_skopt optimizer_synetune
 ```
 All of the above except `optimizer_hebo` work with python3.12.
-
-Please note that installing all requirements for all benchmarks and optimizers in a single 
-environment will not be possible due to conflicting dependencies.
 
 ### Installation from Source
 
@@ -146,7 +144,7 @@ python -m carps.run +optimizer/smac20=blackbox '+task/BBOB=glob(*)' 'seed=range(
 
 For the second command, the Hydra -m (or --multirun) option indicates that multiple runs will be 
 performed over a range of parameter values. In this case, it's indicating that the benchmarking
-should be run for all available BBOB tasks (+task/BBOB=glob(*)) and for 10 different 
+should be run for all available BBOB tasks (`+task/BBOB=glob(*)`) and for 10 different 
 seed values (seed=range(1,11)).
 
 ## Commands
