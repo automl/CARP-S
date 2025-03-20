@@ -53,8 +53,8 @@ class CustomEncoder(json.JSONEncoder):
         Any
             Pure python object.
         """
-        if isinstance(obj, np.int64):
+        if isinstance(obj, np.int64 | np.int32):
             return int(obj)
-        if isinstance(obj, np.float64):
+        if isinstance(obj, np.float64 | np.float32):
             return float(obj)
         return super().default(obj)

@@ -130,7 +130,7 @@ benchmark_bbob:
 benchmark_yahpo:
 # Needs 2GB of space for the surrogate models of YAHPO
 	# Install yahpo
-	CARPS_ROOT="." . container_recipes/benchmarks/YAHPO/install_yahpo.sh
+	. container_recipes/benchmarks/YAHPO/install_yahpo.sh
 	$(PIP) install ConfigSpace --upgrade
 
 benchmark_pymoo:

@@ -26,12 +26,15 @@ from typing import TYPE_CHECKING, Any, TypeVar
 import mfpbench
 
 from carps.objective_functions.objective_function import ObjectiveFunction
+from carps.utils.env_vars import CARPS_TASK_DATA_DIR
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
+
+MFPBENCH_TASK_DATA_DIR = Path(CARPS_TASK_DATA_DIR) / "MFPBench"
 
 benchmarks_names = ["pd1", "jahs", "mfh"]
 
@@ -86,10 +89,12 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         assert self.benchmark in benchmarks, f"benchmark '{benchmark}' must be one of {benchmarks}"
 
         if benchmark_kwargs is None:
-            benchmark_kwargs = {}
+            benchmark_kwargs = {"datadir": MFPBENCH_TASK_DATA_DIR / benchmark_name}
         elif benchmark_kwargs.get("datadir") is not None:
             # Assumes that the data is stored in the following format:
             benchmark_kwargs["datadir"] = Path(benchmark_kwargs["datadir"]) / benchmark_name
+
+        print(benchmark_kwargs)
 
         self._objective_function = mfpbench.get(
             name=benchmark,
@@ -126,7 +131,7 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         configuration = trial_info.config
         start_time = time.time()
         result = self._objective_function.query(
-            configuration.get_dictionary(),
+            dict(configuration),
             at=int(trial_info.budget) if trial_info.budget is not None else None,
         ).as_dict()
         end_time = time.time()
