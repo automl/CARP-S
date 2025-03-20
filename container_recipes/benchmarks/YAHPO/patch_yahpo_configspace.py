@@ -3,8 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from carps.objective_functions.yahpo import YAHPO_TASK_DATA_DIR
+
 print("Fixing yahpo configspace files.")
-path = Path("carps/benchmark_data/yahpo_data")
+path = Path(YAHPO_TASK_DATA_DIR)
 configspace_paths = list(path.glob("**/config_space.json"))
 for p in configspace_paths:
     print("\t", p)

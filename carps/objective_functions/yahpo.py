@@ -10,12 +10,15 @@ from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
 from carps.objective_functions.objective_function import ObjectiveFunction
+from carps.utils.env_vars import CARPS_TASK_DATA_DIR
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from ConfigSpace import ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
+
+YAHPO_TASK_DATA_DIR = Path(CARPS_TASK_DATA_DIR) / "yahpo_data"
 
 LOWER_IS_BETTER = {
     "mmce": True,  # classification error
@@ -97,7 +100,7 @@ class YahpoObjectiveFunction(ObjectiveFunction):
 
         assert bench in list_scenarios(), f"The scenario {bench} you choose is not available."
 
-        yahpo_data_path_path = yahpo_data_path or Path(__file__).parent.parent / "benchmark_data/yahpo_data"
+        yahpo_data_path_path = yahpo_data_path or YAHPO_TASK_DATA_DIR
 
         # setting up meta data for surrogate benchmarks
         local_config.init_config()

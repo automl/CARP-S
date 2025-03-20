@@ -1,3 +1,4 @@
+# @package _global_
 benchmark_id: MFPBench
 task_id: ${task.name}
 task:
@@ -12,8 +13,7 @@ task:
     budget_type: epoch
     prior: null
     perturb_prior: null
-    benchmark_kwargs:
-      datadir: carps/benchmark_data/mfpbench
+    benchmark_kwargs: null
     _target_: carps.objective_functions.mfpbench.MFPBenchObjectiveFunction
   input_space:
     _target_: carps.utils.task.InputSpace

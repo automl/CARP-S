@@ -22,50 +22,56 @@ For more details on CARP-S, please have a look at the
 
 To install CARP-S, you can simply use `pip`:
 
+1. Create virtual env with conda or uv
+
 ```bash
-conda create -n carps python=3.11
+# Conda
+conda create -n carps python=3.12
 conda activate carps
+
+# -OR -
+
+# uv
+pip install uv
+export PIP="uv pip"  # Env var needed for Makefile commands
+uv venv --python=3.12 carpsenv
+source carpsenv/bin/activate
+```
+
+2. Install  carps.
+```bash
 pip install carps
 ```
-
-Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
-For example, if you want to use the `SMAC2.0` optimizer and the `BBOB` benchmark, you need to install the
-requirements for both of them via:
-
-```bash
-pip install carps[smac,bbob]
-```
-
-All possible install options for benchmarks are:
-```bash
-bbob,hpobench,hpob,mfpbench,pymoo,yahpo
-```
-
-All possible install options for optimizers are:
-```bash
-dehb,hebo,nevergrad,optuna,skopt,smac,smac14,synetune
-```
-
-Please note that installing all requirements for all benchmarks and optimizers in a single 
-environment will not be possible due to conflicting dependencies.
-
 ### Installation from Source
 
 If you want to install from source, you can clone the repository and install CARP-S via:
 
+#### Conda
 ```bash
 git clone https://github.com/AutoML/CARP-S.git
 cd CARP-S
-conda create -n carps python=3.11
+export PIP="pip"
+conda create -n carps python=3.12
 conda activate carps
 
 # Install for usage
-pip install .
+$PIP install .
 ```
 
-For installing the requirements for the optimizer and benchmark, you can then use the following command:
+#### uv
 ```bash
-pip install ".[smac,bbob]"
+git clone https://github.com/AutoML/CARP-S.git
+cd CARP-S
+pip install uv
+export PIP="uv pip"
+uv venv --python=3.12 carpsenv
+source carpsenv/bin/activate
+
+# Install for usage
+$PIP install .
+
+# Install as editable
+$PIP install -e .
 ```
 
 If you want to install CARP-S for development, you can use the following command:
@@ -73,30 +79,40 @@ If you want to install CARP-S for development, you can use the following command
 make install-dev
 ```
 
-### Additional Steps for Benchmarks
+### Installing Benchmarks and Optimizers
 
-For HPOBench, it is necessary to install the requirements via:
+Additionally, you need to install the requirements for the benchmark and optimizer that you want to use.
+
+⚠ You can specify the directory of the task data by `export CARPS_TASK_DATA_DIR=...`. Please use absolute dirnames.
+The default location is `<carps package location>/task_data`. If you specify a custom dir, always export the env var.
+
+
+For example, if you want to use the `SMAC3` optimizer and the `BBOB` benchmark, you need to install the
+requirements for both of them via:
+
 ```bash
-bash container_recipes/benchmarks/HPOBench/install_HPOBench.sh
+# Install options for optimizers and benchmarks (these are Makefile commands, check the Makefile for more commands)
+# The commands should be separated by a whitespace
+python -m carps.build.make benchmark_bbob optimizer_smac
 ```
+The benchmarks and optimizers can all be installed in one environment (tested with python3.12).
 
-For some benchmarks, it is necessary to download data, 
-such as surrogate models, in order to run the benchmark: 
+All possible install options for benchmarks are:
+```
+benchmark_bbob benchmark_hpobench benchmark_hpob benchmark_mfpbench benchmark_pymoo benchmark_yahpo
+```
+⚠ Some benchmarks require to download surrogate models and/or containers and thus might take disk space and time to
+download.
 
--   For HPOB, you can download the surrogate benchmarks with
-    ```bash
-    bash container_recipes/benchmarks/HPOB/download_data.sh
-    ```
+All possible install options for optimizers are:
+```
+optimizer_smac optimizer_dehb optimizer_nevergrad optimizer_optuna optimizer_ax optimizer_skopt optimizer_synetune
+```
+All of the above except `optimizer_hebo` work with python3.12.
 
--   For MFPBench, you can download the surrogate benchmarks with
-    ```bash
-    bash container_recipes/benchmarks/MFPBench/download_data.sh
-    ```
+You can also install all benchmarks in one go with `benchmarks` and all optimizers with `optimizers`.
+Check the `Makefile` in carps for more details.
 
--   For YAHPO, you can download the required surrogate benchmarks and meta-data with
-    ```bash
-    bash container_recipes/benchmarks/YAHPO/install_yahpo.sh
-    ```
 
 ## Minimal Example
 Once the requirements for both an optimizer and a benchmark, e.g. `SMAC2.0` and `BBOB`, are installed, you can run
@@ -112,7 +128,7 @@ python -m carps.run +optimizer/smac20=blackbox '+task/BBOB=glob(*)' 'seed=range(
 
 For the second command, the Hydra -m (or --multirun) option indicates that multiple runs will be 
 performed over a range of parameter values. In this case, it's indicating that the benchmarking
-should be run for all available BBOB tasks (+task/BBOB=glob(*)) and for 10 different 
+should be run for all available BBOB tasks (`+task/BBOB=glob(*)`) and for 10 different 
 seed values (seed=range(1,11)).
 
 ## Commands

@@ -22,10 +22,14 @@ import xgboost as xgb  # type: ignore
 from ConfigSpace import ConfigurationSpace
 
 from carps.objective_functions.objective_function import ObjectiveFunction
+from carps.utils.env_vars import CARPS_TASK_DATA_DIR
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
+
+HPOB_TASK_DATA_DIR = Path(CARPS_TASK_DATA_DIR) / "HPO-B"
+HPOB_SURROGATES_DIR = HPOB_TASK_DATA_DIR / "saved-surrogates"
 
 HPOB_SEARCH_SPACE_DIMS = {
     "151": 1,
@@ -214,7 +218,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         self,
         dataset_id: str | int,
         model_id: str | int,
-        surrogates_dir: Path = Path("carps/benchmark_data/HPO-B/saved-surrogates"),
+        surrogates_dir: Path = HPOB_SURROGATES_DIR,
         seed: int = 1,
         loggers: list[AbstractLogger] | None = None,
     ):
