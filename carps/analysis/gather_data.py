@@ -734,6 +734,22 @@ def load_logs(rundir: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     return df, df_cfg
 
 
+def rename_legacy(logs: pd.DataFrame) -> pd.DataFrame:
+    """Rename legacy columns.
+
+    Args:
+        logs (pd.DataFrame): Logs.
+
+    Returns:
+        pd.DataFrame: Logs with renamed columns.
+    """
+    columns = {
+        "problem_id": "task_id",
+        "scenario": "task_type",
+    }
+    return logs.rename(columns=columns)
+
+
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
 def filelogs_to_df(
     rundir: str | list[str], log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
