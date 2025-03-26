@@ -1,6 +1,6 @@
 # This includes an upgrade to the new ConfigSpace
 # pip install yahpo-gym
-git clone https://github.com/benjamc/yahpo_gym.git lib/yahpo_gym
+git clone https://github.com/automl/yahpo_gym.git lib/yahpo_gym
 pip install -e lib/yahpo_gym/yahpo_gym
 mkdir carps/benchmark_data
 cd carps/benchmark_data

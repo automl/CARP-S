@@ -19,7 +19,7 @@ else
 fi
 
 # Install yahpo-gym
-git clone https://github.com/benjamc/yahpo_gym.git lib/yahpo_gym
+git clone https://github.com/automl/yahpo_gym.git lib/yahpo_gym
 $CONDA_RUN_COMMAND $PIP install -e lib/yahpo_gym/yahpo_gym
 
 # Get task data
