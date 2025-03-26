@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
 
+def fix_legacy_task_id(task_id: str) -> str:
+    task_id = "bbob/" + task_id if task_id.startswith("noiseless") else task_id
+    return task_id.replace("noiseless/", "").replace("bb/tab/", "blackbox/tabular/")
 
 def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str) -> None:
     config_target_path = Path("carps/configs/task/subselection") / scenario
@@ -14,8 +17,7 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
 
     def write_subsets(subset_fn: str, identifier: str):
         subset = pd.read_csv(subset_fn)
-        subset["task_id"] = subset["problem_id"].apply(lambda x: "bbob/" + x if x.startswith("noiseless") else x)
-        subset["task_id"] = subset["task_id"].apply(lambda x: x.replace("noiseless/", "").replace("bb/tab/", "blackbox/tabular/"))
+        subset["task_id"] = subset["problem_id"].apply(fix_legacy_task_id)
         subset_size = len(subset)
         task_ids = subset["task_id"].to_list()
 
