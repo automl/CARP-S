@@ -14,6 +14,7 @@ task:
       _target_: hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetAdultOnStepsBenchmark
       rng: ${seed}
     seed: ${seed}
+    metric: ${task.output_space.objectives}
   input_space:
     _target_: carps.utils.task.InputSpace
     configuration_space:
@@ -92,7 +93,7 @@ task:
     _target_: carps.utils.task.OutputSpace
     n_objectives: 1
     objectives:
-    - quality
+    - function_value
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 134

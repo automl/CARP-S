@@ -3,7 +3,7 @@ benchmark_id: HPOBench
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: hpobench/mf/real/ml/svm/168911/subsample
+  name: hpobench/multifidelity/real/ml/svm/168911/subsample
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
@@ -12,6 +12,7 @@ task:
     budget_type: subsample
     benchmark_client: null
     seed: ${seed}
+    metric: ${task.output_space.objectives}
   input_space:
     _target_: carps.utils.task.InputSpace
     configuration_space:
@@ -48,7 +49,7 @@ task:
     _target_: carps.utils.task.OutputSpace
     n_objectives: 1
     objectives:
-    - quality
+    - function_value
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 77
