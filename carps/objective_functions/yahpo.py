@@ -121,7 +121,7 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         #         ^^^^^^^^^^^^^
         #     AttributeError: 'NoneType' object has no attribute 'update'
         # Which occurs when having several instances of the same benchmark
-        self._objective_function = BenchmarkSet(scenario=bench, instance=self.instance, check=False, multithread=False)
+        self._objective_function = BenchmarkSet(scenario=bench, instance=self.instance, check=True, multithread=False)
         self._configspace = self._objective_function.get_opt_space(drop_fidelity_params=True, seed=seed)
         self.fidelity_space = self._objective_function.get_fidelity_space()
         self.fidelity_dims = list(self._objective_function.get_fidelity_space().keys())
