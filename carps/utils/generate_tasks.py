@@ -38,6 +38,7 @@ def get_dict_input_space(input_space: InputSpace) -> dict[str, Any]:
         "_target_": get_target_name(input_space),
         "configuration_space": {
             "_target_": "ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict",
+            "_convert_": "object",
             "d": input_space.configuration_space.to_serialized_dict(),
         },
         "fidelity_space": {
