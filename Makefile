@@ -76,23 +76,8 @@ uvenv:
 	. carpsenv/bin/activate
 	uv pip install setuptools wheel
 
-install-swig:
-	@if [ "$(OS)" = "Darwin" ]; then \
-		echo "Detected macOS: Installing SWIG via Homebrew"; \
-		brew install swig; \
-	elif [ "$(OS)" = "Linux" ]; then \
-		echo "Detected Linux: Installing SWIG via APT"; \
-		# sudo apt update && sudo apt install -y swig; \
-		uv pip install swig; \
-	elif [ "$(OS)" = "Windows_NT" ]; then \
-		echo "Detected Windows: Installing SWIG via Chocolatey"; \
-		choco install swig -y; \
-	else \
-		echo "Unsupported OS: Please install SWIG manually."; \
-	fi
-
 optimizer_smac:
-	$(MAKE) install-swig
+	$(PIP) install swig
 	$(PIP) install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
 
 optimizer_optuna:
