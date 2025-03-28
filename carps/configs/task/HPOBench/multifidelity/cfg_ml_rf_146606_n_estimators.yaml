@@ -17,6 +17,7 @@ task:
     _target_: carps.utils.task.InputSpace
     configuration_space:
       _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
       d:
         name: null
         hyperparameters:
