@@ -1,38 +1,116 @@
 # @package _global_
-scenario: multiobjective
+task_type: multi-objective
 subset_id: test
 benchmark_id: YAHPO
-task_id: multiobjective/10/test/yahpo/mo/lcbench/189873/None
-problem:
-  _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
-  bench: lcbench
-  instance: '189873'
-  budget_type: null
-  metric:
-  - val_accuracy
-  - val_cross_entropy
+task_id: multi-objective/50/test/yahpo/mo/lcbench/189873/None
 task:
-  n_trials: 126
-  time_budget: null
-  n_workers: 1
-  n_objectives: 2
-  objectives:
-  - val_accuracy
-  - val_cross_entropy
-  is_multifidelity: false
-  fidelity_type: null
-  min_fidelity: null
-  max_fidelity: null
-  has_constraints: false
-  domain: ML
-  objective_function_approximation: surrogate
-  has_virtual_time: true
-  deterministic: true
-  dimensions: 7
-  search_space_n_categoricals: 0
-  search_space_n_ordinals: 0
-  search_space_n_integers: 3
-  search_space_n_floats: 4
-  search_space_has_conditionals: false
-  search_space_has_forbiddens: false
-  search_space_has_priors: false
+  _target_: carps.utils.task.Task
+  name: yahpo/mo/lcbench/189873/None
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: lcbench
+    instance: '189873'
+    budget_type: null
+    metric:
+    - val_accuracy
+    - val_cross_entropy
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: constant
+          name: OpenML_task_id
+          value: '189873'
+          meta: null
+        - type: uniform_int
+          name: batch_size
+          lower: 16
+          upper: 512
+          default_value: 91
+          log: true
+          meta: null
+        - type: uniform_float
+          name: learning_rate
+          lower: 0.0001
+          upper: 0.1
+          default_value: 0.0031622777
+          log: true
+          meta: null
+        - type: uniform_float
+          name: max_dropout
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_int
+          name: max_units
+          lower: 64
+          upper: 1024
+          default_value: 256
+          log: true
+          meta: null
+        - type: uniform_float
+          name: momentum
+          lower: 0.1
+          upper: 0.99
+          default_value: 0.545
+          log: false
+          meta: null
+        - type: uniform_int
+          name: num_layers
+          lower: 1
+          upper: 5
+          default_value: 3
+          log: false
+          meta: null
+        - type: uniform_float
+          name: weight_decay
+          lower: 1.0e-05
+          upper: 0.1
+          default_value: 0.050005
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 2
+    objectives:
+    - val_accuracy
+    - val_cross_entropy
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 126
+    time_budget: 126
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 7
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 3
+    search_space_n_floats: 4
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
