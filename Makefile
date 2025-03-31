@@ -106,6 +106,7 @@ optimizer_hebo:
 optimizer_nevergrad:
 	$(PIP) install -r container_recipes/optimizers/Nevergrad/Nevergrad_requirements.txt
 	$(PIP) install numpy --upgrade
+	$(PIP) install cma --upgrade
 
 benchmark_bbob:
 	# Install BBOB
