@@ -45,6 +45,7 @@ class HPOBenchObjectiveFunction(ObjectiveFunction):
         ----------
         model : str | None, Model name.
         task_id : str Task ID, see https://arxiv.org/pdf/2109.06716.pdf, page 22.
+        metric : str | list[str], Metric to optimize.
         benchmark_client : AbstractBenchmarkClient
             Instantiated benchmark/objective function, e.g.
             `hpobench.container.benchmarks.surrogates.paramnet_benchmark.ParamNetAdultOnStepsBenchmark`.
