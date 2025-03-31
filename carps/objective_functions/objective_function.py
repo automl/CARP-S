@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import asdict
 from typing import TYPE_CHECKING
 
+from ConfigSpace.util import deactivate_inactive_hyperparameters
+
+from carps.utils.trials import TrialInfo
+
 if TYPE_CHECKING:
-    from ConfigSpace import ConfigurationSpace
+    from ConfigSpace import Configuration, ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
-    from carps.utils.trials import TrialInfo, TrialValue
+    from carps.utils.trials import TrialValue
 
 
 class ObjectiveFunction(ABC):
@@ -81,6 +86,25 @@ class ObjectiveFunction(ABC):
         """
         raise NotImplementedError
 
+    def _make_config_valid(self, trial_info: TrialInfo) -> TrialInfo:
+        """Make configuration valid.
+
+        Some optimizers cannot handle conditional search spaces and thus propose configurations with values for
+        inactive hyperparameters (HPs). Deactivate those to obtain a valid configuration
+        for conditional search spaces.
+
+        Args:
+            trial_info (TrialInfo): Trial information.
+
+        Returns:
+            TrialInfo: Updated trial information with a valid configuration.
+        """
+        config: Configuration = trial_info.config
+        config = deactivate_inactive_hyperparameters(configuration=dict(config), configuration_space=self.configspace)
+        trial_info_dict = asdict(trial_info)
+        trial_info_dict["config"] = config
+        return TrialInfo(**trial_info_dict)
+
     def evaluate(self, trial_info: TrialInfo) -> TrialValue:
         """Evaluate objective function.
 
@@ -100,6 +124,8 @@ class ObjectiveFunction(ABC):
                 - endtime : float, defaults to 0.0
                 - additional_info : dict[str, Any], defaults to {}
         """
+        trial_info = self._make_config_valid(trial_info=trial_info)
+
         trial_value = self._evaluate(trial_info=trial_info)
         self.n_function_calls += 1
         if trial_info.normalized_budget is not None:

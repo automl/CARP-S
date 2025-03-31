@@ -264,7 +264,10 @@ class NevergradOptimizer(Optimizer):
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
             trial_infos = [
-                self.convert_to_trial(config=Configuration(self.configspace, values=config.value)) for config in configs
+                self.convert_to_trial(
+                    config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True)
+                )
+                for config in configs
             ]
             trial_values = [TrialValue(cost=cost) for cost in costs]
             incumbent_tuple = list(zip(trial_infos, trial_values, strict=False))
