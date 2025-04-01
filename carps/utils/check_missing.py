@@ -82,7 +82,7 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     """
     logger.info(f"Regenerate commands for {runstatus.name} runs...")
     data = missing_data
-    missing = data[data["status"].isin([runstatus.name])]
+    missing = data[data["status"].isin([runstatus])]
     runcommands = []
     for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
         seeds = list(gdf["seed"].unique())
