@@ -66,12 +66,14 @@ def main(cfg: DictConfig) -> None:
             "config": cfg_str,
             "config_hash": cfg_hash,
             "benchmark_id": cfg_dict["benchmark_id"],
+            "subset_id": cfg_dict["subset_id"],
+            "task_type": cfg_dict["task_type"],
             "task_id": cfg_dict["task_id"],
             "optimizer_id": cfg_dict["optimizer_id"],
             "optimizer_container_id": cfg_dict["optimizer_container_id"],
             "seed": cfg_dict["seed"],
-            "n_trials": cfg_dict["task"]["n_trials"],
-            "time_budget": cfg_dict["task"]["time_budget"],
+            "n_trials": cfg_dict["task"]["optimization_resources"]["n_trials"],
+            "time_budget": cfg_dict["task"]["optimization_resources"]["time_budget"],
         }
     ]
 
