@@ -15,6 +15,10 @@ PY_EXPERIMENTER:
         benchmark_id:
           type: VARCHAR(50)
         task_id:
+          type: VARCHAR(250)
+        subset_id:
+          type: VARCHAR(50)
+        task_type:
           type: VARCHAR(50)
         optimizer_id:
           type: VARCHAR(50)
