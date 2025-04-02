@@ -49,10 +49,10 @@ def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor
 def main() -> None:
     """Excecute next experiment from PyExperimenter database."""
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
+    experiment_configuration_file_path = "carps/experimenter/py_experimenter.yaml"
 
-    if Path("carps/container/credentials.yaml").exists():
-        database_credential_file_path = "carps/container/credentials.yaml"
+    if Path("carps/experimenter/credentials.yaml").exists():
+        database_credential_file_path = "carps/experimenter/credentials.yaml"
     else:
         database_credential_file_path = None
 

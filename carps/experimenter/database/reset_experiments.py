@@ -21,11 +21,12 @@ def main(
         database_credential_file_path (str | Path, optional): Path to the database credential file. Defaults to None.
     """
     experiment_configuration_file_path = (
-        pyexperimenter_configuration_file_path or Path(__file__).parent.parent.parent / "container/py_experimenter.yaml"
+        pyexperimenter_configuration_file_path
+        or Path(__file__).parent.parent.parent / "experimenter/py_experimenter.yaml"
     )
 
     database_credential_file_path = (
-        database_credential_file_path or Path(__file__).parent.parent.parent / "container/credentials.yaml"
+        database_credential_file_path or Path(__file__).parent.parent.parent / "experimenter/credentials.yaml"
     )
     if database_credential_file_path is not None and not Path(database_credential_file_path).exists():
         database_credential_file_path = None

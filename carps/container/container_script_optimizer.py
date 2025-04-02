@@ -43,11 +43,11 @@ if (job_id := os.environ["BENCHMARKING_JOB_ID"]) != "":
     cfg = OmegaConf.load(f"{job_id}_hydra_config.yaml")
 
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
+    experiment_configuration_file_path = "carps/experimenter/py_experimenter.yaml"
 
     kwargs = {}
-    if Path("carps/container/credentials.yaml").exists():
-        database_credential_file = "carps/container/credentials.yaml"
+    if Path("carps/experimenter/credentials.yaml").exists():
+        database_credential_file = "carps/experimenter/credentials.yaml"
         kwargs["database_credential_file"] = database_credential_file
 
     experimenter = PyExperimenter(

@@ -6,7 +6,7 @@ logging experiment results and trajectories.
 Either SQLite or MySQL can be used as database, which has some slight differences. 
 Using SQLite is straightforward; you get a local database file but
 parallel execution is not efficient at all. You configure the used database in the 
-`carps/container/py_experimenter.yaml` file by changing the `provider` to `mysql` or 
+`carps/experimenter/py_experimenter.yaml` file by changing the `provider` to `mysql` or 
 `sqlite`. 
 
 In any case, before you can start any jobs, the jobs need to be dispatched to the database.
@@ -27,10 +27,10 @@ If you want to use a personal/local MySQL database, follow these steps:
 2. Create database via `mysql> CREATE DATABASE carps;`
     Select password as authentification.
     Per default, the database name is `carps`.
-    It is set in `carps/container/py_experimenter.yaml`.
+    It is set in `carps/experimenter/py_experimenter.yaml`.
 
 
-3. Add credential file at `carps/container/credentials.yaml`, e.g.
+3. Add credential file at `carps/experimenter/credentials.yaml`, e.g.
 ```yaml
 CREDENTIALS:
   Database:
@@ -42,5 +42,5 @@ CREDENTIALS:
 ```
 
 
-4. Set flag not to use ssh server in `carps/container/py_experimenter.yaml` if you are on your local machine.
+4. Set flag not to use ssh server in `carps/experimenter/py_experimenter.yaml` if you are on your local machine.
 

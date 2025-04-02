@@ -150,7 +150,7 @@ runsold
 /.idea/.gitignore
 /.codecarbon.config
 
-/carps/container/credentials.yaml
+/carps/experimenter/credentials.yaml
 carps.db
 *.jsonl
 *.sif
