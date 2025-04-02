@@ -16,6 +16,21 @@ from carps.utils.loggingutils import CustomEncoder
 
 logger = logging.getLogger("create experiments")
 
+# TODO make experiment_configuration_file_path and database_credential_file_path a commandline arg
+experiment_configuration_file_path = Path(__file__).parent / "py_experimenter.yaml"
+
+database_credential_file_path = Path(__file__).parent / "credentials.yaml"
+if database_credential_file_path is not None and not database_credential_file_path.exists():
+    database_credential_file_path = None  # type: ignore[assignment]
+
+experimenter = PyExperimenter(
+    experiment_configuration_file_path=experiment_configuration_file_path,
+    name="carps",
+    database_credential_file_path=database_credential_file_path,
+    log_level=logging.INFO,
+    use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
+)
+
 
 @hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
@@ -28,22 +43,6 @@ def main(cfg: DictConfig) -> None:
 
     """
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
-
-    experiment_configuration_file_path = (
-        cfg.pyexperimenter_configuration_file_path or Path(__file__).parent / "py_experimenter.yaml"
-    )
-
-    database_credential_file_path = cfg.database_credential_file_path or Path(__file__).parent / "credentials.yaml"
-    if database_credential_file_path is not None and not database_credential_file_path.exists():
-        database_credential_file_path = None
-
-    experimenter = PyExperimenter(
-        experiment_configuration_file_path=experiment_configuration_file_path,
-        name="carps",
-        database_credential_file_path=database_credential_file_path,
-        log_level=logging.INFO,
-        use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
-    )
 
     cfg_json = OmegaConf.to_container(cfg, resolve=True)
 
@@ -97,7 +96,9 @@ def main(cfg: DictConfig) -> None:
             raise e
 
     if not exists:
+        # experimenter.db_connector.start_ssh_tunnel()
         experimenter.fill_table_with_rows(rows)
+    # experimenter.close_ssh()
 
 
 if __name__ == "__main__":

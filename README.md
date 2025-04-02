@@ -152,22 +152,89 @@ The csv files are then located in `<rundir>`. `logs.csv` contain the trial info 
 `logs_cfg.csv` contain the experiment  configuration.
 The experiments can be matched via the column `experiment_id`.
 
+## CARPS and MySQL Database
+Per default, `carps` logs to files. This has its caveats: Checking experiment status is a bit more cumbersome (but 
+possible with `python -m carps.utils.check_missing <rundir>` to check for missing/failed experiments) and reading from
+the filesystem takes a long time. For this reason, we can also control and log experiments to a MySQL database with
+`PyExperimenter`.
+
+### Requirements and Configuration
+Requirement: MySQL database is set up.
+
+1. Add a `credentials.yaml` file in `carps/container` with the following content:
+```yaml
+CREDENTIALS:
+  Database:
+      user: someuser
+      password: amazing_password
+  Connection:
+      Standard:
+        server: mysql_server
+        port: 3306 (most likely)
+```
+2. Edit `carps/container/py_experimenter.yaml` by setting:
+```yaml
+PY_EXPERIMENTER:
+  n_jobs: 1
+
+  Database:
+    use_ssh_tunnel: false
+    provider: mysql
+    database: your_database_name
+...
+```
+!!! Note: If you use an ssh tunnel, set `use_ssh_tunnel` to `true` in `carps/container/py_experimenter.yaml`.
+Set up  `carps/container/credentials.yaml` like this:
+```yaml
+CREDENTIALS:
+  Database:
+      user: someuser
+      password: amazing_password
+  Connection:
+      Standard:
+        server: mysql_server
+        port: 3306 (most likely)
+      Ssh:
+        server: 127.0.0.1
+        address: some_host  # hostname as specified in ~/.ssh/config
+        # ssh_private_key_password: null
+        # server: example.sshmysqlserver.com (address from ssh server)
+        # address: example.sslserver.com
+        # port: optional_ssh_port
+        # remote_address: optional_mysql_server_address
+        # remote_port: optional_mysql_server_port
+        # local_address: optional_local_address
+        # local_port: optional_local_port
+        # passphrase: optional_ssh_passphrase
+```
+### Create Experiments
+First, in order for PyExperimenter to be able to pull experiments from the database, we need to fill it.
+The general command looks like this:
+```bash
+python -m carps.container.create_cluster_configs +task=... +optimizer=... -m
+```
+All subset runs were created with `scripts/create_experiments_in_db.sh`.
+
+### Running Experiments
+Now, execute experiments with:
+```bash
+python run_from_db.py 'job_nr_dummy=range(1,1000)' -m
+```
+This will create 1000 multirun jobs, each pulling an experiment from PyExperimenter and executing it.
+
+!!! Note: On most slurm clusters the max array size is 1000.
+!!! Note: On our mysql server location, at most 300 connections at the same time are possible. You can limit your number
+    of parallel jobs with `hydra.launcher.array_parallelism=250`.
+!!! `carps/configs/runfromdb.yaml` configures the run and its resources. Currently defaults for our slurm cluster are
+    configured. If you run on a different cluster, adapt `hydra.launcher`.
+
 Experiments with error status (or any other status) can be reset via:
 ```bash
 python -m carps.utils.database.reset_experiments
 ```
 
-### Running with Containers and Database
-Another option is to fill the database with all possible combinations of tasks and optimizers
-you would like to run:
-```bash
-python -m carps.container.create_cluster_configs +task=... +optimizer=... -m
-```
+### Get the results from the database and post-process
 
-Then, run them from the database with:
-```bash
-python -m carps.run_from_db 
-```
 
 ## Adding a new Optimizer or Benchmark
 For instructions on how to add a new optimizer or benchmark, please refer to the contributing 
