@@ -162,7 +162,8 @@ def calc_critical_difference(
     identifier: str | None = None,
     figsize: tuple[int | float, int | float] = (12, 8),
     perf_col: str = "trial_value__cost_inc_norm",
-    plot_diagram: bool = True,  # noqa: FBT001, FBT002
+    plot_diagram: bool = True,  # noqa: FBT001, FBT002,
+    calc_df_crit: bool = True,  # noqa: FBT001, FBT002
 ) -> RankResult:
     """Calculate the critical difference.
 
@@ -172,11 +173,13 @@ def calc_critical_difference(
         figsize (tuple[int | float, int | float], optional): Figure size. Defaults to (12, 8).
         perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc_norm".
         plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
+        calc_df_crit (bool, optional): Whether to calculate the df_crit (averaging over seeds). Defaults to True. If
+            False, df is used as is.
 
     Returns:
         RankResult: The rank result.
     """
-    df_crit = get_df_crit(df, perf_col=perf_col)
+    df_crit = get_df_crit(df, perf_col=perf_col) if calc_df_crit else df
 
     # result = autorank(df_crit, alpha=0.05, verbose=True)
     # create_report(result)
