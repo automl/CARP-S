@@ -59,7 +59,7 @@ def get_run_dirs(outdir: str) -> list[Path]:
         triallog_files = pool.map(glob_trial_logs, opt_paths)
     if len(triallog_files) == 0:
         raise ValueError("No trial logs found.")
-    return [f.parent for f in triallog_files]  # type: ignore[attr-defined]
+    return [f.parent for f in np.concatenate(triallog_files)]  # type: ignore[attr-defined]
 
 
 def annotate_with_cfg(
@@ -312,23 +312,25 @@ def add_task_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFram
     """
 
     def determine_task_type(x: pd.Series) -> str:
-        if x[task_prefix + "is_multifidelity"] is False and x[task_prefix + "is_multiobjective"] is False:
+        get_mf = x.get(task_prefix + "is_multifidelity", False)
+        get_mo = x.get(task_prefix + "is_multiobjective", False)
+        if get_mf is False and get_mo is False:
             task_type = "blackbox"
-        elif x[task_prefix + "is_multifidelity"] is True and x[task_prefix + "is_multiobjective"] is False:
+        elif get_mf is True and get_mo is False:
             task_type = "multi-fidelity"
-        elif x[task_prefix + "is_multifidelity"] is False and x[task_prefix + "is_multiobjective"] is True:
+        elif get_mf is False and get_mo is True:
             task_type = "multi-objective"
-        elif x[task_prefix + "is_multifidelity"] is True and x[task_prefix + "is_multiobjective"] is True:
+        elif get_mf is True and get_mo is True:
             task_type = "multi-fidelity-objective"
-        elif np.isnan(x[task_prefix + "is_multifidelity"]) or np.isnan(x[task_prefix + "is_multiobjective"]):
+        elif np.isnan(get_mf) or np.isnan(get_mo):
             task_type = "blackbox"
         else:
             print(
                 x["task_id"],
                 x["optimizer_id"],
                 x["seed"],
-                x[task_prefix + "is_multifidelity"],
-                type(x[task_prefix + "is_multifidelity"]),
+                get_mf,
+                type(get_mf),
             )
             raise ValueError("Unknown task_type")
         return task_type
@@ -380,7 +382,7 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
             key = c.split(".")[1]
             # print(task_cfg, c)
             # print(gdf[c].explode().unique())
-            if overwrite or np.nan in gdf[c].explode().unique():
+            if overwrite or gdf[c].explode().isna().any():
                 v = task_cfg.get(key)
                 if isinstance(v, list | ListConfig):
                     v = [v] * len(gdf)
@@ -394,15 +396,15 @@ def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] | None = N
 
     Args:
         logs (pd.DataFrame): Logs.
-        keep_task_columns (list[str] | None, optional): Columns to keep. Defaults to None -> keep only `n_trials`.
+        keep_task_columns (list[str] | None, optional): Columns to keep. Defaults to None -> keep only `task.optimization_resources.n_trials`.
 
     Returns:
         pd.DataFrame: Filtered logs.
     """
     if keep_task_columns is None:
-        keep_task_columns = ["n_trials"]
+        keep_task_columns = ["task.optimization_resources.n_trials"]
     keep_task_columns = [f"task.{c}" for c in keep_task_columns]
-    task_cols_to_remove = [c for c in logs.columns if c.startswith("task") and c not in keep_task_columns]
+    task_cols_to_remove = [c for c in logs.columns if c.startswith("task.") and c not in keep_task_columns]
     return logs.drop(columns=task_cols_to_remove)
 
 
