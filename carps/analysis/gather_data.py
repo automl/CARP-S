@@ -396,7 +396,8 @@ def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] | None = N
 
     Args:
         logs (pd.DataFrame): Logs.
-        keep_task_columns (list[str] | None, optional): Columns to keep. Defaults to None -> keep only `task.optimization_resources.n_trials`.
+        keep_task_columns (list[str] | None, optional): Columns to keep. Defaults to None -> keep only
+        `task.optimization_resources.n_trials`.
 
     Returns:
         pd.DataFrame: Filtered logs.
