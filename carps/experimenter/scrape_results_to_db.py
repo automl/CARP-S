@@ -40,23 +40,41 @@ experimenter = PyExperimenter(
 )
 
 
-def str_to_val(s: str, type: str) -> None | int | float | str:
-    """Convert string to given type or None.
+def str_to_int(s: str) -> None | int:
+    """Convert string to int or None.
 
     Parameters
     ----------
     s : str
         Input string
-    type : str
-        Type to convert to
     """
     if s == "None":
         return None
-    if type == "int":
-        return int(s)
-    if type == "float":
-        return float(s)
-    return s
+    return int(s)
+
+
+def str_to_float(s: str) -> None | float:
+    """Convert string to float or None.
+
+    Parameters
+    ----------
+    s : str
+        Input string
+    """
+    if s == "None":
+        return None
+    return float(s)
+
+
+def none_if_str_none(s: str) -> None | str:
+    """Converts a string "None" to Python None if applicable.
+
+    Parameters
+    ----------
+    s : str
+        Input string
+    """
+    return None if s == "None" else s
 
 
 def get_value(column_names: list[str], cfg_hash: str, column: str) -> Any:
@@ -91,14 +109,18 @@ def main(rundir: str | list[str]) -> None:
         rundir = [rundir]
     rundirs_list = rundir
 
-    for dir in rundirs_list:
-        logger.info(f"Get rundirs from {dir}...")
-        rundirs = get_run_dirs(dir)
+    for rundir_path in rundirs_list:
+        logger.info(f"Get rundirs from {rundir_path}...")
+        rundirs = get_run_dirs(rundir_path)
         logger.info(f"Found {len(rundirs)} runs. Scraping data...")
 
-        for rundir in rundirs:
+        for run_dir in rundirs:
             # Load configs to DB
-            cfg = load_cfg(rundir)
+            cfg = load_cfg(run_dir)
+
+            if not cfg:
+                raise RuntimeError(f"Config not found at {run_dir}")
+
             carps.experimenter.create_cluster_configs.main(cfg)
 
             cfg_json = OmegaConf.to_container(cfg, resolve=True)
@@ -138,8 +160,8 @@ def main(rundir: str | list[str]) -> None:
             )
 
             db_logger = DatabaseLogger(result_processor=result_processor)
-            log = load_log(rundir)
-            inc = load_log(rundir, "trajectory_logs.jsonl")
+            log = load_log(run_dir)
+            inc = load_log(run_dir, "trajectory_logs.jsonl")
 
             configspace = instantiate(cfg.task.input_space.configuration_space)
 
@@ -150,22 +172,24 @@ def main(rundir: str | list[str]) -> None:
                     configuration_space=configspace,
                     values={x: ast.literal_eval(row.trial_info__config)[i] for i, x in enumerate(configspace)},
                 )
+
+                # Type checks are performed here because values may be "None", which isn't interpreted as null by the DB
                 info = TrialInfo(
                     config,
-                    str_to_val(row.trial_info__instance, "int"),
-                    str_to_val(row.trial_info__seed, "int"),
-                    str_to_val(row.trial_info__budget, "float"),
-                    str_to_val(row.trial_info__normalized_budget, "float"),
-                    str_to_val(row.trial_info__name, "str"),
-                    str_to_val(row.trial_info__checkpoint, "str"),
+                    str_to_int(row.trial_info__instance),
+                    str_to_int(row.trial_info__seed),
+                    str_to_float(row.trial_info__budget),
+                    str_to_float(row.trial_info__normalized_budget),
+                    none_if_str_none(row.trial_info__name),
+                    none_if_str_none(row.trial_info__checkpoint),
                 )
                 value = TrialValue(
-                    str_to_val(row.trial_value__cost, "str"),
-                    str_to_val(row.trial_value__time, "float"),
-                    str_to_val(row.trial_value__virtual_time, "float"),
+                    row.trial_value__cost,
+                    row.trial_value__time,
+                    row.trial_value__virtual_time,
                     StatusType(row.trial_value__status),
-                    str_to_val(row.trial_value__starttime, "float"),
-                    str_to_val(row.trial_value__endtime, "float"),
+                    row.trial_value__starttime,
+                    row.trial_value__endtime,
                 )
                 db_logger.log_trial(row.n_trials, info, value, row.n_function_calls)
 
@@ -176,20 +200,20 @@ def main(rundir: str | list[str]) -> None:
                 )
                 info = TrialInfo(
                     config,
-                    str_to_val(row.trial_info__instance, "int"),
-                    str_to_val(row.trial_info__seed, "int"),
-                    str_to_val(row.trial_info__budget, "float"),
-                    str_to_val(row.trial_info__normalized_budget, "float"),
-                    str_to_val(row.trial_info__name, "str"),
-                    str_to_val(row.trial_info__checkpoint, "str"),
+                    str_to_int(row.trial_info__instance),
+                    str_to_int(row.trial_info__seed),
+                    str_to_float(row.trial_info__budget),
+                    str_to_float(row.trial_info__normalized_budget),
+                    none_if_str_none(row.trial_info__name),
+                    none_if_str_none(row.trial_info__checkpoint),
                 )
                 value = TrialValue(
-                    str_to_val(row.trial_value__cost, "str"),
-                    str_to_val(row.trial_value__time, "float"),
-                    str_to_val(row.trial_value__virtual_time, "float"),
+                    row.trial_value__cost,
+                    row.trial_value__time,
+                    row.trial_value__virtual_time,
                     StatusType(row.trial_value__status),
-                    str_to_val(row.trial_value__starttime, "float"),
-                    str_to_val(row.trial_value__endtime, "float"),
+                    row.trial_value__starttime,
+                    row.trial_value__endtime,
                 )
                 db_logger.log_incumbent(row.n_trials, (info, value))
     logger.info("Done scraping")
