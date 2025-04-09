@@ -955,9 +955,10 @@ int main(int argc, char **argv)
   fp=fopen(argv[5],"w");
   fprintf(fp, "n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n",npoints,kpoints,dim,upper,cput);
   for (i=0; i<kpoints;i++){
-	  for (j=0;j<dim;j++){
+	  for (j=0;j<(dim-1);j++){
 		  fprintf(fp,"%.18e ",optiset[i][j]);
 	  }
+	  fprintf(fp,"%.18e",optiset[i][dim-1]);
 	  fprintf(fp,"\n");
   }
   fclose(fp);
