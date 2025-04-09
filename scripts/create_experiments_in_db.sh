@@ -14,7 +14,6 @@ BB_OPTIMIZERS=(
     "+optimizer/synetune=BO"
     "+optimizer/synetune=BORE"
     "+optimizer/synetune=KDE"
-    "+optimizer/synetune=BO_RS"
     "+optimizer/synetune=MOREA"
     "+optimizer/scikit_optimize=BO_GP_EI"
     "+optimizer/scikit_optimize=BO_GP_LCB"
@@ -24,8 +23,8 @@ BB_OPTIMIZERS=(
 
 for OPT in "${BB_OPTIMIZERS[@]}"; do
     echo $OPT
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/blackbox/dev=glob(*)' 'seed=range(1,21)' -m 
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/blackbox/test=glob(*)' 'seed=range(1,21)' -m 
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/blackbox/dev=glob(*)' 'seed=range(1,21)' -m 
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/blackbox/test=glob(*)' 'seed=range(1,21)' -m 
 done
 
 # MULTIFIDELITY
@@ -39,17 +38,17 @@ MF_OPTIMIZERS=(
 )
 for OPT in "${MF_OPTIMIZERS[@]}"; do
     echo $OPT
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/multifidelity/dev=glob(*)' 'seed=range(1,21)' -m 
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/multifidelity/test=glob(*)' 'seed=range(1,21)' -m 
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/multifidelity/dev=glob(*)' 'seed=range(1,21)' -m 
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/multifidelity/test=glob(*)' 'seed=range(1,21)' -m 
 done
 
 
 
 # MULTI-OBJECTIVE
 MO_OPTIMIZERS=(
-    # "+optimizer/randomsearch=config"
-    # "+optimizer/nevergrad=cmaes"
-    # "+optimizer/nevergrad=DE"
+    "+optimizer/randomsearch=config"
+    "+optimizer/nevergrad=cmaes"
+    "+optimizer/nevergrad=DE"
     "+optimizer/nevergrad=ES"
     "+optimizer/optuna=MO_NSGAII"
     "+optimizer/optuna=MO_TPE"
@@ -63,8 +62,8 @@ MO_OPTIMIZERS=(
 for OPT in "${MO_OPTIMIZERS[@]}"; do
     echo $OPT
 
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/multiobjective/dev=glob(*)' 'seed=range(1,21)' -m
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/multiobjective/test=glob(*)' 'seed=range(1,21)' -m
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/multiobjective/dev=glob(*)' 'seed=range(1,21)' -m
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/multiobjective/test=glob(*)' 'seed=range(1,21)' -m
 done
 
 
@@ -78,6 +77,6 @@ MOMF_OPTIMIZERS=(
 for OPT in "${MOMF_OPTIMIZERS[@]}"; do
     echo $OPT
 
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/multifidelityobjective/dev=glob(*)' 'seed=range(1,21)' -m
-    python -m carps.container.create_cluster_configs +cluster=local $OPT '+task/subselection/multifidelityobjective/test=glob(*)' 'seed=range(1,21)' -m
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/multifidelityobjective/dev=glob(*)' 'seed=range(1,21)' -m
+    python -m carps.experimenter.create_cluster_configs +cluster=local hydra.launcher.n_jobs=32 $OPT '+task/subselection/multifidelityobjective/test=glob(*)' 'seed=range(1,21)' -m
 done
