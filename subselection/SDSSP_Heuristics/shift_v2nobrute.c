@@ -969,6 +969,7 @@ int main(int argc, char **argv)
 	{
 		tries = 50;
 	}
+	int counter_found_better = 0;
 	for (nb_tries = 0; nb_tries < tries; nb_tries++)
 	{
 		int rando1;
@@ -1020,14 +1021,10 @@ int main(int argc, char **argv)
 		cput = ((double)(end - start)) / CLOCKS_PER_SEC;
 		if (super_best > upper)
 		{
+			printf("super_best > upper");
 			super_best = upper;
 			FILE *fp; // Move our opti point set to a file
 			fp = fopen(argv[5], "w");
-			if (fp == NULL)
-			{
-				perror("Error opening file");
-				return 1; // Exit or handle the error as needed
-			}
 			fprintf(fp, "n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n", npoints, kpoints, dim, upper, cput);
 			printf("n=%d,k=%d,dim=%d, discrepancy=%lf, runtime=%lf\n", npoints, kpoints, dim, upper, cput);
 			for (i = 0; i < kpoints; i++)
@@ -1040,11 +1037,30 @@ int main(int argc, char **argv)
 				fprintf(fp, "\n");
 			}
 			fclose(fp);
+			counter_found_better++;
 		}
 
 		for (i = 0; i < kpoints; i++)
 			free(optiset[i]);
 		free(optiset);
+	}
+	if (counter_found_better == 0)
+	{
+		printf("No better point set than initial found\n");
+		// Save original pointset to outfile
+		FILE *fp; // Move our opti point set to a file
+		fp = fopen(argv[5], "w");
+		fprintf(fp, "n=%d,k=%d,dim=%d, discrepancy=%lf\n", npoints, kpoints, dim, upper);
+		for (i = 0; i < kpoints; i++)
+		{
+			for (j = 0; j < (dim - 1); j++)
+			{
+				fprintf(fp, "%.18e ", Orig_pointset[i][j]);
+			}
+			fprintf(fp, "%.18e", Orig_pointset[i][dim - 1]);
+			fprintf(fp, "\n");
+		}
+		fclose(fp);
 	}
 	fclose(pointfile);
 	for (i = 0; i < npoints; i++)
