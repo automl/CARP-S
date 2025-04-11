@@ -174,3 +174,4 @@ tmp*
 *.aux
 *.zip
 *.bak
+*output*
