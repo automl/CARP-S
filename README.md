@@ -161,7 +161,7 @@ the filesystem takes a long time. For this reason, we can also control and log e
 ### Requirements and Configuration
 Requirement: MySQL database is set up.
 
-1. Add a `credentials.yaml` file in `carps/container` with the following content:
+1. Add a `credentials.yaml` file in `carps/experimenter` with the following content:
 ```yaml
 CREDENTIALS:
   Database:
@@ -172,7 +172,7 @@ CREDENTIALS:
         server: mysql_server
         port: 3306 (most likely)
 ```
-2. Edit `carps/container/py_experimenter.yaml` by setting:
+2. Edit `carps/experimenter/py_experimenter.yaml` by setting:
 ```yaml
 PY_EXPERIMENTER:
   n_jobs: 1
@@ -183,8 +183,8 @@ PY_EXPERIMENTER:
     database: your_database_name
 ...
 ```
-!!! Note: If you use an ssh tunnel, set `use_ssh_tunnel` to `true` in `carps/container/py_experimenter.yaml`.
-Set up  `carps/container/credentials.yaml` like this:
+!!! Note: If you use an ssh tunnel, set `use_ssh_tunnel` to `true` in `carps/experimenter/py_experimenter.yaml`.
+Set up  `carps/experimenter/credentials.yaml` like this:
 ```yaml
 CREDENTIALS:
   Database:
@@ -211,7 +211,7 @@ CREDENTIALS:
 First, in order for PyExperimenter to be able to pull experiments from the database, we need to fill it.
 The general command looks like this:
 ```bash
-python -m carps.container.create_cluster_configs +task=... +optimizer=... -m
+python -m carps.experimenter.create_cluster_configs +task=... +optimizer=... -m
 ```
 All subset runs were created with `scripts/create_experiments_in_db.sh`.
 
