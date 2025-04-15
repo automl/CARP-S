@@ -66,6 +66,20 @@ def main(
                 " When done, reset those experiments with `python -m carps.experimenter.database.reset_experiments`."
             )
 
+    # Get error rows with error message
+    # Split into unknown errors and the typical yahpo error. The latter experiments can be easily reset and rerun.
+    table = experimenter.db_connector.get_table()
+    exclude_keys = ["config", "config_hash"]
+    error_status = "error"
+    error_rows = table[table["status"] == error_status]
+    error_rows = error_rows.drop(columns=exclude_keys)
+
+    yahpo_error_ids = error_rows["error"].str.contains("AttributeError: 'NoneType' object has no attribute 'update'")
+    error_rows_yahpo = error_rows[yahpo_error_ids]
+    error_rows_yahpo.to_csv("error_rows_yahpo.csv", index=False)  # type: ignore[attr-defined]
+    error_rows_nonyahpo = error_rows[~yahpo_error_ids]
+    error_rows_nonyahpo.to_csv("error_rows_nonyahpo.csv", index=False)  # type: ignore[attr-defined]
+
 
 if __name__ == "__main__":
     fire.Fire(main)
