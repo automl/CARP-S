@@ -181,8 +181,10 @@ class FileLogger(AbstractLogger):
             info_str = json.dumps(info, cls=CustomEncoder) + "\n"
             logger.debug(info_str)
         else:
-            info_str = f"n_trials: {info['n_trials']}, config: "
-            "{info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
+            info_str = (
+                f"n_trials: {info['n_trials']}, n_function_calls: {n_function_calls}, config: "
+                f"{info['trial_info']['config']}, cost: {info['trial_value']['cost']}"
+            )
             if info["trial_info"]["budget"] is not None:
                 info_str += f" budget: {info['trial_info']['budget']}"
             logger.info(info_str)
