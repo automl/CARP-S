@@ -10,7 +10,8 @@ task:
     bench: rbv2_svm
     instance: '188'
     budget_type: null
-    metric: acc
+    metric:
+    - acc
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
@@ -91,8 +92,9 @@ task:
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace
-    n_objectives: 3
-    objectives: acc
+    n_objectives: 1
+    objectives:
+    - acc
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 118

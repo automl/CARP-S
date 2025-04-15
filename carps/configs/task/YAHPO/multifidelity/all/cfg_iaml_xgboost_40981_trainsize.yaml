@@ -10,7 +10,8 @@ task:
     bench: iaml_xgboost
     instance: '40981'
     budget_type: trainsize
-    metric: f1
+    metric:
+    - f1
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
@@ -174,8 +175,9 @@ task:
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace
-    n_objectives: 2
-    objectives: f1
+    n_objectives: 1
+    objectives:
+    - f1
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 165
