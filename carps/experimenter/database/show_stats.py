@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import fire
@@ -74,11 +75,21 @@ def main(
     error_rows = table[table["status"] == error_status]
     error_rows = error_rows.drop(columns=exclude_keys)
 
-    yahpo_error_ids = error_rows["error"].str.contains("AttributeError: 'NoneType' object has no attribute 'update'")
-    error_rows_yahpo = error_rows[yahpo_error_ids]
-    error_rows_yahpo.to_csv("error_rows_yahpo.csv", index=False)  # type: ignore[attr-defined]
-    error_rows_nonyahpo = error_rows[~yahpo_error_ids]
-    error_rows_nonyahpo.to_csv("error_rows_nonyahpo.csv", index=False)  # type: ignore[attr-defined]
+    expected_errors = {
+        "yahpo_localconfig": "Exception('Could not load local_config! Please run LocalConfiguration.init_config() "
+        "and restart.')",
+        "yahpo_updatenone": "AttributeError: 'NoneType' object has no attribute 'update'",
+    }
+    known_error_ids = []
+    for error_id, error_msg in expected_errors.items():
+        error_ids = error_rows["error"].str.contains(error_msg)
+        error_rows[error_ids].to_csv(f"error_{error_id}.csv", index=False)
+        known_error_ids.append(error_ids)
+
+    unknown_error_ids = ~error_rows["error"].str.contains(
+        "|".join(re.escape(error) for error in expected_errors.values()), regex=True
+    )
+    error_rows[unknown_error_ids].to_csv("error_unknown.csv", index=False)
 
 
 if __name__ == "__main__":
