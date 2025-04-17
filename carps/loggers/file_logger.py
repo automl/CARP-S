@@ -118,8 +118,8 @@ def convert_trials(
 class FileLogger(AbstractLogger):
     """File logger."""
 
-    _filename: str = "trial_logs.jsonl"
-    _filename_trajectory: str = "trajectory_logs.jsonl"
+    _filename = "trial_logs.jsonl"
+    _trajectory_filename = "trajectory_logs.jsonl"
 
     def __init__(self, overwrite: bool = False, directory: str | Path | None = None) -> None:  # noqa: FBT001, FBT002
         """File logger.
@@ -157,7 +157,12 @@ class FileLogger(AbstractLogger):
                 )
 
     def log_trial(
-        self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+        self,
+        n_trials: float,
+        trial_info: TrialInfo,
+        trial_value: TrialValue,
+        n_function_calls: int | None = None,
+        filename: str | None = None,
     ) -> None:
         """Evaluate the task and log the trial.
 
@@ -175,8 +180,11 @@ class FileLogger(AbstractLogger):
             The trial value.
         n_function_calls: int | None, default None
             The number of target function calls, no matter the budget.
+        filename : str, default "trial_logs.jsonl"
+            The filename to log to.
         """
         info = convert_trials(n_trials, trial_info, trial_value, n_function_calls)
+        # TODO Create a separate console logger
         if logger.level >= logging.DEBUG:
             info_str = json.dumps(info, cls=CustomEncoder) + "\n"
             logger.debug(info_str)
@@ -189,17 +197,28 @@ class FileLogger(AbstractLogger):
                 info_str += f" budget: {info['trial_info']['budget']}"
             logger.info(info_str)
 
-        dump_logs(log_data=info, filename=self._filename, directory=self.directory)
+        filename = filename or self._filename
+        dump_logs(log_data=info, filename=filename, directory=self.directory)
 
-    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
-        """Log incumbent.
+    def log_incumbent(
+        self,
+        n_trials: int | float,
+        incumbent: Incumbent,
+        n_function_calls: int | None = None,
+        filename: str | None = None,
+    ) -> None:
+        """Log the incumbent.
 
         Parameters
         ----------
-        n_trials : int | float
-            Number of trials.
+        n_trials : int
+            The number of trials that have been run so far.
         incumbent : Incumbent
-            Incumbent(s) (best performing configuration(s)) to log.
+            The incumbent (best) configuration with associated cost.
+        n_function_calls: int | None, default None
+            The number of target function calls, no matter the budget.
+        filename : str, default "trajectory_logs.jsonl"
+            The filename to log to.
         """
         if incumbent is None:
             return
@@ -207,8 +226,9 @@ class FileLogger(AbstractLogger):
             incumbent = [incumbent]
 
         for inc in incumbent:
-            info = convert_trials(n_trials, inc[0], inc[1])
-            dump_logs(log_data=info, filename=self._filename_trajectory, directory=self.directory)
+            info = convert_trials(n_trials, inc[0], inc[1], n_function_calls=n_function_calls)
+            filename = filename or self._trajectory_filename
+            dump_logs(log_data=info, filename=filename, directory=self.directory)
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
         """Log arbitrary data.
