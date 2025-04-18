@@ -74,6 +74,8 @@ uvenv:
 	pip install uv
 	uv venv --python=3.12 carpsenv
 	. carpsenv/bin/activate
+	python -m ensurepip --upgrade
+	python -m pip install uv --upgrade
 	uv pip install setuptools wheel
 
 optimizer_smac:
