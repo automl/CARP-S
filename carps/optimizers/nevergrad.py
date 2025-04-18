@@ -18,6 +18,7 @@ import ConfigSpace.hyperparameters as CSH  # noqa: N812
 import nevergrad as ng
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
+from omegaconf import DictConfig, OmegaConf
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.trials import TrialInfo, TrialValue
@@ -28,7 +29,6 @@ if TYPE_CHECKING:
         Optimizer as NGOptimizer,
     )
     from nevergrad.parametrization import parameter  # type: ignore
-    from omegaconf import DictConfig
 
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
@@ -121,6 +121,10 @@ class NevergradOptimizer(Optimizer):
         self.optimizer_cfg = optimizer_cfg
         if self.optimizer_cfg is None:
             self.optimizer_cfg = {}
+        if isinstance(self.optimizer_cfg, DictConfig):
+            self.optimizer_cfg = OmegaConf.to_container(self.optimizer_cfg)
+        if "scale" in self.optimizer_cfg:
+            self.optimizer_cfg["scale"] = float(self.optimizer_cfg["scale"])
         if self.nevergrad_cfg.optimizer_name not in opt_list and self.nevergrad_cfg.optimizer_name not in ext_opts:
             raise ValueError(f"Optimizer {self.nevergrad_cfg.optimizer_name} not found in Nevergrad!")
 
