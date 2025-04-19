@@ -42,7 +42,7 @@ def get_all_config_files_in_paths(paths: list[str | Path]) -> list[Path]:
     all_files = []
     for path in paths:
         files = get_all_config_files_in_path(Path(path))
-        print(f"Found {len(files)} tasks in {path}")
+        print(f"Found {len(files)} tasks in {Path(path).resolve()}")
         all_files.extend(files)
     return all_files
 
@@ -74,7 +74,7 @@ def load_combination(optimizer_config_fn: Path, task_config_fn: Path, seed: int)
     Returns:
         DictConfig: Merged configuration.
     """
-    base_cfg = OmegaConf.load("../carps/configs/base.yaml")
+    base_cfg = OmegaConf.load("carps/configs/base.yaml")
 
     optimizer_config_fn = Path(optimizer_config_fn)
     optimizer_config_base = None
@@ -125,73 +125,72 @@ def check_existance_by_keys(experiment_definition: dict, existing_rows: list, id
 
 # OPTIMIZERS
 bb_optimizers = (
-    "../carps/configs/optimizer/randomsearch/config.yaml",
-    "../carps/configs/optimizer/Ax/config.yaml",
-    "../carps/configs/optimizer/hebo/config.yaml",
-    "../carps/configs/optimizer/nevergrad/bayesopt.yaml",
-    "../carps/configs/optimizer/nevergrad/Hyperopt.yaml",
-    "../carps/configs/optimizer/nevergrad/NoisyBandit.yaml",
-    "../carps/configs/optimizer/nevergrad/DE.yaml",
-    "../carps/configs/optimizer/nevergrad/ES.yaml",
-    "../carps/configs/optimizer/optuna/SO_TPE.yaml",
-    "../carps/configs/optimizer/smac20/blackbox.yaml",
-    "../carps/configs/optimizer/smac20/hpo.yaml",
-    "../carps/configs/optimizer/synetune/BO.yaml",
-    "../carps/configs/optimizer/synetune/BORE.yaml",
-    "../carps/configs/optimizer/synetune/KDE.yaml",
-    "../carps/configs/optimizer/synetune/MOREA.yaml",
-    "../carps/configs/optimizer/scikit_optimize/BO_GP_EI.yaml",
-    "../carps/configs/optimizer/scikit_optimize/BO_GP_LCB.yaml",
-    "../carps/configs/optimizer/scikit_optimize/BO_GP_PI.yaml",
-    "../carps/configs/optimizer/scikit_optimize/BO.yaml",
+    "carps/configs/optimizer/randomsearch/config.yaml",
+    "carps/configs/optimizer/Ax/config.yaml",
+    "carps/configs/optimizer/hebo/config.yaml",
+    "carps/configs/optimizer/nevergrad/bayesopt.yaml",
+    "carps/configs/optimizer/nevergrad/Hyperopt.yaml",
+    "carps/configs/optimizer/nevergrad/NoisyBandit.yaml",
+    "carps/configs/optimizer/nevergrad/DE.yaml",
+    "carps/configs/optimizer/nevergrad/ES.yaml",
+    "carps/configs/optimizer/optuna/SO_TPE.yaml",
+    "carps/configs/optimizer/smac20/blackbox.yaml",
+    "carps/configs/optimizer/smac20/hpo.yaml",
+    "carps/configs/optimizer/synetune/BO.yaml",
+    "carps/configs/optimizer/synetune/BORE.yaml",
+    "carps/configs/optimizer/synetune/KDE.yaml",
+    "carps/configs/optimizer/scikit_optimize/BO_GP_EI.yaml",
+    "carps/configs/optimizer/scikit_optimize/BO_GP_LCB.yaml",
+    "carps/configs/optimizer/scikit_optimize/BO_GP_PI.yaml",
+    "carps/configs/optimizer/scikit_optimize/BO.yaml",
 )
 
 mf_optimzier = (
-    "../carps/configs/optimizer/randomsearch/config.yaml",
-    "../carps/configs/optimizer/dehb/multifidelity.yaml",
-    "../carps/configs/optimizer/smac20/hyperband.yaml",
-    "../carps/configs/optimizer/smac20/multifidelity.yaml",
-    "../carps/configs/optimizer/synetune/DEHB.yaml",
-    "../carps/configs/optimizer/synetune/SyncMOBSTER.yaml",
+    "carps/configs/optimizer/randomsearch/config.yaml",
+    "carps/configs/optimizer/dehb/multifidelity.yaml",
+    "carps/configs/optimizer/smac20/hyperband.yaml",
+    "carps/configs/optimizer/smac20/multifidelity.yaml",
+    "carps/configs/optimizer/synetune/DEHB.yaml",
+    "carps/configs/optimizer/synetune/SyncMOBSTER.yaml",
 )
 
 mo_optimizers = (
-    "../carps/configs/optimizer/randomsearch/config.yaml",
-    "../carps/configs/optimizer/nevergrad/cmaes.yaml",
-    "../carps/configs/optimizer/nevergrad/DE.yaml",
-    "../carps/configs/optimizer/nevergrad/ES.yaml",
-    "../carps/configs/optimizer/optuna/MO_NSGAII.yaml",
-    "../carps/configs/optimizer/optuna/MO_TPE.yaml",
-    "../carps/configs/optimizer/smac20/multiobjective_gp.yaml",
-    "../carps/configs/optimizer/smac20/multiobjective_rf.yaml",
-    "../carps/configs/optimizer/synetune/BO_MO_LS.yaml",
-    "../carps/configs/optimizer/synetune/BO_MO_RS.yaml",
-    "../carps/configs/optimizer/synetune/MOREA.yaml",
+    "carps/configs/optimizer/randomsearch/config.yaml",
+    "carps/configs/optimizer/nevergrad/cmaes.yaml",
+    "carps/configs/optimizer/nevergrad/DE.yaml",
+    "carps/configs/optimizer/nevergrad/ES.yaml",
+    "carps/configs/optimizer/optuna/MO_NSGAII.yaml",
+    "carps/configs/optimizer/optuna/MO_TPE.yaml",
+    "carps/configs/optimizer/smac20/multiobjective_gp.yaml",
+    "carps/configs/optimizer/smac20/multiobjective_rf.yaml",
+    "carps/configs/optimizer/synetune/BO_MO_LS.yaml",
+    "carps/configs/optimizer/synetune/BO_MO_RS.yaml",
+    "carps/configs/optimizer/synetune/MOREA.yaml",
 )
 
 momf_optimizers = (
-    "../carps/configs/optimizer/randomsearch/config.yaml",
-    "../carps/configs/optimizer/smac20/momf_gp.yaml",
-    "../carps/configs/optimizer/smac20/momf_rf.yaml",
-    "../carps/configs/optimizer/nevergrad/cmaes.yaml",
+    "carps/configs/optimizer/randomsearch/config.yaml",
+    "carps/configs/optimizer/smac20/momf_gp.yaml",
+    "carps/configs/optimizer/smac20/momf_rf.yaml",
+    "carps/configs/optimizer/nevergrad/cmaes.yaml",
 )
 
 # TASKS
 bb_task_paths = [
-    "../carps/configs/task/subselection/blackbox/dev",
-    "../carps/configs/task/subselection/blackbox/test",
+    "carps/configs/task/subselection/blackbox/dev",
+    "carps/configs/task/subselection/blackbox/test",
 ]
 mf_task_paths = [
-    "../carps/configs/task/subselection/multifidelity/dev",
-    "../carps/configs/task/subselection/multifidelity/test",
+    "carps/configs/task/subselection/multifidelity/dev",
+    "carps/configs/task/subselection/multifidelity/test",
 ]
 mo_task_paths = [
-    "../carps/configs/task/subselection/multiobjective/dev",
-    "../carps/configs/task/subselection/multiobjective/test",
+    "carps/configs/task/subselection/multiobjective/dev",
+    "carps/configs/task/subselection/multiobjective/test",
 ]
 momf_task_paths = [
-    "../carps/configs/task/subselection/multifidelityobjective/dev",
-    "../carps/configs/task/subselection/multifidelityobjective/test",
+    "carps/configs/task/subselection/multifidelityobjective/dev",
+    "carps/configs/task/subselection/multifidelityobjective/test",
 ]
 
 bb_tasks = get_all_config_files_in_paths(bb_task_paths)  # type:ignore[arg-type]
@@ -214,6 +213,7 @@ print(f"len momf combinations: {len(combinations_momf)}")
 combinations = combinations_bb + combinations_mf + combinations_mo + combinations_momf
 
 # CREATE EXPERIMENT DEFINITIONS
+print("Creating experiment definitions...")
 num_processes = 8
 pool = Pool(processes=num_processes)
 exp_defs = list(tqdm(pool.imap_unordered(load, combinations), total=len(combinations)))
@@ -237,6 +237,7 @@ column_names = list(experimenter.db_connector.database_configuration.keyfields.k
 existing_rows = experimenter.db_connector._get_existing_rows(column_names)
 
 # Check if experiments exists
+print("Checking if experiments already exist...")
 rows_exist = [
     check_existance_by_keys(exp_def, existing_rows, experiment_identifiers)
     for exp_def in tqdm(exp_defs, total=len(exp_defs))
