@@ -27,6 +27,7 @@ from ConfigSpace.hyperparameters import (
 )
 
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.configuration import clip_bounds
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -193,6 +194,8 @@ class AxOptimizer(Optimizer):
         TrialInfo
             TrialInfo representation of the input trial
         """
+        trial = clip_bounds(trial, self.task.objective_function.configspace)
+
         # Allow inactivate parameter values for optimizers that cannot handle conditions
         # In that case they will propose a value for each HP, whether it is active or not.
         config = Configuration(self.task.objective_function.configspace, values=trial, allow_inactive_with_values=True)
