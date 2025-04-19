@@ -223,10 +223,12 @@ class AxOptimizer(Optimizer):
             trial value (cost, time, ...)
         """
         if len(self.ax_cfg.scenario.objectives) == 1:
-            raw_data = {objective: trial_value.cost for objective in self.ax_cfg.scenario.objectives}
+            raw_data = {objective: float(trial_value.cost) for objective in self.ax_cfg.scenario.objectives}  # type: ignore[arg-type]
         else:
             assert isinstance(trial_value.cost, list)
-            raw_data = {objective: trial_value.cost[i] for i, objective in enumerate(self.ax_cfg.scenario.objectives)}
+            raw_data = {
+                objective: float(trial_value.cost[i]) for i, objective in enumerate(self.ax_cfg.scenario.objectives)
+            }
 
         trial_index = int(trial_info.name) if trial_info.name is not None else -1
 
