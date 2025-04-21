@@ -1,5 +1,7 @@
 """Process logs from database.
 
+Usage: `python -m carps.experimenter.database.process_logs`
+
 Prerequisites:
     The database must be downloaded with `python -m carps.experimenter.database.download_results`.
     The logs will be in the `experimenter/results` directory.
