@@ -15,7 +15,8 @@ if TYPE_CHECKING:
     from py_experimenter.database_connector_mysql import DatabaseConnectorMYSQL
 
 YAHPO_ERROR_CONDITION = r"WHERE `benchmark_id` LIKE 'YAHPO' AND `status` LIKE 'error' AND `error` LIKE '%AttributeError: \'NoneType\' object has no attribute \'update\'%'"  # noqa: E501
-FALSELY_DONE_CONDITION = r"SELECT r.* FROM results r LEFT JOIN results__trials rt ON r.ID = rt.experiment_id WHERE rt.experiment_id IS NULL;)"  # noqa: E501
+FALSELY_DONE_CONDITION_SELECT = r"SELECT r.* FROM `results` r LEFT JOIN `results__trials` rt ON r.`ID` = rt.`experiment_id` WHERE rt.`experiment_id` IS NULL AND r.`status` = 'done';"  # noqa: E501
+FALSELY_DONE_CONDITION_DELETE = r"DELETE r FROM `results` r LEFT JOIN `results__trials` rt ON r.`ID` = rt.`experiment_id` WHERE rt.`experiment_id` IS NULL AND r.`status` = 'done';"  # noqa: E501
 
 
 def reset_experiments_with_condition(database_connector: DatabaseConnectorMYSQL, condition: str) -> None:
@@ -34,6 +35,29 @@ def reset_experiments_with_condition(database_connector: DatabaseConnectorMYSQL,
     if row_dicts:
         database_connector.fill_table(row_dicts)
     database_connector.logger.info(f"{len(row_dicts)} experiments with condition {condition} were reset")
+
+
+def reset_falsely_done_experiments(database_connector: DatabaseConnectorMYSQL) -> None:
+    """Reset experiments that are falsely marked as done in the database.
+
+    Experiments, that are falsely done, fulfill following condition:
+    They are marked as done in the results table, but do not have a corresponding entry in the trials table.
+
+    Args:
+        database_connector (DatabaseConnectorMYSQL): The database connector instance.
+    """
+
+    def get_dict_for_keyfields_and_rows(keyfields: list[str], rows: list[list[str]]) -> list[dict]:
+        return [dict(zip(keyfields, row, strict=True)) for row in rows]
+
+    column_names, entries = get_experiments_with_condition(database_connector, FALSELY_DONE_CONDITION_SELECT)
+    delete_experiments_with_condition(database_connector, FALSELY_DONE_CONDITION_DELETE)
+    row_dicts = get_dict_for_keyfields_and_rows(column_names, entries)
+    if row_dicts:
+        database_connector.fill_table(row_dicts)
+    database_connector.logger.info(
+        f"{len(row_dicts)} experiments with condition {FALSELY_DONE_CONDITION_SELECT} were reset"
+    )
 
 
 def get_experiments_with_condition(
@@ -71,6 +95,28 @@ def get_experiments_with_condition(
     return column_names, entries
 
 
+def delete_experiments_with_condition(
+    database_connector: DatabaseConnectorMYSQL, delete_query: str | None = None
+) -> None:
+    """Delete experiments with a specific condition from the database.
+
+    Args:
+        database_connector (DatabaseConnectorMYSQL): The database connector instance.
+        delete_query (str | None): The condition to filter experiments for deletion. Defaults to None.
+    """
+    connection = database_connector.connect()
+    cursor = database_connector.cursor(connection)
+
+    query_condition = delete_query or ""
+    if "DELETE" not in query_condition:
+        query = f"DELETE FROM {database_connector.database_configuration.table_name} {query_condition}"  # noqa: S608
+    else:
+        query = query_condition
+    database_connector.execute(cursor, query)
+    database_connector.commit(connection)
+    database_connector.close_connection(connection)
+
+
 def pop_experiments_with_condition(
     database_connector: DatabaseConnectorMYSQL, condition: str | None = None
 ) -> tuple[list[str], list[list]]:
@@ -84,7 +130,7 @@ def pop_experiments_with_condition(
         tuple[list[str], list[list]]: A tuple containing the column names and the entries of the popped experiments.
     """
     column_names, entries = get_experiments_with_condition(database_connector, condition)
-    database_connector._delete_experiments_with_condition(condition)
+    delete_experiments_with_condition(database_connector, condition)
     return column_names, entries
 
 
@@ -137,7 +183,7 @@ def main(
         elif reset_this == "yahpo_attr_error":
             reset_experiments_with_condition(experimenter.db_connector, YAHPO_ERROR_CONDITION)
         elif reset_this == "falsely_done":
-            reset_experiments_with_condition(experimenter.db_connector, FALSELY_DONE_CONDITION)
+            reset_falsely_done_experiments(experimenter.db_connector)
         else:
             raise ValueError(
                 f"Unknown reset condition: {reset_this}. Valid options are: " "error, yahpo_attr_error, falsely_done."
