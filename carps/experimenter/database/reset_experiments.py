@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import fire
+import pandas as pd
 from omegaconf import OmegaConf
 from py_experimenter.experiment_status import ExperimentStatus
 from py_experimenter.experimenter import PyExperimenter
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from py_experimenter.database_connector_mysql import DatabaseConnectorMYSQL
 
 YAHPO_ERROR_CONDITION = r"WHERE `benchmark_id` LIKE 'YAHPO' AND `status` LIKE 'error' AND `error` LIKE '%AttributeError: \'NoneType\' object has no attribute \'update\'%'"  # noqa: E501
+FALSELY_DONE_CONDITION = r"SELECT r.* FROM results r LEFT JOIN results__trials rt ON r.ID = rt.experiment_id WHERE rt.experiment_id IS NULL;)"  # noqa: E501
 
 
 def reset_experiments_with_condition(database_connector: DatabaseConnectorMYSQL, condition: str) -> None:
@@ -34,6 +36,41 @@ def reset_experiments_with_condition(database_connector: DatabaseConnectorMYSQL,
     database_connector.logger.info(f"{len(row_dicts)} experiments with condition {condition} were reset")
 
 
+def get_experiments_with_condition(
+    database_connector: DatabaseConnectorMYSQL, condition: str | None = None
+) -> tuple[list[str], list[list]]:
+    """Get experiments with a specific condition from the database.
+
+    Args:
+        database_connector (DatabaseConnectorMYSQL): The database connector instance.
+        condition (str | None): The condition to filter experiments. Defaults to None.
+
+    Returns:
+        tuple[list[str], list[list]]: A tuple containing the column names and the entries of the experiments.
+    """
+
+    def _get_keyfields_from_columns(column_names: list[str], entries: list[dict]) -> tuple[list[str], list[list]]:
+        df = pd.DataFrame(entries, columns=column_names)  # noqa: PD901
+        keyfields = database_connector.database_configuration.keyfields.keys()
+        entries = df[keyfields].values.tolist()  # noqa: PD011
+        return keyfields, entries  # type: ignore[return-value]
+
+    connection = database_connector.connect()
+    cursor = database_connector.cursor(connection)
+
+    query_condition = condition or ""
+    if "SELECT" not in query_condition:
+        query = f"SELECT * FROM {database_connector.database_configuration.table_name} {query_condition}"  # noqa: S608
+    else:
+        query = query_condition
+    database_connector.execute(cursor, query)
+    entries = database_connector.fetchall(cursor)
+    column_names = database_connector.get_structure_from_table(cursor)
+    column_names, entries = _get_keyfields_from_columns(column_names, entries)
+
+    return column_names, entries
+
+
 def pop_experiments_with_condition(
     database_connector: DatabaseConnectorMYSQL, condition: str | None = None
 ) -> tuple[list[str], list[list]]:
@@ -46,13 +83,13 @@ def pop_experiments_with_condition(
     Returns:
         tuple[list[str], list[list]]: A tuple containing the column names and the entries of the popped experiments.
     """
-    column_names, entries = database_connector._get_experiments_with_condition(condition)
+    column_names, entries = get_experiments_with_condition(database_connector, condition)
     database_connector._delete_experiments_with_condition(condition)
     return column_names, entries
 
 
 def main(
-    reset_yahpo_attr_error: bool = False,  # noqa: FBT001, FBT002
+    reset_what: list[str] | None = None,
     pyexperimenter_configuration_file_path: str | None = None,
     database_credential_file_path: str | Path | None = None,
 ) -> None:
@@ -63,12 +100,19 @@ def main(
     this specific yahpo error condition.
 
     Args:
-        reset_yahpo_attr_error (bool, optional): If True, reset only experiments with the YAHPO error condition.
-            Defaults to False.
+        reset_what (list[str] | None, optional): List of conditions to reset. Defaults to None.
+            Valid options are: "error", "yahpo_attr_error", "falsely_done".
+            "error": Reset all errored experiments.
+            "yahpo_attr_error": Reset experiments with the YAHPO error condition.
+            "falsely_done": Reset experiments that are falsely marked as done (experiment ids not present in trials
+                table).
         pyexperimenter_configuration_file_path (str, optional): Path to the py_experimenter configuration file.
             Defaults to None.
         database_credential_file_path (str | Path, optional): Path to the database credential file. Defaults to None.
     """
+    if reset_what is None:
+        reset_what = ["error"]
+
     experiment_configuration_file_path = (
         pyexperimenter_configuration_file_path
         or Path(__file__).parent.parent.parent / "experimenter/py_experimenter.yaml"
@@ -87,10 +131,17 @@ def main(
         log_file="logs/reset_experiments.log",
         use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
     )
-    if not reset_yahpo_attr_error:
-        experimenter.db_connector.reset_experiments(ExperimentStatus.ERROR.value)
-    else:
-        reset_experiments_with_condition(experimenter.db_connector, YAHPO_ERROR_CONDITION)
+    for reset_this in reset_what:
+        if reset_this == "error":
+            experimenter.db_connector.reset_experiments(ExperimentStatus.ERROR.value)
+        elif reset_this == "yahpo_attr_error":
+            reset_experiments_with_condition(experimenter.db_connector, YAHPO_ERROR_CONDITION)
+        elif reset_this == "falsely_done":
+            reset_experiments_with_condition(experimenter.db_connector, FALSELY_DONE_CONDITION)
+        else:
+            raise ValueError(
+                f"Unknown reset condition: {reset_this}. Valid options are: " "error, yahpo_attr_error, falsely_done."
+            )
 
 
 if __name__ == "__main__":
