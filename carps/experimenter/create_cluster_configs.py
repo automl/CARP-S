@@ -43,21 +43,21 @@ def create_config_hash_from_full_cfg(cfg: DictConfig) -> str:
     Returns:
             str: Hash of the full configuration.
     """
-    cfg_json = OmegaConf.to_container(cfg, resolve=True)
+    cfg_dict = OmegaConf.to_container(cfg, resolve=True)
 
     # This value will always be unique so it
     # disables duplicate checking when adding entries to the database.
     # Py_experimenter will add a creation date so the information
     # is not lost.
-    if "timestamp" in cfg_json:
-        del cfg_json["timestamp"]
+    if "timestamp" in cfg_dict:
+        del cfg_dict["timestamp"]
 
     # Compute hash to efficiently compare configs.
     # In MySQL json objects are reordered to improve performance.
     # This means that there is no guarantee of the json strings
     # to be equal.
-    cfg_str = json.dumps(cfg_json, cls=CustomEncoder)
-    return hashlib.sha256(cfg_str.encode()).hexdigest()
+    cfg_json_str = json.dumps(cfg_dict, cls=CustomEncoder)
+    return hashlib.sha256(cfg_json_str.encode()).hexdigest()
 
 
 def get_experiment_definition(cfg: OmegaConf) -> dict:
