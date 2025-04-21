@@ -78,11 +78,16 @@ def main(
     expected_errors = {
         "yahpo_localconfig": "Exception('Could not load local_config! Please run LocalConfiguration.init_config() "
         "and restart.')",
+        # Reset with `python -m carps.experimenter.database.reset_experiments --reset_yahpo_attr_error`
+        # Just rerun those, it is due to multiple accesses of the surrogate model
         "yahpo_updatenone": "AttributeError: 'NoneType' object has no attribute 'update'",
+        "smac_intensifier": "assert len(incumbent_isb_keys) > 0",
+        # python -m carps.run +task/subselection/blackbox/dev=subset_yahpo_rbv2_aknn_1462_None +optimizer/synetune=KDE seed=3  # noqa: E501
+        "synetune_does_not_respect_bounds": "ConfigSpace.exceptions.IllegalValueError: Value 5: (<class 'int'>) is not allowed for hyperparameter with name 'M'",  # noqa: E501
     }
     known_error_ids = []
     for error_id, error_msg in expected_errors.items():
-        error_ids = error_rows["error"].str.contains(error_msg)
+        error_ids = error_rows["error"].str.contains(error_msg, regex=False)
         error_rows[error_ids].to_csv(f"error_{error_id}.csv", index=False)
         known_error_ids.append(error_ids)
 
