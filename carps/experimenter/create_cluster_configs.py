@@ -89,15 +89,15 @@ def get_experiment_definition(cfg: OmegaConf) -> dict:
     }
 
 
-@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
-def main(cfg: DictConfig) -> None:
-    """Store experiment config in database.
+def fill_database(cfg: DictConfig, experimenter: PyExperimenter) -> None:
+    """Fill the database with the experiment config.
 
-    Parameters
-    ----------
-    cfg : DictConfig
-        Global configuration.
+    Args:
+        cfg (DictConfig): New experiment defined by configuration.
+        experimenter (PyExperimenter): Experimenter object.
 
+    Raises:
+        DatabaseConnectionError: If there is an error with the database connection.
     """
     experiment_definition = get_experiment_definition(cfg)
 
@@ -122,6 +122,19 @@ def main(cfg: DictConfig) -> None:
         # experimenter.db_connector.start_ssh_tunnel()
         experimenter.fill_table_with_rows([experiment_definition])
     # experimenter.close_ssh()
+
+
+@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
+def main(cfg: DictConfig) -> None:
+    """Store experiment config in database.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        Global configuration.
+
+    """
+    fill_database(cfg, experimenter)
 
 
 if __name__ == "__main__":

@@ -175,3 +175,6 @@ tmp*
 *.zip
 *.bak
 *output*
+
+container/python_packages/*
+slurmlogs/*
