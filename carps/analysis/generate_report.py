@@ -4,7 +4,7 @@ For this we need the run logs, which are stored in a CSV or parquet file.
 
 To generate this file, call `python -m carps.analysis.gather_results <rundir>`.
 Of course, you can concatenate multiple result files.
-Keep in mind that the results are grouped by task_type and set id.
+Keep in mind that the results are grouped by task_type and subset_id.
 """
 
 from __future__ import annotations
@@ -608,7 +608,10 @@ def load_results(result_path: str) -> pd.DataFrame:
 
     df = normalize_logs(df)  # noqa: PD901
     if "set" not in df.columns:
-        df["set"] = df["task_id"].apply(lambda x: "dev" if "dev" in x else "test")
+        if "subset_id" not in df.columns:
+            df["set"] = df["task_id"].apply(lambda x: "dev" if "dev" in x else "test")
+        else:
+            df["set"] = df["subset_id"]
     return df
 
 
