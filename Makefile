@@ -120,6 +120,7 @@ benchmark_yahpo:
 	# Install yahpo
 	. container_recipes/benchmarks/YAHPO/install_yahpo.sh
 	$(PIP) install ConfigSpace --upgrade
+	$(PIP) install numpy --upgrade
 
 benchmark_pymoo:
 	# Install pymoo
