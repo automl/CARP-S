@@ -387,6 +387,14 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     new_logs = []
     for gid, gdf in logs.groupby(by="task_id"):
         task_cfg = load_task_cfg(task_id=gid, task_index=task_index)
+
+        task_cfg_yaml = OmegaConf.to_yaml(task_cfg)
+        if "${seed}" in task_cfg_yaml:
+            # Add seed to config to make it resolvable
+            assert gdf["seed"].nunique() == 1  # noqa: PD101
+            seed = gdf["seed"].iloc[0]
+            task_cfg.seed = int(seed)
+        task_cfg = OmegaConf.to_container(task_cfg, resolve=False)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         if overwrite:
             task_dict = asdict(Task(**task_cfg))
@@ -520,7 +528,7 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
     return df, df_cfg
 
 
-def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None) -> pd.DataFrame:
+def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None) -> pd.DataFrame:  # noqa: C901
     """Process raw logs.
 
     Clean, determine incumbent cost, maybe add metadata.
@@ -551,6 +559,10 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     else:
         # Logs come from file
         grouper_keys = ["task_id", "optimizer_id", "seed"]
+
+    if "experiment_id" not in logs and "task_id" not in logs:
+        logger.debug("Ciao old experiment.")
+        return pd.DataFrame()
 
     logger.debug("Handle MO costs...")
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
@@ -813,6 +825,7 @@ def filelogs_to_df(
         rundirs = get_run_dirs(rundir)
         logger.info(f"Found {len(rundirs)} runs. Load data...")
         partial_load_log = partial(load_log, log_fn=log_fn)
+        # results = [partial_load_log(rundir) for rundir in tqdm(rundirs)]
         results = map_multiprocessing(partial_load_log, rundirs, n_processes=n_processes)
         df = pd.concat(results).reset_index(drop=True)  # noqa: PD901
         logger.info("Done. Do some preprocessing...")
@@ -834,9 +847,11 @@ def filelogs_to_df(
     df_cfg = convert_mixed_types_to_str(df_cfg)
     df.to_parquet(Path(rundir) / "logs.parquet", index=False)
     df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False)
+    logger.info(f"Saved to {Path(rundir) / 'logs.csv'} and {Path(rundir) / 'logs_cfg.csv'}. 💌")
     logger.info("Done. 😊")
+
     return df, df_cfg
 
 
 if __name__ == "__main__":
-    fire.Fire(filelogs_to_df)
+    df, df_cfg = fire.Fire(filelogs_to_df)
