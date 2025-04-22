@@ -52,6 +52,16 @@ def main(
     )
 
     experiment_config_table = experimenter.get_table()
+    logger.info("We got following experiment configuration columns:")
+    logger.info(experiment_config_table.columns)
+    df = experiment_config_table  # noqa: PD901
+    if "ID" in df.columns:
+        logger.info(f"Found {df['ID'].nunique()} experiments. 🔍")
+        for task_type in df.task_type.unique():
+            n_experiments = df[df.task_type == task_type]["ID"].nunique()
+            logger.info(f"Found {n_experiments} runs of type {task_type}. 🍏")
+            n_errored = df[(df.task_type == task_type) & (df.status == "error")]["ID"].nunique()
+            logger.info(f"\tFrom them, found {n_errored} errored runs of type {task_type}. ❌")
     trajectory_table = experimenter.get_logtable("trajectory")
     trials_table = experimenter.get_logtable("trials")
     codecarbon_table = experimenter.get_codecarbon_table()
