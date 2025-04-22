@@ -218,7 +218,7 @@ All subset runs were created with `scripts/create_experiments_in_db.sh`.
 ### Running Experiments
 Now, execute experiments with:
 ```bash
-python run_from_db.py 'job_nr_dummy=range(1,1000)' -m
+python -m carps.run_from_db 'job_nr_dummy=range(1,1000)' -m
 ```
 This will create 1000 multirun jobs, each pulling an experiment from PyExperimenter and executing it.
 
@@ -230,7 +230,7 @@ This will create 1000 multirun jobs, each pulling an experiment from PyExperimen
 
 Experiments with error status (or any other status) can be reset via:
 ```bash
-python -m carps.utils.database.reset_experiments
+python -m carps.experimenter.database.reset_experiments
 ```
 
 ### Get the results from the database and post-process
