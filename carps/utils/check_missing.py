@@ -34,6 +34,9 @@ def get_experiment_status(path: Path) -> dict:
     status = RunStatus.MISSING
 
     cfg = OmegaConf.load(path)
+    if not hasattr(cfg, "task") or (hasattr(cfg, "task") and not hasattr(cfg.task, "optimization_resources")):
+        # logger.warning(f"Skipping {path} as it does not have a task attribute.")
+        return {}
     n_trials = cfg.task.optimization_resources.n_trials
     trial_logs_fn = path.parent.parent / "trial_logs.jsonl"
     if trial_logs_fn.is_file():
@@ -69,7 +72,7 @@ def check_missing(rundir: str | Path, n_processes: int = 4) -> pd.DataFrame:
         data = pool.map(get_experiment_status, paths)
     data_df = pd.DataFrame(data)
     data_df.to_csv("runstatus.csv", index=False)
-    return data
+    return data_df
 
 
 def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: str = ".") -> None:
@@ -82,14 +85,14 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     """
     logger.info(f"Regenerate commands for {runstatus.name} runs...")
     data = missing_data
-    missing = data[data["status"].isin([runstatus])]
+    missing = data[data["status"].isin([runstatus.name])]
     runcommands = []
     for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
         seeds = list(gdf["seed"].unique())
         seeds.sort()
         overrides = gdf["overrides"].iloc[0].split(" ")
         overrides = [o for o in overrides if "seed" not in o]
-        overrides.append(f"seed={','.join(str(s) for s in seeds)} -m")
+        overrides.append(f"seed={','.join(str(int(s)) for s in seeds)} -m")
         override = " ".join(overrides)
         runcommand = f"python -m carps.run {override}\n"
         runcommands.append(runcommand)
@@ -114,6 +117,8 @@ def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:  # n
         logger.info("Scanning rundirs for experiment status...")
         data = check_missing(rundir=rundir)
         logger.info("Done!")
+
+    data = data.dropna()
 
     if len(data) > 0:
         generate_commands(data, RunStatus.MISSING, rundir)
