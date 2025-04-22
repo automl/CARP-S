@@ -27,6 +27,7 @@ from ConfigSpace.hyperparameters import (
 )
 
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.configuration import clip_bounds
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -193,6 +194,8 @@ class AxOptimizer(Optimizer):
         TrialInfo
             TrialInfo representation of the input trial
         """
+        trial = clip_bounds(trial, self.task.objective_function.configspace)
+
         # Allow inactivate parameter values for optimizers that cannot handle conditions
         # In that case they will propose a value for each HP, whether it is active or not.
         config = Configuration(self.task.objective_function.configspace, values=trial, allow_inactive_with_values=True)
@@ -223,10 +226,12 @@ class AxOptimizer(Optimizer):
             trial value (cost, time, ...)
         """
         if len(self.ax_cfg.scenario.objectives) == 1:
-            raw_data = {objective: trial_value.cost for objective in self.ax_cfg.scenario.objectives}
+            raw_data = {objective: float(trial_value.cost) for objective in self.ax_cfg.scenario.objectives}  # type: ignore[arg-type]
         else:
             assert isinstance(trial_value.cost, list)
-            raw_data = {objective: trial_value.cost[i] for i, objective in enumerate(self.ax_cfg.scenario.objectives)}
+            raw_data = {
+                objective: float(trial_value.cost[i]) for i, objective in enumerate(self.ax_cfg.scenario.objectives)
+            }
 
         trial_index = int(trial_info.name) if trial_info.name is not None else -1
 

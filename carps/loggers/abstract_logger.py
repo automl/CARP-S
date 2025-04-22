@@ -40,15 +40,17 @@ class AbstractLogger(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
-        """Log the incumbents.
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent, n_function_calls: int | None = None) -> None:
+        """Log the incumbent.
 
         Parameters
         ----------
-        n_trials : int | float
-            The number of trials that have been run so far. Can also be a fraction in case of multi-fidelity.
+        n_trials : int
+            The number of trials that have been run so far.
         incumbent : Incumbent
-            The incumbent (or multiple incumbents).
+            The incumbent (best) configuration with associated cost.
+        n_function_calls: int | None, default None
+            The number of target function calls, no matter the budget.
         """
         raise NotImplementedError
 

@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 
 def fix_legacy_task_id(task_id: str) -> str:
     task_id = "bbob/" + task_id if task_id.startswith("noiseless") else task_id
-    return task_id.replace("noiseless/", "").replace("bb/tab/", "blackbox/tabular/")
+    return task_id.replace("noiseless/", "").replace("bb/tab/", "blackbox/tabular/").replace("MO/tab/", "multiobjective/tabular/").replace("hpobench/mf/", "hpobench/multifidelity/")
 
 def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str) -> None:
     config_target_path = Path("carps/configs/task/subselection") / scenario

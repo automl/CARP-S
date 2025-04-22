@@ -20,10 +20,11 @@ fi
 
 # Install yahpo-gym
 git clone https://github.com/automl/yahpo_gym.git lib/yahpo_gym
-$CONDA_RUN_COMMAND $PIP install -e lib/yahpo_gym/yahpo_gym
+$CONDA_RUN_COMMAND $PIP install --user lib/yahpo_gym/yahpo_gym
 
 # Get task data
 YAHPO_TASK_DATA_DIR=$(python -c "from carps.objective_functions.yahpo import YAHPO_TASK_DATA_DIR; print(YAHPO_TASK_DATA_DIR)")
+echo "YAHPO_TASK_DATA_DIR: $YAHPO_TASK_DATA_DIR"
 mkdir -p $YAHPO_TASK_DATA_DIR
 git clone https://github.com/slds-lmu/yahpo_data.git $YAHPO_TASK_DATA_DIR
 $CONDA_RUN_COMMAND python $CARPS_ROOT/container_recipes/benchmarks/YAHPO/patch_yahpo_configspace.py

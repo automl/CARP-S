@@ -78,6 +78,17 @@ If you want to install CARP-S for development, you can use the following command
 ```bash
 make install-dev
 ```
+#### Apptainer
+You can also create a container with the env setup by running `apptainer build container/env.sif container/env.def`.
+Then you can execute any carps commands as usual by add this prefix `apptainer exec container/env.sif` before the
+command, e.g. `apptainer exec container/env.sif python -m carps.run +task/... +optimizer/...`.
+There is also an sbatch script to run experiments from the database using the apptainer on a slurm cluster
+(`sbatch scripts/container_run_from_db.sh`). You might need to adapt the array size and the number of repetitions
+according to the number of experiments you can run.
+
+#### A note on python versions
+For python3.12, numpy should be `numpy>=2.0.0`. For python3.10, numpy must be `numpy==1.26.4`, you can simply
+`pip install numpy==1.26.4` after running the proposed install commands.
 
 ### Installing Benchmarks and Optimizers
 
@@ -218,7 +229,7 @@ All subset runs were created with `scripts/create_experiments_in_db.sh`.
 ### Running Experiments
 Now, execute experiments with:
 ```bash
-python run_from_db.py 'job_nr_dummy=range(1,1000)' -m
+python -m carps.run_from_db 'job_nr_dummy=range(1,1000)' -m
 ```
 This will create 1000 multirun jobs, each pulling an experiment from PyExperimenter and executing it.
 
@@ -230,7 +241,7 @@ This will create 1000 multirun jobs, each pulling an experiment from PyExperimen
 
 Experiments with error status (or any other status) can be reset via:
 ```bash
-python -m carps.utils.database.reset_experiments
+python -m carps.experimenter.database.reset_experiments
 ```
 
 ### Get the results from the database and post-process

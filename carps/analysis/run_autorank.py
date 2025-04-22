@@ -162,7 +162,8 @@ def calc_critical_difference(
     identifier: str | None = None,
     figsize: tuple[int | float, int | float] = (12, 8),
     perf_col: str = "trial_value__cost_inc_norm",
-    plot_diagram: bool = True,  # noqa: FBT001, FBT002
+    plot_diagram: bool = True,  # noqa: FBT001, FBT002,
+    calc_df_crit: bool = True,  # noqa: FBT001, FBT002
 ) -> RankResult:
     """Calculate the critical difference.
 
@@ -172,11 +173,13 @@ def calc_critical_difference(
         figsize (tuple[int | float, int | float], optional): Figure size. Defaults to (12, 8).
         perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc_norm".
         plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
+        calc_df_crit (bool, optional): Whether to calculate the df_crit (averaging over seeds). Defaults to True. If
+            False, df is used as is.
 
     Returns:
         RankResult: The rank result.
     """
-    df_crit = get_df_crit(df, perf_col=perf_col)
+    df_crit = get_df_crit(df, perf_col=perf_col) if calc_df_crit else df
 
     # result = autorank(df_crit, alpha=0.05, verbose=True)
     # create_report(result)
@@ -367,25 +370,24 @@ def cd_evaluation(
     res = rank_multiple_nonparametric(rank_data, alpha, verbose, all_normal, order, effect_size, None)
 
     result = RankResult(
-        res.rankdf,
-        res.pvalue,
-        res.cd,
-        res.omnibus,
-        res.posthoc,
-        all_normal,
-        pvals_shapiro,
-        None,
-        None,
-        None,
-        alpha,
-        alpha_normality,
-        len(rank_data),
-        None,
-        None,
-        None,
-        None,
-        res.effect_size,
-        None,
+        rankdf=res.rankdf,
+        pvalue=res.pvalue,
+        cd=res.cd,
+        omnibus=res.omnibus,
+        posthoc=res.posthoc,
+        all_normal=all_normal,
+        pvals_shapiro=pvals_shapiro,
+        homoscedastic=None,
+        pval_homogeneity=None,
+        homogeneity_test=None,
+        alpha=alpha,
+        alpha_normality=alpha_normality,
+        num_samples=len(rank_data),
+        posterior_matrix=None,
+        decision_matrix=None,
+        rope=None,
+        rope_mode=None,
+        effect_size=res.effect_size,
         force_mode=None,
     )
     is_significant = True

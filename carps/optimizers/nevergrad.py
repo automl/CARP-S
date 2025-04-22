@@ -18,8 +18,10 @@ import ConfigSpace.hyperparameters as CSH  # noqa: N812
 import nevergrad as ng
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
+from omegaconf import DictConfig, OmegaConf
 
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.configuration import clip_bounds
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
@@ -28,7 +30,6 @@ if TYPE_CHECKING:
         Optimizer as NGOptimizer,
     )
     from nevergrad.parametrization import parameter  # type: ignore
-    from omegaconf import DictConfig
 
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
@@ -121,6 +122,10 @@ class NevergradOptimizer(Optimizer):
         self.optimizer_cfg = optimizer_cfg
         if self.optimizer_cfg is None:
             self.optimizer_cfg = {}
+        if isinstance(self.optimizer_cfg, DictConfig):
+            self.optimizer_cfg = OmegaConf.to_container(self.optimizer_cfg)
+        if "scale" in self.optimizer_cfg:
+            self.optimizer_cfg["scale"] = float(self.optimizer_cfg["scale"])
         if self.nevergrad_cfg.optimizer_name not in opt_list and self.nevergrad_cfg.optimizer_name not in ext_opts:
             raise ValueError(f"Optimizer {self.nevergrad_cfg.optimizer_name} not found in Nevergrad!")
 
@@ -215,13 +220,30 @@ class NevergradOptimizer(Optimizer):
         unique_name = f"{self.counter}_{config.value}_{self.nevergrad_cfg.seed}"
         self.history[unique_name] = (config, None)
         trial_info = self.convert_to_trial(
-            config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True),
+            config=self.convert_nevergrad_config_to_configspace_config(config),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
             budget=None if not self.fidelity_enabled else self.task.input_space.fidelity_space.max_fidelity,
         )
         self.counter += 1
         return trial_info
+
+    def convert_nevergrad_config_to_configspace_config(self, config_nevergrad: parameter.Parameter) -> Configuration:
+        """Convert nevergrad config to configspace config.
+
+        Might clip to hyperparameter bounds of float hyperparameters to prevent numerical issues after log
+        transformation.
+
+        Args:
+            config_nevergrad : parameter.Parameter
+                The configuration to convert.
+
+        Returns:
+            Configuration
+                The ConfigSpace configuration.
+        """
+        config_dict = clip_bounds(config_nevergrad.value, self.configspace)
+        return Configuration(self.configspace, values=config_dict, allow_inactive_with_values=True)
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
@@ -257,30 +279,30 @@ class NevergradOptimizer(Optimizer):
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
         """
-        incumbent = None
-        cost = None
-        unique_name = None
         if self.task.output_space.n_objectives > 1:
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
             trial_infos = [
-                self.convert_to_trial(
-                    config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True)
-                )
+                self.convert_to_trial(config=self.convert_nevergrad_config_to_configspace_config(config))
                 for config in configs
             ]
             trial_values = [TrialValue(cost=cost) for cost in costs]
             incumbent_tuple = list(zip(trial_infos, trial_values, strict=False))
         else:
+            incumbent = None
+            cost = None
+            unique_name = None
+            incumbent_config = None
             for name, value in self.history.items():
                 if incumbent is None or value[1] < cost:
                     incumbent = value[0].value
                     cost = value[1]
                     unique_name = name
+                    incumbent_config = value[0]
             if cost is None:
                 raise ValueError(f"Tried to get Incumbent without calling tell() for config {incumbent}!")
             trial_info = self.convert_to_trial(
-                config=Configuration(self.configspace, values=incumbent, allow_inactive_with_values=True),
+                config=self.convert_nevergrad_config_to_configspace_config(incumbent_config),
                 name=unique_name,
                 seed=self.nevergrad_cfg.seed,
             )

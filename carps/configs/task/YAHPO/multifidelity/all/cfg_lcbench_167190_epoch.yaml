@@ -10,7 +10,8 @@ task:
     bench: lcbench
     instance: '167190'
     budget_type: epoch
-    metric: val_accuracy
+    metric:
+    - val_accuracy
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
@@ -86,8 +87,9 @@ task:
     instance_space: null
   output_space:
     _target_: carps.utils.task.OutputSpace
-    n_objectives: 12
-    objectives: val_accuracy
+    n_objectives: 1
+    objectives:
+    - val_accuracy
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 126

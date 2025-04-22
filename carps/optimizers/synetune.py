@@ -76,6 +76,22 @@ optimizers_dict = {
     "SyncMOBSTER": SyncMOBSTER,
 }
 
+
+metric_type_dict = {
+    "BayesianOptimization": str,
+    "BO-MO-RS": list,
+    "BO-MO-LS": list,
+    "MOREA": list,
+    "ASHA": str,
+    "MOBSTER": str,
+    "BOHB": str,
+    "KDE": str,
+    "BORE": str,
+    "DEHB": str,
+    "MOASHA": list,
+    "SyncMOBSTER": list,
+}
+
 mf_optimizer_dicts = {
     "with_mf": {"ASHA", "MOASHA", "DEHB", "MOBSTER", "BOHB", "SyncMOBSTER"},
     "without_mf": {"BORE", "BayesianOptimization", "KDE"},
@@ -176,7 +192,7 @@ class SynetuneOptimizer(Optimizer):
         self.metric: str | list[str] | tuple[str] = self.task.output_space.objectives
         if isinstance(self.metric, tuple | ListConfig):
             self.metric = list(self.metric)
-        if len(self.metric) == 1:
+        if len(self.metric) == 1 and issubclass(metric_type_dict[optimizer_name], str):
             self.metric = self.metric[0]
         assert isinstance(
             self.metric, str | list
@@ -407,8 +423,6 @@ class SynetuneOptimizer(Optimizer):
                     _optimizer_kwargs["max_resource_level"] = int(
                         self.conversion_factor * self.optimizer_kwargs["max_resource_level"]
                     )
-
-            print(_optimizer_kwargs)
 
         self.syne_tune_configspace = self.convert_configspace(self.configspace)
         _optimizer_kwargs["config_space"] = self.syne_tune_configspace

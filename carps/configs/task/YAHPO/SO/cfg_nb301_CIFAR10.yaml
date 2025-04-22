@@ -650,7 +650,7 @@ task:
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 254
-    time_budget: 250
+    time_budget: null
     n_workers: 1
   metadata:
     _target_: carps.utils.task.TaskMetadata

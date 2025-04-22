@@ -72,7 +72,12 @@ class DatabaseLogger(AbstractLogger):
             logger.info("Not logging to database (result processor is None).")
 
     def log_trial(
-        self, n_trials: float, trial_info: TrialInfo, trial_value: TrialValue, n_function_calls: int | None = None
+        self,
+        n_trials: float,
+        trial_info: TrialInfo,
+        trial_value: TrialValue,
+        n_function_calls: int | None = None,
+        table_name: str = "trials",
     ) -> None:
         """Evaluate the task and log the trial.
 
@@ -90,15 +95,17 @@ class DatabaseLogger(AbstractLogger):
             The trial value.
         n_function_calls: int | None, default None
             The number of target function calls, no matter the budget.
+        table_name: str, default "trials"
+            The name of the table to log the trial to.
         """
         info = convert_trial_info(trial_info, trial_value)
         info["n_trials"] = n_trials
         info["n_function_calls"] = n_function_calls if n_function_calls else n_trials
 
         if self.result_processor:
-            self.result_processor.process_logs({"trials": info})
+            self.result_processor.process_logs({table_name: info})
 
-    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent) -> None:
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent, n_function_calls: int | None = None) -> None:
         """Log the incumbent.
 
         Parameters
@@ -107,6 +114,8 @@ class DatabaseLogger(AbstractLogger):
             The number of trials that have been run so far.
         incumbent : Incumbent
             The incumbent (best) configuration with associated cost.
+        n_function_calls: int | None, default None
+            The number of target function calls, no matter the budget.
         """
         if incumbent is None:
             return
@@ -115,11 +124,13 @@ class DatabaseLogger(AbstractLogger):
             incumbent = [incumbent]
 
         for inc in incumbent:
-            info = convert_trial_info(inc[0], inc[1])
-            info["n_trials"] = n_trials
-
-            if self.result_processor:
-                self.result_processor.process_logs({"trajectory": info})
+            self.log_trial(
+                n_trials=n_trials,
+                trial_info=inc[0],
+                trial_value=inc[1],
+                n_function_calls=n_function_calls,
+                table_name="trajectory",
+            )
 
     def log_arbitrary(self, data: dict, entity: str) -> None:
         """Log arbitrary data to the database.

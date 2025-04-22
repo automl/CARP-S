@@ -1,0 +1,48 @@
+defaults:
+  - _self_
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+  - override /hydra/launcher: joblib
+
+baserundir: output_subselection
+outdir: ${baserundir}/${task_type}/${method}/${subset_size}/${n_reps}
+hydra:
+  run:
+    dir: ${outdir}  
+  sweep:
+    dir: ${baserundir}  
+    subdir: ${task_type}/${method}/${subset_size}/${n_reps}/${log_transform}
+  launcher:
+    n_jobs: 4
+  # launcher:
+  #   partition: normal
+  #   cpus_per_task: 1
+  #   name: carps
+  #   timeout_min: 120
+  #   # mem_gb: 8
+  #   mem_per_cpu: 4G
+  #   setup:
+  #     - module load system singularity
+  job:
+    chdir: True
+
+# Input data
+fullset_csv_path: ???
+
+# Hyperparameters
+task_type: BB
+subset_size: 10
+n_reps: 5000
+method: sequential  # one of ["sequential", "split"]
+log_transform: False # whether to log-transform the data
+
+# Filepaths
+subset_ids: [dev, test]
+executable: ./a.out
+output_subset_file: subsets.csv
+output_metadata_file: metadata.csv
+
+
+
+ 
+
