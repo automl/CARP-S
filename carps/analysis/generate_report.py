@@ -18,6 +18,7 @@ import matplotlib
 
 matplotlib.use("Agg")  # Set non-interactive backend
 
+import matplotlib as mpl
 import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
@@ -472,7 +473,7 @@ def plot_finalperfbarplot(
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
     """
-    setup_seaborn(font_scale=1.2)
+    setup_seaborn(font_scale=1.1)
 
     perf_col = "trial_value__cost_inc_norm"
     x_column = "n_trials_norm"
@@ -515,8 +516,11 @@ def plot_finalperfbarplot(
         hue = "optimizer_id"
         y = hue
         ax1 = sns.barplot(data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax1)
-        ax1.set_title("Final Performance (Normalized)")
+        # ax1.set_title("Final Performance (Normalized)")
+        ax1.get_xaxis().set_minor_locator(mpl.ticker.AutoMinorLocator())
         ax1.set_xscale("log")
+        ax1.set_xlabel("Incumbent Cost (Normalized)")
+        ax1.set_ylabel("Optimizer")
         savefig(fig, figure_filename)
         plt.close(fig)
 
