@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import ast
-import hashlib
-import json
 import logging
 from pathlib import Path
 from typing import Any
@@ -15,10 +13,10 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter, ResultProcessor
 
-import carps.experimenter.create_cluster_configs
 from carps.analysis.gather_data import get_run_dirs, load_cfg, load_log
+from carps.experimenter.create_cluster_configs import create_config_hash, fill_database
 from carps.loggers.database_logger import DatabaseLogger
-from carps.utils.loggingutils import CustomEncoder, get_logger, setup_logging
+from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.trials import StatusType
 from carps.utils.types import TrialInfo, TrialValue
 
@@ -121,15 +119,9 @@ def main(rundir: str | list[str]) -> None:
             if not cfg:
                 raise RuntimeError(f"Config not found at {run_dir}")
 
-            carps.experimenter.create_cluster_configs.main(cfg)
+            fill_database(cfg, experimenter=experimenter)
 
-            cfg_json = OmegaConf.to_container(cfg, resolve=True)
-
-            if "timestamp" in cfg_json:
-                del cfg_json["timestamp"]
-
-            cfg_str = json.dumps(cfg_json, cls=CustomEncoder)
-            cfg_hash = hashlib.sha256(cfg_str.encode()).hexdigest()
+            cfg_hash = create_config_hash(cfg=cfg)
             column_names = list(experimenter.db_connector.database_configuration.keyfields.keys())
 
             status = get_value([*column_names, "status"], cfg_hash, "status")
