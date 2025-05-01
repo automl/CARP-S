@@ -1,4 +1,14 @@
-"""Reset experiments that have errored out in the database."""
+"""Reset experiments that have errored out in the database.
+
+Useful commands to copy and paste:
+- `python -m carps.experimenter.database.reset_experiments` for resetting all experiments with status error
+- `python -m carps.experimenter.database.reset_experiments ['yahpo_attr_error']` for resetting experiments with
+  this specific yahpo error condition.
+- `python -m carps.experimenter.database.reset_experiments ['falsely_done']` for resetting experiments that are
+  falsely marked as done (experiment ids not present in trials table).
+- `python -m carps.experimenter.database.reset_experiments ['error', 'yahpo_attr_error', 'falsely_done']` for
+    resetting all.
+"""
 
 from __future__ import annotations
 
