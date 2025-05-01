@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import numpy as np
 import pytest
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
@@ -24,8 +25,17 @@ def _change_workdir():
 def instantiate_task_and_evaluate(taskconfig_filename: str) -> bool:
     cfg = OmegaConf.load(taskconfig_filename)
     cfg.seed = 123
+    rng = np.random.default_rng(cfg.seed)
     task: Task = instantiate(cfg.task)
-    task.objective_function.evaluate(TrialInfo(task.input_space.configuration_space.sample_configuration()))
+    budget = None
+    if task.input_space.fidelity_space.is_multifidelity:
+        # Select a random fidelity
+        budget = rng.uniform(
+            low=task.input_space.fidelity_space.min_fidelity, high=task.input_space.fidelity_space.max_fidelity
+        )
+    task.objective_function.evaluate(
+        TrialInfo(task.input_space.configuration_space.sample_configuration(), budget=budget),
+    )
     return True
 
 
