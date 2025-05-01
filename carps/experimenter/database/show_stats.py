@@ -85,11 +85,13 @@ def main(
         # python -m carps.run +task/subselection/blackbox/dev=subset_yahpo_rbv2_aknn_1462_None +optimizer/synetune=KDE seed=3  # noqa: E501
         "synetune_does_not_respect_bounds": "ConfigSpace.exceptions.IllegalValueError: Value 5: (<class 'int'>) is not allowed for hyperparameter with name 'M'",  # noqa: E501
     }
+    logger.info(f"Expected errors: {expected_errors.keys()}")
     known_error_ids = []
     for error_id, error_msg in expected_errors.items():
         error_ids = error_rows["error"].str.contains(error_msg, regex=False)
         error_rows[error_ids].to_csv(f"error_{error_id}.csv", index=False)
         known_error_ids.append(error_ids)
+        logger.info(f"Number of experiments with error {error_id}: {error_ids.sum()}")
 
     unknown_error_ids = ~error_rows["error"].str.contains(
         "|".join(re.escape(error) for error in expected_errors.values()), regex=True
