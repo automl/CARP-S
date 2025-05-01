@@ -3,10 +3,11 @@ benchmark_id: DUMMY_ObjectiveFunction
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: dummy
+  name: dummy-mf
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.dummy_problem.DummyObjectiveFunction
+    configuration_space: ${task.input_space.configuration_space}
     return_value: 42
   input_space:
     _target_: carps.utils.task.InputSpace

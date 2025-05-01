@@ -89,7 +89,7 @@ metric_type_dict = {
     "BORE": str,
     "DEHB": str,
     "MOASHA": list,
-    "SyncMOBSTER": list,
+    "SyncMOBSTER": str,
 }
 
 mf_optimizer_dicts = {

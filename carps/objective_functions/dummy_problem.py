@@ -18,13 +18,20 @@ if TYPE_CHECKING:
 class DummyObjectiveFunction(ObjectiveFunction):
     """Dummy objective function for testing purposes."""
 
-    def __init__(self, return_value: float | list[float] = 0, loggers: list[AbstractLogger] | None = None) -> None:
+    def __init__(
+        self,
+        return_value: float | list[float] = 0,
+        configuration_space: ConfigurationSpace | None = None,
+        loggers: list[AbstractLogger] | None = None,
+    ) -> None:
         """Initialize Dummy ObjectiveFunction.
 
         Parameters
         ----------
         return_value : float, optional
             Return value for the objective function evaluation, by default 0.
+        configuration_space : ConfigurationSpace, optional
+            Configuration space, by default None. Defaults to a space with one float parameter "a" in the range [-1, 1].
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
         """
@@ -37,7 +44,7 @@ class DummyObjectiveFunction(ObjectiveFunction):
         assert isinstance(
             self._return_value, float | list
         ), f"Return value must be a float or a list of floats but is {type(self._return_value)}. {self._return_value}."
-        self._configspace = ConfigurationSpace(
+        self._configspace = configuration_space or ConfigurationSpace(
             space={
                 "a": Float("a", bounds=(-1, 1)),
             }

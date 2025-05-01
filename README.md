@@ -86,6 +86,14 @@ There is also an sbatch script to run experiments from the database using the ap
 (`sbatch scripts/container_run_from_db.sh`). You might need to adapt the array size and the number of repetitions
 according to the number of experiments you can run.
 
+PS.: On some clusters you might need to load the module apptainer like so `module load tools Apptainer`.
+Troubleshooting: If you have problems writing your cache directory, mount-bind it like so
+`apptainer shell --bind $XDG_CACHE_HOME container/env.sif`. This binds the directory `$XDG_CACHE_HOME` in the
+container to the directory `$XDG_CACHE_HOME` on the host.
+If you have problems with `/var/lib/hpobench`, this bind might help: 
+`<hpobench data dir>:/var/lib/hpobench/data`. `<hpobench data dir>` can be found in
+[`.hpobenchrc`](https://github.com/automl/HPOBench/?tab=readme-ov-file#configure-hpobench).
+
 #### A note on python versions
 For python3.12, numpy should be `numpy>=2.0.0`. For python3.10, numpy must be `numpy==1.26.4`, you can simply
 `pip install numpy==1.26.4` after running the proposed install commands.

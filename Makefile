@@ -129,6 +129,7 @@ benchmark_pymoo:
 benchmark_mfpbench:
 	# Install mfpbench
 	$(PIP) install -r container_recipes/benchmarks/MFPBench/MFPBench_requirements.txt
+	$(PIP) install xgboost --upgrade
 	$(PIP) install ConfigSpace --upgrade
 	. container_recipes/benchmarks/MFPBench/download_data.sh
 
