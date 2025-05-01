@@ -34,7 +34,7 @@ dependencies = [
 
 requires-python = ">=3.9"
 authors = [
-  { name = "Carolin Benjamins", email = "c.benjaminsq@ai.uni-hannover.de" },
+  { name = "Carolin Benjamins", email = "c.benjamins@ai.uni-hannover.de" },
 ]
 readme = "README.md"
 description = "CARP-S: Benchmarking N Optimizers on M Benchmarks"
