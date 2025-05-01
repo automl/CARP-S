@@ -1,0 +1,118 @@
+# @package _global_
+benchmark_id: HPOBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/blackbox/tabular/ml/xgboost/146818
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    model: xgboost
+    task_id: 146818
+    budget_type: null
+    benchmark_client: null
+    seed: ${seed}
+    metric: ${task.output_space.objectives}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: ordinal
+          name: colsample_bytree
+          sequence:
+          - 0.10000000149011612
+          - 0.20000000298023224
+          - 0.30000001192092896
+          - 0.4000000059604645
+          - 0.5
+          - 0.6000000238418579
+          - 0.699999988079071
+          - 0.800000011920929
+          - 0.8999999761581421
+          - 1.0
+          default_value: 0.10000000149011612
+          meta: null
+        - type: ordinal
+          name: eta
+          sequence:
+          - 0.0009765625
+          - 0.0021094917319715023
+          - 0.004556754138320684
+          - 0.009843133389949799
+          - 0.02126234397292137
+          - 0.045929204672575
+          - 0.09921256452798843
+          - 0.21431098878383636
+          - 0.4629373550415039
+          - 1.0
+          default_value: 0.0009765625
+          meta: null
+        - type: ordinal
+          name: max_depth
+          sequence:
+          - 1.0
+          - 2.0
+          - 3.0
+          - 5.0
+          - 8.0
+          - 13.0
+          - 20.0
+          - 32.0
+          - 50.0
+          default_value: 1.0
+          meta: null
+        - type: ordinal
+          name: reg_lambda
+          sequence:
+          - 0.0009765625
+          - 0.004556754138320684
+          - 0.02126234397292137
+          - 0.09921256452798843
+          - 0.4629373550415039
+          - 2.1601195335388184
+          - 10.079368591308594
+          - 47.0315055847168
+          - 219.45445251464844
+          - 1024.0
+          default_value: 0.0009765625
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - function_value
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 100
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: tabular
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 4
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 4
+    search_space_n_integers: 0
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

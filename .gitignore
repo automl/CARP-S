@@ -138,6 +138,7 @@ containers
 data
 outputs
 runs
+results
 runsold
 *.json
 *.code-workspace
@@ -149,7 +150,7 @@ runsold
 /.idea/.gitignore
 /.codecarbon.config
 
-/carps/container/credentials.yaml
+/carps/experimenter/credentials.yaml
 carps.db
 *.jsonl
 *.sif
@@ -168,3 +169,12 @@ runs*
 *.parquet
 run-data*
 *.txt
+slurm-*
+tmp*
+*.aux
+*.zip
+*.bak
+*output*
+
+container/python_packages/*
+slurmlogs/*

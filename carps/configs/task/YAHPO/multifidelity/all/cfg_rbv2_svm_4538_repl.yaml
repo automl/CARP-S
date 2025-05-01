@@ -1,0 +1,117 @@
+# @package _global_
+benchmark_id: YAHPO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: yahpo/rbv2_svm/4538/repl
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: rbv2_svm
+    instance: '4538'
+    budget_type: repl
+    metric:
+    - acc
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: cost
+          lower: 4.53999298e-05
+          upper: 22026.465794806718
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: categorical
+          name: kernel
+          choices:
+          - linear
+          - polynomial
+          - radial
+          weights: null
+          default_value: linear
+          meta: null
+        - type: categorical
+          name: num.impute.selected.cpo
+          choices:
+          - impute.mean
+          - impute.median
+          - impute.hist
+          weights: null
+          default_value: impute.mean
+          meta: null
+        - type: constant
+          name: task_id
+          value: '4538'
+          meta: null
+        - type: uniform_float
+          name: tolerance
+          lower: 4.53999298e-05
+          upper: 2.0
+          default_value: 0.009528896
+          log: true
+          meta: null
+        - type: uniform_int
+          name: degree
+          lower: 2
+          upper: 5
+          default_value: 4
+          log: false
+          meta: null
+        - type: uniform_float
+          name: gamma
+          lower: 4.53999298e-05
+          upper: 22026.465794806718
+          default_value: 1.0
+          log: true
+          meta: null
+        conditions:
+        - type: EQ
+          child: degree
+          parent: kernel
+          value: polynomial
+        - type: EQ
+          child: gamma
+          parent: kernel
+          value: radial
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: repl
+      min_fidelity: 1
+      max_fidelity: 10
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - acc
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 118
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 6
+    search_space_n_categoricals: 2
+    search_space_n_ordinals: 0
+    search_space_n_integers: 1
+    search_space_n_floats: 3
+    search_space_has_conditionals: true
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - base
+optimizer_id: Optuna-MO-NSGAII
+optimizer:
+  optuna_cfg:
+    study:  # See https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html#optuna.study.Study
+      sampler:
+        _target_: optuna.samplers.NSGAIISampler
+        seed: ${seed}   
+
+  expects_multiple_objectives: true
+  expects_fidelities: false     

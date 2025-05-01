@@ -1,3 +1,5 @@
+"""AbstractLogger."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -9,11 +11,10 @@ if TYPE_CHECKING:
 
 
 class AbstractLogger(ABC):
-    def __init__(self) -> None:
-        """AbstractLogger.
+    """AbstractLogger.
 
-        Intercepts the trial info and value during evaluate.
-        """
+    Intercepts the trial info and value during evaluate.
+    """
 
     @abstractmethod
     def log_trial(
@@ -27,7 +28,7 @@ class AbstractLogger(ABC):
             The number of trials that have been run so far.
             For the case of multi-fidelity, a full trial
             is a configuration evaluated on the maximum budget and
-            the counter is increased by `budget/max_budget` instead
+            the counter is increased by `budget/max_fidelity` instead
             of 1.
         trial_info : TrialInfo
             The trial info.
@@ -39,15 +40,17 @@ class AbstractLogger(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def log_incumbent(self, n_trials: int, incumbent: Incumbent) -> None:
-        """Log the incumbents.
+    def log_incumbent(self, n_trials: int | float, incumbent: Incumbent, n_function_calls: int | None = None) -> None:
+        """Log the incumbent.
 
         Parameters
         ----------
         n_trials : int
             The number of trials that have been run so far.
         incumbent : Incumbent
-            The incumbent (or multiple incumbents).
+            The incumbent (best) configuration with associated cost.
+        n_function_calls: int | None, default None
+            The number of target function calls, no matter the budget.
         """
         raise NotImplementedError
 

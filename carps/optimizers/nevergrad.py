@@ -14,23 +14,23 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ConfigSpace.hyperparameters as CSH
+import ConfigSpace.hyperparameters as CSH  # noqa: N812
 import nevergrad as ng
 import numpy as np
 from ConfigSpace import Configuration, ConfigurationSpace
+from omegaconf import DictConfig, OmegaConf
 
 from carps.optimizers.optimizer import Optimizer
+from carps.utils.configuration import clip_bounds
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
-    from nevergrad.optimization.base import (
+    from nevergrad.optimization.base import (  # type: ignore
         ConfiguredOptimizer as ConfNGOptimizer,
         Optimizer as NGOptimizer,
     )
-    from nevergrad.parametrization import parameter
-    from omegaconf import DictConfig
+    from nevergrad.parametrization import parameter  # type: ignore
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
@@ -46,26 +46,34 @@ ext_opts = {
 }
 
 
-def CS_to_nevergrad_space(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:
-    """Convert ConfigSpace to Nevergrad Parameter."""
+def configspace_hp_to_nevergrad_hp(hp: CSH.Hyperparameter) -> ng.p.Instrumentation:  # noqa: PLR0911
+    """Convert ConfigSpace to Nevergrad Parameter.
+
+    Parameters
+    ----------
+    hp : CSH.Hyperparameter
+        Hyperparameter from ConfigSpace.
+
+    Returns:
+    -------
+    ng.p.Instrumentation
+        Hyperparameter from Nevergrad.
+    """
     if isinstance(hp, CSH.FloatHyperparameter):
         if hp.log:
             return ng.p.Log(lower=hp.lower, upper=hp.upper)
-        else:
-            return ng.p.Scalar(lower=hp.lower, upper=hp.upper)
-    elif isinstance(hp, CSH.IntegerHyperparameter):
+        return ng.p.Scalar(lower=hp.lower, upper=hp.upper)
+    if isinstance(hp, CSH.IntegerHyperparameter):
         if hp.log:
             return ng.p.Log(lower=hp.lower, upper=hp.upper).set_integer_casting()
-        else:
-            return ng.p.Scalar(lower=hp.lower, upper=hp.upper).set_integer_casting()
-    elif isinstance(hp, CSH.CategoricalHyperparameter):
+        return ng.p.Scalar(lower=hp.lower, upper=hp.upper).set_integer_casting()
+    if isinstance(hp, CSH.CategoricalHyperparameter):
         return ng.p.Choice(hp.choices)
-    elif isinstance(hp, CSH.OrdinalHyperparameter):
+    if isinstance(hp, CSH.OrdinalHyperparameter):
         return ng.p.TransitionChoice(hp.sequence)
-    elif isinstance(hp, CSH.Constant):
+    if isinstance(hp, CSH.Constant):
         return ng.p.Choice([hp.value])
-    else:
-        raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
+    raise NotImplementedError(f"Unknown hyperparameter type: {hp.__class__.__name__}")
 
 
 class NevergradOptimizer(Optimizer):
@@ -73,26 +81,51 @@ class NevergradOptimizer(Optimizer):
 
     def __init__(
         self,
-        problem: Problem,
+        task: Task,
         nevergrad_cfg: DictConfig,
         optimizer_cfg: DictConfig,
-        task: Task,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
-        super().__init__(problem, task, loggers)
+        """Initialize the optimizer.
+
+        Parameters
+        ----------
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
+        nevergrad_cfg : DictConfig
+            The configuration for the Nevergrad optimizer.
+        optimizer_cfg : DictConfig
+            The configuration for the optimizer.
+        loggers : list[AbstractLogger] | None
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
+        """
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
 
         self.fidelity_enabled = False
-        self.fidelity_type = None
-        if self.task.is_multifidelity:
+        self.fidelity_type: str | None = None
+        if self.task.input_space.fidelity_space.is_multifidelity:
             self.fidelity_enabled = True
-            self.fidelity_type: str = self.task.fidelity_type
-        self.task = task
-        self.configspace = problem.configspace
+            self.fidelity_type = self.task.input_space.fidelity_space.fidelity_type
+        self.configspace = task.input_space.configuration_space
         self.ng_space = self.convert_configspace(self.configspace)
         self.nevergrad_cfg = nevergrad_cfg
         self.optimizer_cfg = optimizer_cfg
         if self.optimizer_cfg is None:
             self.optimizer_cfg = {}
+        if isinstance(self.optimizer_cfg, DictConfig):
+            self.optimizer_cfg = OmegaConf.to_container(self.optimizer_cfg)
+        if "scale" in self.optimizer_cfg:
+            self.optimizer_cfg["scale"] = float(self.optimizer_cfg["scale"])
         if self.nevergrad_cfg.optimizer_name not in opt_list and self.nevergrad_cfg.optimizer_name not in ext_opts:
             raise ValueError(f"Optimizer {self.nevergrad_cfg.optimizer_name} not found in Nevergrad!")
 
@@ -106,7 +139,7 @@ class NevergradOptimizer(Optimizer):
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -115,7 +148,7 @@ class NevergradOptimizer(Optimizer):
         """
         ng_param = ng.p.Dict()
         for hp in configspace.get_hyperparameters():
-            ng_param[hp.name] = CS_to_nevergrad_space(hp)
+            ng_param[hp.name] = configspace_hp_to_nevergrad_hp(hp)
         return ng_param
 
     def _setup_optimizer(self) -> NGOptimizer | ConfNGOptimizer:
@@ -126,14 +159,14 @@ class NevergradOptimizer(Optimizer):
                 ng_opt = ext_opts[self.nevergrad_cfg.optimizer_name](**self.optimizer_cfg)
             ng_opt = ng_opt(
                 parametrization=self.ng_space,
-                budget=self.task.n_trials,
-                num_workers=self.task.n_workers,
+                budget=self.task.optimization_resources.n_trials,
+                num_workers=self.task.optimization_resources.n_workers,
             )
         else:
             ng_opt = ng.optimizers.registry[self.nevergrad_cfg.optimizer_name](
                 parametrization=self.ng_space,
-                budget=self.task.n_trials,
-                num_workers=self.task.n_workers,
+                budget=self.task.optimization_resources.n_trials,
+                num_workers=self.task.optimization_resources.n_workers,
             )
         ng_opt.parametrization.random_state = np.random.RandomState(self.nevergrad_cfg.seed)
         return ng_opt
@@ -147,7 +180,7 @@ class NevergradOptimizer(Optimizer):
     ) -> TrialInfo:
         """Convert proposal from Nevergrad to TrialInfo.
 
-        This ensures that the problem can be evaluated with a unified API.
+        This ensures that the objective function can be evaluated with a unified API.
 
         Parameters
         ----------
@@ -166,7 +199,7 @@ class NevergradOptimizer(Optimizer):
         return TrialInfo(
             config=config,
             name=name,
-            seed=self.nevergrad_cfg.seed,
+            seed=seed,
             budget=budget,
             instance=None,
         )
@@ -187,13 +220,30 @@ class NevergradOptimizer(Optimizer):
         unique_name = f"{self.counter}_{config.value}_{self.nevergrad_cfg.seed}"
         self.history[unique_name] = (config, None)
         trial_info = self.convert_to_trial(
-            config=Configuration(self.configspace, values=config.value, allow_inactive_with_values=True),
+            config=self.convert_nevergrad_config_to_configspace_config(config),
             name=unique_name,
             seed=self.nevergrad_cfg.seed,
-            budget=None if not self.fidelity_enabled else self.task.max_budget,
+            budget=None if not self.fidelity_enabled else self.task.input_space.fidelity_space.max_fidelity,
         )
         self.counter += 1
         return trial_info
+
+    def convert_nevergrad_config_to_configspace_config(self, config_nevergrad: parameter.Parameter) -> Configuration:
+        """Convert nevergrad config to configspace config.
+
+        Might clip to hyperparameter bounds of float hyperparameters to prevent numerical issues after log
+        transformation.
+
+        Args:
+            config_nevergrad : parameter.Parameter
+                The configuration to convert.
+
+        Returns:
+            Configuration
+                The ConfigSpace configuration.
+        """
+        config_dict = clip_bounds(config_nevergrad.value, self.configspace)
+        return Configuration(self.configspace, values=config_dict, allow_inactive_with_values=True)
 
     def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
         """Tell the optimizer a new trial.
@@ -229,30 +279,33 @@ class NevergradOptimizer(Optimizer):
         Incumbent: tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | None
             The incumbent configuration with associated cost.
         """
-        incumbent = None
-        cost = None
-        unique_name = None
-        if self.task.n_objectives > 1:
+        if self.task.output_space.n_objectives > 1:
             configs = self.solver.pareto_front()
             costs = [param.losses.tolist() for param in configs]
-            trial_info = [
-                self.convert_to_trial(config=Configuration(self.configspace, values=config.value)) for config in configs
+            trial_infos = [
+                self.convert_to_trial(config=self.convert_nevergrad_config_to_configspace_config(config))
+                for config in configs
             ]
-            trial_value = [TrialValue(cost=cost) for cost in costs]
-            incumbent_tuple = list(zip(trial_info, trial_value, strict=False))
+            trial_values = [TrialValue(cost=cost) for cost in costs]
+            incumbent_tuple = list(zip(trial_infos, trial_values, strict=False))
         else:
+            incumbent = None
+            cost = None
+            unique_name = None
+            incumbent_config = None
             for name, value in self.history.items():
                 if incumbent is None or value[1] < cost:
                     incumbent = value[0].value
                     cost = value[1]
                     unique_name = name
+                    incumbent_config = value[0]
             if cost is None:
                 raise ValueError(f"Tried to get Incumbent without calling tell() for config {incumbent}!")
             trial_info = self.convert_to_trial(
-                config=Configuration(self.configspace, values=incumbent, allow_inactive_with_values=True),
+                config=self.convert_nevergrad_config_to_configspace_config(incumbent_config),
                 name=unique_name,
                 seed=self.nevergrad_cfg.seed,
             )
             trial_value = TrialValue(cost=cost)
-            incumbent_tuple = (trial_info, trial_value)
+            incumbent_tuple = (trial_info, trial_value)  # type: ignore[assignment]
         return incumbent_tuple

@@ -79,7 +79,7 @@ $RUN_COMMAND pip install wheel
 $RUN_COMMAND pip install swig
 $RUN_COMMAND pip install -e .
 $RUN_COMMAND pip install -r requirements.txt
-$RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_problem.txt
+$RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_task.txt
 $RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_optimizer.txt
 
 # Benchmark specific
@@ -89,7 +89,7 @@ do
 done
 
 # YAHPO
-bash container_recipes/benchmarks/YAHPO/prepare_yahpo.sh $ENV_LOCATION
+bash container_recipes/benchmarks/YAHPO/install_yahpo.sh $ENV_LOCATION
 
 # MFPBench
 bash container_recipes/benchmarks/MFPBench/download_data.sh $ENV_LOCATION

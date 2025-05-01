@@ -1,0 +1,127 @@
+# @package _global_
+benchmark_id: HPOBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/blackbox/tabular/ml/nn/146822
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    model: nn
+    task_id: 146822
+    budget_type: null
+    benchmark_client: null
+    seed: ${seed}
+    metric: ${task.output_space.objectives}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: ordinal
+          name: alpha
+          sequence:
+          - 9.99999993922529e-09
+          - 7.74263710923151e-08
+          - 5.994842240397702e-07
+          - 4.641588930098806e-06
+          - 3.5938137443736196e-05
+          - 0.00027825593133457005
+          - 0.002154434798285365
+          - 0.01668100617825985
+          - 0.1291549652814865
+          - 1.0
+          default_value: 9.99999993922529e-09
+          meta: null
+        - type: ordinal
+          name: batch_size
+          sequence:
+          - 4.0
+          - 6.0
+          - 10.0
+          - 16.0
+          - 25.0
+          - 40.0
+          - 64.0
+          - 101.0
+          - 161.0
+          - 256.0
+          default_value: 4.0
+          meta: null
+        - type: ordinal
+          name: depth
+          sequence:
+          - 1.0
+          - 2.0
+          - 3.0
+          default_value: 1.0
+          meta: null
+        - type: ordinal
+          name: learning_rate_init
+          sequence:
+          - 9.999999747378752e-06
+          - 3.5938137443736196e-05
+          - 0.00012915497063659132
+          - 0.00046415888937190175
+          - 0.0016681005945429206
+          - 0.005994842387735844
+          - 0.02154434658586979
+          - 0.07742636650800705
+          - 0.2782559394836426
+          - 1.0
+          default_value: 9.999999747378752e-06
+          meta: null
+        - type: ordinal
+          name: width
+          sequence:
+          - 16.0
+          - 25.0
+          - 40.0
+          - 64.0
+          - 101.0
+          - 161.0
+          - 256.0
+          - 406.0
+          - 645.0
+          - 1024.0
+          default_value: 16.0
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - function_value
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 110
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: tabular
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 5
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 5
+    search_space_n_integers: 0
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

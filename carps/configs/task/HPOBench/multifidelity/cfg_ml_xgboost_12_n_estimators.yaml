@@ -1,0 +1,87 @@
+# @package _global_
+benchmark_id: HPOBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/multifidelity/real/ml/xgboost/12/n_estimators
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    model: xgboost
+    task_id: 12
+    budget_type: n_estimators
+    benchmark_client: null
+    seed: ${seed}
+    metric: ${task.output_space.objectives}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: colsample_bytree
+          lower: 0.1
+          upper: 1.0
+          default_value: 1.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: eta
+          lower: 0.0009765625
+          upper: 1.0
+          default_value: 0.3
+          log: true
+          meta: null
+        - type: uniform_int
+          name: max_depth
+          lower: 1
+          upper: 50
+          default_value: 10
+          log: true
+          meta: null
+        - type: uniform_float
+          name: reg_lambda
+          lower: 0.0009765625
+          upper: 1024.0
+          default_value: 1.0
+          log: true
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: n_estimators
+      min_fidelity: 50
+      max_fidelity: 2000
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - function_value
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 100
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: real
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 4
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 1
+    search_space_n_floats: 3
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -1,0 +1,255 @@
+# @package _global_
+benchmark_id: HPOBench
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: hpobench/blackbox/tabular/nas/NASCifar10CBenchmark
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.hpo_bench.HPOBenchObjectiveFunction
+    benchmark_client:
+      _target_: hpobench.container.benchmarks.nas.nasbench_101.NASCifar10CBenchmark
+      rng: ${seed}
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: edge_0
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_1
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_10
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_11
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_12
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_13
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_14
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_15
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_16
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_17
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_18
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_19
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_2
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_20
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_3
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_4
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_5
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_6
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_7
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_8
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: edge_9
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_int
+          name: num_edges
+          lower: 0
+          upper: 9
+          default_value: 4
+          log: false
+          meta: null
+        - type: categorical
+          name: op_node_0
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_1
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_2
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_3
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        - type: categorical
+          name: op_node_4
+          choices:
+          - conv1x1-bn-relu
+          - conv3x3-bn-relu
+          - maxpool3x3
+          weights: null
+          default_value: conv1x1-bn-relu
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 228
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: tabular
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 27
+    search_space_n_categoricals: 5
+    search_space_n_ordinals: 0
+    search_space_n_integers: 1
+    search_space_n_floats: 21
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -82,19 +82,19 @@ It can be run as follows:
 Like for the optimizer, a Singularity recipe has to be created for the benchmark, which should be saved in the folder
 `container_recipes` as well.
 
-The benchmark image also has to be according to the benchmark id, e.g., `DUMMY_Problem.sif` for the 
+The benchmark image also has to be according to the benchmark id, e.g., `DUMMY_ObjectiveFunction.sif` for the 
 `DummyBenchmark` 
 using
 the following command:
 
 ```bash
-singularity build containers/benchmarks/DUMMY_Problem.sif container_recipes/benchmarks/DUMMY_Problem/DUMMY_Problem.recipe
+singularity build containers/benchmarks/DUMMY_ObjectiveFunction.sif container_recipes/benchmarks/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
 ```
 
 Command for Noctua2:
 
 ```bash
-./compile_noctua2.sh containers/benchmarks/DUMMY_Problem.sif container_recipes/benchmarks/DUMMY_Problem/DUMMY_Problem.recipe
+./compile_noctua2.sh containers/benchmarks/DUMMY_ObjectiveFunction.sif container_recipes/benchmarks/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
 ```
 
 #### Running

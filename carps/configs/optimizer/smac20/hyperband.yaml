@@ -1,21 +1,10 @@
 # @package _global_
+defaults:
+  - base
 optimizer_id: SMAC3-Hyperband
-optimizer_container_id: SMAC3
 optimizer:
-  _target_: carps.optimizers.smac20.SMAC3Optimizer
-  _partial_: true
-
   smac_cfg:
     smac_class: smac.facade.hyperband_facade.HyperbandFacade
-    budget_variable: ${problem.budget_type}
-    scenario:
-      seed: ${seed}
-      n_trials: ${task.n_trials}
-      deterministic: true
-      n_workers: 1
-      output_directory: ${outdir}/${seed}/smac3_output
-      min_budget: ${task.min_budget}
-      max_budget: ${task.max_budget}
-    smac_kwargs:
-      dask_client: null
-      overwrite: true
+
+  expects_multiple_objectives: false
+  expects_fidelities: true

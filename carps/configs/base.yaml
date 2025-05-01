@@ -6,12 +6,11 @@ defaults:
 
 seed: 1
 
-# Set in problem cfg
-problem: ???
+# Set in task cfg
 task: ???
 
-benchmark_id: ??? # Set in problem cfg.
-problem_id: ???  # Set in problem cfg. Can be directory.
+benchmark_id: ??? # Set in task cfg.
+task_id: ???  # Set in task cfg. Can be directory.
 
 # Set in optimizer cfg
 optimizer: ???
@@ -27,10 +26,10 @@ conda_env_name: carps_${benchmark_id}_${optimizer_container_id}
 timestamp: ${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 baserundir: runs
-outdir: ${baserundir}/${optimizer_id}/${benchmark_id}/${problem_id}/${seed}
+outdir: ${baserundir}/${optimizer_id}/${benchmark_id}/${task_id}/${seed}
 hydra:
   run:
     dir: ${outdir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
     dir: ${baserundir}  # /${now:%Y-%m-%d}/${now:%H-%M-%S}
-    subdir: ${optimizer_id}/${benchmark_id}/${problem_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir
+    subdir: ${optimizer_id}/${benchmark_id}/${task_id}/${seed}  # those variables are set for individual jobs, therefore can only be in the subdir

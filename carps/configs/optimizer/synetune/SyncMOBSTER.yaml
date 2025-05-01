@@ -1,13 +1,14 @@
 # @package _global_
+defaults:
+  - base
 optimizer_id: SyneTune-SyncMOBSTER
-optimizer_container_id: SyneTune
 optimizer:
-  _target_: carps.optimizers.synetune.SynetuneOptimizer
-  _partial_: true
-
   optimizer_name: 'SyncMOBSTER'
   optimizer_kwargs:
     random_seed: ${seed}
-    max_resource_attr: ${problem.budget_type}
-    # max_resource_level: ${task.max_budget}
-    grace_period: ${task.min_budget}
+    max_resource_attr: ${task.input_space.fidelity_space.fidelity_type}
+    grace_period: ${task.input_space.fidelity_space.min_fidelity}
+    max_resource_level: ${task.input_space.fidelity_space.max_fidelity}
+
+  expects_multiple_objectives: false
+  expects_fidelities: true

@@ -1,0 +1,24 @@
+defaults:
+  - _self_
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+  - override /hydra/launcher: submitit_slurm
+
+hydra:
+  launcher:
+    partition: normal
+    cpus_per_task: 1
+    name: carps
+    timeout_min: 120
+    # mem_gb: 8
+    mem_per_cpu: 4G
+    array_parallelism: 250
+    setup:
+      - module load system singularity
+
+
+job_nr_dummy: 1
+
+pyexperimenter_configuration_file_path: null
+database_credential_file_path: null
+experiment_name: carps

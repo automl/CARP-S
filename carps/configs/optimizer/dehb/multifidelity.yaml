@@ -8,6 +8,10 @@ optimizer:
   dehb_cfg:
     mutation_factor: 0.5
     crossover_prob: 0.5
+    strategy: "rand1_bin"
     seed: ${seed}
     eta: 3
     output_path: ${outdir}/${seed}/dehb_output
+
+  expects_multiple_objectives: false
+  expects_fidelities: true

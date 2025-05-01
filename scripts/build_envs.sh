@@ -9,7 +9,7 @@ export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
 export ENV_LOCATION="/scratch/hpc-prf-intexml/carps-neurips24/envs"
 
 # bash ${CONT_BENCH_RECIPE_PATH}/HPOB/download_data.sh
-# bash scripts/prepare_yahpo.sh
+# bash scripts/install_yahpo.sh
 
 bash scripts/build_env.sh SMAC3 HPOB 3.11 $ENV_LOCATION
 bash scripts/build_env.sh SMAC3 YAHPO 3.11 $ENV_LOCATION

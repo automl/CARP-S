@@ -4,3 +4,12 @@ optimizer_container_id: HEBO
 optimizer:
   _target_: carps.optimizers.hebo.HEBOOptimizer
   _partial_: true
+  hebo_cfg:
+    model_name: gp  # surrogate model to be used
+    rand_sample: null  # iterations to perform random sampling
+    acq_cls:
+      _target_: hebo.acquisitions.acq.MACE
+      _partial_: true
+    es: nsga2
+    model_config: null
+    scramble_seed: ${seed}

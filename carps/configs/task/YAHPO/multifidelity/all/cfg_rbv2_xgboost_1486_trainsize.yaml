@@ -1,0 +1,209 @@
+# @package _global_
+benchmark_id: YAHPO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: yahpo/rbv2_xgboost/1486/trainsize
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: rbv2_xgboost
+    instance: '1486'
+    budget_type: trainsize
+    metric:
+    - acc
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: alpha
+          lower: 0.0009118819656
+          upper: 1096.6331584284585
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: categorical
+          name: booster
+          choices:
+          - gblinear
+          - gbtree
+          - dart
+          weights: null
+          default_value: gblinear
+          meta: null
+        - type: uniform_float
+          name: lambda
+          lower: 0.0009118819656
+          upper: 1096.6331584284585
+          default_value: 1.0
+          log: true
+          meta: null
+        - type: uniform_int
+          name: nrounds
+          lower: 7
+          upper: 2981
+          default_value: 144
+          log: true
+          meta: null
+        - type: categorical
+          name: num.impute.selected.cpo
+          choices:
+          - impute.mean
+          - impute.median
+          - impute.hist
+          weights: null
+          default_value: impute.mean
+          meta: null
+        - type: uniform_float
+          name: subsample
+          lower: 0.1
+          upper: 1.0
+          default_value: 0.55
+          log: false
+          meta: null
+        - type: constant
+          name: task_id
+          value: '1486'
+          meta: null
+        - type: uniform_float
+          name: colsample_bylevel
+          lower: 0.01
+          upper: 1.0
+          default_value: 0.505
+          log: false
+          meta: null
+        - type: uniform_float
+          name: colsample_bytree
+          lower: 0.01
+          upper: 1.0
+          default_value: 0.505
+          log: false
+          meta: null
+        - type: uniform_float
+          name: eta
+          lower: 0.0009118819656
+          upper: 1.0
+          default_value: 0.0301973834
+          log: true
+          meta: null
+        - type: uniform_float
+          name: gamma
+          lower: 4.53999298e-05
+          upper: 7.3890560989306
+          default_value: 0.0183156389
+          log: true
+          meta: null
+        - type: uniform_int
+          name: max_depth
+          lower: 1
+          upper: 15
+          default_value: 8
+          log: false
+          meta: null
+        - type: uniform_float
+          name: min_child_weight
+          lower: 2.718281828459
+          upper: 148.4131591025766
+          default_value: 20.0855369232
+          log: true
+          meta: null
+        - type: uniform_float
+          name: rate_drop
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: skip_drop
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        conditions:
+        - type: IN
+          child: colsample_bylevel
+          parent: booster
+          values:
+          - dart
+          - gbtree
+        - type: IN
+          child: colsample_bytree
+          parent: booster
+          values:
+          - dart
+          - gbtree
+        - type: IN
+          child: eta
+          parent: booster
+          values:
+          - dart
+          - gbtree
+        - type: IN
+          child: gamma
+          parent: booster
+          values:
+          - dart
+          - gbtree
+        - type: IN
+          child: max_depth
+          parent: booster
+          values:
+          - dart
+          - gbtree
+        - type: IN
+          child: min_child_weight
+          parent: booster
+          values:
+          - dart
+          - gbtree
+        - type: EQ
+          child: rate_drop
+          parent: booster
+          value: dart
+        - type: EQ
+          child: skip_drop
+          parent: booster
+          value: dart
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: true
+      fidelity_type: trainsize
+      min_fidelity: 0.03
+      max_fidelity: 1.0
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - acc
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 170
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 14
+    search_space_n_categoricals: 2
+    search_space_n_ordinals: 0
+    search_space_n_integers: 2
+    search_space_n_floats: 10
+    search_space_has_conditionals: true
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -1,3 +1,5 @@
+"""SMAC3-1.4 Optimizer."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -6,46 +8,64 @@ import numpy as np
 from omegaconf import DictConfig, OmegaConf
 
 from carps.optimizers.optimizer import Optimizer
-from carps.utils.exceptions import AskAndTellNotSupportedError
+from carps.utils.exceptions import AskAndTellNotSupportedError, NotSupportedError
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
     from ConfigSpace import Configuration, ConfigurationSpace
-    from smac.facade.smac_ac_facade import SMAC4AC
+    from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
 
-    from carps.benchmarks.problem import Problem
     from carps.loggers.abstract_logger import AbstractLogger
     from carps.utils.task import Task
     from carps.utils.types import Incumbent
 
 
-class NotSupportedError(Exception):
-    pass
-
-
 class SMAC314Optimizer(Optimizer):
+    """SMAC3-1.4 Optimizer."""
+
     def __init__(
         self,
-        problem: Problem,
-        smac_cfg: DictConfig,
         task: Task,
+        smac_cfg: DictConfig,
         loggers: list[AbstractLogger] | None = None,
+        expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
+        expects_fidelities: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
-        super().__init__(problem, task, loggers)
+        """Initialize SMAC3-1.4 Optimizer.
 
-        self.configspace = self.problem.configspace
+        Parameters
+        ----------
+        task : Task
+            The task (objective function with specific input and output space and optimization resources) to optimize.
+        smac_cfg : DictConfig
+            SMAC configuration.
+        loggers : list[AbstractLogger] | None, optional
+            Loggers, by default None.
+        expects_multiple_objectives : bool, optional
+            Metadata. Whether the optimizer expects multiple objectives, by default False.
+        expects_fidelities : bool, optional
+            Metadata. Whether the optimizer expects fidelities for multi-fidelity, by default False.
+        """
+        super().__init__(
+            task,
+            loggers,
+            expects_fidelities=expects_fidelities,
+            expects_multiple_objectives=expects_multiple_objectives,
+        )
+
+        self.configspace = self.task.objective_function.configspace
         self.smac_cfg = smac_cfg
         self._solver: SMAC4AC | None = None
 
     def convert_configspace(self, configspace: ConfigurationSpace) -> ConfigurationSpace:
-        """Convert configuration space from Problem to Optimizer.
+        """Convert configuration space from ObjectiveFunction to Optimizer.
 
         Here, we don't need to convert.
 
         Parameters
         ----------
         configspace : ConfigurationSpace
-            Configuration space from Problem.
+            Configuration space from ObjectiveFunction.
 
         Returns:
         -------
@@ -75,14 +95,15 @@ class SMAC314Optimizer(Optimizer):
         TrialInfo
             Trial info containing configuration, budget, seed, instance.
         """
-        return TrialInfo(config=config, seed=seed, budget=budget, instance=instance)
+        inst = int(instance) if instance is not None else None
+        return TrialInfo(config=config, seed=seed, budget=budget, instance=inst)
 
     def target_function(
         self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
     ) -> float | list[float]:
         """Target Function.
 
-        Interface for the Problem.
+        Interface for the ObjectiveFunction.
 
         Parameters
         ----------
@@ -101,7 +122,7 @@ class SMAC314Optimizer(Optimizer):
             Cost as float or list[float], depending on the number of objectives.
         """
         trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
-        trial_value = self.problem.evaluate(trial_info=trial_info)
+        trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         return trial_value.cost
 
     def _setup_optimizer(self) -> SMAC4AC:
@@ -115,11 +136,11 @@ class SMAC314Optimizer(Optimizer):
             Instance of a SMAC facade.
 
         """
-        from smac.facade.smac_ac_facade import SMAC4AC
-        from smac.facade.smac_bb_facade import SMAC4BB
-        from smac.facade.smac_hpo_facade import SMAC4HPO
-        from smac.facade.smac_mf_facade import SMAC4MF
-        from smac.scenario.scenario import Scenario
+        from smac.facade.smac_ac_facade import SMAC4AC  # type: ignore
+        from smac.facade.smac_bb_facade import SMAC4BB  # type: ignore
+        from smac.facade.smac_hpo_facade import SMAC4HPO  # type: ignore
+        from smac.facade.smac_mf_facade import SMAC4MF  # type: ignore
+        from smac.scenario.scenario import Scenario  # type: ignore
 
         if self.smac_cfg.scenario.n_workers > 1 and self.smac_cfg.optimization_type != "mf":
             raise NotSupportedError("SMAC 1.4 does not support parallel execution natively.")
@@ -155,8 +176,8 @@ class SMAC314Optimizer(Optimizer):
 
             n_seeds = self.smac_cfg.get("n_seeds", None)
             intensifier_kwargs["n_seeds"] = n_seeds
-            intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_budget
-            intensifier_kwargs["max_budget"] = self.smac_cfg.scenario.max_budget
+            intensifier_kwargs["initial_budget"] = self.smac_cfg.scenario.min_fidelity
+            intensifier_kwargs["max_fidelity"] = self.smac_cfg.scenario.max_fidelity
 
             inc_selection = self.smac_cfg.incumbent_selection
             if inc_selection == "highest_observed_budget":
@@ -174,7 +195,7 @@ class SMAC314Optimizer(Optimizer):
         if self.smac_cfg.intensifier is None:
             intensifier = None
         elif self.smac_cfg.intensifier == "successive_halving":
-            from smac.intensification.successive_halving import SuccessiveHalving
+            from smac.intensification.successive_halving import SuccessiveHalving  # type: ignore
 
             intensifier = SuccessiveHalving
         else:
@@ -189,17 +210,48 @@ class SMAC314Optimizer(Optimizer):
         )
 
     def ask(self) -> TrialInfo:
+        """Ask the optimizer for a new trial to evaluate.
+
+        Raises:
+        -------
+        AskAndTellNotSupportedError
+
+        Returns:
+        -------
+        TrialInfo
+            trial info (config, seed, instance, budget)
+        """
         raise AskAndTellNotSupportedError
 
-    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:
+    def tell(self, trial_info: TrialInfo, trial_value: TrialValue) -> None:  # noqa: ARG002
+        """Tell the optimizer a new trial.
+
+
+
+        Parameters
+        ----------
+        trial_value : TrialValue
+            trial value (cost, time, ...)
+        """
         raise AskAndTellNotSupportedError
 
     def _run(self) -> Incumbent:
-        """Run SMAC on Problem."""
+        """Run SMAC on ObjectiveFunction."""
         incumbent = self.solver.optimize()  # noqa: F841
         return self.get_current_incumbent()
 
     def get_current_incumbent(self) -> Incumbent:
+        """Return the current incumbent.
+
+        The incumbent is the current best configuration.
+        In the case of multi-objective, there are multiple best configurations, mostly
+        the Pareto front.
+
+        Returns:
+        -------
+        Incumbent
+            Incumbent tuple(s) containing trial info and trial value.
+        """
         trial_info = TrialInfo(config=self.solver.solver.incumbent)
         trial_value = TrialValue(cost=self.solver.get_runhistory().get_cost(self.solver.solver.incumbent))
         return (trial_info, trial_value)

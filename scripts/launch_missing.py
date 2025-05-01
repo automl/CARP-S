@@ -1,7 +1,10 @@
-import subprocess
-import fire
+from __future__ import annotations
+
 import shutil
+import subprocess
 from pathlib import Path
+
+import fire
 
 sbatch_template="""#!/bin/bash
 #for configuration options see: https://uni-paderborn.atlassian.net/wiki/spaces/PC2DOK/pages/12944324/Running+Compute+Jobs
@@ -28,9 +31,9 @@ def launch(debug: bool = False, extra_config: str = ""):
     if path_sbatch.exists():
         shutil.rmtree(path_sbatch)
     path_sbatch.mkdir(exist_ok=True, parents=True)
-    
 
-    with open(fn_cmd, "r") as file:
+
+    with open(fn_cmd) as file:
         lines = file.readlines()
     for i, line in enumerate(lines):
         line = line.strip()
@@ -50,4 +53,3 @@ def launch(debug: bool = False, extra_config: str = ""):
 
 if __name__ == "__main__":
     fire.Fire(launch)
-    

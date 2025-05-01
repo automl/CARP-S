@@ -11,7 +11,7 @@ from omegaconf import OmegaConf
     ("path", "key"),
     [
         ("carps/configs/optimizer", "optimizer_id"),
-        ("carps/configs/problem", "problem_id"),
+        ("carps/configs/task", "task_id"),
     ],
 )
 def test_unique_ids(path, key):
@@ -19,6 +19,8 @@ def test_unique_ids(path, key):
     paths = list(path.glob("**/*.yaml"))
     values = []
     for p in paths:
+        if str(p).endswith("base.yaml"):
+            continue
         cfg = OmegaConf.load(p)
         value = cfg.get(key)
         values.append(value)

@@ -1,4 +1,4 @@
-syne-tune[basic]==0.13.0
+syne-tune[basic]  #==0.13.0
 # for bore
-xgboost==2.0.3
-scikit-learn==1.4.0
+xgboost  #==2.0.3
+scikit-learn  #==1.4.0

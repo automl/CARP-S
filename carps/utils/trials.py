@@ -1,3 +1,5 @@
+"""CARPS TrialInfo and TrialValue classes."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -32,7 +34,7 @@ class TrialInfo:
     seed : int | None, defaults to None
     budget : float | None, defaults to None
     normalized_budget: float | None, defaults to None
-        The budget normalized by max_budget. Mostly used for logging purposes.
+        The budget normalized by max_fidelity. Mostly used for logging purposes.
     name: str | None, defaults to None, arbitrary information, length 100
     checkpoint: str | None, defaults to None, checkpoint path, length 250
 

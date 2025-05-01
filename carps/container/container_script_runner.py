@@ -1,7 +1,10 @@
+"""Run experiment from database via containers."""
+
 from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from omegaconf import OmegaConf
@@ -12,7 +15,14 @@ if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
 
 
-def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor, custom_config: dict):
+def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor, custom_config: dict) -> None:  # noqa: ARG001
+    """Run one experiment from the database.
+
+    Args:
+        parameters (dict): Parameters from the database.
+        result_processor (ResultProcessor): Result processor.
+        custom_config (dict): Custom configuration.
+    """
     config = parameters["config"]
     cfg_dict = json.loads(config)
 
@@ -27,7 +37,7 @@ def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor
     with open(f"{job_id}_pyexperimenter_id.txt", "w+") as f:
         f.write(str(result_processor.experiment_id))
 
-    with open(f"{job_id}_problem_container.txt", "w+") as f:
+    with open(f"{job_id}_task_container.txt", "w+") as f:
         f.write(cfg_dict["benchmark_id"])
 
     with open(f"{job_id}_optimizer_container.txt", "w+") as f:
@@ -37,11 +47,12 @@ def py_experimenter_evaluate(parameters: dict, result_processor: ResultProcessor
 
 
 def main() -> None:
+    """Excecute next experiment from PyExperimenter database."""
     slurm_job_id = os.environ["BENCHMARKING_JOB_ID"]
-    experiment_configuration_file_path = "carps/container/py_experimenter.yaml"
+    experiment_configuration_file_path = "carps/experimenter/py_experimenter.yaml"
 
-    if os.path.exists("carps/container/credentials.yaml"):
-        database_credential_file_path = "carps/container/credentials.yaml"
+    if Path("carps/experimenter/credentials.yaml").exists():
+        database_credential_file_path = "carps/experimenter/credentials.yaml"
     else:
         database_credential_file_path = None
 

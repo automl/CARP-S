@@ -1,0 +1,100 @@
+# @package _global_
+benchmark_id: YAHPO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: yahpo/rbv2_rpart/1464/None
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.yahpo.YahpoObjectiveFunction
+    bench: rbv2_rpart
+    instance: '1464'
+    budget_type: null
+    metric:
+    - acc
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: cp
+          lower: 0.0009118819656
+          upper: 1.0
+          default_value: 0.01
+          log: true
+          meta: null
+        - type: uniform_int
+          name: maxdepth
+          lower: 1
+          upper: 30
+          default_value: 30
+          log: false
+          meta: null
+        - type: uniform_int
+          name: minbucket
+          lower: 1
+          upper: 100
+          default_value: 1
+          log: false
+          meta: null
+        - type: uniform_int
+          name: minsplit
+          lower: 1
+          upper: 100
+          default_value: 20
+          log: false
+          meta: null
+        - type: categorical
+          name: num.impute.selected.cpo
+          choices:
+          - impute.mean
+          - impute.median
+          - impute.hist
+          weights: null
+          default_value: impute.mean
+          meta: null
+        - type: constant
+          name: task_id
+          value: '1464'
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - acc
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 110
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: ML
+    objective_function_approximation: surrogate
+    has_virtual_time: false
+    deterministic: false
+    dimensions: 5
+    search_space_n_categoricals: 1
+    search_space_n_ordinals: 0
+    search_space_n_integers: 3
+    search_space_n_floats: 1
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
