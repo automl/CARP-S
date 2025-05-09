@@ -19,6 +19,7 @@ recursive-exclude scripts *
 recursive-exclude subselection *
 recursive-exclude lib *
 recursive-exclude env* *
+recursive-exclude carps/benchmark_data *
 
 recursive-include docs *.rst Makefile make.bat *.jpg *.png *.gif
 recursive-include carps/configs *
