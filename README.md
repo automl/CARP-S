@@ -20,8 +20,6 @@ For more details on CARP-S, please have a look at the
 
 ### Installation from PyPI
 
-⚠️ The installation of the optimizers and benchmarks/tasks currently does not work via pip due to packaging issues of the install scripts. Until this is fixed, please install `carps` from source (see below).
-
 To install CARP-S, you can simply use `pip`:
 
 1. Create virtual env with conda or uv
@@ -106,7 +104,7 @@ Additionally, you need to install the requirements for the benchmark and optimiz
 
 ⚠ You can specify the directory of the task data by `export CARPS_TASK_DATA_DIR=...`. Please use absolute dirnames.
 The default location is `<carps package location>/task_data`. If you specify a custom dir, always export the env var.
-
+(The carps package location is the root of the package, not of the repo.)
 
 For example, if you want to use the `SMAC3` optimizer and the `BBOB` benchmark, you need to install the
 requirements for both of them via:

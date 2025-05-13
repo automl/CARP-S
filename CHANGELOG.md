@@ -1,4 +1,8 @@
+# v1.0.1
+Fix installation via pypi ().
+
 # v1.0.0
+⚠ Breaking Changes
 Redefined task as an objective function together with an input and output space. Updated configs. Renamed problem to
 objective function and scenario to task type.
 

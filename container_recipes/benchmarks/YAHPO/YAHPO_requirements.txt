@@ -1,3 +1,0 @@
-yahpo-gym==1.0.1
-onnxruntime==1.15.0
-ConfigSpace~=0.6.0

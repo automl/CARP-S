@@ -64,7 +64,7 @@ def check_requirements(cfg: DictConfig) -> None:
     cfg : DictConfig
         Experiment configuration
     """
-    p_base = Path(__file__).parent.parent.parent / "container_recipes"
+    p_base = Path(__file__).parent.parent.parent / "carps/container/recipes"
     req_file_benchmark = p_base / "benchmarks" / cfg.benchmark_id / f"{cfg.benchmark_id}_requirements.txt"
     req_file_optimizer = (
         p_base / "optimizers" / cfg.optimizer_container_id / f"{cfg.optimizer_container_id}_requirements.txt"
