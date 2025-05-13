@@ -37,7 +37,7 @@ check:
 	pre-commit run --all-files
 
 install-dev:
-	$(PIP) install -e ".[dev]"
+	$(PIP) install -e "../..[dev]"
 	pre-commit install
 
 clean-build:
