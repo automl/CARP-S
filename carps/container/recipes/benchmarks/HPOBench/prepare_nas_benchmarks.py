@@ -1,4 +1,5 @@
 """Prepare NASBench datasets for HPOBench (download them)."""
+
 from __future__ import annotations
 
 from hpobench.benchmarks.nas.nasbench_201 import NASBench_201Data
