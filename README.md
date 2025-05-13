@@ -104,7 +104,7 @@ Additionally, you need to install the requirements for the benchmark and optimiz
 
 ⚠ You can specify the directory of the task data by `export CARPS_TASK_DATA_DIR=...`. Please use absolute dirnames.
 The default location is `<carps package location>/task_data`. If you specify a custom dir, always export the env var.
-
+(The carps package location is the root of the package, not of the repo.)
 
 For example, if you want to use the `SMAC3` optimizer and the `BBOB` benchmark, you need to install the
 requirements for both of them via:
