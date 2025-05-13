@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 include = ["carps"]
 
 [tool.setuptools.package-data]
-"*" = ["Makefile"]
+"*" = ["Makefile", "container_recipes/**/*"]
 
 [project]
 name = "carps"
@@ -205,6 +205,7 @@ exclude = [
   "docs",
   "*plotting*",
   "*hydra_utils*",
+  "carps/container/recipes",
 ]
 
 # Exclude a variety of commonly ignored directories.

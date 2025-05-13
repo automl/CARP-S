@@ -1,3 +1,5 @@
+"""Patch YAHPO configspace files."""
+
 from __future__ import annotations
 
 import json
