@@ -20,6 +20,8 @@ For more details on CARP-S, please have a look at the
 
 ### Installation from PyPI
 
+⚠️ The installation of the optimizers and benchmarks/tasks currently does not work via pip due to packaging issues of the install scripts. Until this is fixed, please install `carps` from source (see below).
+
 To install CARP-S, you can simply use `pip`:
 
 1. Create virtual env with conda or uv
