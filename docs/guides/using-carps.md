@@ -1,6 +1,7 @@
 # Using Carps
 
-In the case when you are developing your optimizer or benchmark in a standalone package, you can use carps without directly working in the carps repo.
+In the case when you are developing your optimizer or benchmark in a standalone package, you can use carps without
+directly working in the carps repo.
 
 ## With your own benchmark
 For a custom benchmark we have an [example repo](https://github.com/automl/OptBench).
