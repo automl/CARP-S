@@ -31,7 +31,7 @@ def run_make_commands(targets: list[str]) -> None:
 if __name__ == '__main__':
     args = sys.argv[1:]
     cwd_orig = os.getcwd()
-    makefile_dir = Path(os.path.dirname(__file__)).parent.parent
+    makefile_dir = Path(os.path.dirname(__file__))
     os.chdir(makefile_dir)
     run_make_commands(args)
     os.chdir(cwd_orig)

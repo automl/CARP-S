@@ -1,11 +1,11 @@
 #!/bin/bash
 # bash scripts/build_env.sh OPTIMIZER_CONTAINER_ID BENCHMARK_ID PYTHON_VERSION 
 export CONT_GENERAL_PATH=containers/general
-export CONT_GENERAL_RECIPE_PATH=container_recipes/general
+export CONT_GENERAL_RECIPE_PATH=carps/container/recipes/general
 export CONT_BENCH_PATH=containers/benchmarks
-export CONT_BENCH_RECIPE_PATH=container_recipes/benchmarks
+export CONT_BENCH_RECIPE_PATH=carps/container/recipes/benchmarks
 export CONT_OPT_PATH=containers/optimizers
-export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
+export CONT_OPT_RECIPE_PATH=carps/container/recipes/optimizers
 export ENV_LOCATION="/scratch/hpc-prf-intexml/carps-neurips24/envs"
 
 # bash ${CONT_BENCH_RECIPE_PATH}/HPOB/download_data.sh

@@ -25,11 +25,11 @@ function yellow {
 
 
 export CONT_GENERAL_PATH=containers/general
-export CONT_GENERAL_RECIPE_PATH=container_recipes/general
+export CONT_GENERAL_RECIPE_PATH=carps/container/recipes/general
 export CONT_BENCH_PATH=containers/benchmarks
-export CONT_BENCH_RECIPE_PATH=container_recipes/benchmarks
+export CONT_BENCH_RECIPE_PATH=carps/container/recipes/benchmarks
 export CONT_OPT_PATH=containers/optimizers
-export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
+export CONT_OPT_RECIPE_PATH=carps/container/recipes/optimizers
 
 PYTHON_VERSION=$2
 # if [ -z "$PYTHON_VERSION" ]
@@ -79,20 +79,20 @@ $RUN_COMMAND pip install wheel
 $RUN_COMMAND pip install swig
 $RUN_COMMAND pip install -e .
 $RUN_COMMAND pip install -r requirements.txt
-$RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_task.txt
-$RUN_COMMAND pip install -r container_recipes/general/general_requirements_container_optimizer.txt
+$RUN_COMMAND pip install -r carps/container/recipes/general/general_requirements_container_task.txt
+$RUN_COMMAND pip install -r carps/container/recipes/general/general_requirements_container_optimizer.txt
 
 # Benchmark specific
 for benchmark_id in "HPOB" "BBOB" "MFPBench" "Pymoo"
 do
-    $RUN_COMMAND pip install -r container_recipes/benchmarks/${benchmark_id}/${benchmark_id}_requirements.txt
+    $RUN_COMMAND pip install -r carps/container/recipes/benchmarks/${benchmark_id}/${benchmark_id}_requirements.txt
 done
 
 # YAHPO
-bash container_recipes/benchmarks/YAHPO/install_yahpo.sh $ENV_LOCATION
+bash carps/container/recipes/benchmarks/YAHPO/install_yahpo.sh $ENV_LOCATION
 
 # MFPBench
-bash container_recipes/benchmarks/MFPBench/download_data.sh $ENV_LOCATION
+bash carps/container/recipes/benchmarks/MFPBench/download_data.sh $ENV_LOCATION
 
 # HPOBench
 # $RUN_COMMAND pip install git+https://github.com/automl/HPOBench.git
