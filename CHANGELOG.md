@@ -1,5 +1,6 @@
 # v1.0.1
-Fix installation via pypi ().
+- Fix installation via pypi (#185).
+- Update docs (#186).
 
 # v1.0.0
 ⚠ Breaking Changes
