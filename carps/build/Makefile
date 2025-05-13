@@ -1,5 +1,6 @@
 # These have been configured to only really run short tasks. Longer form tasks
 # are usually completed in github actions.
+# Paths are relative to the Makefile location.
 
 SHELL := /bin/bash
 
@@ -80,33 +81,33 @@ uvenv:
 
 optimizer_smac:
 	$(PIP) install swig
-	$(PIP) install -r container_recipes/optimizers/SMAC3/SMAC3_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/SMAC3/SMAC3_requirements.txt
 
 optimizer_optuna:
-	$(PIP) install -r container_recipes/optimizers/Optuna/Optuna_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/Optuna/Optuna_requirements.txt
 
 optimizer_dehb:
-	$(PIP) install -r container_recipes/optimizers/DEHB/DEHB_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/DEHB/DEHB_requirements.txt
 	$(PIP) install numpy --upgrade
 
 optimizer_skopt:
-	$(PIP) install -r container_recipes/optimizers/Scikit_Optimize/Scikit_Optimize_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/Scikit_Optimize/Scikit_Optimize_requirements.txt
 
 optimizer_synetune:
-	$(PIP) install -r container_recipes/optimizers/SyneTune/SyneTune_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
 	$(PIP) install numpy --upgrade
 
 optimizer_ax:
-	$(PIP) install -r container_recipes/optimizers/Ax/Ax_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/Ax/Ax_requirements.txt
 	$(PIP) install numpy --upgrade
 
 optimizer_hebo:
-	# . container_recipes/optimizers/HEBO/HEBO_install.sh
-	$(PIP) install -r container_recipes/optimizers/HEBO/HEBO_requirements.txt
+	# . ../container/recipes/optimizers/HEBO/HEBO_install.sh
+	$(PIP) install -r ../container/recipes/optimizers/HEBO/HEBO_requirements.txt
 	$(PIP) install numpy --upgrade
 
 optimizer_nevergrad:
-	$(PIP) install -r container_recipes/optimizers/Nevergrad/Nevergrad_requirements.txt
+	$(PIP) install -r ../container/recipes/optimizers/Nevergrad/Nevergrad_requirements.txt
 	$(PIP) install numpy --upgrade
 	$(PIP) install cma --upgrade
 
@@ -118,29 +119,29 @@ benchmark_bbob:
 benchmark_yahpo:
 # Needs 2GB of space for the surrogate models of YAHPO
 	# Install yahpo
-	. container_recipes/benchmarks/YAHPO/install_yahpo.sh
+	. ../container/recipes/benchmarks/YAHPO/install_yahpo.sh
 	$(PIP) install ConfigSpace --upgrade
 	$(PIP) install numpy --upgrade
 
 benchmark_pymoo:
 	# Install pymoo
-	$(PIP) install -r container_recipes/benchmarks/Pymoo/Pymoo_requirements.txt
+	$(PIP) install -r ../container/recipes/benchmarks/Pymoo/Pymoo_requirements.txt
 
 benchmark_mfpbench:
 	# Install mfpbench
-	$(PIP) install -r container_recipes/benchmarks/MFPBench/MFPBench_requirements.txt
+	$(PIP) install -r ../container/recipes/benchmarks/MFPBench/MFPBench_requirements.txt
 	$(PIP) install xgboost --upgrade
 	$(PIP) install ConfigSpace --upgrade
-	. container_recipes/benchmarks/MFPBench/download_data.sh
+	. ../container/recipes/benchmarks/MFPBench/download_data.sh
 
 benchmark_hpobench:
 	# Install hpobench
-	. container_recipes/benchmarks/HPOBench/install_HPOBench.sh
+	. ../container/recipes/benchmarks/HPOBench/install_HPOBench.sh
 
 benchmark_hpob:
 	# Install hpob
-	$(PIP) install -r container_recipes/benchmarks/HPOB/HPOB_requirements.txt
-	. container_recipes/benchmarks/HPOB/download_data.sh
+	$(PIP) install -r ../container/recipes/benchmarks/HPOB/HPOB_requirements.txt
+	. ../container/recipes/benchmarks/HPOB/download_data.sh
 
 benchmarks:
 	$(MAKE) benchmark_bbob

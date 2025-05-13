@@ -13,7 +13,6 @@ graft tests
 # recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-recursive-exclude container_recipes *
 recursive-exclude examples *
 recursive-exclude notebooks *
 recursive-exclude scripts *
@@ -25,4 +24,4 @@ recursive-exclude carps/benchmark_data *
 
 recursive-include docs *.rst make.bat *.jpg *.png *.gif
 recursive-include carps/configs *
-recursive-include container_recipes *
+recursive-include carps/container/recipes *

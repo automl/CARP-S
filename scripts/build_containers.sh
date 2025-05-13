@@ -1,9 +1,9 @@
 export CONT_GENERAL_PATH=containers/general
-export CONT_GENERAL_RECIPE_PATH=container_recipes/general
+export CONT_GENERAL_RECIPE_PATH=carps/container/recipes/general
 export CONT_BENCH_PATH=containers/benchmarks
-export CONT_BENCH_RECIPE_PATH=container_recipes/benchmarks
+export CONT_BENCH_RECIPE_PATH=carps/container/recipes/benchmarks
 export CONT_OPT_PATH=containers/optimizers
-export CONT_OPT_RECIPE_PATH=container_recipes/optimizers
+export CONT_OPT_RECIPE_PATH=carps/container/recipes/optimizers
 
 mkdir -p $CONT_GENERAL_PATH
 mkdir -p $CONT_BENCH_PATH
