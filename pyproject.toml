@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 include = ["carps"]
 
 [tool.setuptools.package-data]
-"*" = ["Makefile", "container_recipes/**/*"]
+"*" = ["Makefile", "carps/container/recipes/**/*"]
 
 [project]
 name = "carps"
