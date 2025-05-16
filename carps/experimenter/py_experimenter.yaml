@@ -26,9 +26,9 @@ PY_EXPERIMENTER:
           type: VARCHAR(50)
         seed:
           type: INT
-        n_trials:
+        task.optimization_resources.n_trials:
           type: INT
-        time_budget:
+        task.optimization_resources.time_budget:
           type: INT
       resultfields:
         slurm_job_id: VARCHAR(50)
