@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 import json
-import logging
 import multiprocessing
 from collections.abc import Callable, Iterable
 from dataclasses import asdict
@@ -19,6 +18,8 @@ from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
+from carps.analysis.calc_hypervolume import add_hypervolume_to_df
+from carps.analysis.utils import convert_mixed_types_to_str
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
@@ -385,8 +386,8 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     task_index = pd.read_csv(index_fn)
 
     new_logs = []
-    for gid, gdf in logs.groupby(by="task_id"):
-        task_cfg = load_task_cfg(task_id=gid, task_index=task_index)
+    for gid, gdf in logs.groupby(by=["task_id", "seed"]):
+        task_cfg = load_task_cfg(task_id=gid[0], task_index=task_index)
 
         task_cfg_yaml = OmegaConf.to_yaml(task_cfg)
         if "${seed}" in task_cfg_yaml:
@@ -443,7 +444,9 @@ def maybe_convert_cost_dtype(x: int | float | str | list) -> float | list[float]
     if isinstance(x, int | float):
         return float(x)
     if isinstance(x, str):
-        return eval(x)  # noqa: S307
+        x = ast.literal_eval(x)
+        if isinstance(x, dict):
+            x = maybe_convert_cost_dtype(x["cost"])
     assert isinstance(x, list)
     return x
 
@@ -478,31 +481,6 @@ def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
     if isinstance(x, float):
         return x
     raise ValueError(f"Unknown cost type {type(x)}. Supported are float, list, np.ndarray.")
-
-
-def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None = None) -> pd.DataFrame:
-    """Convert mixed type columns to str.
-
-    Necessary to be able to write a parquet file.
-
-    Args:
-        logs (pd.DataFrame): Logs.
-        logger (logging.Logger, optional): Logger. Defaults to None.
-
-    Returns:
-        pd.DataFrame: Logs with mixed type columns converted
-    """
-    mixed_type_columns = logs.select_dtypes(include=["O"]).columns
-    if logger:
-        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")
-    for c in mixed_type_columns:
-        # D = logs[c]
-        # logs.drop(columns=c)
-        if c == "cfg_str":
-            continue
-        logs[c] = logs[c].map(lambda x: str(x))
-        logs[c] = logs[c].astype("str")
-    return logs
 
 
 def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -613,17 +591,23 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Normalized logs
     """
+    grouper_keys = ["task_id", "optimizer_id", "seed"]
     logger.info("Start normalization...")
     logger.info("Normalize n_trials...")
     logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
     ids_mo = logs["task_type"] == "multi-objective"
-    if len(ids_mo) > 0 and "hypervolume" in logs:
+    if len(ids_mo) > 0:
+        if "trial_value__cost_raw" not in logs:
+            logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
+        else:
+            logs["trial_value__cost_raw"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_dtype)
+        logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
-        logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
+        logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_norm"] = logs.groupby("task_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
 
