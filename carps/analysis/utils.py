@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -86,3 +87,28 @@ def filter_only_final_performance(
         df = df[df.groupby(["optimizer_id", "task_id", "seed"])[budget_var].transform(lambda x: x == x.max())]  # noqa: PD901
         df = df[df[budget_var] <= max_fidelity]  # noqa: PD901
     return df
+
+
+def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None = None) -> pd.DataFrame:
+    """Convert mixed type columns to str.
+
+    Necessary to be able to write a parquet file.
+
+    Args:
+        logs (pd.DataFrame): Logs.
+        logger (logging.Logger, optional): Logger. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Logs with mixed type columns converted
+    """
+    mixed_type_columns = logs.select_dtypes(include=["O"]).columns
+    if logger:
+        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")
+    for c in mixed_type_columns:
+        # D = logs[c]
+        # logs.drop(columns=c)
+        if c == "cfg_str":
+            continue
+        logs[c] = logs[c].map(lambda x: str(x))
+        logs[c] = logs[c].astype("str")
+    return logs

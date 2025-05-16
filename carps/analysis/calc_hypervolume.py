@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from pymoo.indicators.hv import HV
 
-from carps.analysis.gather_data import convert_mixed_types_to_str
+from carps.analysis.utils import convert_mixed_types_to_str
 
 run_id = ["task_type", "benchmark_id", "task_id", "optimizer_id", "seed"]
 
