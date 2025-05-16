@@ -7,7 +7,7 @@
 * 2. Download the data for the respective benchmarks using
 *    `python -m mfpbench download --benchmark <benchmark_name> --datadir <data_dir_path>`
 *     where <benchmark_name> is one of ["pd1", "jahs"]
-* 3. Install requirements from "./container_recipes/benchmarks/MFPBench/MFPBench_requirements.txt"
+* 3. Install requirements from "./carps/container/recipes/benchmarks/MFPBench/MFPBench_requirements.txt"
 *    NOTE: JAHSBench is commented out in the requirements file due to compatibility issues
 * 4. Test example 1 (smac20 multifidelity on PD1 imagenet_resnet_512 benchmark):
 *    `python carps/run.py +optimizer/smac20=multifidelity +task/MFPBench/pd1=imagenet_resnet_512

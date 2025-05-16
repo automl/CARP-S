@@ -4,6 +4,7 @@ include CONTRIBUTING.md
 include LICENSE
 include README.md
 include pyproject.toml
+include carps/build/Makefile
 
 graft carps
 graft docs
@@ -12,14 +13,16 @@ graft tests
 # recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
-recursive-exclude container_recipes *
 recursive-exclude examples *
 recursive-exclude notebooks *
 recursive-exclude scripts *
 recursive-exclude subselection *
 recursive-exclude lib *
 recursive-exclude env* *
+recursive-exclude carps.egg* *
 recursive-exclude carps/benchmark_data *
+recursive-exclude carps/task_data *
 
-recursive-include docs *.rst Makefile make.bat *.jpg *.png *.gif
+recursive-include docs *.rst make.bat *.jpg *.png *.gif
 recursive-include carps/configs *
+recursive-include carps/container/recipes *
