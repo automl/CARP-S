@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,7 @@ import fire
 import numpy as np
 import pandas as pd
 from pymoo.indicators.hv import HV
+from tqdm import tqdm
 
 from carps.analysis.utils import convert_mixed_types_to_str
 
@@ -46,35 +48,70 @@ def gather_trajectory(x: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def add_reference_point(x: pd.DataFrame) -> pd.DataFrame:
+def get_reference_point(x: pd.DataFrame, on_key: str = "trial_value__cost") -> np.ndarray:
+    """Get reference point from the dataframe.
+
+    Dataframe should only contain data from one task. The reference point is the maximum
+    of the costs over all trials. This is the worst case scenario for the hypervolume
+    calculation. The reference point is needed to define the bound of the hypervolume.
+
+    Args:
+        x (pd.DataFrame): Dataframe with the trajectory.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_inc".
+
+    Returns:
+        np.ndarray: Reference point.
+    """
+    if "task_id" in x.columns:
+        assert x["task_id"].nunique() == 1, "Cannot get reference point for multiple tasks"  # noqa: PD101
+    costs = get_costs(x, on_key)
+    return np.max(costs, axis=0)
+
+
+def get_costs(x: pd.DataFrame, on_key: str = "trial_value__cost") -> np.ndarray:
+    """Get costs from the dataframe.
+
+    Here, it is expected that the costs are vectors (in the case of multi-objective optimization).
+
+    Args:
+        x (pd.DataFrame): Dataframe with the trajectory.
+        on_key (str, optional): Column to use for the costs. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_raw".
+    """
+    return np.array(x[on_key].to_list())
+
+
+def add_reference_point(x: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
     """Add reference point to the dataframe.
 
     The reference point is needed to define the bound of the hypervolume.
 
     Args:
         x (pd.DataFrame): Dataframe with the trajectory.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_inc".
 
     Returns:
         pd.DataFrame: Dataframe with the reference point.
     """
-    costs = x["trial_value__cost_inc"].apply(lambda x: np.array([np.array(c) for c in x])).to_list()
-    costs = np.concatenate(costs)
-    reference_point = np.max(costs, axis=0)
+    reference_point = get_reference_point(x, on_key)
     x["reference_point"] = [reference_point] * len(x)
     return x
 
 
-def calc_hv(x: pd.DataFrame) -> pd.DataFrame:
+def calc_hv(x: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
     """Calculate hypervolume per trajectory step.
 
     Args:
         x (pd.DataFrame): Dataframe with the trajectory.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_inc".
 
     Returns:
         pd.DataFrame: Dataframe with the hypervolume.
     """
-    F = np.concatenate(np.array([np.array(p) for p in x["trial_value__cost_inc"].to_numpy()]))
-
+    F = get_costs(x, on_key)
     ind = HV(ref_point=x["reference_point"].iloc[0], pf=None, nds=False)
     x["hypervolume"] = ind(F)
     return x
@@ -161,6 +198,40 @@ def calculate_hypervolume(rundir: str) -> None:
     trajectory_df.to_csv(Path(rundir) / "trajectory.csv")
     trajectory_df = convert_mixed_types_to_str(trajectory_df)
     trajectory_df.to_parquet(Path(rundir) / "trajectory.parquet")
+
+
+def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
+    """Add hypervolume to the dataframe.
+
+    If there are multiple objectives, add reference point and calculate hypervolume.
+
+    Args:
+        logs (pd.DataFrame): Dataframe with the logs.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_raw".
+
+    Returns:
+        pd.DataFrame: Dataframe with the hypervolume.
+    """
+    tqdm.pandas(desc="Calc hypervolumne...")
+    ids_mo = logs["task_type"] == "multi-objective"
+    add_reference_point_partial = partial(add_reference_point, on_key=on_key)
+    calc_hv_partial = partial(calc_hv, on_key=on_key)
+    mo_cols = ["hypervolume", "reference_point"]
+    for mo_col in mo_cols:
+        if mo_col not in logs.columns:
+            logs[mo_col] = None
+    if len(ids_mo) > 0:
+        logs.loc[ids_mo] = (
+            logs.loc[ids_mo]
+            .groupby(by=["task_type", "task_id"])
+            .apply(add_reference_point_partial)
+            .reset_index(drop=True)
+        )
+        logs.loc[ids_mo] = (
+            logs.loc[ids_mo].groupby(by=[*run_id, "n_trials"]).progress_apply(calc_hv_partial).reset_index(drop=True)
+        )
+    return logs
 
 
 def load_trajectory(rundir: str) -> pd.DataFrame:
