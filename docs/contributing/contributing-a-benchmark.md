@@ -3,12 +3,13 @@
 To add a new objective function to CARP-S, you need to create a Python file that defines a 
 new objective function class. This class should inherit from the `ObjectiveFunction` class defined in 
 `carps/objective_functions/objective_function.py`. 
+You can see an example of custom objective functions [in this repo](https://github.com/automl/OptBench).
 
 Here's a step-by-step guide for how to add a new benchmark:
 
-1. **Benchmark Python file**:
-Create a new Python file in the `carps/benchmarks/` directory. 
-For example, you might name it `my_benchmark.py`.
+1. **Objective Function Python file**:
+Create a new Python file in the `carps/objective_functions/` directory. 
+For example, you might name it `my_objective_function.py`.
 
 
 2. **Define your objective function class**: 
@@ -22,16 +23,14 @@ them in your class. For example, you might need a method to load data for your o
 
 3. **Requirements file**: Create a requirements file and add the requirements for your benchmark. 
    The file structure must be 
-   `container_recipes/benchmarks/<benchmark_id>/<benchmark_id>_requirements.txt`, so for example,
-   `container_recipes/benchmarks/my_benchmark/my_benchmark_requirements.txt`. Please specify exact 
-   versions of all requirements! This is very important for reproducibility.
+   `carps/container/recipes/benchmarks/<benchmark_id>/<benchmark_id>_requirements.txt`, so for example,
+   `carps/container/recipes/benchmarks/my_objective_function/my_objective_function_requirements.txt`. 
 
-
-4. **Config files**: Add config files for the different benchmarking tasks under 
-   `carps/configs/task/my_benchmark/my_benchmark_config_{task}.yaml`. 
+4. **Config files**: Add config files for the different tasks under 
+   `carps/configs/task/my_objective_function/my_objective_function_config_{task}.yaml`. 
    You can use the existing config files as a template.
 
-Here's a basic example of what your `my_benchmark.py` file might look like:
+Here's a basic example of what your `my_objective_function.py` file might look like:
 
 ```python
 from ConfigSpace import ConfigurationSpace

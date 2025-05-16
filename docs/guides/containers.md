@@ -58,29 +58,29 @@ mkdir /dev/shm/intexml<X> -p
 ```
 
 #### Optimizer
-A Singularity recipe has to be created for the optimizer, which should be saved in the folder `container_recipes`.
+A Singularity recipe has to be created for the optimizer, which should be saved in the folder `carps/container/recipes`.
 This recipe has the purpose of setting up a container in which the optimizer can be run, e.g., installing the 
 required packages, setting environment variables, copying files and so on.
-For the `Dummy_Optimizer` this is `container_recipes/dummy_optimizer/dummy_optimizer.recipe`, which you can consult 
+For the `Dummy_Optimizer` this is `carps/container/recipes/dummy_optimizer/dummy_optimizer.recipe`, which you can consult 
 as a basis for other optimizers.
 
 The optimizer then has to be built to an image named after the optimizer id, e.g., `DUMMY_Optimizer.sif` for the
 `DummyOptimizer` using the following command:
 
 ```bash
-singularity build containers/optimizers/DUMMY_Optimizer.sif container_recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
+singularity build containers/optimizers/DUMMY_Optimizer.sif carps/container/recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
 To facilitate this process, a short script is provided for this purpose, which is however system-specific to Noctua2.
 It can be run as follows:
 
 ```bash
-./compile_noctua2.sh containers/optimizers/DUMMY_Optimizer.sif container_recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
+./compile_noctua2.sh containers/optimizers/DUMMY_Optimizer.sif carps/container/recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
 #### Benchmark
 Like for the optimizer, a Singularity recipe has to be created for the benchmark, which should be saved in the folder
-`container_recipes` as well.
+`carps/container/recipes` as well.
 
 The benchmark image also has to be according to the benchmark id, e.g., `DUMMY_ObjectiveFunction.sif` for the 
 `DummyBenchmark` 
@@ -88,13 +88,13 @@ using
 the following command:
 
 ```bash
-singularity build containers/benchmarks/DUMMY_ObjectiveFunction.sif container_recipes/benchmarks/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
+singularity build containers/benchmarks/DUMMY_ObjectiveFunction.sif carps/container/recipes/benchmarks/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
 ```
 
 Command for Noctua2:
 
 ```bash
-./compile_noctua2.sh containers/benchmarks/DUMMY_ObjectiveFunction.sif container_recipes/benchmarks/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
+./compile_noctua2.sh containers/benchmarks/DUMMY_ObjectiveFunction.sif carps/container/recipes/benchmarks/DUMMY_ObjectiveFunction/DUMMY_ObjectiveFunction.recipe
 ```
 
 #### Running
@@ -102,13 +102,13 @@ A third container is needed that handles the hydra config. It does not need to b
 benchmark, but can be used as is. It can be built as follows:
 
 ```bash
-singularity build containers/general/runner.sif container_recipes/general/runner.recipe
+singularity build containers/general/runner.sif carps/container/recipes/general/runner.recipe
 ```
 
 Command for Noctua2:
 
 ```bash
-./compile_noctua2.sh containers/general/runner.sif container_recipes/general/runner.recipe
+./compile_noctua2.sh containers/general/runner.sif carps/container/recipes/general/runner.recipe
 ```
 
 Running the containerized benchmarking system is also system-dependent. An example for Noctua2 is provided in the
