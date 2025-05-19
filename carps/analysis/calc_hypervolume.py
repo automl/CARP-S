@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from pymoo.indicators.hv import HV
 
-from carps.analysis.gather_data import convert_mixed_types_to_str
+# from carps.analysis.gather_data import convert_mixed_types_to_str
 
 run_id = ["task_type", "benchmark_id", "task_id", "optimizer_id", "seed"]
 
@@ -57,9 +57,17 @@ def add_reference_point(x: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Dataframe with the reference point.
     """
-    costs = x["trial_value__cost_inc"].apply(lambda x: np.array([np.array(c) for c in x])).to_list()
-    costs = np.concatenate(costs)
+    # Flatten and stack all cost vectors
+    costs = np.vstack([np.array(c) for c in x["trial_value__cost_raw"]])
+
+    # Sanity check for consistent dimensionality
+    if len(set(cost.shape[0] for cost in costs)) != 1:
+        raise ValueError("Inconsistent number of objectives in cost vectors.")
+
+    # Reference point is max across all objectives
     reference_point = np.max(costs, axis=0)
+    
+    # Set reference point per row
     x["reference_point"] = [reference_point] * len(x)
     return x
 
@@ -73,7 +81,7 @@ def calc_hv(x: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Dataframe with the hypervolume.
     """
-    F = np.concatenate(np.array([np.array(p) for p in x["trial_value__cost_inc"].to_numpy()]))
+    F = np.vstack([np.array(p) for p in x["trial_value__cost_raw"]])
 
     ind = HV(ref_point=x["reference_point"].iloc[0], pf=None, nds=False)
     x["hypervolume"] = ind(F)
