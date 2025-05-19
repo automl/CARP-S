@@ -22,6 +22,7 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
+from carps.analysis.calc_hypervolume import calc_hv, add_reference_point, run_id
 
 if TYPE_CHECKING:
     from carps.objective_functions.objective_function import ObjectiveFunction
@@ -389,11 +390,11 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
         task_cfg = load_task_cfg(task_id=gid, task_index=task_index)
 
         task_cfg_yaml = OmegaConf.to_yaml(task_cfg)
-        if "${seed}" in task_cfg_yaml:
-            # Add seed to config to make it resolvable
-            assert gdf["seed"].nunique() == 1  # noqa: PD101
-            seed = gdf["seed"].iloc[0]
-            task_cfg.seed = int(seed)
+        # if "${seed}" in task_cfg_yaml:
+        #     # Add seed to config to make it resolvable
+        #     assert gdf["seed"].nunique() == 1  # noqa: PD101
+        #     seed = gdf["seed"].iloc[0]
+        #     task_cfg.seed = int(seed)
         task_cfg = OmegaConf.to_container(task_cfg, resolve=False)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         if overwrite:
@@ -440,10 +441,13 @@ def maybe_convert_cost_dtype(x: int | float | str | list) -> float | list[float]
     Returns:
         float | list[float]: Cost(s).
     """
+    
     if isinstance(x, int | float):
         return float(x)
     if isinstance(x, str):
-        return eval(x)  # noqa: S307
+        x = eval(x)  # noqa: S307
+    if isinstance(x, dict):
+        x = eval(x["cost"])
     assert isinstance(x, list)
     return x
 
@@ -463,7 +467,7 @@ def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
         float: Single-objective cost or aggregated cost.
     """
     if isinstance(x, list | np.ndarray):
-        return np.sum(x)
+        return np.sum(x)  # TODO change to HV here
     if isinstance(x, dict):
         assert len(x.values()) == 1
         # Most likely comes from database
@@ -472,7 +476,7 @@ def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
         if isinstance(value, str):
             value = ast.literal_eval(value)
             if isinstance(value, list):
-                return np.sum(value)
+                return np.sum(value)  # TODO Change to HV here
         if isinstance(value, float | int):
             return value
     if isinstance(x, float):
@@ -566,7 +570,11 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
 
     logger.debug("Handle MO costs...")
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
-    logs["trial_value__cost"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
+    # trial_value__cost_raw for add_reference_point and to calc_hv
+    logs = logs.groupby(by=["task_type", "task_id"]).apply(add_reference_point).reset_index(drop=True)
+    logs = logs.groupby(by=[*run_id, "n_trials"]).apply(calc_hv).reset_index(drop=True)
+    logs["trial_value__cost"] = logs["hypervolume"] #logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
+    print(logs.head())
     logger.debug("Determine incumbent cost...")
     logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
 
@@ -613,6 +621,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Normalized logs
     """
+    grouper_keys = ["task_id", "optimizer_id", "seed"]
     logger.info("Start normalization...")
     logger.info("Normalize n_trials...")
     logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
@@ -623,7 +632,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
-        logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
+        logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_norm"] = logs.groupby("task_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
 
