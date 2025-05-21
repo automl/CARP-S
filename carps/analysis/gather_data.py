@@ -6,6 +6,7 @@ import ast
 import json
 import logging
 import multiprocessing
+import os
 from collections.abc import Callable, Iterable
 from dataclasses import asdict
 from functools import partial
@@ -841,6 +842,7 @@ def filelogs_to_df(
     df = pd.concat(df_list).reset_index(drop=True)  # noqa: PD901
     logger.info("Done. Saving to file...")
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
+    rundir = os.path.commonpath(rundirs_list)
     df.to_csv(Path(rundir) / "logs.csv", index=False)
     df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
     df = convert_mixed_types_to_str(df)  # noqa: PD901
