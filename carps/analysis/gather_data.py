@@ -427,7 +427,6 @@ def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] | None = N
     """
     if keep_task_columns is None:
         keep_task_columns = ["task.optimization_resources.n_trials"]
-    keep_task_columns = [f"task.{c}" for c in keep_task_columns]
     task_cols_to_remove = [c for c in logs.columns if c.startswith("task.") and c not in keep_task_columns]
     return logs.drop(columns=task_cols_to_remove)
 
