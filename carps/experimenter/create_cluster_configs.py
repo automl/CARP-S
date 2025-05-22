@@ -13,6 +13,7 @@ from py_experimenter.exceptions import DatabaseConnectionError
 from py_experimenter.experimenter import PyExperimenter
 
 from carps.utils.loggingutils import CustomEncoder
+import pickle as pckl
 
 logger = logging.getLogger("create experiments")
 
@@ -72,7 +73,7 @@ def get_experiment_definition(cfg: OmegaConf) -> dict:
     cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=True)
 
     cfg_str = json.dumps(cfg_dict, cls=CustomEncoder)
-    cfg_hash = create_config_hash(cfg)
+    cfg_hash = create_config_hash_from_full_cfg(cfg)
 
     return {
         "config": cfg_str,
@@ -100,6 +101,7 @@ def fill_database(cfg: DictConfig, experimenter: PyExperimenter) -> None:
         DatabaseConnectionError: If there is an error with the database connection.
     """
     experiment_definition = get_experiment_definition(cfg)
+    
 
     column_names = list(experimenter.db_connector.database_configuration.keyfields.keys())
     exists = False
@@ -124,7 +126,7 @@ def fill_database(cfg: DictConfig, experimenter: PyExperimenter) -> None:
     # experimenter.close_ssh()
 
 
-@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None)  # type: ignore[misc]
+@hydra.main(config_path="../configs", config_name="base.yaml", version_base=None, save_as_pckl=True, folder_path="configs_pckl")  # type: ignore[misc]
 def main(cfg: DictConfig) -> None:
     """Store experiment config in database.
 
@@ -134,23 +136,31 @@ def main(cfg: DictConfig) -> None:
         Global configuration.
 
     """
-    fill_database(cfg, experimenter)
+    if save_as_pckl:
+        experiment_definition = get_experiment_definition(cfg)
+        files = list(Path(folder_path).glob("*.pkl"))
+        
+        if experiment_definition['config_hash'] not in files:
+            with open(f"{folder_path}{experiment_definition['config_hash']}.pkl", "wb") as f:
+                pckl.dump(experiment_definition, f)
+    else: 
+        experiment_configuration_file_path = Path(__file__).parent / "py_experimenter.yaml"
+        
+        database_credential_file_path = Path(__file__).parent / "credentials.yaml"
+        if database_credential_file_path is not None and not database_credential_file_path.exists():
+            database_credential_file_path = None  # type: ignore[assignment]
+
+        experimenter = PyExperimenter(
+            experiment_configuration_file_path=experiment_configuration_file_path,
+            name="carps",
+            database_credential_file_path=database_credential_file_path,
+            log_level=logging.INFO,
+            use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
+            use_codecarbon=False
+        )
+        fill_database(cfg, experimenter)
 
 
 if __name__ == "__main__":
     # TODO make experiment_configuration_file_path and database_credential_file_path a commandline arg
-    experiment_configuration_file_path = Path(__file__).parent / "py_experimenter.yaml"
-
-    database_credential_file_path = Path(__file__).parent / "credentials.yaml"
-    if database_credential_file_path is not None and not database_credential_file_path.exists():
-        database_credential_file_path = None  # type: ignore[assignment]
-
-    experimenter = PyExperimenter(
-        experiment_configuration_file_path=experiment_configuration_file_path,
-        name="carps",
-        database_credential_file_path=database_credential_file_path,
-        log_level=logging.INFO,
-        use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
-    )
-
     main()
