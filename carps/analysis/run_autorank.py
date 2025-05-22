@@ -383,6 +383,7 @@ def cd_evaluation(
         alpha=alpha,
         alpha_normality=alpha_normality,
         num_samples=len(rank_data),
+        sample_matrix=None,
         posterior_matrix=None,
         decision_matrix=None,
         rope=None,
