@@ -179,12 +179,6 @@ def process_logs_from_database(
         only_incumbents=only_incumbents,
     )
 
-    # Set up multiprocessing pool to process the logs
-    # with Pool() as pool:
-    #     # Wrap pool.imap_unordered with tqdm to show the progress bar
-    #     result = list(tqdm(
-    #           pool.imap_unordered(
-    #           process_experiment_partial, experiment_ids), total=len(experiment_ids), desc="Processing experiments"))
     logger.info(f"Start processing {len(experiment_ids)} experiments... This might take a while...")
     result = [
         process_experiment_partial(experiment_id)
