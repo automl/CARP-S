@@ -45,7 +45,7 @@ with ThreadPoolExecutor() as executor:
 
 
 # CONNECT TO DATABASE and get existing experiments
-experiment_configuration_file_path = "carps/experimenter/py_experimenter copy.yaml"
+experiment_configuration_file_path = "carps/experimenter/py_experimenter.yaml"
 database_credential_file_path = "carps/experimenter/credentials.yaml"
 
 experimenter = PyExperimenter(
