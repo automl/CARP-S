@@ -246,7 +246,7 @@ class HPOBObjectiveFunction(ObjectiveFunction):
         if not surrogates_file.is_file():
             raise RuntimeError(
                 "It seems that the surrogate files have not been downloaded. Please run "
-                "'bash container_recipes/benchmarks/HPOB/download_data.sh' to download the "
+                "'bash carps/container/recipes/benchmarks/HPOB/download_data.sh' to download the "
                 f"surrogates. Surrogates file: {surrogates_file}, surrogates files resolved: "
                 f"{surrogates_file.resolve()}, current workdir: {os.getcwd()}. "
             )

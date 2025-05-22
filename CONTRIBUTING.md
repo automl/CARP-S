@@ -81,11 +81,9 @@ git push origin name-of-your-bugfix-or-feature
 Submit a [pull request](https://github.com/automl/CARP-S/pulls) through the GitHub website!
 
 ## Local Development
-
-### Virtual Environments
-You can try to install all dependencies into one big environment, but probably there are package clashes.
-Therefore, you can build one virtual environment for each optimizer-benchmark combination.
-Either run `scripts/build_envs.sh` to build all existing combinations or copy the combination and run as needed. It will create an environment with name `automlsuite_${OPTIMIZER_CONTAINER_ID}_${BENCHMARK_ID}`.
+To promote compatibility we encourage to enable `numpy>2.0.0` and `ConfigSpace>1.0.0`, and that in general modern
+python versions are supported.
+If there are still package clashes, you can create a virtual env per benchmark and optimizer.
 
 ## Pull Request Guidelines
 Before you submit a pull request, check that it meets these guidelines:
@@ -93,7 +91,7 @@ Before you submit a pull request, check that it meets these guidelines:
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated.
 Put your new functionality into a function with a docstring, and add the feature to the list in `README.md`.
-3. The pull request should work for `Python 3.9` and
+3. The pull request should work for `Python 3.9` (ideally newer versions) and
 make sure that the tests pass for all supported Python versions.
 
 ## Testing
