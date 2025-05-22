@@ -314,6 +314,8 @@ def add_task_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFram
     """
 
     def determine_task_type(x: pd.Series) -> str:
+        if "task_type" in x:
+            return x["task_type"]
         get_mf = x.get(task_prefix + "is_multifidelity", False)
         get_mo = x.get(task_prefix + "is_multiobjective", False)
         if get_mf is False and get_mo is False:
