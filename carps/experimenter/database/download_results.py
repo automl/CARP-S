@@ -18,6 +18,7 @@ def main(
     pyexperimenter_configuration_file_path: str | None = None,
     database_credential_file_path: str | Path | None = None,
     outdir: str | Path | None = None,
+    codecarbon: bool = False
 ) -> None:
     """Download results from the database and save them to outdir.
 
@@ -49,6 +50,7 @@ def main(
         database_credential_file_path=database_credential_file_path,
         log_file="logs/reset_experiments.log",
         use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
+        use_codecarbon=codecarbon
     )
 
     experiment_config_table = experimenter.get_table()
@@ -64,12 +66,14 @@ def main(
             logger.info(f"\tFrom them, found {n_errored} errored runs of type {task_type}. ❌")
     trajectory_table = experimenter.get_logtable("trajectory")
     trials_table = experimenter.get_logtable("trials")
-    codecarbon_table = experimenter.get_codecarbon_table()
+    if codecarbon:
+        codecarbon_table = experimenter.get_codecarbon_table()
 
     experiment_config_table.to_parquet(outdir / "experiment_config.parquet", index=False)
     trajectory_table.to_parquet(outdir / "trajectory.parquet", index=False)
     trials_table.to_parquet(outdir / "trials.parquet", index=False)
-    codecarbon_table.to_parquet(outdir / "codecarbon.parquet", index=False)
+    if codecarbon:
+        codecarbon_table.to_parquet(outdir / "codecarbon.parquet", index=False)
     logger.info(
         "Downloaded results from the database. "
         f"Saved to '{outdir}'. "
