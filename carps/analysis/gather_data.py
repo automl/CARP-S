@@ -6,6 +6,7 @@ import ast
 import json
 import logging
 import multiprocessing
+import os
 from collections.abc import Callable, Iterable
 from dataclasses import asdict
 from functools import partial
@@ -796,7 +797,10 @@ def rename_legacy(logs: pd.DataFrame) -> pd.DataFrame:
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
 def filelogs_to_df(
-    rundir: str | list[str], log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
+    rundir: str | list[str],
+    log_fn: str = "trial_logs.jsonl",
+    n_processes: int | None = None,
+    outdir: str | Path | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load logs from file and preprocess.
 
@@ -841,13 +845,15 @@ def filelogs_to_df(
     df = pd.concat(df_list).reset_index(drop=True)  # noqa: PD901
     logger.info("Done. Saving to file...")
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
-    df.to_csv(Path(rundir) / "logs.csv", index=False)
-    df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
+    if outdir is None:
+        outdir = os.path.commonpath(rundirs_list)
+    df.to_csv(Path(outdir) / "logs.csv", index=False)
+    df_cfg.to_csv(Path(outdir) / "logs_cfg.csv", index=False)
     df = convert_mixed_types_to_str(df)  # noqa: PD901
     df_cfg = convert_mixed_types_to_str(df_cfg)
-    df.to_parquet(Path(rundir) / "logs.parquet", index=False)
-    df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False)
-    logger.info(f"Saved to {Path(rundir) / 'logs.csv'} and {Path(rundir) / 'logs_cfg.csv'}. 💌")
+    df.to_parquet(Path(outdir) / "logs.parquet", index=False)
+    df_cfg.to_parquet(Path(outdir) / "logs_cfg.parquet", index=False)
+    logger.info(f"Saved to {Path(outdir) / 'logs.csv'} and {Path(outdir) / 'logs_cfg.csv'}. 💌")
     logger.info("Done. 😊")
 
     return df, df_cfg
