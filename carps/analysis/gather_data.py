@@ -847,6 +847,8 @@ def filelogs_to_df(
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
     if outdir is None:
         outdir = os.path.commonpath(rundirs_list)
+    outdir = Path(outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
     df.to_csv(Path(outdir) / "logs.csv", index=False)
     df_cfg.to_csv(Path(outdir) / "logs_cfg.csv", index=False)
     df = convert_mixed_types_to_str(df)  # noqa: PD901
