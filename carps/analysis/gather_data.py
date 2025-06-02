@@ -441,13 +441,14 @@ def maybe_convert_cost_dtype(x: int | float | str | list) -> float | list[float]
     Returns:
         float | list[float]: Cost(s).
     """
-    if isinstance(x, int | float):
+    if isinstance(x, float | int):
         return float(x)
     if isinstance(x, str):
         x = ast.literal_eval(x)
         if isinstance(x, dict):
-            x = maybe_convert_cost_dtype(x["cost"])
-    assert isinstance(x, list)
+            return maybe_convert_cost_dtype(x["cost"])
+        return maybe_convert_cost_dtype(x)
+    assert isinstance(x, list), f"Cost is not list but is {x, type(x)}"
     return x
 
 
