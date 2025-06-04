@@ -119,3 +119,42 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None
         logs[c] = logs[c].map(lambda x: str(x))
         logs[c] = logs[c].astype("str")
     return logs
+
+
+def percent_budget_used(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate the percentage of budget used for each optimizer, task, and seed.
+
+    This function groups the DataFrame by run (optimizer_id, task_id, and seed),
+    and calculates the percentage of budget used based on the maximum number of trials.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame containing the performance data.
+
+    Returns:
+    -------
+    pd.DataFrame
+        A DataFrame containing the percentage of budget used for each optimizer, task, and seed.
+    """
+
+    def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
+        total_budget = groupdf["task.optimization_resources.n_trials"].max()
+        groupdf = groupdf[groupdf["n_trials"] == groupdf["n_trials"].max()].copy()
+        groupdf.loc[:, "percent_budget_used"] = groupdf["n_trials"] / total_budget
+        return groupdf
+
+    return df.groupby(by=["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
+
+
+def get_ids_mo(logs: pd.DataFrame) -> pd.Series:
+    """Get multi-objective ids.
+
+    Args:
+        logs (pd.DataFrame): Logs.
+
+    Returns:
+        pd.Series: Boolean series indicating multi-objective ids.
+    """
+    # TODO determine MO ids by type of cost (first apply maybe_convert_cost_dtype)
+    return logs["task_type"].isin(["multi-objective", "multi-fidelity-objective"])
