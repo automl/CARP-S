@@ -6,7 +6,6 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import numpy as np
 import seaborn as sns
 
 if TYPE_CHECKING:
@@ -64,29 +63,37 @@ def setup_seaborn(font_scale: float | None = None) -> None:
     sns.set_palette("colorblind")
 
 
-def filter_only_final_performance(
-    df: pd.DataFrame,
-    budget_var: str = "n_trials_norm",
-    max_fidelity: float = 1,
-    soft: bool = True,  # noqa: FBT001, FBT002
-) -> pd.DataFrame:
-    """Filter only the final performance of the optimizers (performance at budget_var==max_fidelity).
+def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_norm", max_x: float = 1) -> pd.DataFrame:
+    """Filter final performance based on the maximum x value.
 
-    Args:
-        df (pd.DataFrame): Results dataframe.
-        budget_var (str, optional): The budget variable. Defaults to "n_trials_norm".
-        max_fidelity (float, optional): The maximum budget. Defaults to 1.
-        soft (bool, optional): Whether to use a soft filter. Defaults to True.
+    (1) Filter s.t. the x_column is less than or equal to max_x.
+    (2) For each run (each group of optimizer_id, task_id, and seed), keep only the row with the
+    best solution, which is defined as the row with the minimum cost_inc value.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame containing the performance data.
+    x_column : str, optional
+        The column to filter on, by default "n_trials_norm".
+    max_x : float, optional
+        The maximum value of the x_column to filter by, by default 1.
 
     Returns:
-        pd.DataFrame: Filtered dataframe
+    -------
+    pd.DataFrame
+        A DataFrame containing only the final performance data for each optimizer, task, and seed.
     """
-    if not soft:
-        df = df[np.isclose(df[budget_var], max_fidelity)]  # noqa: PD901
-    else:
-        df = df[df.groupby(["optimizer_id", "task_id", "seed"])[budget_var].transform(lambda x: x == x.max())]  # noqa: PD901
-        df = df[df[budget_var] <= max_fidelity]  # noqa: PD901
-    return df
+
+    def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
+        groupdf = groupdf[groupdf[x_column] <= max_x]
+        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()]
+
+    df_final = df.groupby(["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
+
+    if "level_3" in df_final.columns:
+        df_final = df_final.drop(columns=["level_3"])
+    return df_final.reset_index()
 
 
 def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None = None) -> pd.DataFrame:
