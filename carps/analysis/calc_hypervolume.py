@@ -45,6 +45,38 @@ def gather_trajectory(x: pd.DataFrame) -> pd.DataFrame:
         data.append(D)
     return pd.DataFrame(data)
 
+def get_pareto_front(costs):
+    """Return all Pareto-optimal rows from the given array. Assumes minimization."""
+    is_efficient = np.ones(len(costs), dtype=bool)
+    for i, c in enumerate(costs):
+        if is_efficient[i]:
+            is_efficient[is_efficient] = np.any(costs[is_efficient] < c, axis=1) | np.all(costs[is_efficient] == c, axis=1)
+            is_efficient[i] = True
+    return costs[is_efficient]
+
+
+def add_running_pareto_front(group):
+    """Adds the pareto front of all costs up until the current trial to the group.
+
+    Args:
+        group (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    group = group.sort_values("n_trials").reset_index(drop=True)
+    costs = np.stack(group["trial_value__cost_normalized"].to_numpy())
+    pareto_fronts = []
+
+    for i in range(len(group)):
+        current_costs = costs[:i+1]
+        front = get_pareto_front(current_costs)
+        pareto_fronts.append(tuple(map(tuple, front)))
+
+    group["pareto_front"] = pareto_fronts
+    return group
+
+
 
 def add_reference_point(x: pd.DataFrame) -> pd.DataFrame:
     """Add reference point to the dataframe.
@@ -65,11 +97,20 @@ def add_reference_point(x: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Inconsistent number of objectives in cost vectors.")
 
     # Reference point is max across all objectives
-    reference_point = np.max(costs, axis=0)
+    reference_point = np.max(costs, axis=0) + 1e-4
     
     # Set reference point per row
     x["reference_point"] = [reference_point] * len(x)
     return x
+
+def normalize_objectives(x: pd.DataFrame) -> pd.DataFrame:
+    costs = np.vstack(x["trial_value__cost_raw"])
+    min_vals, max_vals = costs.min(0), costs.max(0)
+    denom = np.where(max_vals - min_vals == 0, 1, max_vals - min_vals)
+    normalized = (costs - min_vals) / denom
+    x["trial_value__cost_normalized"] = list(normalized)
+    return x
+
 
 
 def calc_hv(x: pd.DataFrame) -> pd.DataFrame:
@@ -81,9 +122,9 @@ def calc_hv(x: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Dataframe with the hypervolume.
     """
-    F = np.vstack([np.array(p) for p in x["trial_value__cost_raw"]])
+    F = np.vstack([np.array(p) for p in x["pareto_front"]])
 
-    ind = HV(ref_point=x["reference_point"].iloc[0], pf=None, nds=False)
+    ind = HV(ref_point=[1.000001]*F.shape[1], pf=None, nds=False)
     x["hypervolume"] = ind(F)
     return x
 

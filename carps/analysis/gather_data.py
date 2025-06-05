@@ -22,7 +22,7 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
-from carps.analysis.calc_hypervolume import calc_hv, add_reference_point, run_id
+from carps.analysis.calc_hypervolume import calc_hv, add_reference_point, run_id, add_running_pareto_front, normalize_objectives
 
 if TYPE_CHECKING:
     from carps.objective_functions.objective_function import ObjectiveFunction
@@ -571,7 +571,8 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     logger.debug("Handle MO costs...")
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
     # trial_value__cost_raw for add_reference_point and to calc_hv
-    logs = logs.groupby(by=["task_type", "task_id"]).apply(add_reference_point).reset_index(drop=True)
+    logs = logs.groupby(by=["task_type", "task_id"]).apply(normalize_objectives).reset_index(drop=True)
+    logs = logs.groupby(by=[*run_id]).apply(add_running_pareto_front).reset_index(drop=True)
     logs = logs.groupby(by=[*run_id, "n_trials"]).apply(calc_hv).reset_index(drop=True)
     logs["trial_value__cost"] = logs["hypervolume"] #logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
     print(logs.head())
@@ -805,7 +806,7 @@ def rename_legacy(logs: pd.DataFrame) -> pd.DataFrame:
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
 def filelogs_to_df(
-    rundir: str | list[str], log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
+    rundir: str | list[str] = "results/", log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load logs from file and preprocess.
 
