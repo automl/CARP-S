@@ -19,7 +19,7 @@ from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
 from carps.analysis.calc_hypervolume import add_hypervolume_to_df
-from carps.analysis.utils import convert_mixed_types_to_str
+from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
@@ -598,13 +598,15 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
-    ids_mo = logs["task_type"] == "multi-objective"
+    ids_mo = get_ids_mo(logs)
     if len(ids_mo) > 0:
         if "trial_value__cost_raw" not in logs:
             logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
         else:
             logs["trial_value__cost_raw"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_dtype)
         logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
+        # IDs have changed, so we need to recalculate
+        ids_mo = get_ids_mo(logs)
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
