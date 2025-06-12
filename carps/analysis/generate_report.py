@@ -962,8 +962,6 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
                 .map(lambda x: x if x is None else float(x))
             )
 
-    df = df[~df["optimizer_id"].isin(["SyneTune-BORE", "SyneTune-KDE"])]  # noqa: PD901
-
     # Remove rows where "optimizer_id" == "nan"
     return df[df["optimizer_id"] != "nan"]
 
@@ -1011,15 +1009,10 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
     order = {
         "Final Performance": [
             "critical_difference",
-            # "spearman_rank_correlation",
             "performance_per_task",
-            # "finalperformance_boxplot",
-            # "finalperformance_violinplot",
-            "finalperformance_barplot",
         ],
         "Anytime Performance": [
             "rank_over_time",
-            # "ecdf",
         ],
     }
 
