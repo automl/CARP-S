@@ -173,6 +173,7 @@ lint.ignore = [
   "W292",    # No newline at end of file
   "PLC1901", # "" can be simplified to be falsey
   "TCH003",  # Move stdlib import into TYPE_CHECKING
+  "S603",    #  `subprocess` call: check for execution of untrusted input
   "B010",    # Do not use `setattr`
   "COM812",
   # These tend to be lighweight and confuse pyright

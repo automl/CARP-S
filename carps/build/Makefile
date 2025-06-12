@@ -143,6 +143,12 @@ benchmark_hpob:
 	$(PIP) install -r ../container/recipes/benchmarks/HPOB/HPOB_requirements.txt
 	. ../container/recipes/benchmarks/HPOB/download_data.sh
 
+benchmark_papenbench:
+	$(PIP) install git+https://github.com/LeoIV/BencherScaffold
+	apptainer build papenbench.sif ../container/recipes/benchmarks/PapenBench/papenbench.def
+	git clone https://github.com/LeoIV/bencher.git lib/bencher
+	$(PIP) install lib/bencher/BencherServer
+
 benchmarks:
 	$(MAKE) benchmark_bbob
 	$(MAKE) benchmark_yahpo

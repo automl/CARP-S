@@ -1,0 +1,18 @@
+Bootstrap: docker
+From: gaunab/bencher:latest
+Namespace:
+Stage: build
+
+%environment
+    export LANG=C.UTF-8
+    export PATH="/root/.local/bin:$PATH"
+
+%post
+    cd /opt
+    pip install bencherscaffold
+
+%startscript
+    bash -c "python3.11 /entrypoint.py"
+
+%runscript
+    bash -c "echo hello world"
