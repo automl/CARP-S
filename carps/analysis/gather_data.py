@@ -601,7 +601,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Normalize cost...")
     # Handle MO
     ids_mo = get_ids_mo(logs)
-    if len(ids_mo) > 0:
+    if any(ids_mo):
         if "trial_value__cost_raw" not in logs:
             logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
         else:
