@@ -140,6 +140,7 @@ class FileLogger(AbstractLogger):
         super().__init__()
 
         directory = Path(directory) if directory is not None else get_run_directory()
+        assert directory is not None, "Directory must be specified in FileLogger or hydra run dir must be available."
         self.directory = directory
         if (directory / self._filename).is_file():
             if overwrite:
