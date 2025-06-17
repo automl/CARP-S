@@ -317,7 +317,8 @@ def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float
     start = cline + 0.2
     for l, r in groups:  # noqa: E741
         plot_line(
-            [(rankpos(sorted_ranks.iloc[l]) - side, start), (rankpos(sorted_ranks.iloc[r]) + side, start)], linewidth=2.5
+            [(rankpos(sorted_ranks.iloc[l]) - side, start), (rankpos(sorted_ranks.iloc[r]) + side, start)],
+            linewidth=2.5,
         )
         start += no_sig_height
 
