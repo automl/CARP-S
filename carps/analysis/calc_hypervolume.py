@@ -217,7 +217,7 @@ def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost")
     Returns:
         pd.DataFrame: Dataframe with the hypervolume.
     """
-    tqdm.pandas(desc="Calc hypervolumne...")
+    tqdm.pandas(desc="Calc hypervolume...")
     ids_mo = get_ids_mo(logs)
     add_reference_point_partial = partial(add_reference_point, on_key=on_key)
     mo_cols = ["hypervolume", "reference_point"]
