@@ -110,7 +110,7 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None
     """
     mixed_type_columns = logs.select_dtypes(include=["O"]).columns
     if logger:
-        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")
+        logger.debug(f"Goodbye all mixed data, ruthlessly converting {mixed_type_columns} to str...")
     for c in mixed_type_columns:
         # D = logs[c]
         # logs.drop(columns=c)
