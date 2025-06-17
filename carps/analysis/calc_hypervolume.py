@@ -9,13 +9,12 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import Any
 
-import fire
 import numpy as np
 import pandas as pd
 from pymoo.indicators.hv import HV
 from tqdm import tqdm
 
-from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
+from carps.analysis.utils import get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
@@ -203,31 +202,6 @@ def maybe_deserialize(x: Any | str) -> Any | np.ndarray:
     if isinstance(x, str):
         return deserialize_array(x)
     return x
-
-
-def calculate_hypervolume(rundir: str) -> None:
-    """Calculate hypervolume from trajectory logs.
-
-    Save to rundir / "trajectory.parquet" and rundir / "trajectory.csv".
-
-    Args:
-        rundir (str): Directory with the logs.
-    """
-    fn = Path(rundir) / "logs.parquet"
-    if not fn.is_file():
-        raise ValueError(
-            f"Cannot find {fn}. Did you run `python -m carps.analysis.gather_data {rundir} trajectory_logs.jsonl`?"
-        )
-    df = pd.read_parquet(fn)  # noqa: PD901
-    if df["task_type"].nunique() > 2 or df["task_type"].unique()[0] != "multi-objective":  # noqa: PLR2004
-        raise ValueError(f"Oops, found some non multi-objective logs in {fn}. This might not work...")
-    trajectory_df = df.groupby(by=run_id).apply(gather_trajectory).reset_index(drop=True)
-    trajectory_df = trajectory_df.groupby(by=["task_type", "task_id"]).apply(add_reference_point).reset_index(drop=True)
-    raise NotImplementedError("calc hv does not use all the evaluated points yet")
-    trajectory_df = trajectory_df.groupby(by=[*run_id, "n_trials"]).apply(calc_hv).reset_index(drop=True)
-    trajectory_df.to_csv(Path(rundir) / "trajectory.csv")
-    trajectory_df = convert_mixed_types_to_str(trajectory_df)
-    trajectory_df.to_parquet(Path(rundir) / "trajectory.parquet")
 
 
 def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
@@ -420,7 +394,3 @@ def load_trajectory(rundir: str) -> pd.DataFrame:
     df = pd.read_parquet(fn)  # noqa: PD901
     df = df.map(maybe_deserialize)  # noqa: PD901
     print(df["trial_value__cost"].iloc[0], type(df["trial_value__cost"].iloc[0]))
-
-
-if __name__ == "__main__":
-    fire.Fire(calculate_hypervolume)
