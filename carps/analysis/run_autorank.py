@@ -14,7 +14,7 @@ import pandas as pd
 from autorank._util import RankResult, get_sorted_rank_groups, rank_multiple_nonparametric, test_normality
 
 from carps.analysis.process_data import load_logs
-from carps.analysis.utils import filter_only_final_performance
+from carps.analysis.utils import filter_only_final_performance, get_color_palette
 from carps.utils.loggingutils import get_logger
 
 if TYPE_CHECKING:
@@ -45,11 +45,8 @@ def custom_latex_table(
 
     table_df = result.rankdf
     columns = table_df.columns.to_list()
-    if (
-        result.omnibus != "bayes"
-        and result.pvalue >= result.alpha
-        or result.omnibus == "bayes"
-        and len({"smaller", "larger"}.intersection(set(result.rankdf["decision"]))) == 0
+    if (result.omnibus != "bayes" and result.pvalue >= result.alpha) or (
+        result.omnibus == "bayes" and len({"smaller", "larger"}.intersection(set(result.rankdf["decision"]))) == 0
     ):
         columns.remove("effect_size")
         columns.remove("magnitude")
@@ -220,23 +217,40 @@ Source: https://gist.github.com/LennartPurucker/cf4616512529e29c123608b6c2c4a7e9
 """
 
 
-def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float) -> Axis:  # noqa: C901, FBT001, PLR0915
+def _custom_cd_diagram(  # noqa: C901, PLR0913, PLR0915
+    result: RankResult,
+    reverse: bool,  # noqa: FBT001
+    ax: Axis,
+    width: float,
+    palette: dict[str, Any] | None = None,
+    linewidth_scale: float = 4,  # 0.7
+    linewidth_cd_bar: float = 4,  # 2.5
+    linewidth_cd_info: float = 2,  # 0.7
+    linewidth_rankid: float = 2,  # 0.7
+    fontsize_competitor: int = 14,
+    fontsize_ticks: int = 14,
+    fontsize_cd_label: int = 14,
+    markersize_rankid: float = 8,
+    color_cd_bar: str = "grey",
+) -> Axis:
     """!TAKEN FROM AUTORANK WITH MODIFICATIONS!"""
-
-    def plot_line(line: list[tuple[float, float]], color: str = "k", **kwargs: Any) -> None:
-        ax.plot([pos[0] / width for pos in line], [pos[1] / height for pos in line], color=color, **kwargs)
-
-    def plot_text(x: float, y: float, s: str, *args: tuple, **kwargs: Any) -> None:
-        ax.text(x / width, y / height, s, *args, **kwargs)
-
     sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse)
     cd = result.cd
+
+    if palette is None:
+        palette = get_color_palette(optimizers=names)
 
     lowv = min(1, int(math.floor(min(sorted_ranks))))
     highv = max(len(sorted_ranks), int(math.ceil(max(sorted_ranks))))
     cline = 0.4
     textspace = 1
     scalewidth = width - 2 * textspace
+
+    def plot_line(line: list[tuple[float, float]], color: str = "k", **kwargs: Any) -> None:
+        ax.plot([pos[0] / width for pos in line], [pos[1] / height for pos in line], color=color, **kwargs)
+
+    def plot_text(x: float, y: float, s: str, *args: tuple, **kwargs: Any) -> None:
+        ax.text(x / width, y / height, s, *args, **kwargs)
 
     def rankpos(rank: float) -> float:
         relative_rank = rank - lowv if not reverse else highv - rank
@@ -263,8 +277,11 @@ def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float
     ax.set_xlim(0, 1)
     ax.set_ylim(1, 0)
 
-    plot_line([(textspace, cline), (width - textspace, cline)], linewidth=0.7)
+    # ------------------------ DRAW SCALE ------------------------
+    # Base line
+    plot_line([(textspace, cline), (width - textspace, cline)], linewidth=linewidth_scale)
 
+    # Ticks
     bigtick = 0.1
     smalltick = 0.05
 
@@ -273,32 +290,55 @@ def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float
         tick = smalltick
         if a == int(a):
             tick = bigtick
-        plot_line([(rankpos(a), cline - tick / 2), (rankpos(a), cline)], linewidth=0.7)
+        plot_line([(rankpos(a), cline - tick / 2), (rankpos(a), cline)], linewidth=linewidth_scale)
 
+    # Ticklabels
     for a in range(lowv, highv + 1):
         assert tick is not None, "Cannot plot, tick was not set."
-        plot_text(rankpos(a), cline - tick / 2 - 0.05, str(a), ha="center", va="bottom")
+        plot_text(rankpos(a), cline - tick / 2 - 0.05, str(a), ha="center", va="bottom", fontsize=fontsize_ticks)
 
+    # ------------------------ SHOW RANKS ------------------------
+    # Plot left side
     for i in range(math.ceil(len(sorted_ranks) / 2)):
         chei = cline + minnotsignificant + i * 0.2
+        color = palette[names[i]]
+        ax.plot(
+            rankpos(sorted_ranks.iloc[i]) / width, cline / height, color=color, marker="o", markersize=markersize_rankid
+        )
         plot_line(
             [(rankpos(sorted_ranks.iloc[i]), cline), (rankpos(sorted_ranks.iloc[i]), chei), (textspace - 0.1, chei)],
-            linewidth=0.7,
+            linewidth=linewidth_rankid,
+            color=color,
         )
-        plot_text(textspace - 0.2, chei, names[i], ha="right", va="center")
+        plot_text(textspace - 0.2, chei, names[i], ha="right", va="center", fontsize=fontsize_competitor, color="k")
 
+    # Plot right side
     for i in range(math.ceil(len(sorted_ranks) / 2), len(sorted_ranks)):
         chei = cline + minnotsignificant + (len(sorted_ranks) - i - 1) * 0.2
+        color = palette[names[i]]
+        ax.plot(
+            rankpos(sorted_ranks.iloc[i]) / width, cline / height, color=color, marker="o", markersize=markersize_rankid
+        )
         plot_line(
             [
                 (rankpos(sorted_ranks.iloc[i]), cline),
                 (rankpos(sorted_ranks.iloc[i]), chei),
                 (textspace + scalewidth + 0.1, chei),
             ],
-            linewidth=0.7,
+            linewidth=linewidth_rankid,
+            color=color,
         )
-        plot_text(textspace + scalewidth + 0.2, chei, names[i], ha="left", va="center")
+        plot_text(
+            textspace + scalewidth + 0.2,
+            chei,
+            names[i],
+            ha="left",
+            va="center",
+            fontsize=fontsize_competitor,
+            color="k",
+        )
 
+    # ------------------------ DRAW CRITICAL DIFFERENCE ------------------------
     # upper scale
     if not reverse:
         begin, end = rankpos(lowv), rankpos(lowv + cd)
@@ -306,10 +346,23 @@ def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float
         begin, end = rankpos(highv), rankpos(highv - cd)
     distanceh += 0.15
     bigtick /= 2
-    plot_line([(begin, distanceh), (end, distanceh)], linewidth=0.7)
-    plot_line([(begin, distanceh + bigtick / 2), (begin, distanceh - bigtick / 2)], linewidth=0.7)
-    plot_line([(end, distanceh + bigtick / 2), (end, distanceh - bigtick / 2)], linewidth=0.7)
-    plot_text((begin + end) / 2, distanceh - 0.05, "CD", ha="center", va="bottom")
+    # CD line
+    plot_line([(begin, distanceh), (end, distanceh)], linewidth=linewidth_cd_info, color=color_cd_bar)
+    # CD line end markers
+    plot_line(
+        [(begin, distanceh + bigtick / 2), (begin, distanceh - bigtick / 2)],
+        linewidth=linewidth_cd_info,
+        color=color_cd_bar,
+    )
+    plot_line(
+        [(end, distanceh + bigtick / 2), (end, distanceh - bigtick / 2)],
+        linewidth=linewidth_cd_info,
+        color=color_cd_bar,
+    )
+    # CD line label
+    plot_text(
+        (begin + end) / 2, distanceh - 0.05, "CD", ha="center", va="bottom", fontsize=fontsize_cd_label, color="k"
+    )
 
     # no-significance lines
     side = 0.05
@@ -318,7 +371,8 @@ def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float
     for l, r in groups:  # noqa: E741
         plot_line(
             [(rankpos(sorted_ranks.iloc[l]) - side, start), (rankpos(sorted_ranks.iloc[r]) + side, start)],
-            linewidth=2.5,
+            linewidth=linewidth_cd_bar,
+            color="grey",
         )
         start += no_sig_height
 
@@ -417,8 +471,6 @@ def cd_evaluation(
             Path(output_path).parent.mkdir(exist_ok=True, parents=True)
             plt.savefig(output_path + ".png", transparent=True, bbox_inches="tight")
             plt.savefig(output_path + ".pdf", transparent=True, bbox_inches="tight")
-
-        plt.show()
         plt.close()
 
     return result

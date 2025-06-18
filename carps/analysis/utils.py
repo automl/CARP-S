@@ -16,17 +16,22 @@ if TYPE_CHECKING:
 colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
 
 
-def get_color_palette(df: pd.DataFrame, model_name_key: str = "optimizer_id") -> dict[str, Any]:
+def get_color_palette(
+    df: pd.DataFrame | None = None, model_name_key: str = "optimizer_id", optimizers: list[str] | None = None
+) -> dict[str, Any]:
     """Get a color palette based on the optimizers.
 
     Args:
-        df (pd.DataFrame): Results dataframe.
+        df (pd.DataFrame, optional): Results dataframe.
         model_name_key (str, optional): The column name for the model name. Defaults to "model_name".
+        optimizers (list[str], optional): List of optimizers. If None, will be extracted from df. Defaults to None.
 
     Returns:
         dict[str, Any]: Color map.
     """
-    optimizers = list(df[model_name_key].unique())
+    if optimizers is None:
+        assert df is not None, "Either df or optimizers must be provided."
+        optimizers = list(df[model_name_key].unique())
     optimizers.sort()
     cmap1 = colorblind_palette
     cmap2 = sns.color_palette("colorblind", as_cmap=False)
