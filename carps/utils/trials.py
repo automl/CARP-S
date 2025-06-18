@@ -37,8 +37,8 @@ class TrialInfo:
         The budget normalized by max_fidelity. Mostly used for logging purposes.
     name: str | None, defaults to None, arbitrary information, length 100
     checkpoint: str | None, defaults to None, checkpoint path, length 250
-
-    The length of the strings depends on the setting for the database.
+        The length of the strings depends on the setting for the database.
+    additional_info : dict[str, Any], defaults to {}
     """
 
     config: Configuration
@@ -48,6 +48,7 @@ class TrialInfo:
     normalized_budget: float | None = None
     name: str | None = None
     checkpoint: str | None = None
+    additional_info: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass_json

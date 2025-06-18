@@ -104,7 +104,6 @@ def get_df_crit(
     df: pd.DataFrame,
     budget_var: str = "n_trials_norm",
     max_fidelity: float = 1,
-    soft: bool = True,  # noqa: FBT001, FBT002
     perf_col: str = "trial_value__cost_inc",
     nan_handling: str = "remove",
 ) -> pd.DataFrame:
@@ -120,8 +119,6 @@ def get_df_crit(
         df (pd.DataFrame): The dataframe.
         budget_var (str, optional): The budget variable. Defaults to "n_trials_norm".
         max_fidelity (float, optional): The maximum budget. Defaults to 1.
-        soft (bool, optional): Whether to use a soft filter: If no entry at max_fidelity is available,
-            use the performance at the last trial. Defaults to True.
         perf_col (str, optional): The performance column. Defaults to "trial_value__cost_inc".
         nan_handling (str, optional): How to handle nans. Can be "remove", "keep", "replace_by_highest".
             Defaults to "remove".
@@ -129,7 +126,7 @@ def get_df_crit(
     Returns:
         pd.DataFrame: The critical difference dataframe.
     """
-    df = filter_only_final_performance(df=df, budget_var=budget_var, max_fidelity=max_fidelity, soft=soft)  # noqa: PD901
+    df = filter_only_final_performance(df=df, x_column=budget_var, max_x=max_fidelity)  # noqa: PD901
 
     # Work on mean of different seeds
     df_crit = df.groupby(["optimizer_id", "task_id"])[perf_col].apply(np.nanmean).reset_index()
@@ -319,7 +316,10 @@ def _custom_cd_diagram(result: RankResult, reverse: bool, ax: Axis, width: float
     no_sig_height = 0.1
     start = cline + 0.2
     for l, r in groups:  # noqa: E741
-        plot_line([(rankpos(sorted_ranks[l]) - side, start), (rankpos(sorted_ranks[r]) + side, start)], linewidth=2.5)
+        plot_line(
+            [(rankpos(sorted_ranks.iloc[l]) - side, start), (rankpos(sorted_ranks.iloc[r]) + side, start)],
+            linewidth=2.5,
+        )
         start += no_sig_height
 
     return ax
@@ -389,6 +389,7 @@ def cd_evaluation(
         rope_mode=None,
         effect_size=res.effect_size,
         force_mode=None,
+        sample_matrix=None,
     )
     is_significant = True
     if result.pvalue >= result.alpha:

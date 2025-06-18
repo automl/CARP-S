@@ -198,8 +198,6 @@ class SynetuneOptimizer(Optimizer):
             self.metric, str | list
         ), f"Metric must be a string or a list of strings, got {type(self.metric)}, {self.metric}"
 
-        self.trial_counter: int = 0
-
         self.optimizer_name = optimizer_name
         self.configspace = self.task.objective_function.configspace
         self._solver: SyneTrialScheduler | None = None
@@ -341,7 +339,6 @@ class SynetuneOptimizer(Optimizer):
             # del experiment_result[self.task.output_space.objectives]
 
             self._solver.on_trial_add(trial=trial)
-        self.trial_counter += 1
 
         self._solver.on_trial_complete(trial=trial, result=experiment_result)
         trial_result = trial.add_results(
