@@ -928,7 +928,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
 
     # 2. Preprocess results
     logger.info("Preprocessing results")
-    print(df.columns)
+    logger.info(f"Columns: {df.columns}")
 
     if "n_trials" not in df.columns:
         df["n_trials"] = 0
@@ -938,6 +938,8 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
         df = normalize_logs(df)  # noqa: PD901
         result_path = Path(result_path)
         df.to_parquet(result_path.parent / f"{result_path.stem}_normalized{result_path.suffix}", index=False)
+    else:
+        logger.info("...skipping normalization as requested")
     if "n_trials_norm" not in df.columns:
         raise ValueError(
             "n_trials_norm not in df.columns, did you normalize the logs? Maybe set `normalize=True` "
