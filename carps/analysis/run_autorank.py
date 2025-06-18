@@ -471,8 +471,6 @@ def cd_evaluation(
             Path(output_path).parent.mkdir(exist_ok=True, parents=True)
             plt.savefig(output_path + ".png", transparent=True, bbox_inches="tight")
             plt.savefig(output_path + ".pdf", transparent=True, bbox_inches="tight")
-
-        plt.show()
         plt.close()
 
     return result
