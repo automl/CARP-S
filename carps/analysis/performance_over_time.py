@@ -26,7 +26,7 @@ def get_order_by_mean(df: pd.DataFrame, budget_var: str = "n_trials_norm") -> li
     Returns:
         list[str]: Optimizer order.
     """
-    final_df = filter_only_final_performance(df, budget_var=budget_var)
+    final_df = filter_only_final_performance(df, x_column=budget_var)
     reduced = final_df.groupby(by="optimizer_id")["trial_value__cost_inc_norm"].apply(np.nanmean)
     reduced = reduced.sort_values()
     return reduced.index.tolist()

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import fire
 import pandas as pd
+import yaml
 from omegaconf import OmegaConf
 
 from carps.analysis.gather_data import read_jsonl_content
@@ -44,7 +45,11 @@ def get_experiment_status(path: Path) -> dict:
         n_trials_done = trial_logs["n_trials"].max()
         status = RunStatus.COMPLETED if n_trials >= n_trials_done else RunStatus.TRUNCATED
 
-    overrides = OmegaConf.load(path.parent / "overrides.yaml")
+    try:
+        overrides = OmegaConf.load(path.parent / "overrides.yaml")
+    except yaml.reader.ReaderError:
+        logger.warning(f"Could not load overrides from {path.parent / 'overrides.yaml'}.")
+        overrides = []
     # TODO maybe filter cluster
     return {
         "status": status.name,
@@ -56,12 +61,12 @@ def get_experiment_status(path: Path) -> dict:
     }
 
 
-def check_missing(rundir: str | Path, n_processes: int = 4) -> pd.DataFrame:
+def check_missing(rundir: str | Path, n_processes: int | None = None) -> pd.DataFrame:
     """Check missing runs in the given rundir.
 
     Args:
         rundir (str | Path): Path to the rundir.
-        n_processes (int, optional): Number of processes to use. Defaults to 4.
+        n_processes (int, optional): Number of processes to use. Defaults to None.
 
     Returns:
         pd.DataFrame: DataFrame containing the status of the runs. This is also saved to 'runstatus.csv'.
@@ -94,7 +99,7 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
         overrides = [o for o in overrides if "seed" not in o]
         overrides.append(f"seed={','.join(str(int(s)) for s in seeds)} -m")
         override = " ".join(overrides)
-        runcommand = f"python -m carps.run {override}\n"
+        runcommand = f"python -m carps.run {override} \n"
         runcommands.append(runcommand)
     runcommand_fn = Path(rundir) / f"runcommands_{runstatus.name}.sh"
     with open(runcommand_fn, "w") as file:
@@ -102,12 +107,13 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     logger.info(f"Done! Regenerated runcommands at {runcommand_fn}.")
 
 
-def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:  # noqa: FBT001, FBT002
+def regenerate_runcommands(rundir: str, from_cached: bool = False, n_processes: int | None = None) -> None:  # noqa: FBT001, FBT002
     """Regenerate runcommands for missing or truncated runs.
 
     Args:
         rundir (str): Path to the rundir.
         from_cached (bool, optional): Load experiment status data from 'runstatus.csv'. Defaults to False.
+        n_processes (int | None, optional): Number of processes to use. Defaults to None, using all available cores.
     """
     if from_cached:
         logger.info("Loading experiment status data from 'runstatus.csv'...")
@@ -115,7 +121,7 @@ def regenerate_runcommands(rundir: str, from_cached: bool = False) -> None:  # n
         logger.info("Done!")
     else:
         logger.info("Scanning rundirs for experiment status...")
-        data = check_missing(rundir=rundir)
+        data = check_missing(rundir=rundir, n_processes=n_processes)
         logger.info("Done!")
 
     data = data.dropna()
