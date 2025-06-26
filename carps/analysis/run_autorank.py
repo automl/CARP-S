@@ -238,7 +238,7 @@ def _custom_cd_diagram(  # noqa: C901, PLR0913, PLR0915
     cd = result.cd
 
     if palette is None:
-        palette = get_color_palette(optimizers=names)
+        palette = get_color_palette(optimizers=names[:])
 
     lowv = min(1, int(math.floor(min(sorted_ranks))))
     highv = max(len(sorted_ranks), int(math.ceil(max(sorted_ranks))))
@@ -444,6 +444,7 @@ def cd_evaluation(
         effect_size=res.effect_size,
         force_mode=None,
         sample_matrix=None,
+        plot_order=None,
     )
     is_significant = True
     if result.pvalue >= result.alpha:
