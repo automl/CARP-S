@@ -923,7 +923,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
         The preprocessed results.
     """
     # 1. Load results
-    logger.info("Loading results")
+    logger.info("Loading results from %s", result_path)
     df = pd.read_parquet(result_path) if str(result_path).endswith(".parquet") else pd.read_csv(result_path)  # noqa: PD901
 
     # 2. Preprocess results

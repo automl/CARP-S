@@ -92,7 +92,7 @@ def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_no
 
     def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
         groupdf = groupdf[groupdf[x_column] <= max_x]
-        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()]
+        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()].iloc[[-1]]
 
     df_final = df.groupby(["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
 
