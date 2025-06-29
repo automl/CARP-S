@@ -1,3 +1,6 @@
+# v1.0.3
+- Fix the order of optimizer names in the critical difference plots (#196).
+
 # v1.0.2
 - Fix duplicate trial_counter in SyneTune (#193).
 - Refactor plotting (#193,#194).
