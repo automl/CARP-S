@@ -18,11 +18,4 @@ keywords:
 
 <<requires::license license: "BSD license" endrequires::license>>
 
-authors:
-  - family-names: "Benjamins"
-    given-names: "Carolin"
-    affiliation: "Leibniz University Hannover, Germany"
-  - family-names: "Graf"
-    given-names: "Helena"
-    affiliation: "Leibniz University Hannover, Germany"
 ...
