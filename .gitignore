@@ -178,3 +178,5 @@ tmp*
 
 container/python_packages/*
 slurmlogs/*
+
+*.tar.gz

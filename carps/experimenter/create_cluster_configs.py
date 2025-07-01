@@ -17,7 +17,14 @@ import pickle as pckl
 
 logger = logging.getLogger("create experiments")
 
-experiment_identifiers = ["optimizer_id", "task_id", "seed", "benchmark_id", "n_trials", "time_budget"]
+experiment_identifiers = [
+    "optimizer_id",
+    "task_id",
+    "seed",
+    "benchmark_id",
+    "task.optimization_resources.n_trials",
+    "task.optimization_resources.time_budget",
+]
 
 
 def create_config_hash(cfg: DictConfig) -> str:
@@ -85,8 +92,8 @@ def get_experiment_definition(cfg: OmegaConf) -> dict:
         "optimizer_id": cfg_dict["optimizer_id"],
         "optimizer_container_id": cfg_dict["optimizer_container_id"],
         "seed": cfg_dict["seed"],
-        "n_trials": cfg_dict["task"]["optimization_resources"]["n_trials"],
-        "time_budget": cfg_dict["task"]["optimization_resources"]["time_budget"],
+        "task.optimization_resources.n_trials": cfg_dict["task"]["optimization_resources"]["n_trials"],
+        "task.optimization_resources.time_budget": cfg_dict["task"]["optimization_resources"]["time_budget"],
     }
 
 

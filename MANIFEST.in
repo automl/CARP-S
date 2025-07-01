@@ -22,6 +22,7 @@ recursive-exclude env* *
 recursive-exclude carps.egg* *
 recursive-exclude carps/benchmark_data *
 recursive-exclude carps/task_data *
+recursive-exclude * *.sif
 
 recursive-include docs *.rst make.bat *.jpg *.png *.gif
 recursive-include carps/configs *
