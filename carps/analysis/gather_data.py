@@ -612,9 +612,9 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
             logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
         else:
             logs["trial_value__cost_raw"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_dtype)
-        logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
+        # logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
         # IDs have changed, so we need to recalculate
-        ids_mo = get_ids_mo(logs)
+        # ids_mo = get_ids_mo(logs)
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")

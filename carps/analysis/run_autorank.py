@@ -444,8 +444,7 @@ def cd_evaluation(
         rope_mode=None,
         effect_size=res.effect_size,
         force_mode=None,
-        sample_matrix=None,
-        plot_order=None,
+        # plot_order=None,
     )
     is_significant = True
     if result.pvalue >= result.alpha:

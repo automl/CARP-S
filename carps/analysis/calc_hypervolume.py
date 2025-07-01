@@ -215,7 +215,7 @@ def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost")
     """
     tqdm.pandas(desc="Calc hypervolume...")
     ids_mo = get_ids_mo(logs)
-    add_reference_point_partial = partial(add_reference_point, on_key=on_key)
+    add_reference_point_partial = partial(add_reference_point)
     mo_cols = ["hypervolume", "reference_point"]
     for mo_col in mo_cols:
         if mo_col not in logs.columns:
