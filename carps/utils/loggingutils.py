@@ -65,12 +65,15 @@ class CustomEncoder(json.JSONEncoder):
 
 def log_pip_freeze(file_path: str | Path) -> None:
     """Write the output of `pip freeze` directly to a file."""
+    logger = get_logger("carps.utils.loggingutils.log_pip_freeze")
     try:
+        # TODO: enable discovery and usage of uv
         result = subprocess.run(["pip", "freeze"], capture_output=True, text=True, check=True)  # noqa: S603, S607
         with open(file_path, "a") as f:
             f.write("Installed packages (pip freeze):\n")
             f.write(result.stdout + "\n")
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        logger.warning("Failed to run pip freeze. Error: %s", e)
         with open(file_path, "a") as f:
             f.write("Failed to run pip freeze:\n")
             f.write(str(e) + "\n")

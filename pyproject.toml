@@ -10,7 +10,7 @@ include = ["carps"]
 
 [project]
 name = "carps"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
   "autorank",
   "ConfigSpace>=1.0.0",
