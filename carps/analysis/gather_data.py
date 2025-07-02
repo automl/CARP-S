@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 import json
-import logging
 import multiprocessing
 import os
 from collections.abc import Callable, Iterable
@@ -20,6 +19,8 @@ from ConfigSpace import Configuration
 from hydra.core.utils import setup_globals
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
+from carps.analysis.calc_hypervolume import add_hypervolume_to_df
+from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
@@ -168,7 +169,11 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
             "optimizer_id",
         ]
         config_keys_forbidden = ["_target_", "_partial_"]
-        df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+        try:
+            df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+        except Exception as e:
+            logger.error(f"Error annotating data frame with config from {config_fn}. ")
+            raise e
     else:
         config_fn = "no_hydra_config"
         cfg_str = ""
@@ -314,6 +319,8 @@ def add_task_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFram
     """
 
     def determine_task_type(x: pd.Series) -> str:
+        if "task_type" in x:
+            return x["task_type"]
         get_mf = x.get(task_prefix + "is_multifidelity", False)
         get_mo = x.get(task_prefix + "is_multiobjective", False)
         if get_mf is False and get_mo is False:
@@ -386,8 +393,8 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     task_index = pd.read_csv(index_fn)
 
     new_logs = []
-    for gid, gdf in logs.groupby(by="task_id"):
-        task_cfg = load_task_cfg(task_id=gid, task_index=task_index)
+    for gid, gdf in logs.groupby(by=["task_id", "seed"]):
+        task_cfg = load_task_cfg(task_id=gid[0], task_index=task_index)
 
         task_cfg_yaml = OmegaConf.to_yaml(task_cfg)
         if "${seed}" in task_cfg_yaml:
@@ -427,7 +434,6 @@ def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] | None = N
     """
     if keep_task_columns is None:
         keep_task_columns = ["task.optimization_resources.n_trials"]
-    keep_task_columns = [f"task.{c}" for c in keep_task_columns]
     task_cols_to_remove = [c for c in logs.columns if c.startswith("task.") and c not in keep_task_columns]
     return logs.drop(columns=task_cols_to_remove)
 
@@ -441,11 +447,14 @@ def maybe_convert_cost_dtype(x: int | float | str | list) -> float | list[float]
     Returns:
         float | list[float]: Cost(s).
     """
-    if isinstance(x, int | float):
+    if isinstance(x, float | int):
         return float(x)
     if isinstance(x, str):
-        return eval(x)  # noqa: S307
-    assert isinstance(x, list)
+        x = ast.literal_eval(x)
+        if isinstance(x, dict):
+            return maybe_convert_cost_dtype(x["cost"])
+        return maybe_convert_cost_dtype(x)
+    assert isinstance(x, list), f"Cost is not list but is {x, type(x)}"
     return x
 
 
@@ -479,31 +488,6 @@ def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
     if isinstance(x, float):
         return x
     raise ValueError(f"Unknown cost type {type(x)}. Supported are float, list, np.ndarray.")
-
-
-def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None = None) -> pd.DataFrame:
-    """Convert mixed type columns to str.
-
-    Necessary to be able to write a parquet file.
-
-    Args:
-        logs (pd.DataFrame): Logs.
-        logger (logging.Logger, optional): Logger. Defaults to None.
-
-    Returns:
-        pd.DataFrame: Logs with mixed type columns converted
-    """
-    mixed_type_columns = logs.select_dtypes(include=["O"]).columns
-    if logger:
-        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")
-    for c in mixed_type_columns:
-        # D = logs[c]
-        # logs.drop(columns=c)
-        if c == "cfg_str":
-            continue
-        logs[c] = logs[c].map(lambda x: str(x))
-        logs[c] = logs[c].astype("str")
-    return logs
 
 
 def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -614,17 +598,25 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Normalized logs
     """
+    grouper_keys = ["task_id", "optimizer_id", "seed"]
     logger.info("Start normalization...")
     logger.info("Normalize n_trials...")
     logs["n_trials_norm"] = logs.groupby("task_id")["n_trials"].transform(normalize)
     logger.info("Normalize cost...")
     # Handle MO
-    ids_mo = logs["task_type"] == "multi-objective"
-    if len(ids_mo) > 0 and "hypervolume" in logs:
+    ids_mo = get_ids_mo(logs)
+    if any(ids_mo):
+        if "trial_value__cost_raw" not in logs:
+            logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
+        else:
+            logs["trial_value__cost_raw"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_dtype)
+        logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
+        # IDs have changed, so we need to recalculate
+        ids_mo = get_ids_mo(logs)
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
-        logs["trial_value__cost_inc"] = logs["trial_value__cost"].transform("cummin")
+        logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
     logs["trial_value__cost_norm"] = logs.groupby("task_id")["trial_value__cost"].transform(normalize)
     logger.info("Calc normalized incumbent cost...")
 

@@ -10,7 +10,7 @@ include = ["carps"]
 
 [project]
 name = "carps"
-version = "1.0.1"
+version = "1.0.3"
 dependencies = [
   "autorank",
   "ConfigSpace>=1.0.0",
@@ -37,7 +37,7 @@ dependencies = [
 
 requires-python = ">=3.9"
 authors = [
-  { name = "Carolin Benjamins", email = "c.benjamins@ai.uni-hannover.de" },
+  { name = "Carolin Benjamins"},
 ]
 readme = "README.md"
 description = "CARP-S: Benchmarking N Optimizers on M Benchmarks"
