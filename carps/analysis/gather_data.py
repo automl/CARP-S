@@ -169,7 +169,11 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
             "optimizer_id",
         ]
         config_keys_forbidden = ["_target_", "_partial_"]
-        df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+        try:
+            df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+        except Exception as e:
+            logger.error(f"Error annotating data frame with config from {config_fn}. ")
+            raise e
     else:
         config_fn = "no_hydra_config"
         cfg_str = ""

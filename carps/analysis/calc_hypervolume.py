@@ -225,6 +225,7 @@ def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost")
         if mo_col not in logs.columns:
             logs[mo_col] = None
     if len(ids_mo) > 0:
+        # Add the reference point to enable normalization. Later ref point will be [1, 1, ...]
         logs_mo = logs.loc[ids_mo].groupby(by=["task_id"]).apply(add_reference_point_partial).reset_index(drop=True)
         logs_mo = apply_calc_hv_low_mem(logs_mo, on_key=on_key)
         logs = pd.concat([logs.loc[~ids_mo], logs_mo], axis=0).reset_index(drop=True)
@@ -303,7 +304,7 @@ def calc_hv_for_run(gdf_fn_in: str, on_key: str = "trial_value__cost") -> pd.Dat
     cost_min = gdf["minimum_cost"].iloc[0]
     reference_point = np.ones(len(cost_max))  # We work on normalized objective values
 
-    ind = HV(ref_point=reference_point, pf=None, nds=False)
+    ind = HV(ref_point=reference_point, pf=None, nds=True, norm_ref_point=False)
 
     hvs = []
     for n_trial_max in range(len(gdf)):
