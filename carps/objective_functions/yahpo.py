@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import shutil
 import time
-import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import onnxruntime
 from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
@@ -16,8 +15,6 @@ from carps.utils.env_vars import CARPS_TASK_DATA_DIR
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from ConfigSpace import ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
@@ -71,23 +68,45 @@ def maybe_invert(value: float, target: str) -> float:
 class CustomBenchmarkSet(BenchmarkSet):
     """Custom BenchmarkSet to avoid multithreading issues."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        scenario: str | None = None,
+        instance: str | None = None,
+        check: bool = True,  # noqa: FBT001, FBT002
+        noisy: bool = False,  # noqa: FBT001, FBT002
+    ):
         """Initialize CustomBenchmarkSet."""
-        self.model_path_tmp = Path("tmp/tmp_yahpo_model_" + uuid.uuid4().hex + ".onnx")
-        super().__init__(*args, **kwargs)
+        # No multithread in YAHPO Benchmark because this leads to this error:
+        # Traceback (most recent call last):
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carpsenv/lib/python3.12/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target  # noqa: E501
+        #         return _target_(*args, **kwargs)
+        #             ^^^^^^^^^^^^^^^^^^^^^^^^^
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/objective_functions/yahpo.py", line 104, in __init__  # noqa: E501
+        #         local_config.set_data_path(yahpo_data_path_path)
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/lib/yahpo_gym/yahpo_gym/yahpo_gym/local_config.py", line 59, in set_data_path  # noqa: E501
+        #         config.update({'data_path': str(data_path)})
+        #         ^^^^^^^^^^^^^
+        #     AttributeError: 'NoneType' object has no attribute 'update'
+        # Which occurs when having several instances of the same benchmark
+        opts = onnxruntime.SessionOptions()
+        opts.intra_op_num_threads = 1
+        opts.inter_op_num_threads = 1
+        opts.execution_mode = onnxruntime.ExecutionMode.ORT_SEQUENTIAL
 
-    def _get_model_path(self) -> Path:
-        model_path = super()._get_model_path()
-        if not self.model_path_tmp.exists():
-            self.model_path_tmp.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(model_path, self.model_path_tmp)
-        return self.model_path_tmp
+        super().__init__(
+            scenario=scenario,
+            instance=instance,
+            check=check,
+            noisy=noisy,
+            session=None,
+            multithread=False,
+            active_session=False,
+        )
 
-    def __del__(self) -> None:
-        # Clean up the temporary model path
+        # This is the path to the non-stochastic model. Selecting a noisy model is not yet supported.
         model_path = self._get_model_path()
-        if model_path.exists():
-            model_path.unlink()
+        session = onnxruntime.InferenceSession(model_path, sess_options=opts)
+        self.set_session(session, multithread=False)  # providers=["CPUExecutionProvider"]
 
 
 class YahpoObjectiveFunction(ObjectiveFunction):
@@ -135,21 +154,8 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         self.scenario = bench
         self.instance = str(instance)
 
-        # No multithread in YAHPO Benchmark because this leads to this error:
-        # Traceback (most recent call last):
-        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carpsenv/lib/python3.12/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target  # noqa: E501
-        #         return _target_(*args, **kwargs)
-        #             ^^^^^^^^^^^^^^^^^^^^^^^^^
-        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/objective_functions/yahpo.py", line 104, in __init__  # noqa: E501
-        #         local_config.set_data_path(yahpo_data_path_path)
-        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/lib/yahpo_gym/yahpo_gym/yahpo_gym/local_config.py", line 59, in set_data_path  # noqa: E501
-        #         config.update({'data_path': str(data_path)})
-        #         ^^^^^^^^^^^^^
-        #     AttributeError: 'NoneType' object has no attribute 'update'
-        # Which occurs when having several instances of the same benchmark
-        self._objective_function = CustomBenchmarkSet(
-            scenario=bench, instance=self.instance, check=True, multithread=False
-        )
+        self._objective_function = CustomBenchmarkSet(scenario=bench, instance=self.instance)
+
         self._configspace = self._objective_function.get_opt_space(drop_fidelity_params=True, seed=seed)
         self.fidelity_space = self._objective_function.get_fidelity_space()
         self.fidelity_dims = list(self._objective_function.get_fidelity_space().keys())
