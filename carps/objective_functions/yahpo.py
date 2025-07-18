@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import onnxruntime
 from omegaconf import ListConfig
 from yahpo_gym import BenchmarkSet, list_scenarios, local_config
 
@@ -65,50 +64,6 @@ def maybe_invert(value: float, target: str) -> float:
     return sign * value
 
 
-class CustomBenchmarkSet(BenchmarkSet):
-    """Custom BenchmarkSet to avoid multithreading issues."""
-
-    def __init__(
-        self,
-        scenario: str | None = None,
-        instance: str | None = None,
-        check: bool = True,  # noqa: FBT001, FBT002
-        noisy: bool = False,  # noqa: FBT001, FBT002
-    ):
-        """Initialize CustomBenchmarkSet."""
-        # No multithread in YAHPO Benchmark because this leads to this error:
-        # Traceback (most recent call last):
-        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carpsenv/lib/python3.12/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target  # noqa: E501
-        #         return _target_(*args, **kwargs)
-        #             ^^^^^^^^^^^^^^^^^^^^^^^^^
-        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/objective_functions/yahpo.py", line 104, in __init__  # noqa: E501
-        #         local_config.set_data_path(yahpo_data_path_path)
-        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/lib/yahpo_gym/yahpo_gym/yahpo_gym/local_config.py", line 59, in set_data_path  # noqa: E501
-        #         config.update({'data_path': str(data_path)})
-        #         ^^^^^^^^^^^^^
-        #     AttributeError: 'NoneType' object has no attribute 'update'
-        # Which occurs when having several instances of the same benchmark
-        opts = onnxruntime.SessionOptions()
-        opts.intra_op_num_threads = 1
-        opts.inter_op_num_threads = 1
-        opts.execution_mode = onnxruntime.ExecutionMode.ORT_SEQUENTIAL
-
-        super().__init__(
-            scenario=scenario,
-            instance=instance,
-            check=check,
-            noisy=noisy,
-            session=None,
-            multithread=False,
-            active_session=False,
-        )
-
-        # This is the path to the non-stochastic model. Selecting a noisy model is not yet supported.
-        model_path = self._get_model_path()
-        session = onnxruntime.InferenceSession(model_path, sess_options=opts)
-        self.set_session(session, multithread=False)  # providers=["CPUExecutionProvider"]
-
-
 class YahpoObjectiveFunction(ObjectiveFunction):
     """Yahpo ObjectiveFunction."""
 
@@ -147,14 +102,27 @@ class YahpoObjectiveFunction(ObjectiveFunction):
 
         yahpo_data_path_path = yahpo_data_path or YAHPO_TASK_DATA_DIR
 
-        # setting up meta data for surrogate benchmarks
-        local_config.init_config()
-        local_config.set_data_path(yahpo_data_path_path)
+        # Directly set the config in the yahpo config
+        # This avoids writing and reading the config file which would happen for every run.
+        # When on a cluster, for many parallel jobs, this leads to errors reading the file.
+        # This could lead to following error:
+        # Traceback (most recent call last):
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carpsenv/lib/python3.12/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target  # noqa: E501
+        #         return _target_(*args, **kwargs)
+        #             ^^^^^^^^^^^^^^^^^^^^^^^^^
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carps/objective_functions/yahpo.py", line 104, in __init__  # noqa: E501
+        #         local_config.set_data_path(yahpo_data_path_path)
+        #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/lib/yahpo_gym/yahpo_gym/yahpo_gym/local_config.py", line 59, in set_data_path  # noqa: E501
+        #         config.update({'data_path': str(data_path)})
+        #         ^^^^^^^^^^^^^
+        #     AttributeError: 'NoneType' object has no attribute 'update'
+        # In addition, multithred needs to be set to False, otherwise onnxruntime errors will occur.
+        local_config._config = {"data_path": str(yahpo_data_path_path)}
 
         self.scenario = bench
         self.instance = str(instance)
 
-        self._objective_function = CustomBenchmarkSet(scenario=bench, instance=self.instance)
+        self._objective_function = BenchmarkSet(scenario=bench, instance=self.instance, multithread=False)
 
         self._configspace = self._objective_function.get_opt_space(drop_fidelity_params=True, seed=seed)
         self.fidelity_space = self._objective_function.get_fidelity_space()

@@ -1,9 +1,14 @@
-from __future__ import annotations
+"""Test Yahpo in parallel.
 
-from multiprocessing import Pool
+Setup: Have a machine ready with 64 cores.
+E.g., on a slurm cluster: salloc -t 01:00:00 -c 64
+"""
+
+from __future__ import annotations
 
 from carps.objective_functions.yahpo import YahpoObjectiveFunction
 from carps.utils.trials import TrialInfo
+from joblib import Parallel, delayed
 
 
 def make_yahpo_obj() -> YahpoObjectiveFunction:
@@ -17,7 +22,5 @@ def init_and_sample(placeholder: int) -> None:  # noqa: ARG001
     obj_fun.evaluate(trial_info=trial_info)
 
 
-obj_fun = make_yahpo_obj()
-n_parallel = 32
-with Pool(n_parallel) as pool:
-    pool.map(init_and_sample, range(n_parallel))
+n_parallel = 64
+Parallel(n_jobs=n_parallel)(delayed(init_and_sample)(i) for i in range(n_parallel))
