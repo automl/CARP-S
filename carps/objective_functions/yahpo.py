@@ -116,7 +116,7 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         #         config.update({'data_path': str(data_path)})
         #         ^^^^^^^^^^^^^
         #     AttributeError: 'NoneType' object has no attribute 'update'
-        # In addition, multithred needs to be set to False, otherwise onnxruntime errors will occur.
+        # In addition, multithread needs to be set to False, otherwise onnxruntime errors will occur.
         local_config._config = {"data_path": str(yahpo_data_path_path)}
 
         self.scenario = bench
