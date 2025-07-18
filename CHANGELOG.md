@@ -1,3 +1,7 @@
+# 1.0.4
+- Fix yahpo error (#201)
+- Add missing requirement files (#202)
+
 # v1.0.3
 - Fix the order of optimizer names in the critical difference plots (#196).
 
