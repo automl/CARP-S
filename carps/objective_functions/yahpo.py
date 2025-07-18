@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import shutil
 import time
-import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -16,8 +14,6 @@ from carps.utils.env_vars import CARPS_TASK_DATA_DIR
 from carps.utils.trials import TrialInfo, TrialValue
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from ConfigSpace import ConfigurationSpace
 
     from carps.loggers.abstract_logger import AbstractLogger
@@ -68,28 +64,6 @@ def maybe_invert(value: float, target: str) -> float:
     return sign * value
 
 
-class CustomBenchmarkSet(BenchmarkSet):
-    """Custom BenchmarkSet to avoid multithreading issues."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize CustomBenchmarkSet."""
-        self.model_path_tmp = Path("tmp/tmp_yahpo_model_" + uuid.uuid4().hex + ".onnx")
-        super().__init__(*args, **kwargs)
-
-    def _get_model_path(self) -> Path:
-        model_path = super()._get_model_path()
-        if not self.model_path_tmp.exists():
-            self.model_path_tmp.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(model_path, self.model_path_tmp)
-        return self.model_path_tmp
-
-    def __del__(self) -> None:
-        # Clean up the temporary model path
-        model_path = self._get_model_path()
-        if model_path.exists():
-            model_path.unlink()
-
-
 class YahpoObjectiveFunction(ObjectiveFunction):
     """Yahpo ObjectiveFunction."""
 
@@ -128,14 +102,10 @@ class YahpoObjectiveFunction(ObjectiveFunction):
 
         yahpo_data_path_path = yahpo_data_path or YAHPO_TASK_DATA_DIR
 
-        # setting up meta data for surrogate benchmarks
-        local_config.init_config()
-        local_config.set_data_path(yahpo_data_path_path)
-
-        self.scenario = bench
-        self.instance = str(instance)
-
-        # No multithread in YAHPO Benchmark because this leads to this error:
+        # Directly set the config in the yahpo config
+        # This avoids writing and reading the config file which would happen for every run.
+        # When on a cluster, for many parallel jobs, this leads to errors reading the file.
+        # This could lead to following error:
         # Traceback (most recent call last):
         #     File "/home/numina/Documents/repos/CARP-S-Experiments/lib/CARP-S/carpsenv/lib/python3.12/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target  # noqa: E501
         #         return _target_(*args, **kwargs)
@@ -146,10 +116,14 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         #         config.update({'data_path': str(data_path)})
         #         ^^^^^^^^^^^^^
         #     AttributeError: 'NoneType' object has no attribute 'update'
-        # Which occurs when having several instances of the same benchmark
-        self._objective_function = CustomBenchmarkSet(
-            scenario=bench, instance=self.instance, check=True, multithread=False
-        )
+        # In addition, multithread needs to be set to False, otherwise onnxruntime errors will occur.
+        local_config._config = {"data_path": str(yahpo_data_path_path)}
+
+        self.scenario = bench
+        self.instance = str(instance)
+
+        self._objective_function = BenchmarkSet(scenario=bench, instance=self.instance, multithread=False)
+
         self._configspace = self._objective_function.get_opt_space(drop_fidelity_params=True, seed=seed)
         self.fidelity_space = self._objective_function.get_fidelity_space()
         self.fidelity_dims = list(self._objective_function.get_fidelity_space().keys())

@@ -2,9 +2,9 @@ PY_EXPERIMENTER:
   n_jobs: 1
 
   Database:
-    use_ssh_tunnel: true
+    use_ssh_tunnel: false
     provider: mysql
-    database: smacbenchmarking
+    database: carps
     table:
       name: results
       keyfields:
@@ -21,14 +21,14 @@ PY_EXPERIMENTER:
         task_type:
           type: VARCHAR(50)
         optimizer_id:
-          type: VARCHAR(50)
+          type: VARCHAR(200)
         optimizer_container_id:
           type: VARCHAR(50)
         seed:
           type: INT
-        n_trials:
+        task.optimization_resources.n_trials:
           type: INT
-        time_budget:
+        task.optimization_resources.time_budget:
           type: INT
       resultfields:
         slurm_job_id: VARCHAR(50)
@@ -45,6 +45,7 @@ PY_EXPERIMENTER:
         trial_info__normalized_budget: DOUBLE
         trial_info__name: TEXT
         trial_info__checkpoint: TEXT
+        trial_info__additional_info: JSON
         trial_value__cost: JSON
         trial_value__time: DOUBLE
         trial_value__virtual_time: DOUBLE

@@ -81,7 +81,7 @@ def add_metadata(
 def process_single_run_from_database(
     logs_from_one_run: pd.DataFrame,
     experiment_config_table: pd.DataFrame,
-    only_incumbents: bool = True,  # noqa: FBT001, FBT002
+    only_incumbents: bool = False,  # noqa: FBT001, FBT002
 ) -> pd.DataFrame:
     """Process logs from a single run.
 
@@ -114,7 +114,7 @@ def process_experiment(
     experiment_id: int,
     logs_from_database: pd.DataFrame,
     experiment_config_table: pd.DataFrame,
-    only_incumbents: bool = True,  # noqa: FBT001, FBT002
+    only_incumbents: bool = False,  # noqa: FBT001, FBT002
 ) -> pd.DataFrame:
     """Process logs for a specific experiment.
 
@@ -144,7 +144,7 @@ def process_logs_from_database(
     experiment_config_table_filename: str = "experiment_config.parquet",
     output_filename: str = "processed_logs.parquet",
     results_dir: str = "experimenter/results",
-    only_incumbents: bool = True,  # noqa: FBT001, FBT002
+    only_incumbents: bool = False,  # noqa: FBT001, FBT002
 ) -> pd.DataFrame:
     """Process logs from the database with multiprocessing for speed-up.
 
@@ -178,13 +178,18 @@ def process_logs_from_database(
         only_incumbents=only_incumbents,
     )
 
+    logger.info(f"Start processing {len(experiment_ids)} experiments... This might take a while...")
+
     # Set up multiprocessing pool to process the logs
     # with Pool() as pool:
     #     # Wrap pool.imap_unordered with tqdm to show the progress bar
-    #     result = list(tqdm(
-    #           pool.imap_unordered(
-    #           process_experiment_partial, experiment_ids), total=len(experiment_ids), desc="Processing experiments"))
-    logger.info(f"Start processing {len(experiment_ids)} experiments... This might take a while...")
+    #     result = pool.map(
+    #         process_experiment_partial, experiment_ids
+    #     )
+    # result = list(tqdm(
+    #       pool.imap_unordered(
+    #       process_experiment_partial, experiment_ids), total=len(experiment_ids), desc="Processing experiments"))
+    # ⚠ Can only do sequential processing, otherwise process is killed
     result = [
         process_experiment_partial(experiment_id)
         for experiment_id in tqdm(experiment_ids, desc="Processing experiments")

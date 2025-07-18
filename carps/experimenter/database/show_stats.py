@@ -53,7 +53,8 @@ def main(
             condition=f"WHERE status = '{status.value}'"
         )
         # column names most likely are ['config', 'config_hash', 'benchmark_id', 'task_id', 'subset_id', 'task_type',
-        # 'optimizer_id', 'optimizer_container_id', 'seed', 'n_trials', 'time_budget']
+        # 'optimizer_id', 'optimizer_container_id', 'seed', 'task.optimization_resources.n_trials',
+        # 'task.optimization_resources.time_budget']
         logger.info(f"Number of experiments with status {status.value}: {len(entries)}")
         if status == ExperimentStatus.ERROR:
             error_info = []
