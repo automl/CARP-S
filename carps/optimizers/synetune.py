@@ -134,6 +134,7 @@ class SynetuneOptimizer(Optimizer):
         task: Task,
         optimizer_name: str,
         optimizer_kwargs: dict | None = None,
+        is_legacy: bool = False,  # noqa: FBT001, FBT002
         loggers: list[AbstractLogger] | None = None,
         conversion_factor: int = 1000,
         expects_multiple_objectives: bool = False,  # noqa: FBT001, FBT002
@@ -149,6 +150,8 @@ class SynetuneOptimizer(Optimizer):
             Name of the optimizer.
         optimizer_kwargs : dict, optional
             Optimizer kwargs, by default None
+        is_legacy : bool, optional
+            Default False. Indicates whether the optimizer is legacy syne-tune code.
         loggers : list[AbstractLogger], optional
             Loggers, by default None
         expects_multiple_objectives : bool, optional
@@ -164,6 +167,7 @@ class SynetuneOptimizer(Optimizer):
         )
         self.fidelity_enabled = False
         self.max_fidelity = task.input_space.fidelity_space.max_fidelity
+        self.is_legacy = is_legacy
         assert optimizer_name in optimizers_dict
         if optimizer_name in mf_optimizer_dicts["with_mf"]:
             # raise NotImplementedError("Multi-Fidelity Optimization on SyneTune is not implemented yet!")
@@ -276,7 +280,7 @@ class SynetuneOptimizer(Optimizer):
             trial info (config, seed, instance, budget)
         """
         assert self._solver is not None
-        trial_suggestion = self._solver.suggest()
+        trial_suggestion = self._solver.suggest(self.trial_counter) if self.is_legacy else self._solver.suggest()
         trial = SyneTrial(
             trial_id=self.trial_counter,
             config=trial_suggestion.config,
@@ -352,7 +356,10 @@ class SynetuneOptimizer(Optimizer):
 
     def best_trial(self, metric: str) -> TrialResult:
         """Return the best trial according to the provided metric."""
-        sign = -1.0 if self.solver.do_minimize else 1.0
+        if self.is_legacy:
+            sign = 1.0 if self.solver.mode == "max" else -1.0
+        else:
+            sign = -1.0 if self.solver.do_minimize else 1.0
 
         return max(
             [value for key, value in self.completed_experiments.items()],
@@ -397,9 +404,16 @@ class SynetuneOptimizer(Optimizer):
         _optimizer_kwargs: dict[str, Any] = {
             "metric": self.metric,
         }
+        if self.is_legacy:
+            _optimizer_kwargs["mode"] = (
+                "min"
+                if self.task.output_space.n_objectives == 1
+                else list(np.repeat("min", self.task.output_space.n_objectives))
+            )
 
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
-            _optimizer_kwargs["resource_attr"] = self.fidelity_type
+            key_fidelity_type = "resource_attr" if self.is_legacy else "time_attr"
+            _optimizer_kwargs[key_fidelity_type] = self.fidelity_type
             # _optimizer_kwargs["max_t"] = self.max_fidelity  # TODO check how to set n trials / wallclock limit
             # for synetune
 
