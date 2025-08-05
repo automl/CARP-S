@@ -96,6 +96,7 @@ optimizer_skopt:
 optimizer_synetune:
 	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
 	$(PIP) install numpy --upgrade
+	$(PIP) install xgboost --upgrade
 
 optimizer_ax:
 	$(PIP) install -r ../container/recipes/optimizers/Ax/Ax_requirements.txt
