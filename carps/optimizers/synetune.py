@@ -37,9 +37,11 @@ from syne_tune.optimizer.baselines import (  # type: ignore
     ASHA,
     BOHB,
     BORE,
+    CQR,
+)
+from syne_tune.optimizer.legacy_baselines import (
     DEHB,
     KDE,
-    MOASHA,
     MOBSTER,
     MOREA,
     BayesianOptimization,
@@ -69,10 +71,10 @@ optimizers_dict = {
     "ASHA": ASHA,
     "MOBSTER": MOBSTER,
     "BOHB": BOHB,
+    "CQR": CQR,
     "KDE": KDE,
     "BORE": BORE,
     "DEHB": DEHB,
-    "MOASHA": MOASHA,
     "SyncMOBSTER": SyncMOBSTER,
 }
 
@@ -85,16 +87,16 @@ metric_type_dict = {
     "ASHA": str,
     "MOBSTER": str,
     "BOHB": str,
+    "CQR": str,
     "KDE": str,
     "BORE": str,
     "DEHB": str,
-    "MOASHA": list,
     "SyncMOBSTER": str,
 }
 
 mf_optimizer_dicts = {
-    "with_mf": {"ASHA", "MOASHA", "DEHB", "MOBSTER", "BOHB", "SyncMOBSTER"},
-    "without_mf": {"BORE", "BayesianOptimization", "KDE"},
+    "with_mf": {"ASHA", "DEHB", "MOBSTER", "BOHB", "SyncMOBSTER"},
+    "without_mf": {"BORE", "BayesianOptimization", "KDE", "CQR"},
 }
 
 
@@ -274,7 +276,7 @@ class SynetuneOptimizer(Optimizer):
             trial info (config, seed, instance, budget)
         """
         assert self._solver is not None
-        trial_suggestion = self._solver.suggest(self.trial_counter)
+        trial_suggestion = self._solver.suggest()
         trial = SyneTrial(
             trial_id=self.trial_counter,
             config=trial_suggestion.config,
@@ -350,10 +352,7 @@ class SynetuneOptimizer(Optimizer):
 
     def best_trial(self, metric: str) -> TrialResult:
         """Return the best trial according to the provided metric."""
-        if self.optimizer_name == "MOASHA":
-            self.solver.mode = "min"
-
-        sign = 1.0 if self.solver.mode == "max" else -1.0
+        sign = -1.0 if self.solver.do_minimize else 1.0
 
         return max(
             [value for key, value in self.completed_experiments.items()],
@@ -397,9 +396,6 @@ class SynetuneOptimizer(Optimizer):
 
         _optimizer_kwargs: dict[str, Any] = {
             "metric": self.metric,
-            "mode": "min"
-            if self.task.output_space.n_objectives == 1
-            else list(np.repeat("min", self.task.output_space.n_objectives)),
         }
 
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
@@ -425,10 +421,6 @@ class SynetuneOptimizer(Optimizer):
         _optimizer_kwargs["config_space"] = self.syne_tune_configspace
 
         self.optimizer_kwargs.update(_optimizer_kwargs)
-
-        if self.optimizer_name == "MOASHA":
-            del self.optimizer_kwargs["metric"]
-            del self.optimizer_kwargs["resource_attr"]
 
         if self.optimizer_name in ["SyncMOBSTER"] and "time_attr" in self.optimizer_kwargs:
             del self.optimizer_kwargs["time_attr"]
