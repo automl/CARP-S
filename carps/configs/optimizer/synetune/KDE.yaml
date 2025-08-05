@@ -6,3 +6,4 @@ optimizer:
   optimizer_name: 'KDE'
   optimizer_kwargs:
     random_seed: ${seed}
+  is_legacy: true

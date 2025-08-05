@@ -6,3 +6,4 @@ optimizer:
   optimizer_name: 'BayesianOptimization'
   optimizer_kwargs:
     random_seed: ${seed}
+  is_legacy: true

@@ -9,3 +9,4 @@ optimizer:
 
   expects_multiple_objectives: true
   expects_fidelities: false
+  is_legacy: true
