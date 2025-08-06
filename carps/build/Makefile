@@ -73,8 +73,8 @@ OS := $(shell uname)
 
 uvenv:
 	pip install uv
-	uv venv --python=3.12 carpsenv
-	. carpsenv/bin/activate
+	uv venv --python=3.12 .venv
+	. .venv/bin/activate
 	python -m ensurepip --upgrade
 	python -m pip install uv --upgrade
 	uv pip install setuptools wheel
@@ -94,7 +94,9 @@ optimizer_skopt:
 	$(PIP) install -r ../container/recipes/optimizers/Scikit_Optimize/Scikit_Optimize_requirements.txt
 
 optimizer_synetune:
-	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
+# 	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
+	git clone https://github.com/awslabs/syne-tune.git lib/syne-tune || true
+	$(PIP) install -e 'lib/syne-tune[basic,blackbox-repository]'
 	$(PIP) install numpy --upgrade
 	$(PIP) install xgboost --upgrade
 
