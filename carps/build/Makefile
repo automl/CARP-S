@@ -73,6 +73,7 @@ OS := $(shell uname)
 
 uvenv:
 	pip install uv
+	export PATH="$HOME/.local/bin:$PATH"
 	uv venv --python=3.12 .venv
 	. .venv/bin/activate
 	python -m ensurepip --upgrade
