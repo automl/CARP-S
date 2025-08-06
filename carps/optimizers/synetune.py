@@ -33,22 +33,7 @@ from syne_tune.config_space import (  # type: ignore
     randint,
     uniform,
 )
-from syne_tune.optimizer.baselines import (  # type: ignore
-    ASHA,
-    BOHB,
-    BORE,
-    CQR,
-)
-from syne_tune.optimizer.legacy_baselines import (
-    DEHB,
-    KDE,
-    MOBSTER,
-    MOREA,
-    BayesianOptimization,
-    MOLinearScalarizationBayesOpt,
-    MORandomScalarizationBayesOpt,
-    SyncMOBSTER,
-)
+from syne_tune.optimizer.baselines import ASHA, BOHB, BORE, CQR, TPE, BOTorch  # type: ignore
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.pareto_front import pareto
@@ -64,39 +49,27 @@ if TYPE_CHECKING:
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
-    "BayesianOptimization": BayesianOptimization,
-    "BO-MO-RS": MORandomScalarizationBayesOpt,
-    "BO-MO-LS": MOLinearScalarizationBayesOpt,
-    "MOREA": MOREA,
     "ASHA": ASHA,
-    "MOBSTER": MOBSTER,
     "BOHB": BOHB,
     "CQR": CQR,
-    "KDE": KDE,
     "BORE": BORE,
-    "DEHB": DEHB,
-    "SyncMOBSTER": SyncMOBSTER,
+    "BOTorch": BOTorch,
+    "TPE": TPE,
 }
 
 
 metric_type_dict = {
-    "BayesianOptimization": str,
-    "BO-MO-RS": list,
-    "BO-MO-LS": list,
-    "MOREA": list,
     "ASHA": str,
-    "MOBSTER": str,
     "BOHB": str,
     "CQR": str,
-    "KDE": str,
     "BORE": str,
-    "DEHB": str,
-    "SyncMOBSTER": str,
+    "BOTorch": str,
+    "TPE": str,
 }
 
 mf_optimizer_dicts = {
-    "with_mf": {"ASHA", "DEHB", "MOBSTER", "BOHB", "SyncMOBSTER"},
-    "without_mf": {"BORE", "BayesianOptimization", "KDE", "CQR"},
+    "with_mf": {"ASHA", "BOHB"},
+    "without_mf": {"BORE", "CQR", "BOTorch", "TPE"},
 }
 
 

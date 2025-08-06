@@ -1,9 +1,8 @@
 # @package _global_
 defaults:
   - base
-optimizer_id: SyneTune-KDE
+optimizer_id: SyneTune-BOTorch
 optimizer:
-  optimizer_name: 'KDE'
+  optimizer_name: BOTorch
   optimizer_kwargs:
     random_seed: ${seed}
-  is_legacy: true

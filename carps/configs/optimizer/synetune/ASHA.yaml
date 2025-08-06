@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - base
+optimizer_id: SyneTune-ASHA
+optimizer:
+  optimizer_name: ASHA
+  optimizer_kwargs:
+    random_seed: ${seed}
+    max_t: ${task.input_space.fidelity_space.max_fidelity}
+  expects_multiple_objectives: false
+  expects_fidelities: true
