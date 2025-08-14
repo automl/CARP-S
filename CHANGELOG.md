@@ -1,5 +1,6 @@
 # 1.0.5
 - Update SyneTune API, add CQR as optimizer (#211).
+- Fix regeneration of runcommands (#212).
 
 # 1.0.4
 - Fix yahpo error (#201).
