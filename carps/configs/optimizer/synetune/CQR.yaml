@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - base
+optimizer_id: SyneTune-CQR
+optimizer:
+  optimizer_name: CQR
+  optimizer_kwargs:
+    random_seed: ${seed}

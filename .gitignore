@@ -169,6 +169,7 @@ runs*
 *.parquet
 run-data*
 *.txt
+subselection/data*
 slurm-*
 tmp*
 *.aux
