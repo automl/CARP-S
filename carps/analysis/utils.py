@@ -6,14 +6,18 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 
+from carps.utils.loggingutils import get_logger
+
 if TYPE_CHECKING:
-    import matplotlib.pyplot as plt
     import pandas as pd
 
 
 colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
+logger = get_logger("analysis utils")
 
 
 def get_color_palette(
@@ -37,7 +41,10 @@ def get_color_palette(
     cmap2 = sns.color_palette("colorblind", as_cmap=False)
     cmap3 = sns.color_palette("Paired", as_cmap=False)
     colormaps = list(cmap1) + list(cmap2) + list(cmap3)
-    assert len(optimizers) <= len(colormaps), f"Too many optimizers: {len(optimizers)} > {len(colormaps)}"
+    if len(optimizers) > len(colormaps):
+        logger.info(f"Too many optimizers: {len(optimizers)} > {len(colormaps)}. Using continuous colormap.")
+        n_optimizers = len(optimizers)
+        colormaps = plt.colormaps.get_cmap("viridis")(np.linspace(0, 1, n_optimizers))
     return dict(zip(optimizers, colormaps, strict=False))
 
 
