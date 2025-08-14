@@ -46,10 +46,13 @@ def get_experiment_status(path: Path) -> dict:
         status = RunStatus.COMPLETED if n_trials >= n_trials_done else RunStatus.TRUNCATED
 
     try:
-        overrides = OmegaConf.load(path.parent / "overrides.yaml")
+        overrides = OmegaConf.load(path.parent / "hydra.yaml").hydra.overrides
+        task_overrides = overrides.task
+        hydra_overrides = overrides.hydra
     except yaml.reader.ReaderError:
         logger.warning(f"Could not load overrides from {path.parent / 'overrides.yaml'}.")
-        overrides = []
+        task_overrides = []
+        hydra_overrides = []
     # TODO maybe filter cluster
     return {
         "status": status.name,
@@ -57,7 +60,8 @@ def get_experiment_status(path: Path) -> dict:
         "task_id": cfg.task_id,
         "optimizer_id": cfg.optimizer_id,
         "seed": cfg.seed,
-        "overrides": " ".join(overrides),
+        "task_overrides": " ".join(task_overrides),
+        "hydra_overrides": " ".join(hydra_overrides),
     }
 
 
@@ -95,11 +99,14 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
         seeds = list(gdf["seed"].unique())
         seeds.sort()
-        overrides = gdf["overrides"].iloc[0].split(" ")
-        overrides = [o for o in overrides if "seed" not in o]
-        overrides.append(f"seed={','.join(str(int(s)) for s in seeds)} -m")
-        override = " ".join(overrides)
-        runcommand = f"python -m carps.run {override} \n"
+        task_overrides = gdf["task_overrides"].iloc[0].split(" ")
+        task_overrides = [o for o in task_overrides if "seed" not in o]
+        task_overrides.append(f"seed={','.join(str(int(s)) for s in seeds)}")
+        task_overrides = " ".join(task_overrides)
+        hydra_overrides = gdf["hydra_overrides"].iloc[0].split(" ")
+        hydra_overrides = [f'"{ho}"' for ho in hydra_overrides]
+        hydra_overrides = " ".join(hydra_overrides)
+        runcommand = f"python -m carps.run {hydra_overrides} {task_overrides} \n"
         runcommands.append(runcommand)
     runcommand_fn = Path(rundir) / f"runcommands_{runstatus.name}.sh"
     with open(runcommand_fn, "w") as file:
