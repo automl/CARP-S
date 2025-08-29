@@ -24,7 +24,14 @@ help:
 	@echo "* test             to run the tests"
 
 PYTHON ?= python
-PIP ?= pip
+
+ifndef PIP
+ifeq ($(shell command -v uv 2>/dev/null),)
+    PIP := pip
+else
+    PIP := uv pip
+endif
+endif
 
 test:
 	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8
