@@ -22,6 +22,7 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 from carps.analysis.calc_hypervolume import add_hypervolume_to_df
 from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
+from carps.utils.requirements import maybe_import_carps_compatible_package
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
 
@@ -362,7 +363,9 @@ def load_task_cfg(task_id: str, task_index: pd.DataFrame) -> DictConfig:
     if len(subset) == 0:
         raise ValueError(
             f"Can't find config_fn for {task_id}. Maybe the index is old. Run "
-            "`python -m carps.utils.index_configs` to refresh."
+            "`python -m carps.utils.index_configs` to refresh. "
+            "If you want to register custom tasks from your package, run "
+            "`python -m carps.utils.index_configs --carps_pkg_name=<your_package_name>`."
         )
     config_fn = subset.iloc[0]
     if not Path(config_fn).is_file():
@@ -793,6 +796,7 @@ def filelogs_to_df(
     log_fn: str = "trial_logs.jsonl",
     n_processes: int | None = None,
     outdir: str | Path | None = None,
+    carps_pkg_name: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load logs from file and preprocess.
 
@@ -806,12 +810,16 @@ def filelogs_to_df(
         Filename of the log file, by default "trial_logs.jsonl"
     n_processes : int | None, optional
         Number of processes to use for multiprocessing, by default None
+    carps_pkg_name : str | None, optional
+        Name of a CARPS-compatible package to import. This can be useful if the
+        custom package defines OmegaConf resolvers which need to be registered.
 
     Returns.
     -------
     tuple[pd.DataFrame, pd.DataFrame]
         Logs and config data frames.
     """
+    maybe_import_carps_compatible_package(carps_pkg_name)
     if isinstance(rundir, str):
         rundir = [rundir]
     rundirs_list = rundir

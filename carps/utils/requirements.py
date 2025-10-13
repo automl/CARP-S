@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -72,3 +73,44 @@ def check_requirements(cfg: DictConfig) -> None:
 
     _check(req_file_benchmark)
     _check(req_file_optimizer)
+
+
+def maybe_import_carps_compatible_package(carps_pkg_name: str | None) -> None:
+    """Import a CARPS-compatible package if specified.
+
+    This can be useful if the custom package defines OmegaConf resolvers which need to be registered.
+
+    Parameters
+    ----------
+    carps_pkg_name : str | None
+        Name of a CARPS-compatible package to import. If None, no package is imported.
+    """
+    if carps_pkg_name is not None:
+        try:
+            importlib.import_module(carps_pkg_name)
+        except ImportError as e:
+            raise ImportError(f"Could not import package {carps_pkg_name}.") from e
+
+
+def maybe_get_carps_compatible_package_location(carps_pkg_name: str | None) -> Path | None:
+    """Get the location of a CARPS-compatible package if specified.
+
+    This can be useful if the custom package defines OmegaConf resolvers which need to be registered.
+
+    Parameters
+    ----------
+    carps_pkg_name : str | None
+        Name of a CARPS-compatible package. If None, no package is imported.
+
+    Returns:
+    -------
+    Path | None
+        Location of the package, or None if no package name was given.
+    """
+    if carps_pkg_name is not None:
+        try:
+            module = importlib.import_module(carps_pkg_name)
+            return Path(module.__file__).parent  # type: ignore[arg-type]
+        except ImportError as e:
+            raise ImportError(f"Could not import package {carps_pkg_name}.") from e
+    return None
