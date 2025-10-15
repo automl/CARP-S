@@ -13,6 +13,7 @@ from omegaconf import OmegaConf
 
 from carps.analysis.gather_data import read_jsonl_content
 from carps.utils.loggingutils import get_logger, setup_logging
+from carps.utils.requirements import maybe_import_carps_compatible_package
 
 setup_logging()
 logger = get_logger(__file__)
@@ -35,6 +36,7 @@ def get_experiment_status(path: Path) -> dict:
     status = RunStatus.MISSING
 
     cfg = OmegaConf.load(path)
+    OmegaConf.resolve(cfg)
     if not hasattr(cfg, "task") or (hasattr(cfg, "task") and not hasattr(cfg.task, "optimization_resources")):
         # logger.warning(f"Skipping {path} as it does not have a task attribute.")
         return {}
@@ -114,14 +116,23 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
     logger.info(f"Done! Regenerated runcommands at {runcommand_fn}.")
 
 
-def regenerate_runcommands(rundir: str, from_cached: bool = False, n_processes: int | None = None) -> None:  # noqa: FBT001, FBT002
+def regenerate_runcommands(
+    rundir: str,
+    from_cached: bool = False,  # noqa: FBT001, FBT002
+    n_processes: int | None = None,
+    carps_pkg_name: str | None = None,
+) -> None:
     """Regenerate runcommands for missing or truncated runs.
 
     Args:
         rundir (str): Path to the rundir.
         from_cached (bool, optional): Load experiment status data from 'runstatus.csv'. Defaults to False.
         n_processes (int | None, optional): Number of processes to use. Defaults to None, using all available cores.
+        carps_pkg_name (str | None, optional): Name of the CARPS compatible package to use.
+            Useful, if package defines custom resolvers which need to be registered. Defaults to None.
     """
+    maybe_import_carps_compatible_package(carps_pkg_name)
+
     if from_cached:
         logger.info("Loading experiment status data from 'runstatus.csv'...")
         data = pd.read_csv("runstatus.csv")
