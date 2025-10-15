@@ -405,7 +405,7 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
             assert gdf["seed"].nunique() == 1  # noqa: PD101
             seed = gdf["seed"].iloc[0]
             task_cfg.seed = int(seed)
-        task_cfg = OmegaConf.to_container(task_cfg, resolve=False)
+        task_cfg = OmegaConf.to_container(task_cfg, resolve=True)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         if overwrite:
             task_dict = asdict(Task(**task_cfg))
@@ -558,8 +558,6 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     logger.debug("Determine incumbent cost...")
     logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
 
-    logger.debug("Maybe add task info...")
-    logs = maybe_postadd_task(logs)
     if "task.output_space.n_objectives" in logs:
         logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
     logger.debug("Infer task_type...")
