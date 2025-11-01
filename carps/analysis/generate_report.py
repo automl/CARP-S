@@ -89,6 +89,7 @@ def plot_ranks_over_time(  # noqa: PLR0915
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the ranks of the optimizers over time.
 
@@ -96,6 +97,7 @@ def plot_ranks_over_time(  # noqa: PLR0915
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -162,7 +164,8 @@ def plot_ranks_over_time(  # noqa: PLR0915
             continue
 
         palette = get_color_palette(gdf)
-        fig = plt.Figure(figsize=(6, 4))
+        figure_class = plt.figure if show_figure else plt.Figure
+        fig = figure_class(figsize=(6, 4))
         ax = fig.add_subplot(111)
 
         # Plot significance change
@@ -194,6 +197,8 @@ def plot_ranks_over_time(  # noqa: PLR0915
         ax.legend(sorted_handles, sorted_labels, loc="center left", bbox_to_anchor=(1.05, 0.5), title=legend_title)
         ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
         savefig(fig, figure_filename)
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
@@ -202,30 +207,35 @@ def plot_ranks_over_time(  # noqa: PLR0915
 def plot_performance_over_time(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    per_task: bool = False,  # noqa: FBT001, FBT002
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the performance of the optimizers over time.
 
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        per_task (bool, False): Whether to plot per task. In this case, the performance is not normalized.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
     """
-    setup_seaborn(font_scale=1.3)
-    lineplot_kwargs = {"linewidth": 4}
+    setup_seaborn(font_scale=1.2)
+    lineplot_kwargs = {"linewidth": 2}
 
-    key_performance = "trial_value__cost_inc_norm"
-    x_column = "n_trials_norm"
+    key_performance = "trial_value__cost_inc_norm" if not per_task else "trial_value__cost_inc"
+    x_column = "n_trials_norm" if not per_task else "n_trials"
 
-    perf = get_interpolated_performance_df(df)
+    perf = get_interpolated_performance_df(df) if not per_task else df
 
     resulting_files = []
     for gid, gdf in perf.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_perfovertime"
+        pertaskid = "_pertask" if per_task else ""
+        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_perfovertime{pertaskid}"
         resulting_files.append(
             {
                 "task_type": gid[0],
@@ -245,16 +255,43 @@ def plot_performance_over_time(
             continue
 
         palette = get_color_palette(gdf)
-        fig = plt.Figure(figsize=(6, 4))
-        ax = fig.add_subplot(111)
-        ax = sns.lineplot(
-            data=gdf, x=x_column, y=key_performance, hue="optimizer_id", ax=ax, palette=palette, **lineplot_kwargs
-        )
-        ax.set_xlabel("Number of Trials (normalized)")
-        ax.set_ylabel(f"{key_performance} (lower is better)")
-        ax.set_xlim(0, 1)
-        ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+
+        if not per_task:
+            figure_class = plt.figure if show_figure else plt.Figure
+            fig = figure_class(figsize=(6, 4))
+            ax = fig.add_subplot(111)
+            ax = sns.lineplot(
+                data=gdf, x=x_column, y=key_performance, hue="optimizer_id", ax=ax, palette=palette, **lineplot_kwargs
+            )
+            ax.set_xlabel("Number of Trials (normalized)")
+            ax.set_ylabel(f"{key_performance} (lower is better)")
+            ax.set_xlim(0, 1)
+            ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+            ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", title=None)
+        else:
+            grid = sns.FacetGrid(
+                gdf,
+                col="task_id",
+                hue="optimizer_id",
+                col_wrap=4,
+                height=4,
+                sharex=False,
+                sharey=False,
+                palette=palette,
+            )
+            grid.map_dataframe(
+                sns.lineplot,
+                x=x_column,
+                y=key_performance,
+                **lineplot_kwargs,
+            )
+            grid.set_titles(col_template="{col_name}", row_template="{row_name}")
+            grid.add_legend(bbox_to_anchor=(1.05, 1), loc="upper left", title=None)
+            fig = grid.figure
+
         savefig(fig, figure_filename)
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
@@ -264,6 +301,7 @@ def plot_budget_used(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the used budget. Useful for debugging.
 
@@ -271,6 +309,7 @@ def plot_budget_used(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -295,7 +334,8 @@ def plot_budget_used(
         if not replot:
             continue
 
-        fig = plt.Figure(figsize=(6, 4))
+        figure_class = plt.figure if show_figure else plt.Figure
+        fig = figure_class(figsize=(6, 4))
         ax = fig.add_subplot(111)
         palette = get_color_palette(df=gdf)
         budget_used = percent_budget_used(df=gdf)
@@ -308,18 +348,26 @@ def plot_budget_used(
         plt.show()
         ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
         savefig(fig, figure_filename)
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
 
 
-def plot_ecdf(df: pd.DataFrame, output_dir: str | Path = "figures", replot: bool = True) -> list[dict[str, Any]]:  # noqa: FBT001, FBT002
+def plot_ecdf(
+    df: pd.DataFrame,
+    output_dir: str | Path = "figures",
+    replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
+) -> list[dict[str, Any]]:
     """Plot the empirical cumulative distribution function (eCDF) / proportion of the incumbent cost.
 
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -352,7 +400,8 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str | Path = "figures", replot: bool
         if not replot:
             continue
 
-        fig = plt.Figure(figsize=(6, 4))
+        figure_class = plt.figure if show_figure else plt.Figure
+        fig = figure_class(figsize=(6, 4))
         ax = fig.add_subplot(111)
 
         for optimizer_id, odf in gdf.groupby("optimizer_id"):
@@ -365,6 +414,8 @@ def plot_ecdf(df: pd.DataFrame, output_dir: str | Path = "figures", replot: bool
         ax.set_ylabel("Proportion")
         ax.set_title(f"{gid[0]}: {gid[1]}")
         savefig(fig, figure_filename)
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
@@ -374,6 +425,7 @@ def plot_critical_difference(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the critical difference diagram.
 
@@ -381,6 +433,7 @@ def plot_critical_difference(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -424,6 +477,7 @@ def plot_critical_difference(
             output_path=fig_filename,
             figsize=figsize,
             plot_diagram=True,
+            show_figure=show_figure,
         )
     return resulting_files
 
@@ -432,6 +486,7 @@ def plot_performance_per_task(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the performance of the optimizers per task.
 
@@ -439,6 +494,7 @@ def plot_performance_per_task(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -472,7 +528,10 @@ def plot_performance_per_task(
 
         # sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
 
-        fig = plt.Figure(figsize=(12, 12))
+        figure_class = plt.Figure
+        if show_figure:
+            figure_class = plt.figure
+        fig = figure_class(figsize=(12, 12))
         ax0 = fig.add_subplot(111)
 
         # Perf per task (normalized)
@@ -514,6 +573,8 @@ def plot_performance_per_task(
         ax0.set_ylabel("Task ID")
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
+        if show_figure:
+            plt.show()
         plt.close(fig)
     return resulting_files
 
@@ -522,6 +583,7 @@ def plot_boxplot_violinplot(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the final performance of the optimizers as boxplot and violinplot.
 
@@ -529,6 +591,7 @@ def plot_boxplot_violinplot(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -573,7 +636,8 @@ def plot_boxplot_violinplot(
         result = calc_critical_difference(gdf, identifier=None, perf_col=perf_col, plot_diagram=False)
         sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
 
-        fig = plt.Figure(figsize=(6, 4))
+        figure_class = plt.figure if show_figure else plt.Figure
+        fig = figure_class(figsize=(6, 4))
         ax1 = fig.add_subplot(111)
         df_finalperf = filter_only_final_performance(df=gdf)
         sorter = names
@@ -597,6 +661,8 @@ def plot_boxplot_violinplot(
         ax2 = sns.violinplot(data=df_finalperf, y=y, x=x, hue=hue, palette=palette, ax=ax2, cut=0)
         ax2.set_title("Log Final Performance (Normalized)")
         savefig(fig, figure_filename_violinplot)
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
@@ -606,6 +672,7 @@ def plot_finalperfboxplot(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the final performance of the optimizers as boxplot.
 
@@ -613,6 +680,7 @@ def plot_finalperfboxplot(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -687,7 +755,8 @@ def plot_finalperfboxplot(
         ax.set_ylabel("Optimizer")
 
         fig.tight_layout()
-        plt.show()
+        if show_figure:
+            plt.show()
 
         savefig(fig, figure_filename)
         plt.close(fig)
@@ -699,6 +768,7 @@ def plot_finalperfbarplot(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the final performance of the optimizers as boxplot and violinplot.
 
@@ -706,6 +776,7 @@ def plot_finalperfbarplot(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -738,7 +809,8 @@ def plot_finalperfbarplot(
 
         df_final = filter_only_final_performance(df=gdf)
 
-        fig = plt.Figure(figsize=(6, 4))
+        figure_class = plt.figure if show_figure else plt.Figure
+        fig = figure_class(figsize=(6, 4))
         ax = fig.add_subplot(111)
         df_final["mean_perf"] = df_final.groupby("optimizer_id")[perf_col].transform("mean")
         df_final = df_final.sort_values(by="mean_perf")
@@ -764,6 +836,8 @@ def plot_finalperfbarplot(
             ax.text(x_pos, y_pos, f"{mean_perf_value:.2e}", ha="left", va="center", color="black")
 
         savefig(fig, figure_filename)
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
@@ -773,6 +847,7 @@ def plot_spearman_rank_correlation(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     replot: bool = True,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
     """Plot the Spearman rank correlation matrix between the optimizers.
 
@@ -780,6 +855,7 @@ def plot_spearman_rank_correlation(
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
         replot (bool, True): Whether to replot the figures.
+        show_figure (bool, False): Whether to show the figure.
 
     Returns:
         list[dict[str, Any]]: The filenames of and information about the resulting plots.
@@ -815,7 +891,8 @@ def plot_spearman_rank_correlation(
         # df_crit.index = [i.replace(task_prefix + "/dev/", "") for i in df_crit.index]
         # df_crit.index = [i.replace(task_prefix + "/test/", "") for i in df_crit.index]
 
-        fig = plt.Figure(figsize=(6 * 1.5, 4 * 1.5))
+        figure_class = plt.figure if show_figure else plt.Figure
+        fig = figure_class(figsize=(6 * 1.5, 4 * 1.5))
         ax3 = fig.add_subplot(111)
         ranked_df = df_crit.rank(axis=1, method="min", ascending=True)
         correlation_matrix = ranked_df.corr(method="spearman")
@@ -825,7 +902,8 @@ def plot_spearman_rank_correlation(
         # fig.set_tight_layout(True)
 
         savefig(fig, figure_filename)
-
+        if show_figure:
+            plt.show()
         plt.close(fig)
 
     return resulting_files
@@ -965,6 +1043,19 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
             )
 
     # Remove rows where "optimizer_id" == "nan"
+    df = df[  # noqa: PD901
+        ~df["optimizer_id"].isin(
+            [
+                "SyneTune-DEHB",
+                "SyneTune-SyncMOBSTER",
+                "SyneTune-KDE",
+                "SyneTune-BO",
+                "SyneTune-MOREA",
+                "SyneTune-BO-MO-LS",
+                "SyneTune-BO-MO-RS",
+            ]
+        )
+    ]
     return df[df["optimizer_id"] != "nan"]
 
 

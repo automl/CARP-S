@@ -388,6 +388,7 @@ def cd_evaluation(
     figsize: tuple[int, int] | tuple[float, float] = (12, 8),
     plot_diagram: bool = True,  # noqa: FBT001, FBT002
     verbose: bool = False,  # noqa: FBT001, FBT002
+    show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> RankResult:
     """Run critical difference evaluation.
 
@@ -404,6 +405,7 @@ def cd_evaluation(
         figsize (tuple[int | float], optional): Figure size. Defaults to (12, 8).
         plot_diagram (bool, optional): Whether to plot the diagram. Defaults to True.
         verbose (bool, optional): Whether to print verbose output. Defaults to False.
+        show_figure (bool, optional): Whether to show the figure. Defaults to False.
 
     Returns:
         RankResult: Rank result.
@@ -472,6 +474,8 @@ def cd_evaluation(
             Path(output_path).parent.mkdir(exist_ok=True, parents=True)
             plt.savefig(output_path + ".png", transparent=True, bbox_inches="tight")
             plt.savefig(output_path + ".pdf", transparent=True, bbox_inches="tight")
+        if show_figure:
+            plt.show()
         plt.close()
 
     return result
