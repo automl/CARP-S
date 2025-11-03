@@ -126,7 +126,7 @@ def get_df_crit(
     df = filter_only_final_performance(df=df, x_column=budget_var, max_x=max_fidelity)  # noqa: PD901
 
     # Work on mean of different seeds
-    df_crit = df.groupby(["optimizer_id", "task_id"])[perf_col].apply(np.nanmean).reset_index()
+    df_crit = df.groupby(["optimizer_id", "task_id"])[perf_col].apply(np.nanmean).reset_index().copy()
 
     df_crit = df_crit.pivot_table(index="task_id", columns="optimizer_id", values=perf_col)
 
@@ -137,14 +137,14 @@ def get_df_crit(
         # Rows are tasks, cols are optimizers
         if len(lost) > 0:
             df_crit = df_crit[~nan_ids]
-            logger.info(f"Lost following experiments: {lost}")
+            logger.info(f"Lost following experiments: {list(lost)}")
     elif nan_handling == "keep":
         pass
     elif nan_handling == "replace_by_highest":
         nan_ids = np.array([np.any(np.isnan(d.values)) for _, d in df_crit.iterrows()])
         max_val = df_crit[perf_col].max()
         df_crit.loc[nan_ids, perf_col] = max_val
-        logger.info(f"Replaced nans by max val {max_val}: {df_crit}")
+        logger.info(f"Replaced nans by max val {float(max_val)}: {df_crit}")
     else:
         raise ValueError(f"Unknown nan handling {nan_handling}. Can only do `remove`, `keep`, `replace_by_highest`.")
 
@@ -424,7 +424,6 @@ def cd_evaluation(
 
     # -- Friedman-Nemenyi
     res = rank_multiple_nonparametric(rank_data, alpha, verbose, all_normal, order, effect_size, None)
-
     result = RankResult(
         rankdf=res.rankdf,
         pvalue=res.pvalue,

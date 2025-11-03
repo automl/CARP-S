@@ -46,6 +46,7 @@ from carps.analysis.run_autorank import (
 from carps.analysis.utils import (
     filter_only_final_performance,
     get_color_palette,
+    get_marker_palette,
     percent_budget_used,
     savefig,
     setup_seaborn,
@@ -136,7 +137,9 @@ def plot_ranks_over_time(  # noqa: PLR0915
             # logger.info(f"rank_result: {rank_result}")
             df_rank_list.append(df_rank_cd)
     df_rank: pd.DataFrame = pd.concat(df_rank_list).reset_index(drop=True)
-    df_rank.to_parquet("df_rank.parquet", index=False)
+
+    # df_rank.to_parquet("df_rank.parquet", index=False)
+    # df_rank = pd.read_parquet("df_rank.parquet")
 
     key_rank = "meanrank"
 
@@ -234,6 +237,7 @@ def plot_performance_over_time(
     resulting_files = []
     for gid, gdf in perf.groupby(["task_type", "set"]):
         palette = get_color_palette(gdf)
+        marker_palette = get_marker_palette(gdf)
         pertaskid = "_pertask" if per_task else ""
         figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_perfovertime{pertaskid}"
         resulting_files.append(
@@ -261,8 +265,21 @@ def plot_performance_over_time(
             fig = figure_class(figsize=(6, 4))
             ax = fig.add_subplot(111)
             ax = sns.lineplot(
-                data=gdf, x=x_column, y=key_performance, hue="optimizer_id", ax=ax, palette=palette, **lineplot_kwargs
+                data=gdf,
+                x=x_column,
+                y=key_performance,
+                hue="optimizer_id",
+                style="optimizer_id",
+                dashes=False,
+                markers=marker_palette,
+                markevery=4,
+                ax=ax,
+                palette=palette,
+                **lineplot_kwargs,
             )
+            for ln in ax.get_lines():
+                ln.set_zorder(9999)  # Markers on top
+                ln.set_clip_on(False)  # Markers not clipped
             ax.set_xlabel("Number of Trials (normalized)")
             ax.set_ylabel(f"{key_performance} (lower is better)")
             ax.set_xlim(0, 1)
@@ -272,17 +289,23 @@ def plot_performance_over_time(
             grid = sns.FacetGrid(
                 gdf,
                 col="task_id",
-                hue="optimizer_id",
+                # hue="optimizer_id",
                 col_wrap=4,
                 height=4,
                 sharex=False,
                 sharey=False,
-                palette=palette,
+                # palette=palette,
             )
             grid.map_dataframe(
                 sns.lineplot,
                 x=x_column,
                 y=key_performance,
+                hue="optimizer_id",
+                style="optimizer_id",
+                dashes=False,
+                markers=marker_palette,
+                markevery=0.1,
+                palette=palette,
                 **lineplot_kwargs,
             )
             grid.set_titles(col_template="{col_name}", row_template="{row_name}")
