@@ -1228,12 +1228,24 @@ def generate_report(
     logger.info("\t...ranks over time")
     resulting_files_rank_over_time = plot_ranks_over_time(df, output_dir=figure_dir, replot=True)
 
+    logger.info("\t...incumbent cost over time (aggregated, normalized, interpolated)")
+    resulting_files_perfovertime = plot_performance_over_time(
+        df, output_dir=figure_dir, per_task=False, replot=True, show_figure=False
+    )
+
+    logger.info("\t...incumbent cost over time per task")
+    resulting_files_perfovertime_pertask = plot_performance_over_time(
+        df, output_dir=figure_dir, per_task=True, replot=True, show_figure=False
+    )
+
     resulting_files = pd.concat(
         [
             pd.DataFrame(resulting_files_critical_difference),
             pd.DataFrame(resulting_files_performance_per_task),
             pd.DataFrame(resulting_files_finalperfboxplot),
             pd.DataFrame(resulting_files_rank_over_time),
+            pd.DataFrame(resulting_files_perfovertime),
+            pd.DataFrame(resulting_files_perfovertime_pertask),
         ]
     ).reset_index(drop=True)
     write_latex_report(resulting_files, report_dir, report_name)
