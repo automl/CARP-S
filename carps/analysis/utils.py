@@ -39,9 +39,11 @@ def get_marker_palette(
         assert df is not None, "Either df or optimizers must be provided."
         optimizers = list(df[model_name_key].unique())
     optimizers.sort()
+    _markers = markers
     if len(optimizers) > len(markers):
+        _markers = markers + markers
         logger.info(f"Too many optimizers: {len(optimizers)} > {len(markers)}. Reusing markers.")
-    return dict(zip(optimizers, markers, strict=False))
+    return dict(zip(optimizers, _markers, strict=False))
 
 
 def get_color_palette(
