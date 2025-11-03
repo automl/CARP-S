@@ -509,7 +509,7 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
 
     df = pd.concat(logs).reset_index(drop=True)  # noqa: PD901
     df_cfg = pd.concat([pd.read_parquet(Path(p) / "logs_cfg.parquet") for p in paths]).reset_index(drop=True)
-    df["set"] = set_id
+    df["subset_id"] = set_id
     return df, df_cfg
 
 
@@ -726,7 +726,7 @@ def get_interpolated_performance_df(
 
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
-    group_keys = ["task_type", "set", "benchmark_id", "optimizer_id", "task_id", "seed"]
+    group_keys = ["task_type", "subset_id", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []
     for gid, gdf in logs.groupby(by=group_keys):

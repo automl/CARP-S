@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -196,3 +197,39 @@ def get_ids_mo(logs: pd.DataFrame) -> pd.Series:
     """
     # TODO determine MO ids by type of cost (first apply maybe_convert_cost_dtype)
     return logs["task_type"].isin(["multi-objective", "multi-fidelity-objective"])
+
+
+def determine_filename_id(group_keys: Sequence[str], gid: list[Any]) -> str:
+    """Determine filename id based on group keys.
+
+    Parameters
+    ----------
+    group_keys : Sequence[str]
+        The group keys.
+    gid : list[Any]
+        The group values.
+
+    Returns:
+    -------
+    str
+        The filename id.
+    """
+    return "_".join([f"{k}-{v}" for k, v in zip(group_keys, gid, strict=True)])
+
+
+def get_figure_title(group_keys: Sequence[str], gid: list[Any]) -> str:
+    """Determine filename id based on group keys.
+
+    Parameters
+    ----------
+    group_keys : Sequence[str]
+        The group keys.
+    gid : list[Any]
+        The group values.
+
+    Returns:
+    -------
+    str
+        The filename id.
+    """
+    return ",".join([f"{k}: {v}" for k, v in zip(group_keys, gid, strict=True)])

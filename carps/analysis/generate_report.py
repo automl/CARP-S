@@ -44,8 +44,10 @@ from carps.analysis.run_autorank import (
     get_sorted_rank_groups,
 )
 from carps.analysis.utils import (
+    determine_filename_id,
     filter_only_final_performance,
     get_color_palette,
+    get_figure_title,
     get_marker_palette,
     percent_budget_used,
     savefig,
@@ -116,7 +118,7 @@ def plot_ranks_over_time(  # noqa: PLR0915
     perf = get_interpolated_performance_df(df)
 
     df_rank_list = []
-    for gid, gdf in perf.groupby(groupers):
+    for gid, gdf in perf.groupby(list(groupers)):
         budgets = gdf[x_column].unique()
         logger.info(f"Budgets: {budgets}")
         for max_fidelity in track(budgets, "Calc critical difference per step..."):
@@ -148,13 +150,13 @@ def plot_ranks_over_time(  # noqa: PLR0915
     key_rank = "meanrank"
 
     resulting_files = []
-    for gid, gdf in df_rank.groupby(groupers):
+    for gid, gdf in df_rank.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_rank"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_rank"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "rank_over_time",
@@ -165,6 +167,7 @@ def plot_ranks_over_time(  # noqa: PLR0915
                 " an estimate of the performance. The rank is then calculated per step and task with the same "
                 "approach as for the critical difference diagram. The grey area marks the area where the "
                 "test results are insignificant.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -202,9 +205,11 @@ def plot_ranks_over_time(  # noqa: PLR0915
         sorted_labels = tuple([f"{label} ({final_rank.loc[label, 'meanrank']:.1f})" for label in sorted_labels])
         legend_title = "Optimizer (Final Rank)"
         ax.legend(sorted_handles, sorted_labels, loc="center left", bbox_to_anchor=(1.05, 0.5), title=legend_title)
-        ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+        title = get_figure_title(groupers, gid)
+        ax.set_title(title)
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -243,15 +248,15 @@ def plot_performance_over_time(
     perf = get_interpolated_performance_df(df) if not per_task else df
 
     resulting_files = []
-    for gid, gdf in perf.groupby(groupers):
+    for gid, gdf in perf.groupby(list(groupers)):
         palette = get_color_palette(gdf)
         marker_palette = get_marker_palette(gdf)
         pertaskid = "_pertask" if per_task else ""
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_perfovertime{pertaskid}"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_perfovertime{pertaskid}"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "rank_over_time",
@@ -261,6 +266,7 @@ def plot_performance_over_time(
                 "the rank the better. For each optimizer and task, the performance is averaged over seeds to obtain"
                 " an estimate of the performance. The rank is then calculated per step and task with the same "
                 "approach as for the critical difference diagram.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -291,7 +297,8 @@ def plot_performance_over_time(
             ax.set_xlabel("Number of Trials (normalized)")
             ax.set_ylabel(f"{key_performance} (lower is better)")
             ax.set_xlim(0, 1)
-            ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+            title = get_figure_title(groupers, gid)
+            ax.set_title(title)
             ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", title=None)
         else:
             grid = sns.FacetGrid(
@@ -322,6 +329,7 @@ def plot_performance_over_time(
 
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -351,19 +359,20 @@ def plot_budget_used(
     """
     setup_seaborn(font_scale=1.3)
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_percent_budget_used"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_percent_budget_used"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "percent_budget_used",
                 "plot_type_pretty": "Percent Budget Used",
                 "explanation": "The perceentage of how much of the total budget was used by the "
                 "optimizer. This is useful to see if any optimizer prematurely stopped.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -381,9 +390,11 @@ def plot_budget_used(
         ax.set_ylabel("Optimizer")
         fig.tight_layout()
         plt.show()
-        ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+        title = get_figure_title(groupers, gid)
+        ax.set_title(title)
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -417,13 +428,13 @@ def plot_ecdf(
     key_performance = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_ecdf"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_ecdf"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "ecdf",
@@ -434,6 +445,7 @@ def plot_ecdf(
                 "The eCDF shows the proportion of incumbent costs encountered during the optimization. "
                 "The further left the curve is, the better the optimizer is performing, because it achieves lower "
                 "values sooner.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -451,9 +463,11 @@ def plot_ecdf(
         # ax.set_xscale("log")
         ax.set_xlabel("Log Incumbent Cost (Normalized)")
         ax.set_ylabel("Proportion")
-        ax.set_title(f"{gid[0]}: {gid[1]}")
+        title = get_figure_title(groupers, gid)
+        ax.set_title(title)
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -485,12 +499,12 @@ def plot_critical_difference(
     figsize = (6 * 1.5, 4 * 1.5)
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
-        fig_filename = f"{output_dir}/{gid[0]}_{gid[1]}_criticaldifference"
+    for gid, gdf in df.groupby(list(groupers)):
+        filename_id = determine_filename_id(groupers, gid)
+        fig_filename = f"{output_dir}/{filename_id}_criticaldifference"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": fig_filename,
                 "plot_type": "critical_difference",
@@ -508,6 +522,7 @@ def plot_critical_difference(
                 "The significance level is $\alpha=0.05$. "
                 "In order to be considered different, the difference between the mean ranks of two optimizers must be "
                 "greater than the critical difference (CD).",
+                **grouper_info,
             }
         )
         if not replot:
@@ -551,12 +566,12 @@ def plot_performance_per_task(
     perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_performancepertask"
+    for gid, gdf in df.groupby(list(groupers)):
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_performancepertask"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "performance_per_task",
@@ -566,6 +581,7 @@ def plot_performance_per_task(
                 "The performance is shown as a heatmap, where the colors indicate the performance of the optimizer "
                 "on a specific task. "
                 "The better the optimizer performs, the lighter/more yellow the color.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -601,12 +617,12 @@ def plot_performance_per_task(
         mesh = ax0.collections[0]
         _annotate_heatmap(ax0, mesh, {"fontsize": 8}, ".6g", annot_data)
 
+        title = get_figure_title(groupers, gid)
         ax0.set_title(
-            f"Final Performance per Task for Task Type {gid[0]} and Set {gid[1]}\n"
-            "Annotations: Raw Values, Colormap: Normalized Values"
+            f"Final Performance per Task for {title}\n" "Annotations: Raw Values, Colormap: Normalized Values"
         )
 
-        ax0.set_title(f"Final Performance per Task for Task Type {gid[0]} and Set {gid[1]}")
+        ax0.set_title(f"Final Performance per Task for {title}")
         ax0.text(
             0.5,
             1.05,
@@ -621,6 +637,7 @@ def plot_performance_per_task(
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
     return resulting_files
@@ -653,32 +670,33 @@ def plot_boxplot_violinplot(
     x_column = "n_trials_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{gid[0]}_{gid[1]}"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{filename_id}"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename_boxplot,
                 "plot_type": "finalperformance_boxplot",
                 "plot_type_pretty": "Final Performance (Normalized, Boxplot)",
                 "explanation": "The boxplot shows the final performance of the optimizers. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. ",
+                **grouper_info,
             }
         )
-        figure_filename_violinplot = f"{output_dir}/finalperfviolinplot_{gid[0]}_{gid[1]}"
+        figure_filename_violinplot = f"{output_dir}/finalperfviolinplot_{filename_id}"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename_violinplot,
                 "plot_type": "finalperformance_violinplot",
                 "plot_type_pretty": "Final Performance (Normalized, Violinplot)",
                 "explanation": "The violinplot shows the final performance of the optimizers. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. ",
+                **grouper_info,
             }
         )
         if not replot:
@@ -713,6 +731,7 @@ def plot_boxplot_violinplot(
         ax2.set_title("Log Final Performance (Normalized)")
         savefig(fig, figure_filename_violinplot)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -746,13 +765,13 @@ def plot_finalperfboxplot(
     key_agg = "median"
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_finalperfboxplot"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_finalperfboxplot"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "finalperformance_barplot",
@@ -764,6 +783,7 @@ def plot_finalperfboxplot(
                 "The black square ⬛ marks the mean. "
                 "The distribution is obtained by first averaging the performance over all "
                 "tasks, and then plot the distribution over seeds.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -811,6 +831,7 @@ def plot_finalperfboxplot(
 
         fig.tight_layout()
         if show_figure:
+            logger.info(gid)
             plt.show()
 
         savefig(fig, figure_filename)
@@ -845,19 +866,20 @@ def plot_finalperfbarplot(
     perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_finalperfbarplot"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_finalperfbarplot"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "finalperformance_barplot",
                 "plot_type_pretty": "Final Performance (Normalized, Barplot)",
                 "explanation": "The barplot shows the mean final performance of the optimizers "
                 r"with 95-\% confidence interval.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -896,6 +918,7 @@ def plot_finalperfbarplot(
 
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -928,12 +951,12 @@ def plot_spearman_rank_correlation(
     perf_col = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(groupers):
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_spearmanrankcorrelation"
+    for gid, gdf in df.groupby(list(groupers)):
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_spearmanrankcorrelation"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "subset_id": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "spearman_rank_correlation",
@@ -942,6 +965,7 @@ def plot_spearman_rank_correlation(
                 "ranks of the optimizers. "
                 "The intuition is that optimizers that perform similarly on the tasks will have a high correlation. "
                 "The ranks are calculated based on the final performance of the optimizers. ",
+                **grouper_info,
             }
         )
         if not replot:
@@ -966,6 +990,7 @@ def plot_spearman_rank_correlation(
 
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -993,7 +1018,7 @@ def plot_status(
     df = logs_normalized  # noqa: PD901
     outdir = Path(outdir)
 
-    for (task_type, set_id), gdf in df.groupby(groupers):
+    for (task_type, set_id), gdf in df.groupby(list(groupers)):
         all_tasks = gdf["task_id"].unique()
         all_seeds = gdf["seed"].unique()
         all_optimizers = gdf["optimizer_id"].unique()
@@ -1183,7 +1208,7 @@ def write_latex_report(
         ],
     }
 
-    for (task_type, set_id), info in resulting_files.groupby(groupers):
+    for (task_type, set_id), info in resulting_files.groupby(list(groupers)):
         report_tex = ""
         report_filename = report_dir / f"{report_name}_{task_type}_{set_id}.tex"
         full_report_filename = report_dir / f"full_{report_name}_{task_type}_{set_id}.tex"
