@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from matplotlib.lines import Line2D
 
 from carps.utils.loggingutils import get_logger
 
@@ -18,6 +19,29 @@ if TYPE_CHECKING:
 
 colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
 logger = get_logger("analysis utils")
+markers = list(Line2D.filled_markers)
+
+
+def get_marker_palette(
+    df: pd.DataFrame | None = None, model_name_key: str = "optimizer_id", optimizers: list[str] | None = None
+) -> dict[str, Any]:
+    """Get a marker palette based on the optimizers.
+
+    Args:
+        df (pd.DataFrame, optional): Results dataframe.
+        model_name_key (str, optional): The column name for the model name. Defaults to "model_name".
+        optimizers (list[str], optional): List of optimizers. If None, will be extracted from df. Defaults to None.
+
+    Returns:
+        dict[str, Any]: Marker map.
+    """
+    if optimizers is None:
+        assert df is not None, "Either df or optimizers must be provided."
+        optimizers = list(df[model_name_key].unique())
+    optimizers.sort()
+    if len(optimizers) > len(markers):
+        logger.info(f"Too many optimizers: {len(optimizers)} > {len(markers)}. Reusing markers.")
+    return dict(zip(optimizers, markers, strict=False))
 
 
 def get_color_palette(
