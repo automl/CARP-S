@@ -119,6 +119,7 @@ def plot_ranks_over_time(  # noqa: PLR0915
 
     df_rank_list = []
     for gid, gdf in perf.groupby(list(groupers)):
+        logger.info(gid)
         budgets = gdf[x_column].unique()
         logger.info(f"Budgets: {budgets}")
         for max_fidelity in track(budgets, "Calc critical difference per step..."):
@@ -132,8 +133,8 @@ def plot_ranks_over_time(  # noqa: PLR0915
                     plot_diagram=False,
                 )
             df_rank_cd = rank_result.rankdf
-            df_rank_cd["task_type"] = gid[0]
-            df_rank_cd["subset_id"] = gid[1]
+            for k, v in zip(groupers, gid, strict=True):
+                df_rank_cd[k] = v
             df_rank_cd["n_trials_norm"] = max_fidelity
             df_rank_cd["critical_difference"] = rank_result.cd
             df_rank_cd["is_significant"] = rank_result.pvalue < rank_result.alpha
@@ -500,6 +501,7 @@ def plot_critical_difference(
 
     resulting_files = []
     for gid, gdf in df.groupby(list(groupers)):
+        logger.info(gid)
         filename_id = determine_filename_id(groupers, gid)
         fig_filename = f"{output_dir}/{filename_id}_criticaldifference"
         grouper_info = dict(zip(groupers, gid, strict=True))
