@@ -18,7 +18,8 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
-colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
+# colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"] # noqa: E501
+colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#7A7A7A"]
 logger = get_logger("analysis utils")
 markers = list(Line2D.filled_markers)
 
