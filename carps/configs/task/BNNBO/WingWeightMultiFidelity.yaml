@@ -1,0 +1,130 @@
+# @package _global_
+benchmark_id: BNNBO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: bnnbo/WingWeightMultiFidelity
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.botorch.BOTorchObjectiveFunction
+    botorch_problem:
+      _target_: botorch.test_functions.multi_fidelity.WingWeightMultiFidelity
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: constant
+          name: fidelity
+          value: 3
+          meta: null
+        - type: uniform_float
+          name: x0_cont
+          lower: 150.0
+          upper: 200.0
+          default_value: 175.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x1_cont
+          lower: 220.0
+          upper: 300.0
+          default_value: 260.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x2_cont
+          lower: 6.0
+          upper: 10.0
+          default_value: 8.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x3_cont
+          lower: -10.0
+          upper: 10.0
+          default_value: 0.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x4_cont
+          lower: 16.0
+          upper: 45.0
+          default_value: 30.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x5_cont
+          lower: 0.5
+          upper: 1.0
+          default_value: 0.75
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x6_cont
+          lower: 0.08
+          upper: 0.18
+          default_value: 0.13
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x7_cont
+          lower: 2.5
+          upper: 6.0
+          default_value: 4.25
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x8_cont
+          lower: 1700.0
+          upper: 2500.0
+          default_value: 2100.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x9_cont
+          lower: 0.025
+          upper: 0.08
+          default_value: 0.0525
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 153
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: real
+    objective_function_approximation: real
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 11
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 11
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

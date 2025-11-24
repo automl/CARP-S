@@ -6,7 +6,7 @@ import time
 from typing import TYPE_CHECKING
 
 import torch
-from ConfigSpace import Categorical, ConfigurationSpace, Float
+from ConfigSpace import Categorical, ConfigurationSpace, Constant, Float
 
 from carps.objective_functions.objective_function import ObjectiveFunction
 from carps.utils.trials import TrialInfo, TrialValue
@@ -43,18 +43,41 @@ class BOTorchObjectiveFunction(ObjectiveFunction):
 
         # Create configspace
         assert len(botorch_problem.discrete_inds) == 0
-        hps = []
+        bounds = botorch_problem.bounds
+        bound_len = bounds.shape[-1]
+        fidelity_hp = None
+        if hasattr(botorch_problem, "fidelities"):
+            max_fidelity = botorch_problem.fidelities[-1]
+            bounds = bounds[:, :-1]  # Last bound is for fidelity
+            fidelity_hp = Constant(name="fidelity", value=max_fidelity)
+        n_hps = len(botorch_problem.categorical_inds) + len(botorch_problem.continuous_inds)
+        if fidelity_hp:
+            n_hps -= 1
+        hps = [1] * n_hps
+        hp_order = [""] * n_hps
         for index in botorch_problem.continuous_inds:
-            lowerbound = float(botorch_problem.bounds[0, index])
-            upperbound = float(botorch_problem.bounds[1, index])
-            hp = Float(f"x{index}_cont", (lowerbound, upperbound))
-            hps.append(hp)
+            if index == bound_len - 1 and fidelity_hp:  # Account for potential fidelity
+                continue
+            lowerbound = float(bounds[0, index])
+            upperbound = float(bounds[1, index])
+            name = f"x{index}_cont"
+            hp = Float(name, (lowerbound, upperbound))
+            hps[index] = hp
+            hp_order[index] = name
         for index in botorch_problem.categorical_inds:
-            lowerbound = int(botorch_problem.bounds[0, index])
-            upperbound = int(botorch_problem.bounds[1, index])
+            if index == bound_len - 1 and fidelity_hp:  # Account for potential fidelity
+                continue
+            lowerbound = int(bounds[0, index])
+            upperbound = int(bounds[1, index])
             items = list(range(lowerbound, upperbound + 1))
-            hp = Categorical(f"x{index}_cat", items=items)
-            hps.append(hp)
+            name = f"x{index}_cat"
+            hp = Categorical(name, items=items)
+            hps[index] = hp
+            hp_order[index] = name
+        if fidelity_hp is not None:
+            hps.append(fidelity_hp)
+            hp_order.append("fidelity")
+        self.hp_order = hp_order
         self._configspace = ConfigurationSpace(space=hps)
         self.seed = seed  # unused
 
@@ -84,8 +107,8 @@ class BOTorchObjectiveFunction(ObjectiveFunction):
         """
         configuration = trial_info.config
         starttime = time.time()
-
-        config_tensor = torch.tensor(list(configuration.values()))
+        config_dict = dict(configuration)
+        config_tensor = torch.tensor([[config_dict[k] for k in self.hp_order]])
 
         cost = float(self.botorch_problem.evaluate_true(config_tensor.reshape(1, -1)))
 

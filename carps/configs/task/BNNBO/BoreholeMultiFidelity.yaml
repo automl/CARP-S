@@ -1,0 +1,116 @@
+# @package _global_
+benchmark_id: BNNBO
+task_id: ${task.name}
+task:
+  _target_: carps.utils.task.Task
+  name: bnnbo/BoreholeMultiFidelity
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.botorch.BOTorchObjectiveFunction
+    botorch_problem:
+      _target_: botorch.test_functions.multi_fidelity.BoreholeMultiFidelity
+    seed: ${seed}
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: constant
+          name: fidelity
+          value: 4
+          meta: null
+        - type: uniform_float
+          name: x0_cont
+          lower: 0.05
+          upper: 0.15
+          default_value: 0.1
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x1_cont
+          lower: 100.0
+          upper: 10000.0
+          default_value: 5050.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x2_cont
+          lower: 100.0
+          upper: 1000.0
+          default_value: 550.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x3_cont
+          lower: 10.0
+          upper: 500.0
+          default_value: 255.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x4_cont
+          lower: 990.0
+          upper: 1110.0
+          default_value: 1050.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x5_cont
+          lower: 700.0
+          upper: 820.0
+          default_value: 760.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x6_cont
+          lower: 1000.0
+          upper: 2000.0
+          default_value: 1500.0
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x7_cont
+          lower: 6000.0
+          upper: 12000.0
+          default_value: 9000.0
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - quality
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 140
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: real
+    objective_function_approximation: real
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 9
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 9
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
