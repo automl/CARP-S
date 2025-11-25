@@ -182,6 +182,7 @@ plugins:
 nav:
   - Home: "index.md"
   - Installation: "installation.md"
+  - Plot Demos: "plot_demo.md"
   - Guides:
     - "guides/first-steps.md"
     - "guides/hydra.md"
