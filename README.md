@@ -202,15 +202,13 @@ appreciating any kind of help. Find our guidelines for contributing to this pack
 [here](CONTRIBUTING.md).
 
 If you use CARP-S in one of your research projects, please cite our 
-[arXiv paper](https://arxiv.org/abs/2506.06143):
+[paper](https://arxiv.org/abs/2506.06143):
 ```
-@article{arXiv:2506.06143,
-  author  = {Carolin Benjamins, Helena Graf, Sarah Segel, Difan Deng, Tim Ruhkopf, Leona Hennig, Soham Basu, Neeratyoy Mallik, Edward Bergman, Deyao Chen, François Clément, Alexander Tornede, Matthias Feurer, Katharina Eggensperger, Frank Hutter, Carola Doerr, Marius Lindauer},
-  title   = {carps: A Framework for Comparing N Hyperparameter Optimizers on M Benchmarks},
-  journal = {Journal of Machine Learning Research},
-  year    = {2025},
-  eprint  = {2506.06143},
-  url     = {https://arxiv.org/abs/2506.06143}
+@article{benjamins2025carps,
+  title={carps: A framework for comparing n hyperparameter optimizers on m benchmarks},
+  author={Benjamins, Carolin and Graf, Helena and Segel, Sarah and Deng, Difan and Ruhkopf, Tim and Hennig, Leona and Basu, Soham and Mallik, Neeratyoy and Bergman, Edward and Chen, Deyao and others},
+  journal={arXiv:2506.06143},
+  year={2025}
 }
 ```
 
