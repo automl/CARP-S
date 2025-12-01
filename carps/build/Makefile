@@ -24,7 +24,14 @@ help:
 	@echo "* test             to run the tests"
 
 PYTHON ?= python
-PIP ?= pip
+
+ifndef PIP
+ifeq ($(shell command -v uv 2>/dev/null),)
+    PIP := pip
+else
+    PIP := uv pip
+endif
+endif
 
 test:
 	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8
@@ -73,8 +80,9 @@ OS := $(shell uname)
 
 uvenv:
 	pip install uv
-	uv venv --python=3.12 carpsenv
-	. carpsenv/bin/activate
+	export PATH="$HOME/.local/bin:$PATH"
+	uv venv --python=3.12 .venv
+	. .venv/bin/activate
 	python -m ensurepip --upgrade
 	python -m pip install uv --upgrade
 	uv pip install setuptools wheel
@@ -94,8 +102,12 @@ optimizer_skopt:
 	$(PIP) install -r ../container/recipes/optimizers/Scikit_Optimize/Scikit_Optimize_requirements.txt
 
 optimizer_synetune:
-	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
+# 	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
+	git clone https://github.com/awslabs/syne-tune.git lib/syne-tune || true
+	$(PIP) install -e 'lib/syne-tune[basic,blackbox-repository]'
+	$(PIP) install statsmodels
 	$(PIP) install numpy --upgrade
+	$(PIP) install xgboost --upgrade
 
 optimizer_ax:
 	$(PIP) install -r ../container/recipes/optimizers/Ax/Ax_requirements.txt
@@ -129,7 +141,7 @@ benchmark_pymoo:
 
 benchmark_mfpbench:
 	# Install mfpbench
-	$(PIP) install -r ../container/recipes/benchmarks/MFPBench/MFPBench_requirements.txt
+	$(PIP) install mf-prior-bench
 	$(PIP) install xgboost --upgrade
 	$(PIP) install ConfigSpace --upgrade
 	. ../container/recipes/benchmarks/MFPBench/download_data.sh

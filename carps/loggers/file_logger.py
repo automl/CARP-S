@@ -15,7 +15,7 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.types import RunMode
 
 from carps.loggers.abstract_logger import AbstractLogger
-from carps.utils.loggingutils import CustomEncoder, get_logger, setup_logging
+from carps.utils.loggingutils import CustomEncoder, get_logger, log_python_env, setup_logging
 
 if TYPE_CHECKING:
     from carps.optimizers.optimizer import Incumbent
@@ -140,6 +140,7 @@ class FileLogger(AbstractLogger):
         super().__init__()
 
         directory = Path(directory) if directory is not None else get_run_directory()
+        assert directory is not None, "Directory must be specified in FileLogger or hydra run dir must be available."
         self.directory = directory
         if (directory / self._filename).is_file():
             if overwrite:
@@ -155,6 +156,8 @@ class FileLogger(AbstractLogger):
                     f"Found previous run at '{directory}'. Stopping run. If you want to overwrite, specify overwrite "
                     f"for the file logger in the config (CARP-S/carps/configs/logger.yaml)."
                 )
+
+        log_python_env(log_file=Path(directory) / "env_info.txt")
 
     def log_trial(
         self,

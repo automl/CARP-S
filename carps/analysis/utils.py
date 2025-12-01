@@ -6,33 +6,69 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
+from matplotlib.lines import Line2D
+
+from carps.utils.loggingutils import get_logger
 
 if TYPE_CHECKING:
-    import matplotlib.pyplot as plt
     import pandas as pd
 
 
 colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
+logger = get_logger("analysis utils")
+markers = list(Line2D.filled_markers)
 
 
-def get_color_palette(df: pd.DataFrame, model_name_key: str = "optimizer_id") -> dict[str, Any]:
+def get_marker_palette(
+    df: pd.DataFrame | None = None, model_name_key: str = "optimizer_id", optimizers: list[str] | None = None
+) -> dict[str, Any]:
+    """Get a marker palette based on the optimizers.
+
+    Args:
+        df (pd.DataFrame, optional): Results dataframe.
+        model_name_key (str, optional): The column name for the model name. Defaults to "model_name".
+        optimizers (list[str], optional): List of optimizers. If None, will be extracted from df. Defaults to None.
+
+    Returns:
+        dict[str, Any]: Marker map.
+    """
+    if optimizers is None:
+        assert df is not None, "Either df or optimizers must be provided."
+        optimizers = list(df[model_name_key].unique())
+    optimizers.sort()
+    if len(optimizers) > len(markers):
+        logger.info(f"Too many optimizers: {len(optimizers)} > {len(markers)}. Reusing markers.")
+    return dict(zip(optimizers, markers, strict=False))
+
+
+def get_color_palette(
+    df: pd.DataFrame | None = None, model_name_key: str = "optimizer_id", optimizers: list[str] | None = None
+) -> dict[str, Any]:
     """Get a color palette based on the optimizers.
 
     Args:
-        df (pd.DataFrame): Results dataframe.
+        df (pd.DataFrame, optional): Results dataframe.
         model_name_key (str, optional): The column name for the model name. Defaults to "model_name".
+        optimizers (list[str], optional): List of optimizers. If None, will be extracted from df. Defaults to None.
 
     Returns:
         dict[str, Any]: Color map.
     """
-    optimizers = list(df[model_name_key].unique())
+    if optimizers is None:
+        assert df is not None, "Either df or optimizers must be provided."
+        optimizers = list(df[model_name_key].unique())
     optimizers.sort()
     cmap1 = colorblind_palette
     cmap2 = sns.color_palette("colorblind", as_cmap=False)
     cmap3 = sns.color_palette("Paired", as_cmap=False)
     colormaps = list(cmap1) + list(cmap2) + list(cmap3)
-    assert len(optimizers) <= len(colormaps), f"Too many optimizers: {len(optimizers)} > {len(colormaps)}"
+    if len(optimizers) > len(colormaps):
+        logger.info(f"Too many optimizers: {len(optimizers)} > {len(colormaps)}. Using continuous colormap.")
+        n_optimizers = len(optimizers)
+        colormaps = plt.colormaps.get_cmap("viridis")(np.linspace(0, 1, n_optimizers))
     return dict(zip(optimizers, colormaps, strict=False))
 
 
@@ -87,7 +123,7 @@ def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_no
 
     def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
         groupdf = groupdf[groupdf[x_column] <= max_x]
-        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()]
+        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()].iloc[[-1]]
 
     df_final = df.groupby(["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
 
@@ -110,7 +146,7 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None
     """
     mixed_type_columns = logs.select_dtypes(include=["O"]).columns
     if logger:
-        logger.debug(f"Goodybe all mixed data, ruthlessly converting {mixed_type_columns} to str...")
+        logger.debug(f"Goodbye all mixed data, ruthlessly converting {mixed_type_columns} to str...")
     for c in mixed_type_columns:
         # D = logs[c]
         # logs.drop(columns=c)

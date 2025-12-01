@@ -1,0 +1,2 @@
+syne-tune[basic,blackbox-repository]  >= 0.14.2
+

@@ -204,6 +204,19 @@ class NevergradOptimizer(Optimizer):
             instance=None,
         )
 
+    def get_unique_trial_name(self, config: parameter.Parameter) -> str:
+        """Get a unique name for the trial based on the configuration and seed.
+
+        This is used to track trials in the history.
+
+        Args:
+            config (parameter.Parameter): The configuration for the trial.
+
+        Returns:
+            str: A unique name for the trial.
+        """
+        return f"{self.counter}_{config.value}_{self.nevergrad_cfg.seed}"
+
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
 
@@ -217,7 +230,7 @@ class NevergradOptimizer(Optimizer):
             trial info (config, seed, instance, budget)
         """
         config: parameter.Parameter = self.solver.ask()
-        unique_name = f"{self.counter}_{config.value}_{self.nevergrad_cfg.seed}"
+        unique_name = self.get_unique_trial_name(config)
         self.history[unique_name] = (config, None)
         trial_info = self.convert_to_trial(
             config=self.convert_nevergrad_config_to_configspace_config(config),

@@ -9,13 +9,12 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import Any
 
-import fire
 import numpy as np
 import pandas as pd
 from pymoo.indicators.hv import HV
 from tqdm import tqdm
 
-from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
+from carps.analysis.utils import get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
@@ -205,29 +204,178 @@ def maybe_deserialize(x: Any | str) -> Any | np.ndarray:
     return x
 
 
-def calculate_hypervolume(rundir: str) -> None:
-    """Calculate hypervolume from trajectory logs.
+def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
+    """Add hypervolume to the dataframe.
 
-    Save to rundir / "trajectory.parquet" and rundir / "trajectory.csv".
+    If there are multiple objectives, add reference point and calculate hypervolume.
 
     Args:
-        rundir (str): Directory with the logs.
+        logs (pd.DataFrame): Dataframe with the logs.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_raw".
+
+    Returns:
+        pd.DataFrame: Dataframe with the hypervolume.
     """
-    fn = Path(rundir) / "logs.parquet"
-    if not fn.is_file():
-        raise ValueError(
-            f"Cannot find {fn}. Did you run `python -m carps.analysis.gather_data {rundir} trajectory_logs.jsonl`?"
-        )
-    df = pd.read_parquet(fn)  # noqa: PD901
-    if df["task_type"].nunique() > 2 or df["task_type"].unique()[0] != "multi-objective":  # noqa: PLR2004
-        raise ValueError(f"Oops, found some non multi-objective logs in {fn}. This might not work...")
-    trajectory_df = df.groupby(by=run_id).apply(gather_trajectory).reset_index(drop=True)
-    trajectory_df = trajectory_df.groupby(by=["task_type", "task_id"]).apply(add_reference_point).reset_index(drop=True)
-    raise NotImplementedError("calc hv does not use all the evaluated points yet")
-    trajectory_df = trajectory_df.groupby(by=[*run_id, "n_trials"]).apply(calc_hv).reset_index(drop=True)
-    trajectory_df.to_csv(Path(rundir) / "trajectory.csv")
-    trajectory_df = convert_mixed_types_to_str(trajectory_df)
-    trajectory_df.to_parquet(Path(rundir) / "trajectory.parquet")
+    tqdm.pandas(desc="Calc hypervolume...")
+    ids_mo = get_ids_mo(logs)
+    add_reference_point_partial = partial(add_reference_point, on_key=on_key)
+    mo_cols = ["hypervolume", "reference_point"]
+    for mo_col in mo_cols:
+        if mo_col not in logs.columns:
+            logs[mo_col] = None
+    if len(ids_mo) > 0:
+        # Add the reference point to enable normalization. Later ref point will be [1, 1, ...]
+        logs_mo = logs.loc[ids_mo].groupby(by=["task_id"]).apply(add_reference_point_partial).reset_index(drop=True)
+        logs_mo = apply_calc_hv_low_mem(logs_mo, on_key=on_key)
+        logs = pd.concat([logs.loc[~ids_mo], logs_mo], axis=0).reset_index(drop=True)
+    return logs
+
+
+def calc_hv_for_run_old(
+    group_id: list[str], logs: pd.DataFrame, run_id: list[str], on_key: str = "trial_value__cost"
+) -> pd.DataFrame:
+    """Calculate hypervolume for a single run.
+
+    Args:
+        group_id (list[str]): List of run identifiers.
+        logs (pd.DataFrame): Dataframe with the logs.
+        run_id (list[str]): List of column names to use for the run identifiers.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_raw".
+
+    Returns:
+        pd.DataFrame: Dataframe with the hypervolume for the run.
+    """
+    gdf = logs[
+        (logs[run_id[0]] == group_id[0])
+        & (logs[run_id[1]] == group_id[1])
+        & (logs[run_id[2]] == group_id[2])
+        & (logs[run_id[3]] == group_id[3])
+        & (logs[run_id[4]] == group_id[4])
+    ]
+    # gdf = gdf.compute()
+    # gdf2 = logs[logs[run_id].apply(lambda x, group_id=group_id: all(x == group_id), axis=1)].copy()
+    # assert len(gdf2) == len(gdf), "log selection failed"
+    if len(gdf) == 0:
+        return None
+    # Sort gdf by n_trials
+    gdf = gdf.sort_values(by="n_trials")
+
+    ind = HV(ref_point=gdf["reference_point"].iloc[0], pf=None, nds=False)
+
+    hvs = []
+    for n_trial_max in range(len(gdf)):
+        F = get_costs(gdf.iloc[: n_trial_max + 1], on_key)
+        hv = float(ind(F))
+        hvs.append(hv)
+    gdf["hypervolume"] = hvs
+    # assert that hvs is monotonically increasing
+    assert np.all(np.diff(hvs) + 1e-8 >= 0), "Hypervolume is not monotonically increasing"
+    return gdf
+
+
+def calc_hv_for_run(gdf_fn_in: str, on_key: str = "trial_value__cost") -> pd.DataFrame:
+    """Calculate hypervolume for a single run.
+
+    Args:
+        gdf_fn_in (str): Path to the input dataframe with the logs. Should only contain
+            data from one run (one task, one optimizer, one seed).
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_raw".
+
+    Returns:
+        pd.DataFrame: Dataframe with the hypervolume for the run.
+    """
+    gdf_fn_in = Path(gdf_fn_in)  # type: ignore[assignment]
+    gdf_fn = Path("tmp/hypervolume") / gdf_fn_in.name  # type: ignore[attr-defined]
+    if gdf_fn.is_file():
+        return gdf_fn
+
+    gdf = pd.read_parquet(gdf_fn_in, engine="pyarrow")
+
+    gdf_fn.parent.mkdir(parents=True, exist_ok=True)
+    if len(gdf) == 0:
+        return None
+    # Sort gdf by n_trials
+    gdf = gdf.sort_values(by="n_trials")
+
+    cost_max = gdf["reference_point"].iloc[0]
+    cost_min = gdf["minimum_cost"].iloc[0]
+    reference_point = np.ones(len(cost_max))  # We work on normalized objective values
+
+    ind = HV(ref_point=reference_point, pf=None, nds=True, norm_ref_point=False)
+
+    hvs = []
+    for n_trial_max in range(len(gdf)):
+        F = get_costs(gdf.iloc[: n_trial_max + 1], on_key)
+        # Normalize
+        Fbefore = F
+        F = (F - cost_min) / (cost_max - cost_min)
+        assert F.shape == Fbefore.shape, f"{F.shape}, {Fbefore.shape}"
+        hv = float(ind(F))
+        hvs.append(hv)
+    gdf["hypervolume"] = hvs
+    # assert that hvs is monotonically increasing
+    assert np.all(np.diff(hvs) + 1e-7 >= 0), f"Hypervolume is not monotonically increasing, {hvs, np.diff(hvs)}"
+    gdf.to_parquet(gdf_fn, index=False, engine="pyarrow")
+    return gdf_fn
+
+
+def apply_calc_hv_low_mem(logs: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
+    """Calculate hypervolume for each run in the logs.
+
+    Args:
+        logs (pd.DataFrame): Dataframe with the logs.
+        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
+            Can also be "trial_value__cost_raw".
+
+    Returns:
+        pd.DataFrame: Dataframe with the hypervolume for each run.
+    """
+    logger.info("Calculating hypervolume for each run in the logs...")
+
+    def _save_group_to_filesystem(group: pd.DataFrame, input_directory: Path) -> pd.DataFrame:
+        group_id = group[run_id].iloc[0].to_list()
+        gdf_fn = input_directory / f"{'_'.join([str(g) for g in group_id]).replace('/','_')}.parquet"
+        if gdf_fn.is_file():
+            return gdf_fn
+        gdf_fn.parent.mkdir(parents=True, exist_ok=True)
+        group.to_parquet(gdf_fn, index=False, engine="pyarrow")
+        return gdf_fn
+
+    input_directory = Path("tmp/hypervolume_in")
+    output_directory = Path("tmp/hypervolume")
+    delete_existing = True
+    if delete_existing:
+        if input_directory.is_dir() and False:
+            for fn in input_directory.iterdir():
+                fn.unlink()
+        if output_directory.is_dir():
+            for fn in output_directory.iterdir():
+                fn.unlink()
+    input_directory.mkdir(parents=True, exist_ok=True)
+    output_directory.mkdir(parents=True, exist_ok=True)
+
+    tqdm.pandas(desc="Saving groups to filesystem...")
+    gdf_fns = logs.groupby(by=run_id).progress_apply(
+        lambda x, input_directory=input_directory: _save_group_to_filesystem(x, input_directory)
+    )
+    gdf_fns = os.listdir(input_directory)
+    gdf_fns = [Path(input_directory) / fn for fn in gdf_fns]
+    del logs
+
+    partial_func = partial(calc_hv_for_run, on_key=on_key)
+
+    logger.info(
+        f"...processing this can take a while. Check progress with `ls {output_directory!s} | wc -l` "
+        f"({len(gdf_fns)} tasks in total)."
+    )
+    with Pool() as pool:
+        results = pool.map(partial_func, gdf_fns)
+
+    results = [pd.read_parquet(r, engine="pyarrow") for r in results if r is not None]
+    return pd.concat(results, ignore_index=True).reset_index(drop=True)
 
 
 def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
@@ -420,7 +568,3 @@ def load_trajectory(rundir: str) -> pd.DataFrame:
     df = pd.read_parquet(fn)  # noqa: PD901
     df = df.map(maybe_deserialize)  # noqa: PD901
     print(df["trial_value__cost"].iloc[0], type(df["trial_value__cost"].iloc[0]))
-
-
-if __name__ == "__main__":
-    fire.Fire(calculate_hypervolume)

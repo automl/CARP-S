@@ -1,8 +1,8 @@
 # @package _global_
 defaults:
   - base
-optimizer_id: SyneTune-KDE
+optimizer_id: SyneTune-TPE
 optimizer:
-  optimizer_name: 'KDE'
+  optimizer_name: TPE
   optimizer_kwargs:
     random_seed: ${seed}

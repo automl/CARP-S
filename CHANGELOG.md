@@ -1,3 +1,23 @@
+# 1.0.5
+- Update SyneTune API, add CQR as optimizer (#211).
+- Fix regeneration of runcommands (#212).
+- Update plotting functions and add example notebook (`plot_demo.ipynb`) (#214).
+
+# 1.0.4
+- Fix yahpo error (#201).
+- Add missing requirement files (#202).
+
+# v1.0.3
+- Fix the order of optimizer names in the critical difference plots (#196).
+
+# v1.0.2
+- Fix duplicate trial_counter in SyneTune (#193).
+- Refactor plotting (#193,#194).
+- Extend TrialInfo, logging utilities, and missing-run detection with extra fields and environment dumps (#193).
+- Refactor experimenter configs, database schemas, and analysis pipeline for nested task keys 
+    and hypervolume support (#193).
+
+
 # v1.0.1
 - Fix installation via pypi (#185).
 - Update docs (#186).

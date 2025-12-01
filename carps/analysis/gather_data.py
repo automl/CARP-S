@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 import multiprocessing
+import os
 from collections.abc import Callable, Iterable
 from dataclasses import asdict
 from functools import partial
@@ -168,7 +169,11 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
             "optimizer_id",
         ]
         config_keys_forbidden = ["_target_", "_partial_"]
-        df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+        try:
+            df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+        except Exception as e:
+            logger.error(f"Error annotating data frame with config from {config_fn}. ")
+            raise e
     else:
         config_fn = "no_hydra_config"
         cfg_str = ""
@@ -314,6 +319,8 @@ def add_task_type(logs: pd.DataFrame, task_prefix: str = "task.") -> pd.DataFram
     """
 
     def determine_task_type(x: pd.Series) -> str:
+        if "task_type" in x:
+            return x["task_type"]
         get_mf = x.get(task_prefix + "is_multifidelity", False)
         get_mo = x.get(task_prefix + "is_multiobjective", False)
         if get_mf is False and get_mo is False:
@@ -427,7 +434,6 @@ def filter_task_info(logs: pd.DataFrame, keep_task_columns: list[str] | None = N
     """
     if keep_task_columns is None:
         keep_task_columns = ["task.optimization_resources.n_trials"]
-    keep_task_columns = [f"task.{c}" for c in keep_task_columns]
     task_cols_to_remove = [c for c in logs.columns if c.startswith("task.") and c not in keep_task_columns]
     return logs.drop(columns=task_cols_to_remove)
 
@@ -599,7 +605,7 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
     logger.info("Normalize cost...")
     # Handle MO
     ids_mo = get_ids_mo(logs)
-    if len(ids_mo) > 0:
+    if any(ids_mo):
         if "trial_value__cost_raw" not in logs:
             logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
         else:
@@ -783,7 +789,10 @@ def rename_legacy(logs: pd.DataFrame) -> pd.DataFrame:
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
 def filelogs_to_df(
-    rundir: str | list[str], log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
+    rundir: str | list[str],
+    log_fn: str = "trial_logs.jsonl",
+    n_processes: int | None = None,
+    outdir: str | Path | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load logs from file and preprocess.
 
@@ -828,13 +837,17 @@ def filelogs_to_df(
     df = pd.concat(df_list).reset_index(drop=True)  # noqa: PD901
     logger.info("Done. Saving to file...")
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
-    df.to_csv(Path(rundir) / "logs.csv", index=False)
-    df_cfg.to_csv(Path(rundir) / "logs_cfg.csv", index=False)
+    if outdir is None:
+        outdir = os.path.commonpath(rundirs_list)
+    outdir = Path(outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    df.to_csv(Path(outdir) / "logs.csv", index=False)
+    df_cfg.to_csv(Path(outdir) / "logs_cfg.csv", index=False)
     df = convert_mixed_types_to_str(df)  # noqa: PD901
     df_cfg = convert_mixed_types_to_str(df_cfg)
-    df.to_parquet(Path(rundir) / "logs.parquet", index=False)
-    df_cfg.to_parquet(Path(rundir) / "logs_cfg.parquet", index=False)
-    logger.info(f"Saved to {Path(rundir) / 'logs.csv'} and {Path(rundir) / 'logs_cfg.csv'}. 💌")
+    df.to_parquet(Path(outdir) / "logs.parquet", index=False)
+    df_cfg.to_parquet(Path(outdir) / "logs_cfg.parquet", index=False)
+    logger.info(f"Saved to {Path(outdir) / 'logs.csv'} and {Path(outdir) / 'logs_cfg.csv'}. 💌")
     logger.info("Done. 😊")
 
     return df, df_cfg
