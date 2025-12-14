@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any
 
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
-from rich import print as printr
 
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
@@ -262,15 +261,10 @@ class SMAC3Optimizer(Optimizer):
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "initial_design", scenario)
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "multi_objective_algorithm", scenario)
 
-        printr(smac_class, smac_kwargs)
-
-        smac = smac_class(
+        return smac_class(
             target_function=self.target_function,
             **smac_kwargs,
         )
-        printr(smac)
-
-        return smac
 
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.
