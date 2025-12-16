@@ -9,6 +9,7 @@ Stage: build
 
 %post
     cd /opt
+    pyenv local 3.11.13
     pip install bencherscaffold
 
 %startscript
