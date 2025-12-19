@@ -39,6 +39,7 @@ class TrialInfo:
     checkpoint: str | None, defaults to None, checkpoint path, length 250
         The length of the strings depends on the setting for the database.
     additional_info : dict[str, Any], defaults to {}
+    cutoff : float | None, optional cutoff for methods like adaptive capping
     """
 
     config: Configuration
@@ -49,6 +50,7 @@ class TrialInfo:
     name: str | None = None
     checkpoint: str | None = None
     additional_info: dict[str, Any] = field(default_factory=dict)
+    cutoff: float | None = None
 
 
 @dataclass_json
