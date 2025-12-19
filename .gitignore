@@ -181,3 +181,4 @@ container/python_packages/*
 slurmlogs/*
 
 *.tar.gz
+.DS_Store
