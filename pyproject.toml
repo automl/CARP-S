@@ -33,6 +33,7 @@ dependencies = [
   "fire",
   "ipywidgets",
   "py-experimenter>=1.4.1",
+  "tqdm"
 ]
 
 requires-python = ">=3.9"
