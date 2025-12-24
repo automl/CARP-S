@@ -681,6 +681,7 @@ def get_interpolated_performance_df(
     n_points: int = 20,
     x_column: str = "n_trials_norm",
     interpolation_columns: list[str] | None = None,
+    group_keys: list[str] | None = None,
 ) -> pd.DataFrame:
     """Get performance dataframe for plotting.
 
@@ -694,6 +695,11 @@ def get_interpolated_performance_df(
         Number of interpolation steps, by default 20
     x_column : str, optional
         The x-axis column to interpolate by, by default 'n_trials_norm'
+    interpolation_columns : list[str], optional
+        The columns that should be interpolated, defaults to `trial_valoue__cost<whatever>`.
+    group_keys : list[str], optional
+        The group keys to distinguish single runs, defaults to
+         ["task_type", "subset_id", "benchmark_id", "optimizer_id", "task_id", "seed"].
 
     Raises:
     ------
@@ -726,7 +732,8 @@ def get_interpolated_performance_df(
 
     # interpolation_columns = [
     #     c for c in logs.columns if c != x_column and c not in identifier_columns and not c.startswith("task")]
-    group_keys = ["task_type", "subset_id", "benchmark_id", "optimizer_id", "task_id", "seed"]
+    if group_keys is None:
+        group_keys = ["task_type", "subset_id", "benchmark_id", "optimizer_id", "task_id", "seed"]
     x = np.linspace(0, 1, n_points + 1)
     D = []
     for gid, gdf in logs.groupby(by=group_keys):
