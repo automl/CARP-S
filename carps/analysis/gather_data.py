@@ -57,7 +57,7 @@ def get_run_dirs(outdir: str) -> list[Path]:
     Returns:
         list[Path]: List of paths to run directories.
     """
-    opt_paths = list(Path(outdir).glob("*/*"))
+    opt_paths = list(Path(outdir).glob("*"))
     with multiprocessing.Pool() as pool:
         triallog_files = pool.map(glob_trial_logs, opt_paths)
     if len(triallog_files) == 0:
@@ -450,7 +450,7 @@ def maybe_convert_cost_dtype(x: int | float | str | list) -> float | list[float]
     if isinstance(x, float | int):
         return float(x)
     if isinstance(x, str):
-        x = ast.literal_eval(x)
+        x = np.nan if x == "inf" else ast.literal_eval(x)
         if isinstance(x, dict):
             return maybe_convert_cost_dtype(x["cost"])
         return maybe_convert_cost_dtype(x)
