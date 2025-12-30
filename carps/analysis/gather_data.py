@@ -52,16 +52,25 @@ def get_run_dirs(outdir: str) -> list[Path]:
     """Get run directories.
 
     Args:
-        outdir (str): Output directory.
+        outdir (str): Output directory. Path(outdir).name can contain * matching appropriate folders, e.g.
+        PPO-AlphaNet*.
 
     Returns:
         list[Path]: List of paths to run directories.
     """
-    opt_paths = list(Path(outdir).glob("*"))
+    if "*" in outdir:
+        parent_dir = Path(outdir).parent
+        outdirs = list(parent_dir.glob(Path(outdir).name))
+        logger.info(f"Gather from subdirs: {outdirs}.")
+    else:
+        outdirs = [Path(outdir)]
+    opt_paths = []
+    for _outdir in outdirs:
+        opt_paths.extend(list(Path(_outdir).glob("*")))
     with multiprocessing.Pool() as pool:
         triallog_files = pool.map(glob_trial_logs, opt_paths)
     if len(triallog_files) == 0:
-        raise ValueError("No trial logs found.")
+        raise ValueError(f"No trial logs found in {outdir}.")
     return [f.parent for f in np.concatenate(triallog_files)]  # type: ignore[attr-defined]
 
 
@@ -809,6 +818,7 @@ def filelogs_to_df(
     ----------
     rundir : str | Path | list[str]
         Directory containing logs.
+        Path(rundir).name can contain * matching appropriate folders, e.g. PPO-AlphaNet*.
     log_fn : str, optional
         Filename of the log file, by default "trial_logs.jsonl"
     n_processes : int | None, optional
