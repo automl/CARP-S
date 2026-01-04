@@ -833,6 +833,8 @@ def filelogs_to_df(
         rundir = [rundir]
     rundirs_list = rundir
     df_list = []
+    df_cfg_list = []
+    offset: int = 0
     for rundir in rundirs_list:
         logger.info(f"Get rundirs from {rundir}...")
         rundirs = get_run_dirs(rundir)
@@ -844,14 +846,20 @@ def filelogs_to_df(
         logger.info("Done. Do some preprocessing...")
         df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
         df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
-        df["experiment_id"] = df["cfg_fn"].apply(
-            lambda x, df_cfg=df_cfg: np.where(df_cfg["cfg_fn"].to_numpy() == x)[0][0]
+        df["experiment_id"] = (
+            df["cfg_fn"].apply(lambda x, df_cfg=df_cfg: np.where(df_cfg["cfg_fn"].to_numpy() == x)[0][0]) + offset
         )
         df_cfg.loc[:, "cfg_str"] = df_cfg["cfg_str"].apply(lambda x: x.replace("\n", "\\n"))
         del df["cfg_str"]
         del df["cfg_fn"]
         df_list.append(df)
+        df_cfg_list.append(df_cfg)
+        offset += len(df_cfg)
     df = pd.concat(df_list).reset_index(drop=True)  # noqa: PD901
+    del df_list
+    df_cfg = pd.concat(df_cfg_list).reset_index(drop=True)
+    del df_cfg_list
+    assert df["experiment_id"].nunique() == len(df_cfg)
     logger.info("Done. Saving to file...")
     # df = df.map(lambda x: x if not isinstance(x, list) else str(x))
     if outdir is None:
