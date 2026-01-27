@@ -24,6 +24,7 @@ from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
+from carps.utils.types import RunStatus
 
 if TYPE_CHECKING:
     from carps.objective_functions.objective_function import ObjectiveFunction
@@ -162,6 +163,12 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
 
     cfg = load_cfg(rundir)
     if cfg is not None:
+        # Get runstatus
+        n_trials = cfg.task.optimization_resources.n_trials
+        n_trials_done = df["n_trials"].max()
+        status = RunStatus.COMPLETED if n_trials >= n_trials_done else RunStatus.TRUNCATED
+        df["status"] = status.name
+
         config_fn = str(Path(rundir) / ".hydra/config.yaml")
         cfg_str = OmegaConf.to_yaml(cfg=cfg)
         df["cfg_fn"] = config_fn
