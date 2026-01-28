@@ -103,7 +103,9 @@ def setup_seaborn(font_scale: float | None = None) -> None:
     sns.set_palette("colorblind")
 
 
-def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_norm", max_x: float = 1) -> pd.DataFrame:
+def filter_only_final_performance(
+    df: pd.DataFrame, x_column: str = "n_trials_norm", max_x: float = 1, key_performance: str = "trial_value__cost_inc"
+) -> pd.DataFrame:
     """Filter final performance based on the maximum x value.
 
     (1) Filter s.t. the x_column is less than or equal to max_x.
@@ -118,6 +120,8 @@ def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_no
         The column to filter on, by default "n_trials_norm".
     max_x : float, optional
         The maximum value of the x_column to filter by, by default 1.
+    key_performance : str, optional
+        The performance column, by default "trial_value__cost_inc".
 
     Returns:
     -------
@@ -127,7 +131,7 @@ def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_no
 
     def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
         groupdf = groupdf[groupdf[x_column] <= max_x]
-        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()].iloc[[-1]]
+        return groupdf[groupdf[key_performance] == groupdf[key_performance].min()].iloc[[-1]]
 
     df_final = df.groupby(["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
 
