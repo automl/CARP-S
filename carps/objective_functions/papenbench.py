@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
     from carps.loggers.abstract_logger import AbstractLogger
 
-import importlib.util
 
 from bencherscaffold.client import BencherClient
 from bencherscaffold.protoclasses.bencher_pb2 import Value, ValueType
@@ -33,7 +32,6 @@ from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__file__)
-
 
 PAPENBENCH_CONTAINER_FILE = CARPS_ROOT / "build/papenbench.sif"
 
@@ -68,9 +66,7 @@ def get_benchmark_registry() -> Mapping[str, dict[str, Any]]:
         The benchmark registry containing benchmark infos like
         port number, dimension and search space type.
     """
-    spec = importlib.util.find_spec("bencherserver")
-    assert spec is not None, "bencherserver package not found. Please install it."
-    registry_fn = Path(spec.origin).parent / "benchmark-registry.json"  # type: ignore[attr-defined,arg-type]
+    registry_fn = Path("carps/build/lib/bencher/BencherServer/benchmark-registry.json")  # type: ignore[attr-defined,arg-type]
     with open(registry_fn) as f:
         return json.load(f)
 
