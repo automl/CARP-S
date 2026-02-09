@@ -166,7 +166,7 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         # Get runstatus
         n_trials = cfg.task.optimization_resources.n_trials
         n_trials_done = df["n_trials"].max()
-        status = RunStatus.COMPLETED if n_trials >= n_trials_done else RunStatus.TRUNCATED
+        status = RunStatus.COMPLETED if n_trials_done >= n_trials else RunStatus.TRUNCATED
         df["status"] = status.name
 
         config_fn = str(Path(rundir) / ".hydra/config.yaml")
