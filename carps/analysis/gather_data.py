@@ -24,6 +24,7 @@ from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
+from carps.analysis.calc_hypervolume import calc_hv, add_reference_point, run_id, add_running_pareto_front, normalize_objectives
 
 if TYPE_CHECKING:
     from carps.objective_functions.objective_function import ObjectiveFunction
@@ -397,11 +398,11 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
         task_cfg = load_task_cfg(task_id=gid[0], task_index=task_index)
 
         task_cfg_yaml = OmegaConf.to_yaml(task_cfg)
-        if "${seed}" in task_cfg_yaml:
-            # Add seed to config to make it resolvable
-            assert gdf["seed"].nunique() == 1  # noqa: PD101
-            seed = gdf["seed"].iloc[0]
-            task_cfg.seed = int(seed)
+        # if "${seed}" in task_cfg_yaml:
+        #     # Add seed to config to make it resolvable
+        #     assert gdf["seed"].nunique() == 1  # noqa: PD101
+        #     seed = gdf["seed"].iloc[0]
+        #     task_cfg.seed = int(seed)
         task_cfg = OmegaConf.to_container(task_cfg, resolve=False)
         task_columns = [c for c in gdf.columns if c.startswith("task.")]
         if overwrite:
@@ -473,7 +474,7 @@ def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
         float: Single-objective cost or aggregated cost.
     """
     if isinstance(x, list | np.ndarray):
-        return np.sum(x)
+        return np.sum(x)  # TODO change to HV here
     if isinstance(x, dict):
         assert len(x.values()) == 1
         # Most likely comes from database
@@ -482,7 +483,7 @@ def maybe_convert_cost_to_so(x: float | list | np.ndarray) -> float:
         if isinstance(value, str):
             value = ast.literal_eval(value)
             if isinstance(value, list):
-                return np.sum(value)
+                return np.sum(value)  # TODO Change to HV here
         if isinstance(value, float | int):
             return value
     if isinstance(x, float):
@@ -551,7 +552,12 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
 
     logger.debug("Handle MO costs...")
     logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
-    logs["trial_value__cost"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
+    # trial_value__cost_raw for add_reference_point and to calc_hv
+    logs = logs.groupby(by=["task_type", "task_id"]).apply(normalize_objectives).reset_index(drop=True)
+    logs = logs.groupby(by=[*run_id]).apply(add_running_pareto_front).reset_index(drop=True)
+    logs = logs.groupby(by=[*run_id, "n_trials"]).apply(calc_hv).reset_index(drop=True)
+    logs["trial_value__cost"] = logs["hypervolume"] #logs["trial_value__cost_raw"].apply(maybe_convert_cost_to_so)
+    print(logs.head())
     logger.debug("Determine incumbent cost...")
     logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
 
@@ -610,9 +616,9 @@ def normalize_logs(logs: pd.DataFrame) -> pd.DataFrame:
             logs["trial_value__cost_raw"] = logs["trial_value__cost"].apply(maybe_convert_cost_dtype)
         else:
             logs["trial_value__cost_raw"] = logs["trial_value__cost_raw"].apply(maybe_convert_cost_dtype)
-        logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
+        # logs = add_hypervolume_to_df(logs, on_key="trial_value__cost_raw")
         # IDs have changed, so we need to recalculate
-        ids_mo = get_ids_mo(logs)
+        # ids_mo = get_ids_mo(logs)
         hv = logs.loc[ids_mo, "hypervolume"]
         logs.loc[ids_mo, "trial_value__cost"] = -hv  # higher is better
         logs["trial_value__cost"] = logs["trial_value__cost"].astype("float64")
@@ -789,10 +795,7 @@ def rename_legacy(logs: pd.DataFrame) -> pd.DataFrame:
 
 # NOTE(eddiebergman): Use `n_processes=None` as default, which uses `os.cpu_count()` in `Pool`
 def filelogs_to_df(
-    rundir: str | list[str],
-    log_fn: str = "trial_logs.jsonl",
-    n_processes: int | None = None,
-    outdir: str | Path | None = None,
+    rundir: str | list[str] = "results/", log_fn: str = "trial_logs.jsonl", n_processes: int | None = None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load logs from file and preprocess.
 

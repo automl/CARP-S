@@ -438,14 +438,14 @@ def cd_evaluation(
         alpha=alpha,
         alpha_normality=alpha_normality,
         num_samples=len(rank_data),
+        sample_matrix=None,
         posterior_matrix=None,
         decision_matrix=None,
         rope=None,
         rope_mode=None,
         effect_size=res.effect_size,
         force_mode=None,
-        sample_matrix=None,
-        plot_order=None,
+        # plot_order=None,
     )
     is_significant = True
     if result.pvalue >= result.alpha:

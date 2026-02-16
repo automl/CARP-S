@@ -17,6 +17,7 @@ from tqdm import tqdm
 from carps.analysis.utils import get_ids_mo
 from carps.utils.loggingutils import get_logger, setup_logging
 
+# from carps.analysis.gather_data import convert_mixed_types_to_str
 setup_logging()
 logger = get_logger(__file__)
 
@@ -52,63 +53,40 @@ def gather_trajectory(x: pd.DataFrame) -> pd.DataFrame:
         data.append(D)
     return pd.DataFrame(data)
 
+def get_pareto_front(costs):
+    """Return all Pareto-optimal rows from the given array. Assumes minimization."""
+    is_efficient = np.ones(len(costs), dtype=bool)
+    for i, c in enumerate(costs):
+        if is_efficient[i]:
+            is_efficient[is_efficient] = np.any(costs[is_efficient] < c, axis=1) | np.all(costs[is_efficient] == c, axis=1)
+            is_efficient[i] = True
+    return costs[is_efficient]
 
-def get_reference_point(x: pd.DataFrame, on_key: str = "trial_value__cost") -> np.ndarray:
-    """Get reference point from the dataframe.
 
-    Dataframe should only contain data from one task. The reference point is the maximum
-    of the costs over all trials. This is the worst case scenario for the hypervolume
-    calculation. The reference point is needed to define the bound of the hypervolume.
+def add_running_pareto_front(group):
+    """Adds the pareto front of all costs up until the current trial to the group.
 
     Args:
-        x (pd.DataFrame): Dataframe with the trajectory.
-        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
-            Can also be "trial_value__cost_inc".
+        group (_type_): _description_
 
     Returns:
-        np.ndarray: Reference point.
+        _type_: _description_
     """
-    if "task_id" in x.columns:
-        assert x["task_id"].nunique() == 1, "Cannot get reference point for multiple tasks"  # noqa: PD101
-    costs = get_costs(x, on_key)
-    return np.max(costs, axis=0)
+    group = group.sort_values("n_trials").reset_index(drop=True)
+    costs = np.stack(group["trial_value__cost_normalized"].to_numpy())
+    pareto_fronts = []
+
+    for i in range(len(group)):
+        current_costs = costs[:i+1]
+        front = get_pareto_front(current_costs)
+        pareto_fronts.append(tuple(map(tuple, front)))
+
+    group["pareto_front"] = pareto_fronts
+    return group
 
 
-def get_cost_min(x: pd.DataFrame, on_key: str = "trial_value__cost") -> np.ndarray:
-    """Get the minimum objective values from the dataframe.
 
-    Dataframe should only contain data from one task. The point is the minimum
-    of the costs over all trials. This is the best case scenario for the hypervolume
-    calculation. The minimum point is needed for normalization.
-
-    Args:
-        x (pd.DataFrame): Dataframe with the trajectory.
-        on_key (str, optional): Column to use for the reference point. Defaults to "trial_value__cost".
-            Can also be "trial_value__cost_inc".
-
-    Returns:
-        np.ndarray: Minimum cost.
-    """
-    if "task_id" in x.columns:
-        assert x["task_id"].nunique() == 1, "Cannot get reference point for multiple tasks"  # noqa: PD101
-    costs = get_costs(x, on_key)
-    return np.min(costs, axis=0)
-
-
-def get_costs(x: pd.DataFrame, on_key: str = "trial_value__cost") -> np.ndarray:
-    """Get costs from the dataframe.
-
-    Here, it is expected that the costs are vectors (in the case of multi-objective optimization).
-
-    Args:
-        x (pd.DataFrame): Dataframe with the trajectory.
-        on_key (str, optional): Column to use for the costs. Defaults to "trial_value__cost".
-            Can also be "trial_value__cost_raw".
-    """
-    return np.array(x[on_key].to_list())
-
-
-def add_reference_point(x: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
+def add_reference_point(x: pd.DataFrame) -> pd.DataFrame:
     """Add reference point to the dataframe.
 
     The reference point is needed to define the bound of the hypervolume.
@@ -121,14 +99,31 @@ def add_reference_point(x: pd.DataFrame, on_key: str = "trial_value__cost") -> p
     Returns:
         pd.DataFrame: Dataframe with the reference point.
     """
-    reference_point = get_reference_point(x, on_key)
+    # Flatten and stack all cost vectors
+    costs = np.vstack([np.array(c) for c in x["trial_value__cost_raw"]])
+
+    # Sanity check for consistent dimensionality
+    if len(set(cost.shape[0] for cost in costs)) != 1:
+        raise ValueError("Inconsistent number of objectives in cost vectors.")
+
+    # Reference point is max across all objectives
+    reference_point = np.max(costs, axis=0) + 1e-4
+    
+    # Set reference point per row
     x["reference_point"] = [reference_point] * len(x)
-    minimum_cost = get_cost_min(x, on_key)
-    x["minimum_cost"] = [minimum_cost] * len(x)
+    return x
+
+def normalize_objectives(x: pd.DataFrame) -> pd.DataFrame:
+    costs = np.vstack(x["trial_value__cost_raw"])
+    min_vals, max_vals = costs.min(0), costs.max(0)
+    denom = np.where(max_vals - min_vals == 0, 1, max_vals - min_vals)
+    normalized = (costs - min_vals) / denom
+    x["trial_value__cost_normalized"] = list(normalized)
     return x
 
 
-def calc_hv(x: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
+
+def calc_hv(x: pd.DataFrame) -> pd.DataFrame:
     """Calculate hypervolume per trajectory step.
 
     Args:
@@ -139,8 +134,9 @@ def calc_hv(x: pd.DataFrame, on_key: str = "trial_value__cost") -> pd.DataFrame:
     Returns:
         pd.DataFrame: Dataframe with the hypervolume.
     """
-    F = get_costs(x, on_key)
-    ind = HV(ref_point=x["reference_point"].iloc[0], pf=None, nds=False)
+    F = np.vstack([np.array(p) for p in x["pareto_front"]])
+
+    ind = HV(ref_point=[1.000001]*F.shape[1], pf=None, nds=False)
     x["hypervolume"] = ind(F)
     return x
 
@@ -219,7 +215,7 @@ def add_hypervolume_to_df(logs: pd.DataFrame, on_key: str = "trial_value__cost")
     """
     tqdm.pandas(desc="Calc hypervolume...")
     ids_mo = get_ids_mo(logs)
-    add_reference_point_partial = partial(add_reference_point, on_key=on_key)
+    add_reference_point_partial = partial(add_reference_point)
     mo_cols = ["hypervolume", "reference_point"]
     for mo_col in mo_cols:
         if mo_col not in logs.columns:

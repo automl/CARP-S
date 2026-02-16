@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from carps.loggers.abstract_logger import AbstractLogger
 from carps.utils.loggingutils import CustomEncoder, get_logger, setup_logging
+import time
 
 if TYPE_CHECKING:
     from py_experimenter.result_processor import ResultProcessor
@@ -98,12 +99,20 @@ class DatabaseLogger(AbstractLogger):
         table_name: str, default "trials"
             The name of the table to log the trial to.
         """
-        info = convert_trial_info(trial_info, trial_value)
-        info["n_trials"] = n_trials
-        info["n_function_calls"] = n_function_calls if n_function_calls else n_trials
+        for i in range(5):
+            try:
+                info = convert_trial_info(trial_info, trial_value)
+                info["n_trials"] = n_trials
+                info["n_function_calls"] = n_function_calls if n_function_calls else n_trials
 
-        if self.result_processor:
-            self.result_processor.process_logs({table_name: info})
+                if self.result_processor:
+                    logger.info(f"Logging trial to {table_name}: {info}")
+                    self.result_processor.process_logs({table_name: info})
+                break
+            except Exception as e:
+                if i == 4:
+                    raise e
+                time.sleep(10)
 
     def log_incumbent(self, n_trials: int | float, incumbent: Incumbent, n_function_calls: int | None = None) -> None:
         """Log the incumbent.
@@ -142,5 +151,14 @@ class DatabaseLogger(AbstractLogger):
         entity : str
             The entity to log the data to. This is the table name in the database.
         """
-        if self.result_processor:
-            self.result_processor.process_logs({entity: data})
+
+        for i in range(5):
+            try:
+                if self.result_processor:
+                    self.result_processor.process_logs({entity: data})
+                break
+            except Exception as e:
+                if i == 4:
+                    raise e
+                time.sleep(10)
+

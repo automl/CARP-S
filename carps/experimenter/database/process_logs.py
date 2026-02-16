@@ -63,6 +63,7 @@ def add_metadata(
         "config",
         "config_hash",
         "name",
+        "n_trials"
     ]
     metadata_columns = [c for c in experiment_config_table.columns if c not in ignore_columns]
 
@@ -100,9 +101,9 @@ def process_single_run_from_database(
     if logs_from_one_run["experiment_id"].nunique() != 1:  # noqa: PD101
         raise ValueError("Multiple values for `experiment_id` found in the logs. Something is suspicious.")
     experiment_id = logs_from_one_run["experiment_id"].iloc[0]
-    logs_from_one_run = process_logs(logs_from_one_run)
-    if only_incumbents:
-        logs_from_one_run = filter_non_incumbent_entries(logs=logs_from_one_run)
+    # logs_from_one_run = process_logs(logs_from_one_run)
+    # if only_incumbents:
+    #     logs_from_one_run = filter_non_incumbent_entries(logs=logs_from_one_run)
     return add_metadata(
         logs_from_one_run=logs_from_one_run,
         experiment_id=experiment_id,
@@ -197,9 +198,9 @@ def process_logs_from_database(
 
     # Combine the results into a single DataFrame
     processed_logs = pd.concat(result, ignore_index=True).reset_index(drop=True)
-    processed_logs.to_parquet(output_filename, index=False)
+    processed_logs = process_logs(processed_logs)
+    processed_logs.to_parquet(output_filename, index=False, engine="fastparquet")
     logger.info(f"Processed logs saved to {output_filename} 💌.")
-    return processed_logs
 
 
 if __name__ == "__main__":

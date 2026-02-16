@@ -35,6 +35,7 @@ experimenter = PyExperimenter(
     database_credential_file_path=database_credential_file_path,
     log_level=logging.INFO,
     use_ssh_tunnel=OmegaConf.load(experiment_configuration_file_path).PY_EXPERIMENTER.Database.use_ssh_tunnel,
+    use_codecarbon=False
 )
 
 
