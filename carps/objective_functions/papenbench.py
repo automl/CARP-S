@@ -66,7 +66,7 @@ def get_benchmark_registry() -> Mapping[str, dict[str, Any]]:
         The benchmark registry containing benchmark infos like
         port number, dimension and search space type.
     """
-    registry_fn = Path("carps/build/lib/bencher/BencherServer/benchmark-registry.json")  # type: ignore[attr-defined,arg-type]
+    registry_fn = Path(__file__).parent / "../build/lib/bencher/BencherServer/benchmark-registry.json"  # type: ignore[attr-defined,arg-type]
     with open(registry_fn) as f:
         return json.load(f)
 
