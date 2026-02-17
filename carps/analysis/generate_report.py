@@ -1213,7 +1213,7 @@ def write_latex_report(
     for gid, info in resulting_files.groupby(list(groupers)):
         # Normalize gid to always be a tuple for consistency
         gid_normalized = gid if isinstance(gid, tuple) else (gid,)
-        
+
         report_tex = ""
         filename_id = determine_filename_id(groupers, gid_normalized)
         report_filename = report_dir / f"{report_name}_{filename_id}.tex"
