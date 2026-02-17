@@ -1285,8 +1285,8 @@ def generate_report(
 
     # Load and preprocess results
     df = load_results(result_path, normalize=normalize_results)  # noqa: PD901
-    plot_status(df, figure_dir)
-    _ = plot_budget_used(df, output_dir=figure_dir, replot=True)
+    plot_status(df, figure_dir, groupers=groupers)
+    _ = plot_budget_used(df, output_dir=figure_dir, replot=True, groupers=groupers)
 
     # FINAL PERFORMANCE
     logger.info("Plotting final performance...")
@@ -1334,7 +1334,7 @@ def generate_report(
             pd.DataFrame(resulting_files_perfovertime_pertask),
         ]
     ).reset_index(drop=True)
-    write_latex_report(resulting_files, report_dir, report_name)
+    write_latex_report(resulting_files, report_dir, report_name, groupers=groupers)
 
     logger.info(f"Find figures at {figure_dir}.")
     logger.info("Done! 🌞")
