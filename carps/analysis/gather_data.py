@@ -70,7 +70,7 @@ def get_run_dirs(outdir: str) -> list[Path]:
         opt_paths.extend(list(Path(_outdir).glob("*")))
     with multiprocessing.Pool() as pool:
         triallog_files = pool.map(glob_trial_logs, opt_paths)
-    if len(triallog_files) == 0:
+    if not any(triallog_files):
         raise ValueError(f"No trial logs found in {outdir}.")
     return [f.parent for f in np.concatenate(triallog_files)]  # type: ignore[attr-defined]
 
@@ -156,7 +156,7 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
     Returns:
         pd.DataFrame: Data frame for one optimization run.
     """
-    df = read_trial_log(rundir, log_fn=log_fn)  # noqa: PD901
+    df = read_trial_log(rundir, log_fn=log_fn)
     if df is None:
         # raise NotImplementedError("No idea what should happen here!?")
         return pd.DataFrame()
@@ -186,7 +186,7 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         ]
         config_keys_forbidden = ["_target_", "_partial_"]
         try:
-            df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)  # noqa: PD901
+            df = annotate_with_cfg(df=df, cfg=cfg, config_keys=config_keys, config_keys_forbidden=config_keys_forbidden)
         except Exception as e:
             logger.error(f"Error annotating data frame with config from {config_fn}. ")
             raise e
@@ -197,10 +197,10 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         df["cfg_str"] = [(config_fn, cfg_str)] * len(df)
 
     if "problem.function.seed" in df:
-        df = df.drop(columns=["problem.function.seed"])  # noqa: PD901
+        df = df.drop(columns=["problem.function.seed"])
 
     if "problem.function.dim" in df:
-        df = df.rename(columns={"task.function.dim": "dim"})  # noqa: PD901
+        df = df.rename(columns={"task.function.dim": "dim"})
 
     return process_logs(df)
 
@@ -258,8 +258,8 @@ def read_trial_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.D
     if not path.exists():
         return None
 
-    df = read_jsonl_content(path)  # noqa: PD901
-    df = normalize_drop(df, "trial_info", rename_columns=True, sep="__")  # noqa: PD901
+    df = read_jsonl_content(path)
+    df = normalize_drop(df, "trial_info", rename_columns=True, sep="__")
     return normalize_drop(df, "trial_value", rename_columns=True, sep="__")
 
 
@@ -523,7 +523,7 @@ def load_set(paths: list[str], set_id: str = "unknown") -> tuple[pd.DataFrame, p
             fn = Path(p) / "logs.parquet"
         logs.append(pd.read_parquet(fn))
 
-    df = pd.concat(logs).reset_index(drop=True)  # noqa: PD901
+    df = pd.concat(logs).reset_index(drop=True)
     df_cfg = pd.concat([pd.read_parquet(Path(p) / "logs_cfg.parquet") for p in paths]).reset_index(drop=True)
     df["subset_id"] = set_id
     return df, df_cfg
@@ -595,7 +595,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
 
     # Convert config to object
     logger.debug("Save config as a string to avoid mixed type columns...")
-    logs["trial_info__config"] = logs["trial_info__config"].apply(lambda x: str(x))
+    logs["trial_info__config"] = logs["trial_info__config"].apply(str)
 
     # Add time
     logger.debug("Calculate the elapsed time...")
@@ -788,8 +788,8 @@ def load_logs(rundir: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         )
         raise RuntimeError(msg)
 
-    df = pd.read_csv(logs_fn)  # noqa: PD901
-    df = normalize_logs(df)  # noqa: PD901
+    df = pd.read_csv(logs_fn)
+    df = normalize_logs(df)
     df_cfg = pd.read_csv(logs_cfg_fn)
     return df, df_cfg
 
@@ -849,7 +849,7 @@ def filelogs_to_df(
         partial_load_log = partial(load_log, log_fn=log_fn)
         # results = [partial_load_log(rundir) for rundir in tqdm(rundirs)]
         results = map_multiprocessing(partial_load_log, rundirs, n_processes=n_processes)
-        df = pd.concat(results).reset_index(drop=True)  # noqa: PD901
+        df = pd.concat(results).reset_index(drop=True)
         logger.info("Done. Do some preprocessing...")
         df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
         df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
@@ -862,7 +862,7 @@ def filelogs_to_df(
         df_list.append(df)
         df_cfg_list.append(df_cfg)
         offset += len(df_cfg)
-    df = pd.concat(df_list).reset_index(drop=True)  # noqa: PD901
+    df = pd.concat(df_list).reset_index(drop=True)
     del df_list
     df_cfg = pd.concat(df_cfg_list).reset_index(drop=True)
     del df_cfg_list
@@ -875,7 +875,7 @@ def filelogs_to_df(
     outdir.mkdir(parents=True, exist_ok=True)
     df.to_csv(Path(outdir) / "logs.csv", index=False)
     df_cfg.to_csv(Path(outdir) / "logs_cfg.csv", index=False)
-    df = convert_mixed_types_to_str(df)  # noqa: PD901
+    df = convert_mixed_types_to_str(df)
     df_cfg = convert_mixed_types_to_str(df_cfg)
     df.to_parquet(Path(outdir) / "logs.parquet", index=False)
     df_cfg.to_parquet(Path(outdir) / "logs_cfg.parquet", index=False)
