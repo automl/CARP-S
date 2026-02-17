@@ -156,7 +156,11 @@ benchmark_hpob:
 	. ../container/recipes/benchmarks/HPOB/download_data.sh
 
 benchmark_bnnbo:
-	git clone git@github.com:benjamc/bnn-bo.git lib/bnn-bo
+	@if [ ! -d "lib/bnn-bo" ]; then \
+		git clone https://github.com/benjamc/bnn-bo.git lib/bnn-bo; \
+	else \
+		echo "lib/bnn-bo already exists, skipping clone"; \
+	fi
 	$(PIP) install -e lib/bnn-bo
 	$(PIP) install py-pde torchvision swig gymnasium[box2d]
 
