@@ -191,3 +191,25 @@ Here we provide the link to the [meta data](https://drive.google.com/file/d/1Z9q
 that contains the detailed optimization setting for each run  
 and the [running results](https://drive.google.com/file/d/1Ai-pM_LlsQ0E4EAfkeujtu6iwvhozhda/view?usp=sharing) that 
 records the running results of each optimization-benchmark combination. 
+
+## Miscellaneous
+
+CARP-S is developed by the [AutoML Groups of the Universities of Hannover and
+Freiburg](http://www.automl.org/). It is a featured optimizer on [AutoML Space](https://automl.space/automl-tools/).
+
+If you have found a bug, please report to [issues](https://github.com/automl/CARP-S/issues). Moreover, we are 
+appreciating any kind of help. Find our guidelines for contributing to this package 
+[here](CONTRIBUTING.md).
+
+If you use CARP-S in one of your research projects, please cite our 
+[paper](https://arxiv.org/abs/2506.06143):
+```
+@article{benjamins2025carps,
+  title={carps: A framework for comparing n hyperparameter optimizers on m benchmarks},
+  author={Benjamins, Carolin and Graf, Helena and Segel, Sarah and Deng, Difan and Ruhkopf, Tim and Hennig, Leona and Basu, Soham and Mallik, Neeratyoy and Bergman, Edward and Chen, Deyao and others},
+  journal={arXiv:2506.06143},
+  year={2025}
+}
+```
+
+Copyright (c) 2025, [Leibniz University Hannover - Institute of AI](https://www.ai.uni-hannover.de/)
