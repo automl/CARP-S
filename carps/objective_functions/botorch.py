@@ -5,7 +5,14 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-import torch
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None  # type: ignore
+
 from ConfigSpace import Categorical, ConfigurationSpace, Constant, Float
 
 from carps.objective_functions.objective_function import ObjectiveFunction
@@ -36,7 +43,28 @@ class BOTorchObjectiveFunction(ObjectiveFunction):
             The botorch problem.
         loggers : list[AbstractLogger] | None, optional
             Loggers, by default None
+
+        Raises:
+        ------
+        ImportError
+            If torch or botorch is not installed.
         """
+        if not TORCH_AVAILABLE:
+            msg = (
+                "torch is required to use BOTorchObjectiveFunction. "
+                "Please install it with: pip install torch"
+            )
+            raise ImportError(msg)
+
+        try:
+            import botorch  # noqa: F401, PLC0415
+        except ImportError as e:
+            msg = (
+                "botorch is required to use BOTorchObjectiveFunction. "
+                "Please install it with: pip install botorch"
+            )
+            raise ImportError(msg) from e
+
         super().__init__(loggers)
 
         self.botorch_problem = botorch_problem

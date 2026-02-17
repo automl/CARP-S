@@ -87,6 +87,10 @@ containers = [
   "py-experimenter>=1.4.1",
   "pymysql",
 ]
+botorch = [
+  "torch",
+  "botorch",
+]
 
 # https://docs.pytest.org/en/7.2.x/reference/reference.html#ini-options-ref
 [tool.pytest.ini_options]
