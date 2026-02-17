@@ -155,13 +155,13 @@ benchmark_hpob:
 	$(PIP) install -r ../container/recipes/benchmarks/HPOB/HPOB_requirements.txt
 	. ../container/recipes/benchmarks/HPOB/download_data.sh
 
-benchmark_bnnbo:
-	@if [ ! -d "lib/bnn-bo" ]; then \
-		git clone https://github.com/benjamc/bnn-bo.git lib/bnn-bo; \
+benchmark_nasengb:
+	@if [ ! -d "lib/naseng_benchmark" ]; then \
+		git clone https://github.com/luh-ai/naseng_benchmark.git lib/naseng_benchmark; \
 	else \
-		echo "lib/bnn-bo already exists, skipping clone"; \
+		echo "lib/naseng_benchmark already exists, skipping clone and just pull" && git pull; \
 	fi
-	$(PIP) install -e lib/bnn-bo
+	$(PIP) install -e lib/naseng_benchmark
 	$(PIP) install py-pde torchvision swig gymnasium[box2d]
 
 benchmarks:
@@ -171,7 +171,7 @@ benchmarks:
 	$(MAKE) benchmark_mfpbench
 	$(MAKE) benchmark_hpobench
 	$(MAKE) benchmark_hpob
-	$(MAKE) benchmark_bnnbo
+	$(MAKE) benchmark_nasengb
 
 optimizers:
 	$(MAKE) optimizer_smac

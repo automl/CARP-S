@@ -1,14 +1,14 @@
 # @package _global_
-benchmark_id: BNNBO
+benchmark_id: nasengb
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: bnnbo/PDEVar
+  name: nasengb/WeldedBeamSO
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.botorch.BOTorchObjectiveFunction
     botorch_problem:
-      _target_: bnnbo_test_functions.pdes.PDEVar
+      _target_: botorch.test_functions.synthetic.WeldedBeamSO
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
@@ -20,30 +20,30 @@ task:
         hyperparameters:
         - type: uniform_float
           name: x0_cont
-          lower: 0.1
-          upper: 5.0
-          default_value: 2.55
+          lower: 0.125
+          upper: 10.0
+          default_value: 5.0625
           log: false
           meta: null
         - type: uniform_float
           name: x1_cont
           lower: 0.1
-          upper: 5.0
-          default_value: 2.55
+          upper: 10.0
+          default_value: 5.05
           log: false
           meta: null
         - type: uniform_float
           name: x2_cont
-          lower: 0.01
-          upper: 5.0
-          default_value: 2.505
+          lower: 0.1
+          upper: 10.0
+          default_value: 5.05
           log: false
           meta: null
         - type: uniform_float
           name: x3_cont
-          lower: 0.01
-          upper: 5.0
-          default_value: 2.505
+          lower: 0.1
+          upper: 10.0
+          default_value: 5.05
           log: false
           meta: null
         conditions: []

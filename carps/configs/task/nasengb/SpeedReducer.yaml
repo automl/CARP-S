@@ -1,9 +1,9 @@
 # @package _global_
-benchmark_id: BNNBO
+benchmark_id: nasengb
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: bnnbo/SpeedReducer
+  name: nasengb/SpeedReducer
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.botorch.BOTorchObjectiveFunction

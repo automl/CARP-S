@@ -1,14 +1,14 @@
 # @package _global_
-benchmark_id: BNNBO
+benchmark_id: nasengb
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: bnnbo/PestControl
+  name: nasengb/PestControl
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.botorch.BOTorchObjectiveFunction
     botorch_problem:
-      _target_: bnnbo_test_functions.pest_control.PestControl
+      _target_: naseng_benchmark.pest_control.PestControl
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
