@@ -176,6 +176,7 @@ lint.ignore = [
   "TCH003",  # Move stdlib import into TYPE_CHECKING
   "B010",    # Do not use `setattr`
   "COM812",
+  "PD901",  # Avoid using the generic variable name `df` for DataFrames
   # These tend to be lighweight and confuse pyright
   "PTH123",
   "PTH109",

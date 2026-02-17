@@ -266,8 +266,8 @@ def load_logs(rundir: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         )
         raise RuntimeError(msg)
 
-    df = pd.read_csv(logs_fn)  # noqa: PD901
-    df = process_logs(df)  # noqa: PD901
+    df = pd.read_csv(logs_fn)
+    df = process_logs(df)
     df_cfg = pd.read_csv(logs_cfg_fn)
     return df, df_cfg
 

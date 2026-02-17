@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import itertools
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -17,7 +19,8 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
-colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"]
+# colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"] # noqa: E501
+colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#7A7A7A"]
 logger = get_logger("analysis utils")
 markers = list(Line2D.filled_markers)
 
@@ -41,7 +44,7 @@ def get_marker_palette(
     optimizers.sort()
     if len(optimizers) > len(markers):
         logger.info(f"Too many optimizers: {len(optimizers)} > {len(markers)}. Reusing markers.")
-    return dict(zip(optimizers, markers, strict=False))
+    return dict(zip(optimizers, itertools.cycle(markers), strict=False))
 
 
 def get_color_palette(
@@ -99,7 +102,9 @@ def setup_seaborn(font_scale: float | None = None) -> None:
     sns.set_palette("colorblind")
 
 
-def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_norm", max_x: float = 1) -> pd.DataFrame:
+def filter_only_final_performance(
+    df: pd.DataFrame, x_column: str = "n_trials_norm", max_x: float = 1, key_performance: str = "trial_value__cost_inc"
+) -> pd.DataFrame:
     """Filter final performance based on the maximum x value.
 
     (1) Filter s.t. the x_column is less than or equal to max_x.
@@ -114,6 +119,8 @@ def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_no
         The column to filter on, by default "n_trials_norm".
     max_x : float, optional
         The maximum value of the x_column to filter by, by default 1.
+    key_performance : str, optional
+        The performance column, by default "trial_value__cost_inc".
 
     Returns:
     -------
@@ -123,7 +130,7 @@ def filter_only_final_performance(df: pd.DataFrame, x_column: str = "n_trials_no
 
     def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
         groupdf = groupdf[groupdf[x_column] <= max_x]
-        return groupdf[groupdf["trial_value__cost_inc"] == groupdf["trial_value__cost_inc"].min()].iloc[[-1]]
+        return groupdf[groupdf[key_performance] == groupdf[key_performance].min()].iloc[[-1]]
 
     df_final = df.groupby(["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
 
@@ -194,3 +201,39 @@ def get_ids_mo(logs: pd.DataFrame) -> pd.Series:
     """
     # TODO determine MO ids by type of cost (first apply maybe_convert_cost_dtype)
     return logs["task_type"].isin(["multi-objective", "multi-fidelity-objective"])
+
+
+def determine_filename_id(group_keys: Sequence[str], gid: list[Any]) -> str:
+    """Determine filename id based on group keys.
+
+    Parameters
+    ----------
+    group_keys : Sequence[str]
+        The group keys.
+    gid : list[Any]
+        The group values.
+
+    Returns:
+    -------
+    str
+        The filename id.
+    """
+    return "_".join([f"{k}-{v}" for k, v in zip(group_keys, gid, strict=True)])
+
+
+def get_figure_title(group_keys: Sequence[str], gid: list[Any]) -> str:
+    """Determine filename id based on group keys.
+
+    Parameters
+    ----------
+    group_keys : Sequence[str]
+        The group keys.
+    gid : list[Any]
+        The group values.
+
+    Returns:
+    -------
+    str
+        The filename id.
+    """
+    return ",".join([f"{k}: {v}" for k, v in zip(group_keys, gid, strict=True)])
