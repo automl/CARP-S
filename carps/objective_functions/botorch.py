@@ -11,7 +11,6 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    torch = None  # type: ignore
 
 from ConfigSpace import Categorical, ConfigurationSpace, Constant, Float
 
