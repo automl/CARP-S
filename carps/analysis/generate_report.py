@@ -256,17 +256,27 @@ def plot_performance_over_time(
         filename_id = determine_filename_id(groupers, gid)
         figure_filename = f"{output_dir}/{filename_id}_perfovertime{pertaskid}"
         grouper_info = dict(zip(groupers, gid, strict=True))
+        plot_type = "performance_over_time" if not per_task else "performance_over_time_per_task"
+        plot_type_pretty = "Performance over Time" if not per_task else "Performance over Time (Per Task)"
+        if per_task:
+            explanation = (
+                "The performance of each optimizer over time shows how the incumbent cost evolves "
+                "as the number of trials increases. For each optimizer, the performance is averaged over seeds. "
+                "The performance is shown per task without normalization."
+            )
+        else:
+            explanation = (
+                "The performance of each optimizer over time shows how the normalized incumbent cost evolves "
+                "as the number of trials increases. For each optimizer and task, the performance is averaged over seeds "
+                "to obtain an estimate of the performance. The performance is then normalized and interpolated across tasks."
+            )
         resulting_files.append(
             {
                 "task_id": None,
                 "filename": figure_filename,
-                "plot_type": "rank_over_time",
-                "plot_type_pretty": "Rank over Time",
-                "explanation": "The rank of each optimizer over time compares which optimizer "
-                "performs better, the lower "
-                "the rank the better. For each optimizer and task, the performance is averaged over seeds to obtain"
-                " an estimate of the performance. The rank is then calculated per step and task with the same "
-                "approach as for the critical difference diagram.",
+                "plot_type": plot_type,
+                "plot_type_pretty": plot_type_pretty,
+                "explanation": explanation,
                 **grouper_info,
             }
         )
@@ -1207,6 +1217,8 @@ def write_latex_report(
         ],
         "Anytime Performance": [
             "rank_over_time",
+            "performance_over_time",
+            "performance_over_time_per_task",
         ],
     }
 
