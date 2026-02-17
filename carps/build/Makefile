@@ -155,15 +155,6 @@ benchmark_hpob:
 	$(PIP) install -r ../container/recipes/benchmarks/HPOB/HPOB_requirements.txt
 	. ../container/recipes/benchmarks/HPOB/download_data.sh
 
-benchmark_bnnbo:
-	@if [ ! -d "lib/bnn-bo" ]; then \
-		git clone https://github.com/benjamc/bnn-bo.git lib/bnn-bo; \
-	else \
-		echo "lib/bnn-bo already exists, skipping clone"; \
-	fi
-	$(PIP) install -e lib/bnn-bo
-	$(PIP) install py-pde torchvision swig gymnasium[box2d]
-
 benchmarks:
 	$(MAKE) benchmark_bbob
 	$(MAKE) benchmark_yahpo
@@ -171,7 +162,6 @@ benchmarks:
 	$(MAKE) benchmark_mfpbench
 	$(MAKE) benchmark_hpobench
 	$(MAKE) benchmark_hpob
-	$(MAKE) benchmark_bnnbo
 
 optimizers:
 	$(MAKE) optimizer_smac
