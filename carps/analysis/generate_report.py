@@ -1211,8 +1211,11 @@ def write_latex_report(
     }
 
     for gid, info in resulting_files.groupby(list(groupers)):
+        # Normalize gid to always be a tuple for consistency
+        gid_normalized = gid if isinstance(gid, tuple) else (gid,)
+        
         report_tex = ""
-        filename_id = determine_filename_id(groupers, gid if isinstance(gid, tuple) else (gid,))
+        filename_id = determine_filename_id(groupers, gid_normalized)
         report_filename = report_dir / f"{report_name}_{filename_id}.tex"
         full_report_filename = report_dir / f"full_{report_name}_{filename_id}.tex"
 
@@ -1225,7 +1228,6 @@ def write_latex_report(
 
             for plot_type in _order:
                 _info = info[info["plot_type"] == plot_type].iloc[0]
-                gid_normalized = gid if isinstance(gid, tuple) else (gid,)
                 plot_title = f"{get_figure_title(groupers, gid_normalized)} - {_info['plot_type_pretty']}"
                 plot_filename = "figures" + _info["filename"].split("figures")[-1]
                 report_tex += latex_template_plot_block.replace("plot_title", plot_title).replace(
