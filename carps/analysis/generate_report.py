@@ -1210,12 +1210,13 @@ def write_latex_report(
         ],
     }
 
-    for (task_type, set_id), info in resulting_files.groupby(list(groupers)):
+    for gid, info in resulting_files.groupby(list(groupers)):
         report_tex = ""
-        report_filename = report_dir / f"{report_name}_{task_type}_{set_id}.tex"
-        full_report_filename = report_dir / f"full_{report_name}_{task_type}_{set_id}.tex"
+        filename_id = determine_filename_id(groupers, gid if isinstance(gid, tuple) else (gid,))
+        report_filename = report_dir / f"{report_name}_{filename_id}.tex"
+        full_report_filename = report_dir / f"full_{report_name}_{filename_id}.tex"
 
-        print(task_type, set_id)
+        print(gid)
 
         # Embed plots
         report_tex += "\\section{Plots}\n"
@@ -1224,7 +1225,8 @@ def write_latex_report(
 
             for plot_type in _order:
                 _info = info[info["plot_type"] == plot_type].iloc[0]
-                plot_title = f"Task Type: {_info['task_type']} - Set: {_info['set']} - {_info['plot_type_pretty']}"
+                gid_normalized = gid if isinstance(gid, tuple) else (gid,)
+                plot_title = f"{get_figure_title(groupers, gid_normalized)} - {_info['plot_type_pretty']}"
                 plot_filename = "figures" + _info["filename"].split("figures")[-1]
                 report_tex += latex_template_plot_block.replace("plot_title", plot_title).replace(
                     "plot_filename", plot_filename
