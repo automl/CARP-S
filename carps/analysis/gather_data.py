@@ -852,7 +852,7 @@ def filelogs_to_df(
         df = pd.concat(results).reset_index(drop=True)
         logger.info("Done. Do some preprocessing...")
         df_cfg = pd.DataFrame([{"cfg_fn": k, "cfg_str": v} for k, v in df["cfg_str"].unique()])
-        df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg))
+        df_cfg.loc[:, "experiment_id"] = np.arange(0, len(df_cfg)) + offset
         df["experiment_id"] = (
             df["cfg_fn"].apply(lambda x, df_cfg=df_cfg: np.where(df_cfg["cfg_fn"].to_numpy() == x)[0][0]) + offset
         )
