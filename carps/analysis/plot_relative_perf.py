@@ -29,7 +29,7 @@ def norm_by_opt(df: pd.DataFrame, optimizer_id: str) -> pd.DataFrame:
             lambda x, reference=reference: x / reference
         )
         df_new.append(gdf)
-    df = pd.concat(df_new).reset_index(drop=True)  # noqa: PD901
+    df = pd.concat(df_new).reset_index(drop=True)
 
     # df["trial_value_cost_normopt"] = df.groupby("task_id").apply(_norm_by_opt)
     df["trial_value__cost_inc_normopt"] = df.groupby(by=["task_id", "optimizer_id", "seed"])[

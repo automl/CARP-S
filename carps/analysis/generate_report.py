@@ -1028,7 +1028,7 @@ def plot_status(
             `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
             or any custom columns determining the groups.
     """
-    df = logs_normalized  # noqa: PD901
+    df = logs_normalized
     outdir = Path(outdir)
 
     for (task_type, set_id), gdf in df.groupby(list(groupers)):
@@ -1108,7 +1108,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
     """
     # 1. Load results
     logger.info("Loading results from %s", result_path)
-    df = pd.read_parquet(result_path) if str(result_path).endswith(".parquet") else pd.read_csv(result_path)  # noqa: PD901
+    df = pd.read_parquet(result_path) if str(result_path).endswith(".parquet") else pd.read_csv(result_path)
 
     # 2. Preprocess results
     logger.info("Preprocessing results")
@@ -1119,7 +1119,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
 
     if normalize:
         logger.info("...normalizing")
-        df = normalize_logs(df)  # noqa: PD901
+        df = normalize_logs(df)
         result_path = Path(result_path)
         df.to_parquet(result_path.parent / f"{result_path.stem}_normalized{result_path.suffix}", index=False)
     else:
@@ -1147,7 +1147,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
             )
 
     # Remove rows where "optimizer_id" == "nan"
-    df = df[  # noqa: PD901
+    df = df[
         ~df["optimizer_id"].isin(
             [
                 "SyneTune-DEHB",
@@ -1301,7 +1301,7 @@ def generate_report(
     figure_dir.mkdir(exist_ok=True, parents=True)
 
     # Load and preprocess results
-    df = load_results(result_path, normalize=normalize_results)  # noqa: PD901
+    df = load_results(result_path, normalize=normalize_results)
     plot_status(df, figure_dir, groupers=groupers)
     _ = plot_budget_used(df, output_dir=figure_dir, replot=True, groupers=groupers)
 

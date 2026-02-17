@@ -123,7 +123,7 @@ def get_df_crit(
     Returns:
         pd.DataFrame: The critical difference dataframe.
     """
-    df = filter_only_final_performance(df=df, x_column=budget_var, max_x=max_fidelity)  # noqa: PD901
+    df = filter_only_final_performance(df=df, x_column=budget_var, max_x=max_fidelity)
 
     # Work on mean of different seeds
     df_crit = df.groupby(["optimizer_id", "task_id"])[perf_col].apply(np.nanmean).reset_index().copy()
