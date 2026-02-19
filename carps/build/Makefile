@@ -164,6 +164,13 @@ benchmark_nasengb:
 	$(PIP) install -e lib/naseng_benchmark
 	$(PIP) install py-pde torchvision swig gymnasium[box2d]
 
+benchmark_papenbench:
+ 	$(PIP) install git+https://github.com/lpapenme/BencherScaffold
+	apptainer build papenbench.sif ../container/recipes/benchmarks/PapenBench/papenbench.def
+	rm -rf lib/bencher
+	git clone https://github.com/lpapenme/bencher.git lib/bencher
+	$(PIP) install lib/bencher/BencherServer
+
 benchmarks:
 	$(MAKE) benchmark_bbob
 	$(MAKE) benchmark_yahpo
