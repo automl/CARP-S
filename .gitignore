@@ -183,3 +183,4 @@ slurmlogs/*
 
 *.tar.gz
 .DS_Store
+.cenv
