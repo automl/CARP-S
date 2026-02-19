@@ -81,11 +81,11 @@ OS := $(shell uname)
 uvenv:
 	pip install uv
 	export PATH="$HOME/.local/bin:$PATH"
-	uv venv --python=3.12 .venv
-	. .venv/bin/activate
-	python -m ensurepip --upgrade
-	python -m pip install uv --upgrade
-	uv pip install setuptools wheel
+	uv venv --python=3.13 .venv
+	. .venv/bin/activate && \
+		python -m ensurepip --upgrade && \
+		python -m pip install uv --upgrade  && \
+		uv pip install setuptools wheel  && \
 
 optimizer_smac:
 	$(PIP) install swig
