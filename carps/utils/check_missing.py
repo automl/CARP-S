@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from enum import Enum, auto
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -13,17 +12,10 @@ from omegaconf import OmegaConf
 
 from carps.analysis.gather_data import read_jsonl_content
 from carps.utils.loggingutils import get_logger, setup_logging
+from carps.utils.types import RunStatus
 
 setup_logging()
 logger = get_logger(__file__)
-
-
-class RunStatus(Enum):
-    """Enum for the status of a run."""
-
-    COMPLETED = auto()
-    MISSING = auto()
-    TRUNCATED = auto()
 
 
 def get_experiment_status(path: Path) -> dict:

@@ -33,6 +33,7 @@ dependencies = [
   "fire",
   "ipywidgets",
   "py-experimenter>=1.4.1",
+  "tqdm"
 ]
 
 requires-python = ">=3.9"
@@ -176,6 +177,7 @@ lint.ignore = [
   "S603",    #  `subprocess` call: check for execution of untrusted input
   "B010",    # Do not use `setattr`
   "COM812",
+  "PD901",  # Avoid using the generic variable name `df` for DataFrames
   # These tend to be lighweight and confuse pyright
   "PTH123",
   "PTH109",

@@ -348,7 +348,7 @@ def apply_calc_hv_low_mem(logs: pd.DataFrame, on_key: str = "trial_value__cost")
     output_directory = Path("tmp/hypervolume")
     delete_existing = True
     if delete_existing:
-        if input_directory.is_dir() and False:
+        if input_directory.is_dir():
             for fn in input_directory.iterdir():
                 fn.unlink()
         if output_directory.is_dir():
@@ -565,6 +565,6 @@ def load_trajectory(rundir: str) -> pd.DataFrame:
     fn = Path(rundir) / "trajectory.parquet"
     if not fn.is_file():
         raise ValueError(f"Cannot find {fn}. Did you run `python -m carps.analysis.calc_hypervolume {rundir}`?")
-    df = pd.read_parquet(fn)  # noqa: PD901
-    df = df.map(maybe_deserialize)  # noqa: PD901
+    df = pd.read_parquet(fn)
+    df = df.map(maybe_deserialize)
     print(df["trial_value__cost"].iloc[0], type(df["trial_value__cost"].iloc[0]))

@@ -109,7 +109,7 @@ def create_tables(df: pd.DataFrame, budget_var: str = "n_trials_norm", max_fidel
     perf_col_norm: str = "trial_value__cost_inc_norm"
 
     print(df[budget_var].max())
-    df = df[np.isclose(df[budget_var], max_fidelity)]  # noqa: PD901
+    df = df[np.isclose(df[budget_var], max_fidelity)]
 
     # Aggregate all
 
