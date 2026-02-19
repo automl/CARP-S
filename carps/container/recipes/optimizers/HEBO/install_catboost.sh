@@ -1,7 +1,10 @@
 PIP=$PIP
-if [ -z "$PIP" ]
-then
-    PIP="pip"
+if [ -z "$PIP" ]; then
+    if command -v uv >/dev/null 2>&1; then
+        PIP="uv pip"
+    else
+        PIP="pip"
+    fi
 fi
 
 $PIP install setuptools wheel jupyterlab conan build --upgrade
