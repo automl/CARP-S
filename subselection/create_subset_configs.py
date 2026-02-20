@@ -22,9 +22,7 @@ def create_subset_configs(subset_fn_dev: str, subset_fn_test: str, scenario: str
         task_ids = subset["task_id"].to_list()
 
         index_fn = config_target_path.parent.parent / "index.csv"
-        if not index_fn.is_file():
-            raise ValueError(f"Could not find {index_fn}. ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-        task_index = pd.read_csv(index_fn)
+        task_index = get_index_config(index_fn)
         print(task_index.head())
         print(task_ids)
         not_found = [pid for pid in task_ids if pid not in task_index["task_id"].to_list()]
