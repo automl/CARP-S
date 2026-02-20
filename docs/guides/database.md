@@ -15,7 +15,9 @@ parallel execution is not efficient at all.
 ### Requirements and Configuration
 Requirement: MySQL database is set up.
 
-1. Add a `credentials.yaml` file in `carps/experimenter` with the following content:
+1. Install the database dependencies with `pip install carps[database]`.
+
+2. Add a `credentials.yaml` file in `carps/experimenter` with the following content:
 ```yaml
 CREDENTIALS:
   Database:
@@ -26,7 +28,7 @@ CREDENTIALS:
         server: mysql_server
         port: 3306 (most likely)
 ```
-2. Edit `carps/experimenter/py_experimenter.yaml` by setting:
+3. Edit `carps/experimenter/py_experimenter.yaml` by setting:
 ```yaml
 PY_EXPERIMENTER:
   n_jobs: 1
