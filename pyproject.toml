@@ -32,7 +32,6 @@ dependencies = [
   "pymoo",
   "fire",
   "ipywidgets",
-  "py-experimenter>=1.4.1",
   "tqdm"
 ]
 
@@ -66,6 +65,7 @@ dev = [
   "pre-commit",
   "ruff",
   "mypy",
+  "types-Deprecated",
   "mkdocs",
   "mkdocs-material",
   "mkdocs-autorefs",
@@ -87,6 +87,9 @@ containers = [
   "GitPython",
   "py-experimenter>=1.4.1",
   "pymysql",
+]
+database = [
+  "py-experimenter>=1.4.1",
 ]
 
 # https://docs.pytest.org/en/7.2.x/reference/reference.html#ini-options-ref
