@@ -21,6 +21,7 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 
 from carps.analysis.calc_hypervolume import add_hypervolume_to_df
 from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
+from carps.utils.index_configs import get_index_config
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
@@ -404,9 +405,7 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
         logger.debug("No task_id in logs. Can't add task info.")
         return logs
     index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
-    if not index_fn.is_file():
-        raise ValueError("ObjectiveFunction ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-    task_index = pd.read_csv(index_fn)
+    task_index = get_index_config(index_fn)
 
     new_logs = []
     for gid, gdf in logs.groupby(by=["task_id", "seed"]):
