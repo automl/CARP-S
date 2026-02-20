@@ -65,6 +65,7 @@ dev = [
   "pre-commit",
   "ruff",
   "mypy",
+  "types-Deprecated",
   "mkdocs",
   "mkdocs-material",
   "mkdocs-autorefs",
