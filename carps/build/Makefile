@@ -167,8 +167,11 @@ benchmark_nasengb:
 benchmark_papenbench:
 	$(PIP) install git+https://github.com/lpapenme/BencherScaffold
 	apptainer build papenbench.sif ../container/recipes/benchmarks/PapenBench/papenbench.def
-	rm -rf lib/bencher
-	git clone https://github.com/lpapenme/bencher.git lib/bencher
+	@if [ ! -d "lib/bencher" ]; then \
+		git clone https://github.com/lpapenme/bencher.git lib/bencher; \
+	else \
+		echo "lib/bencher already exists, skipping clone and just pull" && git pull; \
+	fi
 	$(PIP) install lib/bencher/BencherServer
 	$(PIP) install numpy --upgrade
 
