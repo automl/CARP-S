@@ -4,7 +4,7 @@ from pathlib import Path
 
 import fire
 import pandas as pd
-from carps.analysis.gather_data import normalize_logs
+from carps.analysis.gather_data_utils import normalize_logs
 from carps.analysis.run_autorank import get_df_crit
 
 

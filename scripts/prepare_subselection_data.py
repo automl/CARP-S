@@ -4,7 +4,7 @@ import contextlib
 from pathlib import Path
 
 import pandas as pd
-from carps.analysis.gather_data import convert_mixed_types_to_str, normalize_logs
+from carps.analysis.gather_data_utils import convert_mixed_types_to_str, normalize_logs
 from carps.analysis.run_autorank import get_df_crit
 from carps.utils.loggingutils import get_logger, setup_logging
 

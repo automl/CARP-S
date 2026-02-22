@@ -33,7 +33,7 @@ from seaborn.utils import (
     relative_luminance,
 )
 
-from carps.analysis.gather_data import (
+from carps.analysis.gather_data_utils import (
     get_interpolated_performance_df,
     normalize_logs,
 )
