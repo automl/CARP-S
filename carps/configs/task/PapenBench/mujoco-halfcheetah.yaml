@@ -1,13 +1,13 @@
 # @package _global_
 benchmark_id: PapenBench
-task_id: PapenBench/mopta08
+task_id: PapenBench/mujoco-halfcheetah
 task:
   _target_: carps.utils.task.Task
-  name: PapenBench/mopta08
+  name: PapenBench/mujoco-halfcheetah
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.papenbench.PapenBenchObjectiveFunction
-    benchmark_name: mopta08
+    benchmark_name: mujoco-halfcheetah
   input_space:
     _target_: carps.utils.task.InputSpace
     configuration_space:
@@ -730,160 +730,6 @@ task:
             default_value: 0.5
             log: false
             meta: null
-          - type: uniform_float
-            name: x0102
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0103
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0104
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0105
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0106
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0107
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0108
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0109
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0110
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0111
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0112
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0113
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0114
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0115
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0116
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0117
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0118
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0119
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0120
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0121
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0122
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0123
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
         conditions: []
         forbiddens: []
         python_module_version: 1.2.0
@@ -902,7 +748,7 @@ task:
       - objective_0
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
-    n_trials: 465
+    n_trials: 424
     time_budget: null
     n_workers: 1
   metadata:
@@ -912,11 +758,11 @@ task:
     objective_function_approximation: real
     has_virtual_time: false
     deterministic: true
-    dimensions: 124
+    dimensions: 102
     search_space_n_categoricals: 0
     search_space_n_ordinals: 0
     search_space_n_integers: 0
-    search_space_n_floats: 124
+    search_space_n_floats: 102
     search_space_has_conditionals: false
     search_space_has_forbiddens: false
     search_space_has_priors: false
