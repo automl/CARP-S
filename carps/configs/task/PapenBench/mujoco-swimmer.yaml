@@ -128,13 +128,6 @@ task:
             default_value: 0.5
             log: false
             meta: null
-          - type: uniform_float
-            name: x0016
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
         conditions: []
         forbiddens: []
         python_module_version: 1.2.0
