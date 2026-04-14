@@ -55,7 +55,9 @@ def index_configs(extra_task_paths: list[str] | None = None, extra_optimizer_pat
                 }
             )
         table = pd.DataFrame(table_list)
-        table.to_csv(paths[0] / "index.csv", index=False)
+        _key = "task" if "task" in str(paths[0]) else "optimizer"
+        indexpath = Path(str(paths[0]).split(_key)[0] + _key)
+        table.to_csv(indexpath / "index.csv", index=False)
 
 
 def create_table(key: str, paths: list[Path], target: Path) -> None:
