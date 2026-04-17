@@ -6,6 +6,7 @@ import hashlib
 from pathlib import Path
 
 import fire
+import omegaconf
 import pandas as pd
 from omegaconf import OmegaConf
 from platformdirs import user_cache_dir
@@ -15,6 +16,7 @@ from carps.utils.loggingutils import get_logger
 
 logger = get_logger("ConfigIndexer")
 
+cache_path = Path(user_cache_dir("carps")) / "index.csv"
 
 config_folder = Path(__file__).parent.parent / "configs"
 config_folder_task = config_folder / "task"
@@ -41,13 +43,20 @@ def index_configs(extra_task_paths: list[str] | None = None, extra_optimizer_pat
     """
     register_extra_paths(extra_task_paths, extra_optimizer_paths)
 
+    index_list = []
     for path, key in PATH_KEY_ZIP.items():
         paths = list(path.glob("**/*.yaml"))
 
         table_list = []
         for fn in track(paths, total=len(paths), description=f"Gathering for {key}..."):
             cfg = OmegaConf.load(fn)
-            value = cfg.get(key)
+            try:
+                value = cfg.get(key, None)
+            except omegaconf.errors.InterpolationToMissingValueError:
+                cfg_dict = OmegaConf.to_container(cfg=cfg, resolve=False)
+                value = cfg_dict.get(key, None)
+            if value is None:
+                continue
             table_list.append(
                 {
                     "config_fn": str(fn),
@@ -55,9 +64,9 @@ def index_configs(extra_task_paths: list[str] | None = None, extra_optimizer_pat
                 }
             )
         table = pd.DataFrame(table_list)
-        _key = "task" if "task" in str(paths[0]) else "optimizer"
-        indexpath = Path(str(paths[0]).split(_key)[0] + _key)
-        table.to_csv(indexpath / "index.csv", index=False)
+        index_list.append(table)
+    index_df = pd.concat(index_list)
+    index_df.to_csv(cache_path, index=False)
 
 
 def create_table(key: str, paths: list[Path], target: Path) -> None:
@@ -107,28 +116,26 @@ def register_extra_paths(extra_task_paths: list[str] | None, extra_optimizer_pat
         PATH_KEY_ZIP[Path(task_path_str)] = "task_id"
 
 
-def get_index_config(path: Path) -> pd.DataFrame:
-    """Index all task and optimizer configs.
+def get_index() -> pd.DataFrame:
+    """Get index of carps compatible tasks and optimizers.
 
-    Create `index.csv` containing the config filename `config_fn` and the
-    `task_id` or `optimizer_id` for all task and optimizer configs.
-    Replaces old indexing api by using caching directory
+    Reads from the cache directory.
 
-    Parameters:
-    ----------
-    path: path the old index file would have been
-
-    returns: pd.DataFrame containing the index
+    Returns:
+    -------
+    pd.DataFrame
+        The index with `task_id` and `optimizer_id` with the corresponding
+        config filename.
     """
-    path_dashed = str(path.parent).replace("/", "-")
-
-    paths = list(path.parent.glob("**/*.yaml"))
-    paths_hash = hash_inputs(paths)[:12]
-
-    cache_path = Path(user_cache_dir("carps")) / f"index-{path_dashed}-{paths_hash}.csv"
-    if not cache_path.is_file():
+    if not cache_path.is_file() or True:
+        logger.info(
+            f"Index file not found at {cache_path}. Reindex config. Attention! "
+            "If you have configs in your package, manually run "
+            "python -m carps.utils.index_configs --extra_task_paths=... "
+            "--extra_optimizer_paths=..."
+        )
         cache_path.parent.mkdir(exist_ok=True, parents=True)
-        create_table(PATH_KEY_ZIP[path.parent], paths, cache_path)
+        index_configs()
 
     return pd.read_csv(cache_path)
 
