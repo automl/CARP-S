@@ -21,7 +21,7 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 
 from carps.analysis.calc_hypervolume import add_hypervolume_to_df
 from carps.analysis.utils import convert_mixed_types_to_str, get_ids_mo
-from carps.utils.index_configs import get_index_config
+from carps.utils.index_configs import get_index
 from carps.utils.loggingutils import get_logger, setup_logging
 from carps.utils.task import Task
 from carps.utils.trials import TrialInfo
@@ -404,8 +404,7 @@ def maybe_postadd_task(logs: pd.DataFrame, overwrite: bool = False) -> pd.DataFr
     if "task_id" not in logs:
         logger.debug("No task_id in logs. Can't add task info.")
         return logs
-    index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
-    task_index = get_index_config(index_fn)
+    task_index = get_index()
 
     new_logs = []
     for gid, gdf in logs.groupby(by=["task_id", "seed"]):
@@ -571,7 +570,7 @@ def process_logs(logs: pd.DataFrame, keep_task_columns: list[str] | None = None)
     logs["trial_value__cost_inc"] = logs.groupby(by=grouper_keys)["trial_value__cost"].transform("cummin")
 
     logger.debug("Maybe add task info...")
-    logs = maybe_postadd_task(logs)
+    # logs = maybe_postadd_task(logs)
     if "task.output_space.n_objectives" in logs:
         logs["task.is_multiobjective"] = logs["task.output_space.n_objectives"] > 1
     logger.debug("Infer task_type...")
