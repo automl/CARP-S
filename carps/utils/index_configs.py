@@ -66,6 +66,7 @@ def index_configs(extra_task_paths: list[str] | None = None, extra_optimizer_pat
         table = pd.DataFrame(table_list)
         index_list.append(table)
     index_df = pd.concat(index_list)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
     index_df.to_csv(cache_path, index=False)
 
 
