@@ -7,7 +7,7 @@ from pathlib import Path
 
 import fire
 
-from carps.utils.index_configs import get_index_config
+from carps.utils.index_configs import get_index
 from carps.utils.loggingutils import get_logger
 
 logger = get_logger(__file__)
@@ -43,8 +43,7 @@ def find_override(task_id: str | None = None, optimizer_id: str | None = None) -
     else:
         raise ValueError("Please specify either `task_id` or `optimizer_id`.")
 
-    index_fn = path / "index.csv"
-    table = get_index_config(index_fn)
+    table = get_index()
 
     try:
         config_fn = table["config_fn"][table[key] == to_find].to_numpy()[0]

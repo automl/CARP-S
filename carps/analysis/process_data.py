@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
-from carps.utils.index_configs import get_index_config
+from carps.utils.index_configs import get_index
 from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
@@ -69,8 +69,7 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Logs with task columns.
     """
-    index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
-    task_index = get_index_config(index_fn)
+    task_index = get_index()
 
     def load_task_cfg(task_id: str) -> DictConfig:
         config_fn = task_index["config_fn"][task_index["task_id"] == task_id].iloc[0]
