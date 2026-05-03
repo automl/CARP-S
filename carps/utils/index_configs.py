@@ -128,7 +128,7 @@ def get_index() -> pd.DataFrame:
         The index with `task_id` and `optimizer_id` with the corresponding
         config filename.
     """
-    if not cache_path.is_file() or True:
+    if not cache_path.is_file():
         logger.info(
             f"Index file not found at {cache_path}. Reindex config. Attention! "
             "If you have configs in your package, manually run "
