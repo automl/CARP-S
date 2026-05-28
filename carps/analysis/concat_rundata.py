@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from carps.analysis.gather_data import convert_mixed_types_to_str, load_set
+from carps.analysis.gather_data_utils import convert_mixed_types_to_str, load_set
 
 
 def concat_rundata() -> None:

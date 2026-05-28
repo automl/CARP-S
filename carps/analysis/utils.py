@@ -6,18 +6,16 @@ import itertools
 import logging
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import polars as pl
 import seaborn as sns
 from matplotlib.lines import Line2D
 
 from carps.utils.loggingutils import get_logger
-
-if TYPE_CHECKING:
-    import pandas as pd
-
 
 # colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#DDDDDD"] # noqa: E501
 colorblind_palette = ["#88CCEE", "#44AA99", "#117733", "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#7A7A7A"]
@@ -103,40 +101,76 @@ def setup_seaborn(font_scale: float | None = None) -> None:
 
 
 def filter_only_final_performance(
-    df: pd.DataFrame, x_column: str = "n_trials_norm", max_x: float = 1, key_performance: str = "trial_value__cost_inc"
-) -> pd.DataFrame:
-    """Filter final performance based on the maximum x value.
+    df: pd.DataFrame | pl.DataFrame,
+    x_column: str = "n_trials_norm",
+    max_x: float = 1,
+    key_performance: str = "trial_value__cost_inc",
+) -> pd.DataFrame | pl.DataFrame:
+    """Extracts the best-found performance (incumbent) for each experimental run
+    within a specified budget constraint.
 
-    (1) Filter s.t. the x_column is less than or equal to max_x.
-    (2) For each run (each group of optimizer_id, task_id, and seed), keep only the row with the
-    best solution, which is defined as the row with the minimum cost_inc value.
+    This function simulates a snapshot of an optimization process. It first
+    constrains the data to a maximum budget (x_column) and then identifies
+    the single best configuration found up to that point for every unique
+    combination of optimizer, task, and random seed.
+
+    Algorithm Logic:
+    1. Filter: Retain only observations where the budget metric is <= `max_x`.
+    2. Group: Partition data by ["optimizer_id", "task_id", "seed"].
+    3. Identify Incumbent: Within each partition, locate the observation
+       with the minimum value in `key_performance`.
+    4. Tie-breaking: If multiple timestamps share the same minimum cost,
+       the earliest occurrence is retained.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        The DataFrame containing the performance data.
+    df : Union[pd.DataFrame, pl.DataFrame]
+        The dataset containing optimization traces. Supports both Pandas and
+        Polars backends.
     x_column : str, optional
-        The column to filter on, by default "n_trials_norm".
+        The budget or time-step column (e.g., normalized trials, wall-clock
+        time, or iterations), by default "n_trials_norm".
     max_x : float, optional
-        The maximum value of the x_column to filter by, by default 1.
+        The budget cutoff. Any data points beyond this value are ignored
+        to simulate early stopping or specific budget analysis, by default 1.
     key_performance : str, optional
-        The performance column, by default "trial_value__cost_inc".
+        The metric to be minimized (e.g., cost, regret, or error).
+        By default "trial_value__cost_inc".
 
     Returns:
     -------
-    pd.DataFrame
-        A DataFrame containing only the final performance data for each optimizer, task, and seed.
+    Union[pd.DataFrame, pl.DataFrame]
+        A reduced DataFrame containing exactly one row per (optimizer, task, seed),
+        representing the peak performance achieved within the given budget.
+        The return type matches the input type.
+
+    Raises:
+    ------
+    TypeError
+        If the input 'df' is neither a Pandas nor a Polars DataFrame.
     """
+    group_cols = ["optimizer_id", "task_id", "seed"]
 
-    def keep(groupdf: pd.DataFrame) -> pd.DataFrame:
-        groupdf = groupdf[groupdf[x_column] <= max_x]
-        return groupdf[groupdf[key_performance] == groupdf[key_performance].min()].iloc[[-1]]
+    # --- Polars Backend (Vectorized Expressions) ---
+    if isinstance(df, pl.DataFrame):
+        return (
+            df.filter(pl.col(x_column) <= max_x)
+            .sort(key_performance, descending=False)
+            .group_by(group_cols, maintain_order=True)
+            .first()
+        )
 
-    df_final = df.groupby(["optimizer_id", "task_id", "seed"]).apply(keep, include_groups=False)
+    # --- Pandas Backend (Vectorized Sorting/Grouping) ---
+    if isinstance(df, pd.DataFrame):
+        # We avoid .apply() as it is slow; sorting + .first() is the idiomatic alternative
+        return (
+            df[df[x_column] <= max_x]
+            .sort_values(key_performance, ascending=True)
+            .groupby(group_cols, as_index=False)
+            .first()
+        )
 
-    if "level_3" in df_final.columns:
-        df_final = df_final.drop(columns=["level_3"])
-    return df_final.reset_index()
+    raise TypeError(f"Unsupported dataframe type: {type(df)}. Expected Pandas or Polars.")
 
 
 def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None = None) -> pd.DataFrame:
@@ -151,7 +185,7 @@ def convert_mixed_types_to_str(logs: pd.DataFrame, logger: logging.Logger | None
     Returns:
         pd.DataFrame: Logs with mixed type columns converted
     """
-    mixed_type_columns = logs.select_dtypes(include=["O"]).columns
+    mixed_type_columns = logs.select_dtypes(include=["O", "object"]).columns
     if logger:
         logger.debug(f"Goodbye all mixed data, ruthlessly converting {mixed_type_columns} to str...")
     for c in mixed_type_columns:
