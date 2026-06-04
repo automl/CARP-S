@@ -1,0 +1,1054 @@
+# @package _global_
+benchmark_id: PapenBench
+task_id: PapenBench/maxsat125
+task:
+  _target_: carps.utils.task.Task
+  name: PapenBench/maxsat125
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.papenbench.PapenBenchObjectiveFunction
+    benchmark_name: maxsat125
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: categorical
+          name: x0000
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0001
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0002
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0003
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0004
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0005
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0006
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0007
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0008
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0009
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0010
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0011
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0012
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0013
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0014
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0015
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0016
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0017
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0018
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0019
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0020
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0021
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0022
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0023
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0024
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0025
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0026
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0027
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0028
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0029
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0030
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0031
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0032
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0033
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0034
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0035
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0036
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0037
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0038
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0039
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0040
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0041
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0042
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0043
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0044
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0045
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0046
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0047
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0048
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0049
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0050
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0051
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0052
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0053
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0054
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0055
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0056
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0057
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0058
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0059
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0060
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0061
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0062
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0063
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0064
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0065
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0066
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0067
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0068
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0069
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0070
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0071
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0072
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0073
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0074
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0075
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0076
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0077
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0078
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0079
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0080
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0081
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0082
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0083
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0084
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0085
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0086
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0087
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0088
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0089
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0090
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0091
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0092
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0093
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0094
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0095
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0096
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0097
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0098
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0099
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0100
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0101
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0102
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0103
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0104
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0105
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0106
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0107
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0108
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0109
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0110
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0111
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0112
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0113
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0114
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0115
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0116
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0117
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0118
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0119
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0120
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0121
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0122
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0123
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        - type: categorical
+          name: x0124
+          choices:
+          - 0
+          - 1
+          weights: null
+          default_value: 0
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - objective_0
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 468
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: TODO
+    objective_function_approximation: TODO
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 125
+    search_space_n_categoricals: 125
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

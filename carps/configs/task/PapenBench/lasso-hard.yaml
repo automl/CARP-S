@@ -7041,7 +7041,7 @@ task:
     _target_: carps.utils.task.TaskMetadata
     has_constraints: false
     domain: TODO
-    objective_function_approximation: real
+    objective_function_approximation: TODO
     has_virtual_time: false
     deterministic: true
     dimensions: 1000

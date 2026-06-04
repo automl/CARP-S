@@ -16,118 +16,118 @@ task:
       d:
         name: null
         hyperparameters:
-          - type: uniform_float
-            name: x0000
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0001
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0002
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0003
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0004
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0005
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0006
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0007
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0008
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0009
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0010
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0011
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0012
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0013
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0014
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
-          - type: uniform_float
-            name: x0015
-            lower: 0.0
-            upper: 1.0
-            default_value: 0.5
-            log: false
-            meta: null
+        - type: uniform_float
+          name: x0000
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0001
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0002
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0003
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0004
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0005
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0006
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0007
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0008
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0009
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0010
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0011
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0012
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0013
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0014
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0015
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
         conditions: []
         forbiddens: []
         python_module_version: 1.2.0
@@ -143,7 +143,7 @@ task:
     _target_: carps.utils.task.OutputSpace
     n_objectives: 1
     objectives:
-      - objective_0
+    - objective_0
   optimization_resources:
     _target_: carps.utils.task.OptimizationResources
     n_trials: 180
@@ -152,8 +152,8 @@ task:
   metadata:
     _target_: carps.utils.task.TaskMetadata
     has_constraints: false
-    domain: car_design
-    objective_function_approximation: real
+    domain: TODO
+    objective_function_approximation: TODO
     has_virtual_time: false
     deterministic: true
     dimensions: 16

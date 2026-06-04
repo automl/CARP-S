@@ -1,0 +1,278 @@
+# @package _global_
+benchmark_id: PapenBench
+task_id: PapenBench/bbob-schaffers1000_32
+task:
+  _target_: carps.utils.task.Task
+  name: PapenBench/bbob-schaffers1000_32
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.papenbench.PapenBenchObjectiveFunction
+    benchmark_name: bbob-schaffers1000_32
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_float
+          name: x0000
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0001
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0002
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0003
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0004
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0005
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0006
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0007
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0008
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0009
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0010
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0011
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0012
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0013
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0014
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0015
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0016
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0017
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0018
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0019
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0020
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0021
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0022
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0023
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0024
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0025
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0026
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0027
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0028
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0029
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0030
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        - type: uniform_float
+          name: x0031
+          lower: 0.0
+          upper: 1.0
+          default_value: 0.5
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - objective_0
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 247
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: TODO
+    objective_function_approximation: TODO
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 32
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 0
+    search_space_n_floats: 32
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
