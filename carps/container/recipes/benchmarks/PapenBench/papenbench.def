@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: gaunab/bencher:preload
+From: gaunab/bencher:latest
 Namespace:
 Stage: build
 
