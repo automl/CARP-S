@@ -23,9 +23,12 @@ if TYPE_CHECKING:
     from carps.loggers.abstract_logger import AbstractLogger
 
 
+import os
+import socket
+
 from bencherscaffold.client import BencherClient
 from bencherscaffold.protoclasses.bencher_pb2 import Value, ValueType
-from ConfigSpace import Configuration, ConfigurationSpace, Float, UniformFloatHyperparameter
+from ConfigSpace import Categorical, Configuration, ConfigurationSpace, Float, Integer
 
 from carps.utils.env_vars import CARPS_ROOT
 from carps.utils.loggingutils import get_logger, setup_logging
@@ -33,29 +36,61 @@ from carps.utils.loggingutils import get_logger, setup_logging
 setup_logging()
 logger = get_logger(__file__)
 
-PAPENBENCH_CONTAINER_FILE = CARPS_ROOT / "build/papenbench.sif"
+PAPENBENCH_CONTAINER_FILE = CARPS_ROOT / "../containers/benchmarks/papenbench.sif"
+
+os.environ["PATH"] = "/opt/software/pc2/EB-SW/software/Apptainer/1.3.5-GCCcore-13.3.0/bin:" + os.environ.get("PATH", "")
 
 
-def config_to_value(config: Configuration, configspace: ConfigurationSpace) -> list[Value]:
+def find_free_port() -> int:
+    """Helper to find an open high-port on the host node dynamically."""
+    # Handle parallel pytest workers
+    worker_id = os.environ.get("PYTEST_XDIST_WORKER")
+    if worker_id is not None:
+        worker_idx = int(worker_id.replace("gw", ""))
+        return 50000 + (worker_idx * 20)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
+
+
+def config_to_value(config: Configuration, hp_type: str) -> list[Value]:
     """Convert ConfigSpace configuration to values.
 
     Values are the format required by the underlying objective function.
 
     Args:
         config (Configuration): The configuration to convert.
-        configspace (ConfigurationSpace): The associated configuration space.
-            Necessary to infer the hyperparameter type.
+        hp_type (str): The domain benchmark category type string.
 
     Returns:
         list[Value]: List of values corresponding to the configuration.
     """
     values = []
 
-    for hp, hp_value in config.items():
-        if isinstance(configspace[hp], UniformFloatHyperparameter):
-            values.append(Value(type=ValueType.CONTINUOUS, value=hp_value))
+    for hp_name in sorted(config.keys()):
+        hp_value = config[hp_name]
+
+        if hp_type == "purely_continuous":
+            values.append(Value(type=ValueType.CONTINUOUS, value=float(hp_value)))
+
+        elif hp_type == "purely_binary":
+            values.append(Value(type=ValueType.BINARY, value=int(hp_value)))
+
+        elif hp_type == "purely_categorical":
+            values.append(Value(type=ValueType.CATEGORICAL, value=int(hp_value)))
+
+        elif hp_type == "purely_integer":
+            values.append(Value(type=ValueType.INTEGER, value=int(hp_value)))
+
+        elif hp_type == "mixed":
+            dim_idx = int(hp_name[1:])  # Parses string index "x0045" -> 45
+            if dim_idx < 50:  # noqa: PLR2004
+                values.append(Value(type=ValueType.BINARY, value=int(hp_value)))
+            else:
+                values.append(Value(type=ValueType.CONTINUOUS, value=float(hp_value)))
         else:
-            raise ValueError(f"Hp type not supported: {type(hp)}")
+            raise ValueError(f"Hyperparameter configuration mapping type '{hp_type}' is unsupported.")
+
     return values
 
 
@@ -68,10 +103,29 @@ def get_benchmark_registry() -> Mapping[str, dict[str, Any]]:
     """
     registry_fn = Path(__file__).parent / "../build/lib/bencher/BencherServer/benchmark-registry.json"  # type: ignore[attr-defined,arg-type]
     with open(registry_fn) as f:
-        return json.load(f)
+        registry = json.load(f)
+
+    # Handle BBOB and PBO
+    patched_registry = {}
+
+    for benchmark_name, benchmark_info in registry.items():
+        if benchmark_name.startswith("bbob") and benchmark_info["dimensions"] is None:
+            for d in [2, 4, 8, 16, 32]:
+                new_info = benchmark_info.copy()
+                new_info["dimensions"] = d
+                patched_registry[f"{benchmark_name}_{d}"] = new_info
+        elif benchmark_name.startswith("pbo") and benchmark_info["dimensions"] is None:
+            for d in [4, 9, 16, 25, 36]:  # Dim needs to be perfect square
+                new_info = benchmark_info.copy()
+                new_info["dimensions"] = d
+                patched_registry[f"{benchmark_name}_{d}"] = new_info
+        else:
+            patched_registry[benchmark_name] = benchmark_info
+
+    return patched_registry
 
 
-def get_configspace(benchmark_name: str) -> ConfigurationSpace:
+def get_configspace(benchmark_name: str) -> ConfigurationSpace:  # noqa: C901, PLR0912
     """Get configuration space for specific objective function.
 
     Args:
@@ -89,15 +143,53 @@ def get_configspace(benchmark_name: str) -> ConfigurationSpace:
     hp_type = benchmark_info["type"]
     dimensions = benchmark_info["dimensions"]
     cs = ConfigurationSpace()
+
+    bo4mob_scenarios = ["1ramp", "2corridor", "3junction", "4smallRegion", "5fullRegion"]
+    is_bo4mob = any(scen in benchmark_name for scen in bo4mob_scenarios)
+    if is_bo4mob:
+        hp_type = "purely_integer"
+
+    hps = []
+
     if hp_type == "purely_continuous":
-        for dim in range(dimensions):
-            hp_float = Float(
-                name=f"x{dim:04d}",
-                bounds=(0.0, 1.0),
-            )
-            cs.add(hp_float)
+        hps = [Float(name=f"x{dim:04d}", bounds=(0.0, 1.0)) for dim in range(dimensions)]
+        cs.add(hps)
+
+    elif hp_type in ("purely_categorical", "purely_binary"):
+        items = [0, 1, 2, 3, 4] if hp_type == "purely_categorical" else [0, 1]
+        hps = [Categorical(name=f"x{dim:04d}", items=items) for dim in range(dimensions)]
+        cs.add(hps)
+
+    elif hp_type == "mixed":
+        if "svmmixed" in benchmark_name.lower():
+            # First 50 dimensions are binary
+            for dim in range(50):
+                hps.append(Categorical(name=f"x{dim:04d}", items=[0, 1]))
+
+            # Last 3 dimensions are continuous
+            for dim in range(3):
+                hps.append(Float(name=f"x{50 + dim:04d}", bounds=(0.0, 1.0)))
+
+            cs.add(hps)
+        else:
+            raise NotImplementedError(f"Mixed configuration profile for '{benchmark_name}' is not supported.")
+
+    elif hp_type == "purely_integer":
+        # Handle paper-specific integer bounds for BO4Mob configurations
+        if is_bo4mob:
+            if "1ramp" in benchmark_name:
+                lower, upper = 1, 2500
+            else:
+                lower, upper = 1, 2000
+        else:
+            raise NotImplementedError(f"Pure integer configuration profile for '{benchmark_name}' is not supported.")
+
+        hps = [Integer(name=f"x{dim:04d}", bounds=(lower, upper)) for dim in range(dimensions)]
+        cs.add(hps)
+
     else:
         raise NotImplementedError(f"Benchmark type '{hp_type}' is not supported.")
+
     return cs
 
 
@@ -153,15 +245,23 @@ class PapenBenchObjectiveFunction(ObjectiveFunction):
 
         self.benchmark_name = benchmark_name
 
+        registry = get_benchmark_registry()
+        self.benchmark_info = registry.get(benchmark_name)
+        if self.benchmark_info is None:
+            raise ValueError(f"Benchmark '{benchmark_name}' not found in registry.")
+
         self.cs = get_configspace(benchmark_name)
 
         self.instance_id = f"instance_{uuid.uuid4().hex[:8]}"
 
+        # Dynamic port allocation for supporting multiple instances
+        self.port = find_free_port()
+
         self.start_container()
+        time.sleep(3)  # Sanity check
 
         # Create a client to communicate with the Bencher server
-        # By default, it connects to 127.0.0.1:50051
-        self.client = BencherClient()
+        self.client = BencherClient(port=self.port)
 
     @property
     def configspace(self) -> ConfigurationSpace:
@@ -170,12 +270,40 @@ class PapenBenchObjectiveFunction(ObjectiveFunction):
 
     def start_container(self) -> None:
         """Start the container for the benchmark."""
-        start_command = f"apptainer instance start {PAPENBENCH_CONTAINER_FILE} {self.instance_id}"
+        start_command = (
+            f"apptainer instance start --contain --writable-tmpfs --fakeroot "
+            f"{PAPENBENCH_CONTAINER_FILE} {self.instance_id}"
+        )
+
+        env = os.environ.copy()
+
+        env["APPTAINERENV_PYTHONUNBUFFERED"] = "1"
+        env["APPTAINERENV_OMP_NUM_THREADS"] = "1"
+        env["APPTAINERENV_MKL_NUM_THREADS"] = "1"
+        env["APPTAINERENV_OPENBLAS_NUM_THREADS"] = "1"
+        env["APPTAINERENV_VECLIB_MAXIMUM_THREADS"] = "1"
+        env["APPTAINERENV_NUMEXPR_NUM_THREADS"] = "1"
+
+        base_port = self.port
+        logger.info(f"Assigning dynamic port ecosystem starting at base: {base_port}")
+
+        # Force-inject the exact environment names defined in the configuration specs
+        env["APPTAINERENV_BENCHER_SERVER_PORT"] = str(base_port)
+        env["APPTAINERENV_BENCHER_LASSO_PORT"] = str(base_port + 2)
+        env["APPTAINERENV_BENCHER_NODEP_PORT"] = str(base_port + 3)
+        env["APPTAINERENV_BENCHER_MAXSAT_PORT"] = str(base_port + 4)
+        env["APPTAINERENV_BENCHER_EBO_PORT"] = str(base_port + 5)
+        env["APPTAINERENV_BENCHER_MUJOCO_PORT"] = str(base_port + 6)
+        env["APPTAINERENV_BENCHER_SVM_PORT"] = str(base_port + 7)
+        env["APPTAINERENV_BENCHER_IOH_PORT"] = str(base_port + 8)
+        env["APPTAINERENV_BENCHER_BO4MOB_PORT"] = str(base_port + 9)
+
         try:
-            subprocess.run(start_command.split(" "), shell=False, check=True)
+            subprocess.run(start_command.split(" "), shell=False, check=True, env=env)
             logger.info(f"Start command issued for instance '{self.instance_id}'.")
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to start instance '{self.instance_id}': {e}")
+            self.stop_container()
             raise e
 
         wait_for_instance(self.instance_id)
@@ -183,37 +311,37 @@ class PapenBenchObjectiveFunction(ObjectiveFunction):
     def stop_container(self) -> None:
         """Stop the container for the benchmark."""
         stop_command = f"apptainer instance stop {self.instance_id}"
-
-        result = subprocess.run(
-            "apptainer instance list".split(" "),
-            shell=False,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        logger.debug(f"Instance list output:\n{result.stdout}")
-        if self.instance_id in result.stdout:
-            try:
+        try:
+            result = subprocess.run(
+                "apptainer instance list".split(" "),
+                shell=False,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if self.instance_id in result.stdout:
                 subprocess.run(stop_command.split(" "), shell=False, check=True)
                 logger.info(f"Stop command issued for instance '{self.instance_id}'.")
-
                 wait_for_instance(self.instance_id, wait_for_stop=True)
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Failed to stop instance '{self.instance_id}': {e}")
-                raise e
-        else:
-            logger.warning(f"Instance '{self.instance_id}' is not running, no stop command issued.")
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"Failed to stop instance '{self.instance_id}': {e}")
 
     def _evaluate(self, trial_info: TrialInfo) -> TrialValue:
         # Evaluate the benchmark with the given values
         # This will send the values to the server and return the result
         # If the server is not running, it will raise an error
 
-        values = config_to_value(trial_info.config, configspace=self.cs)
+        values = config_to_value(trial_info.config, hp_type=self.benchmark_info["type"])  # type: ignore[index]
+
+        # Handle dim suffix
+        if self.benchmark_name.startswith("bbob") or self.benchmark_name.startswith("pbo"):
+            bench = self.benchmark_name.rsplit("_", 1)[0]
+        else:
+            bench = self.benchmark_name
 
         starttime = time.time()
         result = self.client.evaluate_point(
-            benchmark_name=self.benchmark_name,
+            benchmark_name=bench,
             point=values,
         )
         endtime = time.time()
