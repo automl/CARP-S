@@ -17,7 +17,7 @@ source_path = "carps"
 # NOTE: Given the current setup, we can only operate at a module level.
 # Ideally we specify options (at least at a module level) and we render
 # them into strings using a yaml parser. For now this is fine though
-NO_INHERITS = ("sklearn.evaluation",)
+NO_INHERITS = ()
 TAB = "    "
 
 for path in sorted(Path(source_path).rglob("*.py")):
