@@ -33,6 +33,9 @@ for path in sorted(Path(source_path).rglob("*.py")):
     if any(part.startswith("_") for part in parts):
         continue
 
+    if any(part in ("lib", "recipes") for part in parts):
+        continue
+
     with mkdocs_gen_files.open(full_doc_path, "w") as fd:
         if parts[0] != source_path:
             parts = (source_path,) + parts
