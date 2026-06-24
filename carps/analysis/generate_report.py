@@ -12,10 +12,11 @@ from __future__ import annotations
 import ast
 import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import fire
 import matplotlib
+from autorank import autorank
 
 matplotlib.use("Agg")  # Set non-interactive backend
 
@@ -54,6 +55,9 @@ from carps.analysis.utils import (
     setup_seaborn,
 )
 from carps.utils.loggingutils import get_logger, setup_logging
+
+if TYPE_CHECKING:
+    from autorank._util import RankResult
 
 setup_logging()
 logger = get_logger(__file__)
@@ -126,12 +130,16 @@ def plot_ranks_over_time(  # noqa: PLR0915
             df_crit = get_df_crit(gdf, max_fidelity=max_fidelity, perf_col=key_performance, budget_var=x_column)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")  # Ignore all warnings
-                rank_result = cd_evaluation(
-                    df_crit,
-                    maximize_metric=False,
-                    ignore_non_significance=True,
-                    plot_diagram=False,
-                )
+                n_optimizers = df_crit.shape[1]
+                if n_optimizers == 2:  # noqa: PLR2004
+                    rank_result = autorank(df_crit, alpha=0.05, verbose=False)
+                else:
+                    rank_result = cd_evaluation(
+                        df_crit,
+                        maximize_metric=False,
+                        ignore_non_significance=True,
+                        plot_diagram=False,
+                    )
             df_rank_cd = rank_result.rankdf
             for k, v in zip(groupers, gid, strict=True):
                 df_rank_cd[k] = v
@@ -486,6 +494,133 @@ def plot_ecdf(
     return resulting_files
 
 
+def plot_2optimizers_rank_result(result: RankResult, fig_filename: str, show_figure: bool = False) -> None:  # noqa: FBT001, FBT002, PLR0915
+    """Plot the rank result for two optimizers.
+
+    Args:
+        result (RankResult): The rank result to plot.
+        fig_filename (str): The filename to save the figure as.
+        show_figure (bool, optional): Whether to display the figure. Defaults to False.
+    """
+    # --- 1. Experimental Data Extraction ---
+    methods = result.rankdf.index.tolist()
+    mean_ranks = result.rankdf["meanrank"].tolist()
+    medians = result.rankdf["median"].tolist()
+    mads = result.rankdf["mad"].tolist()
+
+    # Confidence Interval Bounds
+    ci_lower = result.rankdf["ci_lower"].tolist()
+    ci_upper = result.rankdf["ci_upper"].tolist()
+
+    # Test Metadata Constants
+    p_val = result.pvalue
+    alpha = result.alpha
+    n_samples = result.num_samples
+
+    figure_class = plt.Figure
+    if show_figure:
+        figure_class = plt.figure
+    fig = figure_class(figsize=(10, 7))
+    ax1, ax2 = fig.subplots(2, 1, gridspec_kw={"height_ratios": [1, 2.2]})
+    # --- 3. TOP AXIS: Rank Line Visualization ---
+    ax1.axhline(y=0, color="#2c3e50", linewidth=2.5, zorder=1)
+
+    colors = ["#2b7bba", "#e74c3c"]  # Blue for RS, Red for SMAC3
+    for rank, name, color in zip(mean_ranks, methods, colors, strict=False):
+        ax1.plot([rank, rank], [-0.1, 0.1], color="#2c3e50", linewidth=2, zorder=2)
+        ax1.scatter(rank, 0, color=color, s=120, edgecolor="black", zorder=3)
+        ax1.text(
+            rank,
+            0.2,
+            f"{name}\n(Rank: {rank:.1f})",
+            ha="center",
+            va="bottom",
+            fontweight="bold",
+            color=color,
+            fontsize=10,
+        )
+
+    ax1.set_xlim(0.5, 2.5)
+    ax1.set_ylim(-0.5, 0.8)
+    ax1.set_xticks([1.0, 1.5, 2.0, 2.5])
+    ax1.set_xticklabels(["1.0", "1.5", "2.0", "2.5"])
+    ax1.set_yticks([])
+    ax1.grid(False)  # noqa: FBT003
+    ax1.set_title("Mean Ranking Axis (Lower is Better)", loc="left", fontsize=11, fontweight="bold", color="#555")
+
+    # --- 4. BOTTOM AXIS: Median & Confidence Intervals ---
+    x_positions = np.arange(len(methods))
+    mad_colors = ["#1a5276", "#7b241c"]  # Darker variants for the inner MAD bars
+
+    for i, (_name, med, mad, low, up, color, mad_color) in enumerate(
+        zip(methods, medians, mads, ci_lower, ci_upper, colors, mad_colors, strict=False)
+    ):
+        # Calculate asymmetric CI distance dimensions relative to this specific median point
+        low_err = med - low
+        up_err = up - med
+
+        # Label plots only on the first iteration to avoid duplicate legend entries
+        mad_label = "MAD Range" if i == 0 else ""
+        ci_label = "95% Confidence Interval" if i == 0 else ""
+
+        # Plot Thicker Inner Whisker (MAD)
+        ax2.errorbar(
+            i, med, yerr=[[mad], [mad]], fmt="none", ecolor=mad_color, elinewidth=6, alpha=0.5, label=mad_label
+        )
+
+        # Plot Thinner Outer Whisker (95% CI)
+        ax2.errorbar(
+            i,
+            med,
+            yerr=[[low_err], [up_err]],
+            fmt="none",
+            ecolor=color,
+            elinewidth=1.5,
+            capsize=8,
+            capthick=1.5,
+            label=ci_label,
+        )
+
+        # Draw Center Median Dot
+        ax2.scatter(i, med, color=color, s=100, edgecolor="black", zorder=4)
+
+        # Fixed font warning by swapping 'semibold' to 'bold'
+        ax2.text(i + 0.06, med, f"Med: {med:.2f}", va="center", ha="left", fontsize=9.5, fontweight="bold")
+
+    # Style Bottom Plot Parameters
+    ax2.set_xticks(x_positions)
+    ax2.set_xticklabels(methods, fontweight="bold", fontsize=11)
+    ax2.set_ylabel("Performance Distribution Scale", fontweight="bold", fontsize=11)
+    ax2.set_title(
+        "Median Estimations, MADs, and Asymmetric CIs", loc="left", fontsize=11, fontweight="bold", color="#555"
+    )
+    ax2.set_yscale("symlog")
+    ax2.legend(loc="upper right", frameon=True, facecolor="#fdfefe")
+
+    # --- 5. Summary Annotation Card ---
+    summary_box_text = (
+        f"Omnibus Test: Wilcoxon Signed-Rank\n"
+        f"Number of Samples (N): {n_samples}\n"
+        f"Significance Level (α): {alpha:.2f}\n"  # noqa: RUF001
+        f"Calculated p-value: {p_val:.5f}  (Statistically Significant)"
+    )
+    fig.text(
+        0.125,
+        0.92,
+        summary_box_text,
+        fontsize=10,
+        fontfamily="monospace",
+        bbox={"boxstyle": "round,pad=0.6", "facecolor": "#f4f6f7", "edgecolor": "#bdc3c7"},
+    )
+
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.82, hspace=0.4)
+    savefig(fig, fig_filename)
+    if show_figure:
+        plt.show()
+    plt.close(fig)
+
+
 def plot_critical_difference(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
@@ -541,15 +676,25 @@ def plot_critical_difference(
         if not replot:
             continue
         df_crit = get_df_crit(gdf, perf_col=perf_col)
-        _ = cd_evaluation(
-            df_crit,
-            maximize_metric=False,
-            ignore_non_significance=True,
-            output_path=fig_filename,
-            figsize=figsize,
-            plot_diagram=True,
-            show_figure=show_figure,
-        )
+        n_optimizers = df_crit.shape[1]
+        if n_optimizers == 1:
+            logger.warning(f"Only one optimizer found for {gid}. Skipping critical difference plot.")
+            continue
+        if n_optimizers == 2:  # noqa: PLR2004
+            logger.warning(f"Only two optimizers found for {gid}. Using Wilcoxon signed-rank test.")
+            result = autorank(df_crit, alpha=0.05, verbose=False)
+            plot_2optimizers_rank_result(result, fig_filename=fig_filename, show_figure=show_figure)
+        else:
+            logger.info(f"Calculating critical difference for {gid} with {n_optimizers} optimizers.")
+            _ = cd_evaluation(
+                df_crit,
+                maximize_metric=False,
+                ignore_non_significance=True,
+                output_path=fig_filename,
+                figsize=figsize,
+                plot_diagram=True,
+                show_figure=show_figure,
+            )
     return resulting_files
 
 
@@ -1277,7 +1422,8 @@ def generate_report(
     """Generate a report from the results of the optimization runs.
 
     Args:
-        result_path (str, "logs.parquet"): Path to the results CSV or parquet file.
+        result_path (str, "logs.parquet"): Path to the results CSV or parquet file. Can also be a directory, if so,
+            it looks for `logs.parquet` in that directory.
         report_dir (str | Path, "reports"): Directory to save the report to.
         report_name (str, "report"): Name of the report, will be the folder name. If none,
             use the curent date and time as folder name.
@@ -1299,6 +1445,9 @@ def generate_report(
     report_dir.mkdir(exist_ok=True, parents=True)
     figure_dir = report_dir / "figures"
     figure_dir.mkdir(exist_ok=True, parents=True)
+
+    if Path(result_path).is_dir():
+        result_path = str(Path(result_path) / "logs.parquet")
 
     # Load and preprocess results
     df = load_results(result_path, normalize=normalize_results)
