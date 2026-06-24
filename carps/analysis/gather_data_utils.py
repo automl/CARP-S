@@ -191,6 +191,8 @@ def load_log(rundir: str | Path, log_fn: str = "trial_logs.jsonl") -> pd.DataFra
         except Exception as e:
             logger.error(f"Error annotating data frame with config from {config_fn}. ")
             raise e
+        if "subset_id" not in df:
+            df["subset_id"] = "unknown"
     else:
         config_fn = "no_hydra_config"
         cfg_str = ""
