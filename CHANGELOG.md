@@ -1,4 +1,4 @@
-# 1.0.5
+# 1.1.0
 - Update SyneTune API, add CQR as optimizer (#211).
 - Fix regeneration of runcommands (#212).
 - Update plotting functions and add example notebook (`plot_demo.ipynb`) (#214).
