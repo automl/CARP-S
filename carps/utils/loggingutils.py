@@ -68,7 +68,7 @@ def log_pip_freeze(file_path: str | Path) -> None:
     logger = get_logger("carps.utils.loggingutils.log_pip_freeze")
     try:
         # TODO: enable discovery and usage of uv
-        result = subprocess.run(["pip", "freeze"], capture_output=True, text=True, check=True)  # noqa: S603, S607
+        result = subprocess.run(["pip", "freeze"], capture_output=True, text=True, check=True)  # noqa: S607
         with open(file_path, "a") as f:
             f.write("Installed packages (pip freeze):\n")
             f.write(result.stdout + "\n")
