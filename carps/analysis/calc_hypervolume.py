@@ -348,7 +348,7 @@ def apply_calc_hv_low_mem(logs: pd.DataFrame, on_key: str = "trial_value__cost")
     output_directory = Path("tmp/hypervolume")
     delete_existing = True
     if delete_existing:
-        if input_directory.is_dir():
+        if input_directory.is_dir() and False:
             for fn in input_directory.iterdir():
                 fn.unlink()
         if output_directory.is_dir():

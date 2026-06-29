@@ -1048,6 +1048,8 @@ def plot_finalperfbarplot(
 
         df_final = filter_only_final_performance(df=gdf)
 
+        df_final = filter_only_final_performance(df=gdf)
+
         figure_class = plt.figure if show_figure else plt.Figure
         fig = figure_class(figsize=(6, 4))
         ax = fig.add_subplot(111)

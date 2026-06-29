@@ -1,0 +1,1111 @@
+# @package _global_
+benchmark_id: PapenBench
+task_id: PapenBench/4smallRegion_221018_08-09_speed
+task:
+  _target_: carps.utils.task.Task
+  name: PapenBench/4smallRegion_221018_08-09_speed
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.papenbench.PapenBenchObjectiveFunction
+    benchmark_name: 4smallRegion_221018_08-09_speed
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_int
+          name: x0000
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0001
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0002
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0003
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0004
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0005
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0006
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0007
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0008
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0009
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0010
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0011
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0012
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0013
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0014
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0015
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0016
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0017
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0018
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0019
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0020
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0021
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0022
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0023
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0024
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0025
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0026
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0027
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0028
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0029
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0030
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0031
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0032
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0033
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0034
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0035
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0036
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0037
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0038
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0039
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0040
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0041
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0042
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0043
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0044
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0045
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0046
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0047
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0048
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0049
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0050
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0051
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0052
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0053
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0054
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0055
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0056
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0057
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0058
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0059
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0060
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0061
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0062
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0063
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0064
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0065
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0066
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0067
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0068
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0069
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0070
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0071
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0072
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0073
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0074
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0075
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0076
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0077
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0078
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0079
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0080
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0081
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0082
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0083
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0084
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0085
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0086
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0087
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0088
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0089
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0090
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0091
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0092
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0093
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0094
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0095
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0096
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0097
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0098
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0099
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0100
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0101
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0102
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0103
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0104
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0105
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0106
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0107
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0108
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0109
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0110
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0111
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0112
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0113
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0114
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0115
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0116
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0117
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0118
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0119
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0120
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0121
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0122
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0123
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0124
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0125
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0126
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0127
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0128
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0129
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0130
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0131
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0132
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0133
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0134
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0135
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0136
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0137
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0138
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0139
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0140
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0141
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0142
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0143
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0144
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0145
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0146
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0147
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0148
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0149
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0150
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - objective_0
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 512
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: TODO
+    objective_function_approximation: TODO
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 151
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 151
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false

@@ -1,0 +1,201 @@
+# @package _global_
+benchmark_id: PapenBench
+task_id: PapenBench/2corridor_221016_06-07_count
+task:
+  _target_: carps.utils.task.Task
+  name: PapenBench/2corridor_221016_06-07_count
+  seed: ${seed}
+  objective_function:
+    _target_: carps.objective_functions.papenbench.PapenBenchObjectiveFunction
+    benchmark_name: 2corridor_221016_06-07_count
+  input_space:
+    _target_: carps.utils.task.InputSpace
+    configuration_space:
+      _target_: ConfigSpace.configuration_space.ConfigurationSpace.from_serialized_dict
+      _convert_: object
+      d:
+        name: null
+        hyperparameters:
+        - type: uniform_int
+          name: x0000
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0001
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0002
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0003
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0004
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0005
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0006
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0007
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0008
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0009
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0010
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0011
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0012
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0013
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0014
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0015
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0016
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0017
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0018
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0019
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        - type: uniform_int
+          name: x0020
+          lower: 1
+          upper: 2000
+          default_value: 1000
+          log: false
+          meta: null
+        conditions: []
+        forbiddens: []
+        python_module_version: 1.2.0
+        format_version: 0.4
+    fidelity_space:
+      _target_: carps.utils.task.FidelitySpace
+      is_multifidelity: false
+      fidelity_type: null
+      min_fidelity: null
+      max_fidelity: null
+    instance_space: null
+  output_space:
+    _target_: carps.utils.task.OutputSpace
+    n_objectives: 1
+    objectives:
+    - objective_0
+  optimization_resources:
+    _target_: carps.utils.task.OptimizationResources
+    n_trials: 204
+    time_budget: null
+    n_workers: 1
+  metadata:
+    _target_: carps.utils.task.TaskMetadata
+    has_constraints: false
+    domain: TODO
+    objective_function_approximation: TODO
+    has_virtual_time: false
+    deterministic: true
+    dimensions: 21
+    search_space_n_categoricals: 0
+    search_space_n_ordinals: 0
+    search_space_n_integers: 21
+    search_space_n_floats: 0
+    search_space_has_conditionals: false
+    search_space_has_forbiddens: false
+    search_space_has_priors: false
