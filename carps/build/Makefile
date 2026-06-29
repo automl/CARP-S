@@ -183,6 +183,7 @@ benchmarks:
 	$(MAKE) benchmark_hpobench
 # 	$(MAKE) benchmark_hpob
 	$(MAKE) benchmark_nasengb
+	$(MAKE) benchmark_papenbench
 
 optimizers:
 	$(MAKE) optimizer_smac
