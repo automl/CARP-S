@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 NAME := CARP-S
 PACKAGE_NAME := carps
-VERSION := 1.0.1
+VERSION := 1.1.0
 
 DIST := dist
 
@@ -170,7 +170,7 @@ benchmarks:
 	$(MAKE) benchmark_pymoo
 	$(MAKE) benchmark_mfpbench
 	$(MAKE) benchmark_hpobench
-	$(MAKE) benchmark_hpob
+# 	$(MAKE) benchmark_hpob
 	$(MAKE) benchmark_nasengb
 
 optimizers:
