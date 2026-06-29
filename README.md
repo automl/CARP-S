@@ -112,7 +112,7 @@ All possible install options for benchmarks are:
 benchmark_bbob benchmark_hpobench benchmark_hpob benchmark_mfpbench benchmark_pymoo benchmark_yahpo
 ```
 ⚠ Some benchmarks require to download surrogate models and/or containers and thus might take disk space and time to
-download.
+download. For example, HPOBench needs `apptainer`.
 
 All possible install options for optimizers are:
 ```
@@ -208,12 +208,17 @@ appreciating any kind of help. Find our guidelines for contributing to this pack
 If you use CARP-S in one of your research projects, please cite our 
 [paper](https://arxiv.org/abs/2506.06143):
 ```
-@article{benjamins2025carps,
+@article{benjamins-tmlr2026a,
   title={carps: A framework for comparing n hyperparameter optimizers on m benchmarks},
-  author={Benjamins, Carolin and Graf, Helena and Segel, Sarah and Deng, Difan and Ruhkopf, Tim and Hennig, Leona and Basu, Soham and Mallik, Neeratyoy and Bergman, Edward and Chen, Deyao and others},
-  journal={arXiv:2506.06143},
-  year={2025}
+  author={
+    Benjamins, Carolin and Graf, Helena and Segel, Sarah and Deng, Difan and Ruhkopf, Tim and Hennig, Leona and
+    Basu, Soham and Mallik, Neeratyoy and Bergman, Edward and Chen, Deyao and Clément, François and
+    Tornede, Alexander and Feurer, Matthias and Eggensperger, Katharina and
+    Hutter, Frank and Doerr, Carola and Lindauer, Marius
+    },
+  journal={TMLR},
+  year={2026}
 }
 ```
 
-Copyright (c) 2025, [Leibniz University Hannover - Institute of AI](https://www.ai.uni-hannover.de/)
+Copyright (c) 2026, [Leibniz University Hannover - Institute of AI](https://www.ai.uni-hannover.de/)
