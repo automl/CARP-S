@@ -1,5 +1,5 @@
 # Plot Demo
-This notebook demonstrates the analysis capabilities from carps.
+This file demonstrates the analysis capabilities from carps.
 For the subset data, it shows which functions generate the plots.
 Alternatively, to create the plots, you can also run
 ```bash
