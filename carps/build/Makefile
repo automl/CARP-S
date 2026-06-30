@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 NAME := CARP-S
 PACKAGE_NAME := carps
-VERSION := 1.0.1
+VERSION := 1.1.0
 
 DIST := dist
 
@@ -34,7 +34,7 @@ endif
 endif
 
 test:
-	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8
+	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8 --lf -x
 
 docs:
 	$(PYTHON) -m webbrowser -t "http://127.0.0.1:8000/"
@@ -181,8 +181,9 @@ benchmarks:
 	$(MAKE) benchmark_pymoo
 	$(MAKE) benchmark_mfpbench
 	$(MAKE) benchmark_hpobench
-	$(MAKE) benchmark_hpob
+# 	$(MAKE) benchmark_hpob
 	$(MAKE) benchmark_nasengb
+	$(MAKE) benchmark_papenbench
 
 optimizers:
 	$(MAKE) optimizer_smac

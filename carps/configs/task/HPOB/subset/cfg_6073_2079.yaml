@@ -3,13 +3,12 @@ benchmark_id: HPOB
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: hpob/subset/6073/2076
+  name: hpob/subset/6073/2079
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
     model_id: '6073'
-    dataset_id: '2076'
-    surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
+    dataset_id: '2079'
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
