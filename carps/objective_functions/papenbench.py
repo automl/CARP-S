@@ -36,7 +36,7 @@ from carps.utils.loggingutils import get_logger, setup_logging
 setup_logging()
 logger = get_logger(__file__)
 
-PAPENBENCH_CONTAINER_FILE = CARPS_ROOT / "../containers/benchmarks/papenbench.sif"
+PAPENBENCH_CONTAINER_FILE = CARPS_ROOT / "build/papenbench.sif"
 
 os.environ["PATH"] = "/opt/software/pc2/EB-SW/software/Apptainer/1.3.5-GCCcore-13.3.0/bin:" + os.environ.get("PATH", "")
 

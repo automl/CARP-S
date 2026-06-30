@@ -166,7 +166,7 @@ benchmark_nasengb:
 
 benchmark_papenbench:
 	$(PIP) install git+https://github.com/lpapenme/BencherScaffold
-	apptainer build papenbench.sif ../container/recipes/benchmarks/PapenBench/papenbench.def
+	. ../container/recipes/benchmarks/PapenBench/build_container.sh
 	@if [ ! -d "lib/bencher" ]; then \
 		git clone https://github.com/lpapenme/bencher.git lib/bencher; \
 	else \
