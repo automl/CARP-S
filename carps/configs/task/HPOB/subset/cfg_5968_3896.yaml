@@ -3,13 +3,12 @@ benchmark_id: HPOB
 task_id: ${task.name}
 task:
   _target_: carps.utils.task.Task
-  name: hpob/subset/6073/58
+  name: hpob/subset/5968/3896
   seed: ${seed}
   objective_function:
     _target_: carps.objective_functions.hpo_b.HPOBObjectiveFunction
-    model_id: '6073'
-    dataset_id: '58'
-    surrogates_dir: carps/benchmark_data/HPO-B/saved-surrogates
+    model_id: '5968'
+    dataset_id: '3896'
     seed: ${seed}
   input_space:
     _target_: carps.utils.task.InputSpace
@@ -28,48 +27,6 @@ task:
           meta: null
         - type: uniform_float
           name: x1
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x10
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x11
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x12
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x13
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x14
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x15
           lower: 0.0
           upper: 1.0
           default_value: 0.5
@@ -117,20 +74,6 @@ task:
           default_value: 0.5
           log: false
           meta: null
-        - type: uniform_float
-          name: x8
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
-        - type: uniform_float
-          name: x9
-          lower: 0.0
-          upper: 1.0
-          default_value: 0.5
-          log: false
-          meta: null
         conditions: []
         forbiddens: []
         python_module_version: 1.2.0
@@ -159,11 +102,11 @@ task:
     objective_function_approximation: surrogate
     has_virtual_time: false
     deterministic: true
-    dimensions: 16
+    dimensions: 8
     search_space_n_categoricals: 0
     search_space_n_ordinals: 0
     search_space_n_integers: 0
-    search_space_n_floats: 16
+    search_space_n_floats: 8
     search_space_has_conditionals: false
     search_space_has_forbiddens: false
     search_space_has_priors: false

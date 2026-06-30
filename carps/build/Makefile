@@ -34,7 +34,7 @@ endif
 endif
 
 test:
-	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8
+	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8 --lf -x
 
 docs:
 	$(PYTHON) -m webbrowser -t "http://127.0.0.1:8000/"
