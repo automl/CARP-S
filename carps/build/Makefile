@@ -104,7 +104,7 @@ optimizer_skopt:
 optimizer_synetune:
 # 	$(PIP) install -r ../container/recipes/optimizers/SyneTune/SyneTune_requirements.txt
 	git clone https://github.com/awslabs/syne-tune.git lib/syne-tune || true
-	$(PIP) install -e 'lib/syne-tune[basic,blackbox-repository]'
+	$(PIP) install -e 'lib/syne-tune[extra]'
 	$(PIP) install statsmodels
 	$(PIP) install numpy --upgrade
 	$(PIP) install xgboost --upgrade
