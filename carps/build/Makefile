@@ -96,7 +96,7 @@ optimizer_optuna:
 
 optimizer_dehb:
 	$(PIP) install -r ../container/recipes/optimizers/DEHB/DEHB_requirements.txt
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 
 optimizer_skopt:
 	$(PIP) install -r ../container/recipes/optimizers/Scikit_Optimize/Scikit_Optimize_requirements.txt
@@ -106,34 +106,34 @@ optimizer_synetune:
 	git clone https://github.com/awslabs/syne-tune.git lib/syne-tune || true
 	$(PIP) install -e 'lib/syne-tune[extra]'
 	$(PIP) install statsmodels
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 	$(PIP) install xgboost --upgrade
 
 optimizer_ax:
 	$(PIP) install -r ../container/recipes/optimizers/Ax/Ax_requirements.txt
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 
 optimizer_hebo:
 	# . ../container/recipes/optimizers/HEBO/HEBO_install.sh
 	$(PIP) install -r ../container/recipes/optimizers/HEBO/HEBO_requirements.txt
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 
 optimizer_nevergrad:
 	$(PIP) install -r ../container/recipes/optimizers/Nevergrad/Nevergrad_requirements.txt
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 	$(PIP) install cma --upgrade
 
 benchmark_bbob:
 	# Install BBOB
 	$(PIP) install ioh
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 
 benchmark_yahpo:
 # Needs 2GB of space for the surrogate models of YAHPO
 	# Install yahpo
 	. ../container/recipes/benchmarks/YAHPO/install_yahpo.sh
 	$(PIP) install ConfigSpace --upgrade
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 
 benchmark_pymoo:
 	# Install pymoo
@@ -162,7 +162,7 @@ benchmark_nasengb:
 		echo "lib/naseng_benchmark already exists, skipping clone and just pull" && git pull; \
 	fi
 	$(PIP) install -e lib/naseng_benchmark
-	$(PIP) install py-pde torchvision swig gymnasium[box2d]
+	$(PIP) install py-pde torchvision swig gymnasium[box2d] --upgrade
 
 benchmark_papenbench:
 	$(PIP) install git+https://github.com/lpapenme/BencherScaffold
@@ -173,7 +173,7 @@ benchmark_papenbench:
 		echo "lib/bencher already exists, skipping clone and just pull" && git pull; \
 	fi
 	$(PIP) install lib/bencher/BencherServer
-	$(PIP) install numpy --upgrade
+	$(PIP) install "numpy<2.5.0"
 
 benchmarks:
 	$(MAKE) benchmark_bbob
