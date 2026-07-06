@@ -56,7 +56,7 @@ $PIP install .
 $PIP install -e .
 ```
 
-If you want to install CARP-S for development, you can use the following command (from the root of the repo):
+If you want to install `carps` for development, you can use the following command (from the root of the repo):
 ```bash
 $PIP install -e .
 python -m carps.build.make install-dev
@@ -65,7 +65,7 @@ python -m carps.build.make install-dev
 ⚠ This is still experimental.
 
 You can also create a container with the env setup by running `apptainer build container/env.sif container/env.def`.
-Then you can execute any carps commands as usual by add this prefix `apptainer exec container/env.sif` before the
+Then you can execute any `carps` commands as usual by add this prefix `apptainer exec container/env.sif` before the
 command, e.g. `apptainer exec container/env.sif python -m carps.run +task/... +optimizer/...`.
 There is also an sbatch script to run experiments from the database using the apptainer on a SLURM cluster
 (`sbatch scripts/container_run_from_db.sh`). You might need to adapt the array size and the number of repetitions
@@ -89,7 +89,7 @@ Additionally, you need to install the requirements for the benchmark and optimiz
 
 ⚠ You can specify the directory of the task data by `export CARPS_TASK_DATA_DIR=...`. Please use absolute dirnames.
 The default location is `<carps package location>/task_data`. If you specify a custom dir, always export the env var.
-(The carps package location is the root of the package, not of the repo.)
+(The `carps` package location is the root of the package, not of the repo.)
 
 For example, if you want to use the `SMAC3` optimizer and the `BBOB` benchmark, you need to install the
 requirements for both of them via:
@@ -116,4 +116,4 @@ optimizer_smac optimizer_dehb optimizer_nevergrad optimizer_optuna optimizer_ax 
 All of the above except `optimizer_hebo` work with python3.12.
 
 You can also install all benchmarks in one go with `benchmarks` and all optimizers with `optimizers`.
-Check the `carps/build/Makefile` in carps for more details.
+Check the `carps/build/Makefile` in `carps` for more details.

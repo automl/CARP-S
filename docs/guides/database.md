@@ -5,7 +5,7 @@ possible with `python -m carps.utils.check_missing <rundir>` to check for missin
 the filesystem takes a long time. For this reason, we can also control and log experiments to a MySQL database with
 `PyExperimenter`.
 
-This document describes how to set up the database for the CARP-S framework and use it for
+This document describes how to set up the database for the `carps` framework and use it for
 logging experiment results and trajectories.
 
 Either SQLite or MySQL can be used as databases, which have some slight differences. 

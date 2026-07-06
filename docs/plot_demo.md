@@ -1,5 +1,5 @@
 # Plot Demo
-carps comes with a selection of different plotting options for visualizing experiment results.
+`carps` comes with a selection of different plotting options for visualizing experiment results.
 For the subset data, we show which functions generate the plots.
 Alternatively, to create the plots, you can also run
 ```bash
