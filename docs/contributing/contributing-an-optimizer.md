@@ -15,13 +15,13 @@ For example, you might name it `my_optimizer.py`.
 
 2. **Define your optimizer class**:
 Define a new class that inherits from `Optimizer`. This class should implement the 
-`convert_configspace` method, that takes a ConfigSpace configuration space and converts it to 
-a search space from the optimizer, and a `convert_to_trial` method, that converts a proposal by 
-the optimizer to a TrialInfo object. Furthermore, a `_setup_optimizer` method should be implemented,
-setting up and returning the optimizer to be used, and a `get_current_incumbent` method, extracting 
-the incumbent config and cost. Finally, an `ask` method is required, that 
-queries a new trial to evaluate from the optimizer and returns it as a TrialInfo object, and a 
-`tell` method, that takes a TrialInfo and TrialValue and updates the optimizer with the results of 
+`convert_configspace` method, which takes a ConfigSpace configuration space and converts it to 
+the optimizer's search space, and the `convert_to_trial` method, which converts a proposal from 
+the optimizer to a TrialInfo object. Furthermore, a `_setup_optimizer` method should be implemented to
+set up and return the optimizer to be used, as well as a `get_current_incumbent` method to extract 
+the incumbent config and its cost. Finally, an `ask` method is required, which 
+queries a new trial to evaluate from the optimizer and returns it as a TrialInfo object as well as a 
+`tell` method, which takes a TrialInfo and TrialValue and updates the optimizer with the results of 
 the trial. If your optimizer requires additional methods, you can implement them in your class. 
 
 

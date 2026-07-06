@@ -1,6 +1,6 @@
 # Plot Demo
-This file demonstrates the analysis capabilities from carps.
-For the subset data, it shows which functions generate the plots.
+carps comes with a selection of different plotting options for visualizing experiment results.
+For the subset data, we show which functions generate the plots.
 Alternatively, to create the plots, you can also run
 ```bash
 python -m carps.analysis.generate_report \
@@ -10,7 +10,7 @@ python -m carps.analysis.generate_report \
 ```
 from the commandline.
 
-The next cell loads the results and preprocesses them. The resulting dataframe has the following columns:
+After loading the generated experiment results, the dataframe has the following columns:
 ```yaml
 # Identifying information of the run
 optimizer_id: The identifier of the optimizer.
@@ -65,7 +65,7 @@ task.optimization_resources.n_trials: The optimization resources for the tasks i
 ```
 
 ## Download Results
-Optionally download results from huggingface.
+Optionally, download results from huggingface.
 Prerequisite: Install `huggingface`.
 
 
@@ -161,7 +161,7 @@ The ranking is performed on the raw performance values, averaged across seeds. T
 use the frequentist approach (Demšar, 2006): We use the non-parametric Friedman test as an omnibus test
 to determine whether there are any significant differences between the median values of the populations.
 We use this test because we have more than two populations, which cannot be assumed to be normally
-distributed. We use the post hoc Nemenyi test to infer which differences are significant. The significance level
+distributed. We use the post-hoc Nemenyi test to infer which differences are significant. The significance level
 is α = 0.05. In order to be considered different, the difference between the mean ranks of two optimizers must
 be greater than the critical difference.
 
@@ -215,7 +215,7 @@ resulting_files_finalperfboxplot = plot_finalperfboxplot(results, output_dir=fig
 
 ## Performance over Time
 We can inspect the anytime performance in two ways. 
-The first is visualizing the incumbent cost over iterations: Either aggregated and normalized (and interpolated), or per task.
+The first one is visualizing the incumbent cost over iterations: Either aggregated and normalized (and interpolated), or per task.
 The caveat of the first method is that we cannot distinguish well between optimizers.
 Thus, we normally resort to the ranking over time as determined via statistical testing.
 

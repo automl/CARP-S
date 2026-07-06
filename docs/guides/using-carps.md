@@ -4,7 +4,7 @@ In the case when you are developing your optimizer or benchmark in a standalone 
 directly working in the carps repo.
 
 ## With your own benchmark
-For a custom benchmark we have an [example repo](https://github.com/automl/OptBench).
+For a custom benchmark, we have an [example repo](https://github.com/automl/OptBench).
 It shows how to use your own benchmark with carps optimizers.
 
 ## With your own optimizer

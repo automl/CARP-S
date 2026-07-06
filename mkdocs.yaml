@@ -185,7 +185,6 @@ plugins:
 nav:
   - Home: "index.md"
   - Installation: "installation.md"
-  - Plot Demos: "plot_demo.md"
   - Guides:
     - "guides/first-steps.md"
     - "guides/hydra.md"
@@ -194,6 +193,7 @@ nav:
     - "guides/large-scale-benchmarking.md"
     - "guides/using-carps.md"
   - Commands: "commands.md"
+  - Plot Demos: "plot_demo.md"
   - Contributing:
     - "contributing/index.md"
     - "contributing/contributing-a-benchmark.md"

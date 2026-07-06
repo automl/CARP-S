@@ -67,11 +67,11 @@ python -m carps.build.make install-dev
 You can also create a container with the env setup by running `apptainer build container/env.sif container/env.def`.
 Then you can execute any carps commands as usual by add this prefix `apptainer exec container/env.sif` before the
 command, e.g. `apptainer exec container/env.sif python -m carps.run +task/... +optimizer/...`.
-There is also an sbatch script to run experiments from the database using the apptainer on a slurm cluster
+There is also an sbatch script to run experiments from the database using the apptainer on a SLURM cluster
 (`sbatch scripts/container_run_from_db.sh`). You might need to adapt the array size and the number of repetitions
 according to the number of experiments you can run.
 
-PS.: On some clusters you might need to load the module apptainer like so `module load tools Apptainer`.
+PS.: On some clusters, you might need to load the module apptainer like so `module load tools Apptainer`.
 Troubleshooting: If you have problems writing your cache directory, mount-bind it like so
 `apptainer shell --bind $XDG_CACHE_HOME container/env.sif`. This binds the directory `$XDG_CACHE_HOME` in the
 container to the directory `$XDG_CACHE_HOME` on the host.
