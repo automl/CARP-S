@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-from carps.analysis.gather_data import convert_mixed_types_to_str
+from carps.analysis.gather_data_utils import convert_mixed_types_to_str
 
 if __name__=="__main__":
     paths = {

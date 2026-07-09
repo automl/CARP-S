@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 NAME := CARP-S
 PACKAGE_NAME := carps
-VERSION := 1.0.1
+VERSION := 1.1.0
 
 DIST := dist
 
@@ -34,7 +34,7 @@ endif
 endif
 
 test:
-	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8
+	$(PYTHON) -m pytest tests/test_configs.py tests/test_optimizers.py tests/test_tasks.py -n 8 --lf -x
 
 docs:
 	$(PYTHON) -m webbrowser -t "http://127.0.0.1:8000/"
@@ -81,11 +81,11 @@ OS := $(shell uname)
 uvenv:
 	pip install uv
 	export PATH="$HOME/.local/bin:$PATH"
-	uv venv --python=3.12 .venv
-	. .venv/bin/activate
-	python -m ensurepip --upgrade
-	python -m pip install uv --upgrade
-	uv pip install setuptools wheel
+	uv venv --python=3.13 .venv
+	. .venv/bin/activate && \
+		python -m ensurepip --upgrade && \
+		python -m pip install uv --upgrade  && \
+		uv pip install setuptools wheel  && \
 
 optimizer_smac:
 	$(PIP) install swig
@@ -155,13 +155,35 @@ benchmark_hpob:
 	$(PIP) install -r ../container/recipes/benchmarks/HPOB/HPOB_requirements.txt
 	. ../container/recipes/benchmarks/HPOB/download_data.sh
 
+benchmark_nasengb:
+	@if [ ! -d "lib/naseng_benchmark" ]; then \
+		git clone https://github.com/luh-ai/naseng_benchmark.git lib/naseng_benchmark; \
+	else \
+		echo "lib/naseng_benchmark already exists, skipping clone and just pull" && git pull; \
+	fi
+	$(PIP) install -e lib/naseng_benchmark
+	$(PIP) install py-pde torchvision swig gymnasium[box2d]
+
+benchmark_papenbench:
+	$(PIP) install git+https://github.com/lpapenme/BencherScaffold
+	apptainer build papenbench.sif ../container/recipes/benchmarks/PapenBench/papenbench.def
+	@if [ ! -d "lib/bencher" ]; then \
+		git clone https://github.com/lpapenme/bencher.git lib/bencher; \
+	else \
+		echo "lib/bencher already exists, skipping clone and just pull" && git pull; \
+	fi
+	$(PIP) install lib/bencher/BencherServer
+	$(PIP) install numpy --upgrade
+
 benchmarks:
 	$(MAKE) benchmark_bbob
 	$(MAKE) benchmark_yahpo
 	$(MAKE) benchmark_pymoo
 	$(MAKE) benchmark_mfpbench
 	$(MAKE) benchmark_hpobench
-	$(MAKE) benchmark_hpob
+# 	$(MAKE) benchmark_hpob
+	$(MAKE) benchmark_nasengb
+	$(MAKE) benchmark_papenbench
 
 optimizers:
 	$(MAKE) optimizer_smac

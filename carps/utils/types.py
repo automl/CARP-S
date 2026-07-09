@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import Enum, auto
 from typing import Any
 
 import numpy as np
@@ -14,3 +15,11 @@ Incumbent = tuple[TrialInfo, TrialValue] | list[tuple[TrialInfo, TrialValue]] | 
 
 VERY_SMALL_NUMBER = -1e32
 VERY_LARGE_NUMBER = 1e32
+
+
+class RunStatus(Enum):
+    """Enum for the status of a run."""
+
+    COMPLETED = auto()
+    MISSING = auto()
+    TRUNCATED = auto()

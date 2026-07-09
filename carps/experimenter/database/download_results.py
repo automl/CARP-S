@@ -54,7 +54,7 @@ def main(
     experiment_config_table = experimenter.get_table()
     logger.info("We got following experiment configuration columns:")
     logger.info(experiment_config_table.columns)
-    df = experiment_config_table  # noqa: PD901
+    df = experiment_config_table
     if "ID" in df.columns:
         logger.info(f"Found {df['ID'].nunique()} experiments. 🔍")
         for task_type in df.task_type.unique():

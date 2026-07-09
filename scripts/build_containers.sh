@@ -47,4 +47,5 @@ mkdir -p $CONT_OPT_PATH
 # YAHPO
 ./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/YAHPO.sif ${CONT_BENCH_RECIPE_PATH}/YAHPO/YAHPO.recipe
 
-
+# PapenBench
+./scripts/compile_noctua2.sh ${CONT_BENCH_PATH}/papenbench.sif ${CONT_BENCH_RECIPE_PATH}/PapenBench/papenbench.def

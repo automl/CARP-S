@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from enum import Enum, auto
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -11,19 +10,12 @@ import pandas as pd
 import yaml
 from omegaconf import OmegaConf
 
-from carps.analysis.gather_data import read_jsonl_content
+from carps.analysis.gather_data_utils import read_jsonl_content
 from carps.utils.loggingutils import get_logger, setup_logging
+from carps.utils.types import RunStatus
 
 setup_logging()
 logger = get_logger(__file__)
-
-
-class RunStatus(Enum):
-    """Enum for the status of a run."""
-
-    COMPLETED = auto()
-    MISSING = auto()
-    TRUNCATED = auto()
 
 
 def get_experiment_status(path: Path) -> dict:
@@ -92,26 +84,29 @@ def generate_commands(missing_data: pd.DataFrame, runstatus: RunStatus, rundir: 
         runstatus (RunStatus): Status of the runs to generate commands for.
         rundir (str, optional): Path to the rundir. Defaults to ".".
     """
-    logger.info(f"Regenerate commands for {runstatus.name} runs...")
     data = missing_data
     missing = data[data["status"].isin([runstatus.name])]
-    runcommands = []
-    for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
-        seeds = list(gdf["seed"].unique())
-        seeds.sort()
-        task_overrides = gdf["task_overrides"].iloc[0].split(" ")
-        task_overrides = [o for o in task_overrides if "seed" not in o]
-        task_overrides.append(f"seed={','.join(str(int(s)) for s in seeds)}")
-        task_overrides = " ".join(task_overrides)
-        hydra_overrides = gdf["hydra_overrides"].iloc[0].split(" ")
-        hydra_overrides = [f'"{ho}"' for ho in hydra_overrides]
-        hydra_overrides = " ".join(hydra_overrides)
-        runcommand = f"python -m carps.run {hydra_overrides} {task_overrides} \n"
-        runcommands.append(runcommand)
-    runcommand_fn = Path(rundir) / f"runcommands_{runstatus.name}.sh"
-    with open(runcommand_fn, "w") as file:
-        file.writelines(runcommands)
-    logger.info(f"Done! Regenerated runcommands at {runcommand_fn}.")
+    if len(missing) > 0:
+        logger.info(f"Found {len(missing)} {runstatus.name} runs.\n\tRegenerate commands for {runstatus.name} runs...")
+        runcommands = []
+        for _gid, gdf in missing.groupby(by=["optimizer_id", "task_id"]):
+            seeds = list(gdf["seed"].unique())
+            seeds.sort()
+            task_overrides = gdf["task_overrides"].iloc[0].split(" ")
+            task_overrides = [o for o in task_overrides if "seed" not in o]
+            task_overrides.append(f"seed={','.join(str(int(s)) for s in seeds)}")
+            task_overrides = " ".join(task_overrides)
+            hydra_overrides = gdf["hydra_overrides"].iloc[0].split(" ")
+            hydra_overrides = [f'"{ho}"' for ho in hydra_overrides]
+            hydra_overrides = " ".join(hydra_overrides)
+            runcommand = f"python -m carps.run {hydra_overrides} {task_overrides} \n"
+            runcommands.append(runcommand)
+        runcommand_fn = Path(rundir) / f"runcommands_{runstatus.name}.sh"
+        with open(runcommand_fn, "w") as file:
+            file.writelines(runcommands)
+        logger.info(f"\tDone! Regenerated runcommands at {runcommand_fn}.")
+    else:
+        logger.info(f"Found no {runstatus.name} runs.")
 
 
 def regenerate_runcommands(rundir: str, from_cached: bool = False, n_processes: int | None = None) -> None:  # noqa: FBT001, FBT002

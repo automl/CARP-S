@@ -12,10 +12,11 @@ from __future__ import annotations
 import ast
 import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import fire
 import matplotlib
+from autorank import autorank
 
 matplotlib.use("Agg")  # Set non-interactive backend
 
@@ -33,7 +34,7 @@ from seaborn.utils import (
     relative_luminance,
 )
 
-from carps.analysis.gather_data import (
+from carps.analysis.gather_data_utils import (
     get_interpolated_performance_df,
     normalize_logs,
 )
@@ -44,14 +45,19 @@ from carps.analysis.run_autorank import (
     get_sorted_rank_groups,
 )
 from carps.analysis.utils import (
+    determine_filename_id,
     filter_only_final_performance,
     get_color_palette,
+    get_figure_title,
     get_marker_palette,
     percent_budget_used,
     savefig,
     setup_seaborn,
 )
 from carps.utils.loggingutils import get_logger, setup_logging
+
+if TYPE_CHECKING:
+    from autorank._util import RankResult
 
 setup_logging()
 logger = get_logger(__file__)
@@ -89,6 +95,7 @@ def _annotate_heatmap(
 def plot_ranks_over_time(  # noqa: PLR0915
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -97,6 +104,9 @@ def plot_ranks_over_time(  # noqa: PLR0915
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -112,22 +122,27 @@ def plot_ranks_over_time(  # noqa: PLR0915
     perf = get_interpolated_performance_df(df)
 
     df_rank_list = []
-    for gid, gdf in perf.groupby(["task_type", "set"]):
+    for gid, gdf in perf.groupby(list(groupers)):
+        logger.info(gid)
         budgets = gdf[x_column].unique()
         logger.info(f"Budgets: {budgets}")
         for max_fidelity in track(budgets, "Calc critical difference per step..."):
             df_crit = get_df_crit(gdf, max_fidelity=max_fidelity, perf_col=key_performance, budget_var=x_column)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")  # Ignore all warnings
-                rank_result = cd_evaluation(
-                    df_crit,
-                    maximize_metric=False,
-                    ignore_non_significance=True,
-                    plot_diagram=False,
-                )
+                n_optimizers = df_crit.shape[1]
+                if n_optimizers == 2:  # noqa: PLR2004
+                    rank_result = autorank(df_crit, alpha=0.05, verbose=False)
+                else:
+                    rank_result = cd_evaluation(
+                        df_crit,
+                        maximize_metric=False,
+                        ignore_non_significance=True,
+                        plot_diagram=False,
+                    )
             df_rank_cd = rank_result.rankdf
-            df_rank_cd["task_type"] = gid[0]
-            df_rank_cd["set"] = gid[1]
+            for k, v in zip(groupers, gid, strict=True):
+                df_rank_cd[k] = v
             df_rank_cd["n_trials_norm"] = max_fidelity
             df_rank_cd["critical_difference"] = rank_result.cd
             df_rank_cd["is_significant"] = rank_result.pvalue < rank_result.alpha
@@ -144,13 +159,13 @@ def plot_ranks_over_time(  # noqa: PLR0915
     key_rank = "meanrank"
 
     resulting_files = []
-    for gid, gdf in df_rank.groupby(["task_type", "set"]):
+    for gid, gdf in df_rank.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_rank"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_rank"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "rank_over_time",
@@ -161,6 +176,7 @@ def plot_ranks_over_time(  # noqa: PLR0915
                 " an estimate of the performance. The rank is then calculated per step and task with the same "
                 "approach as for the critical difference diagram. The grey area marks the area where the "
                 "test results are insignificant.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -198,9 +214,11 @@ def plot_ranks_over_time(  # noqa: PLR0915
         sorted_labels = tuple([f"{label} ({final_rank.loc[label, 'meanrank']:.1f})" for label in sorted_labels])
         legend_title = "Optimizer (Final Rank)"
         ax.legend(sorted_handles, sorted_labels, loc="center left", bbox_to_anchor=(1.05, 0.5), title=legend_title)
-        ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+        title = get_figure_title(groupers, gid)
+        ax.set_title(title)
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -211,6 +229,7 @@ def plot_performance_over_time(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
     per_task: bool = False,  # noqa: FBT001, FBT002
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -219,6 +238,9 @@ def plot_performance_over_time(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         per_task (bool, False): Whether to plot per task. In this case, the performance is not normalized.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
@@ -235,24 +257,36 @@ def plot_performance_over_time(
     perf = get_interpolated_performance_df(df) if not per_task else df
 
     resulting_files = []
-    for gid, gdf in perf.groupby(["task_type", "set"]):
+    for gid, gdf in perf.groupby(list(groupers)):
         palette = get_color_palette(gdf)
         marker_palette = get_marker_palette(gdf)
         pertaskid = "_pertask" if per_task else ""
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_perfovertime{pertaskid}"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_perfovertime{pertaskid}"
+        grouper_info = dict(zip(groupers, gid, strict=True))
+        plot_type = "performance_over_time" if not per_task else "performance_over_time_per_task"
+        plot_type_pretty = "Performance over Time" if not per_task else "Performance over Time (Per Task)"
+        if per_task:
+            explanation = (
+                "The performance of each optimizer over time shows how the incumbent cost evolves "
+                "as the number of trials increases. For each optimizer, the performance is averaged over seeds. "
+                "The performance is shown per task without normalization."
+            )
+        else:
+            explanation = (
+                "The performance of each optimizer over time shows how the normalized incumbent cost evolves "
+                "as the number of trials increases. For each optimizer and task, the performance is averaged over "
+                "seeds to obtain an estimate of the performance. The performance is then normalized and interpolated "
+                "across tasks."
+            )
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
-                "plot_type": "rank_over_time",
-                "plot_type_pretty": "Rank over Time",
-                "explanation": "The rank of each optimizer over time compares which optimizer "
-                "performs better, the lower "
-                "the rank the better. For each optimizer and task, the performance is averaged over seeds to obtain"
-                " an estimate of the performance. The rank is then calculated per step and task with the same "
-                "approach as for the critical difference diagram.",
+                "plot_type": plot_type,
+                "plot_type_pretty": plot_type_pretty,
+                "explanation": explanation,
+                **grouper_info,
             }
         )
         if not replot:
@@ -283,7 +317,8 @@ def plot_performance_over_time(
             ax.set_xlabel("Number of Trials (normalized)")
             ax.set_ylabel(f"{key_performance} (lower is better)")
             ax.set_xlim(0, 1)
-            ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+            title = get_figure_title(groupers, gid)
+            ax.set_title(title)
             ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", title=None)
         else:
             grid = sns.FacetGrid(
@@ -314,6 +349,7 @@ def plot_performance_over_time(
 
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -323,6 +359,7 @@ def plot_performance_over_time(
 def plot_budget_used(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -331,6 +368,9 @@ def plot_budget_used(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -339,19 +379,20 @@ def plot_budget_used(
     """
     setup_seaborn(font_scale=1.3)
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_percent_budget_used"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_percent_budget_used"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "percent_budget_used",
                 "plot_type_pretty": "Percent Budget Used",
                 "explanation": "The perceentage of how much of the total budget was used by the "
                 "optimizer. This is useful to see if any optimizer prematurely stopped.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -369,9 +410,11 @@ def plot_budget_used(
         ax.set_ylabel("Optimizer")
         fig.tight_layout()
         plt.show()
-        ax.set_title(f"Task Type: {gid[0]}, Set: {gid[1]}")
+        title = get_figure_title(groupers, gid)
+        ax.set_title(title)
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -381,6 +424,7 @@ def plot_budget_used(
 def plot_ecdf(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -389,6 +433,9 @@ def plot_ecdf(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -401,13 +448,13 @@ def plot_ecdf(
     key_performance = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_ecdf"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_ecdf"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "ecdf",
@@ -418,6 +465,7 @@ def plot_ecdf(
                 "The eCDF shows the proportion of incumbent costs encountered during the optimization. "
                 "The further left the curve is, the better the optimizer is performing, because it achieves lower "
                 "values sooner.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -435,18 +483,148 @@ def plot_ecdf(
         # ax.set_xscale("log")
         ax.set_xlabel("Log Incumbent Cost (Normalized)")
         ax.set_ylabel("Proportion")
-        ax.set_title(f"{gid[0]}: {gid[1]}")
+        title = get_figure_title(groupers, gid)
+        ax.set_title(title)
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
     return resulting_files
 
 
+def plot_2optimizers_rank_result(result: RankResult, fig_filename: str, show_figure: bool = False) -> None:  # noqa: FBT001, FBT002, PLR0915
+    """Plot the rank result for two optimizers.
+
+    Args:
+        result (RankResult): The rank result to plot.
+        fig_filename (str): The filename to save the figure as.
+        show_figure (bool, optional): Whether to display the figure. Defaults to False.
+    """
+    # --- 1. Experimental Data Extraction ---
+    methods = result.rankdf.index.tolist()
+    mean_ranks = result.rankdf["meanrank"].tolist()
+    medians = result.rankdf["median"].tolist()
+    mads = result.rankdf["mad"].tolist()
+
+    # Confidence Interval Bounds
+    ci_lower = result.rankdf["ci_lower"].tolist()
+    ci_upper = result.rankdf["ci_upper"].tolist()
+
+    # Test Metadata Constants
+    p_val = result.pvalue
+    alpha = result.alpha
+    n_samples = result.num_samples
+
+    figure_class = plt.Figure
+    if show_figure:
+        figure_class = plt.figure
+    fig = figure_class(figsize=(10, 7))
+    ax1, ax2 = fig.subplots(2, 1, gridspec_kw={"height_ratios": [1, 2.2]})
+    # --- 3. TOP AXIS: Rank Line Visualization ---
+    ax1.axhline(y=0, color="#2c3e50", linewidth=2.5, zorder=1)
+
+    colors = ["#2b7bba", "#e74c3c"]  # Blue for RS, Red for SMAC3
+    for rank, name, color in zip(mean_ranks, methods, colors, strict=False):
+        ax1.plot([rank, rank], [-0.1, 0.1], color="#2c3e50", linewidth=2, zorder=2)
+        ax1.scatter(rank, 0, color=color, s=120, edgecolor="black", zorder=3)
+        ax1.text(
+            rank,
+            0.2,
+            f"{name}\n(Rank: {rank:.1f})",
+            ha="center",
+            va="bottom",
+            fontweight="bold",
+            color=color,
+            fontsize=10,
+        )
+
+    ax1.set_xlim(0.5, 2.5)
+    ax1.set_ylim(-0.5, 0.8)
+    ax1.set_xticks([1.0, 1.5, 2.0, 2.5])
+    ax1.set_xticklabels(["1.0", "1.5", "2.0", "2.5"])
+    ax1.set_yticks([])
+    ax1.grid(False)  # noqa: FBT003
+    ax1.set_title("Mean Ranking Axis (Lower is Better)", loc="left", fontsize=11, fontweight="bold", color="#555")
+
+    # --- 4. BOTTOM AXIS: Median & Confidence Intervals ---
+    x_positions = np.arange(len(methods))
+    mad_colors = ["#1a5276", "#7b241c"]  # Darker variants for the inner MAD bars
+
+    for i, (_name, med, mad, low, up, color, mad_color) in enumerate(
+        zip(methods, medians, mads, ci_lower, ci_upper, colors, mad_colors, strict=False)
+    ):
+        # Calculate asymmetric CI distance dimensions relative to this specific median point
+        low_err = med - low
+        up_err = up - med
+
+        # Label plots only on the first iteration to avoid duplicate legend entries
+        mad_label = "MAD Range" if i == 0 else ""
+        ci_label = "95% Confidence Interval" if i == 0 else ""
+
+        # Plot Thicker Inner Whisker (MAD)
+        ax2.errorbar(
+            i, med, yerr=[[mad], [mad]], fmt="none", ecolor=mad_color, elinewidth=6, alpha=0.5, label=mad_label
+        )
+
+        # Plot Thinner Outer Whisker (95% CI)
+        ax2.errorbar(
+            i,
+            med,
+            yerr=[[low_err], [up_err]],
+            fmt="none",
+            ecolor=color,
+            elinewidth=1.5,
+            capsize=8,
+            capthick=1.5,
+            label=ci_label,
+        )
+
+        # Draw Center Median Dot
+        ax2.scatter(i, med, color=color, s=100, edgecolor="black", zorder=4)
+
+        # Fixed font warning by swapping 'semibold' to 'bold'
+        ax2.text(i + 0.06, med, f"Med: {med:.2f}", va="center", ha="left", fontsize=9.5, fontweight="bold")
+
+    # Style Bottom Plot Parameters
+    ax2.set_xticks(x_positions)
+    ax2.set_xticklabels(methods, fontweight="bold", fontsize=11)
+    ax2.set_ylabel("Performance Distribution Scale", fontweight="bold", fontsize=11)
+    ax2.set_title(
+        "Median Estimations, MADs, and Asymmetric CIs", loc="left", fontsize=11, fontweight="bold", color="#555"
+    )
+    ax2.set_yscale("symlog")
+    ax2.legend(loc="upper right", frameon=True, facecolor="#fdfefe")
+
+    # --- 5. Summary Annotation Card ---
+    summary_box_text = (
+        f"Omnibus Test: Wilcoxon Signed-Rank\n"
+        f"Number of Samples (N): {n_samples}\n"
+        f"Significance Level (α): {alpha:.2f}\n"  # noqa: RUF001
+        f"Calculated p-value: {p_val:.5f}  (Statistically Significant)"
+    )
+    fig.text(
+        0.125,
+        0.92,
+        summary_box_text,
+        fontsize=10,
+        fontfamily="monospace",
+        bbox={"boxstyle": "round,pad=0.6", "facecolor": "#f4f6f7", "edgecolor": "#bdc3c7"},
+    )
+
+    plt.tight_layout()
+    fig.subplots_adjust(top=0.82, hspace=0.4)
+    savefig(fig, fig_filename)
+    if show_figure:
+        plt.show()
+    plt.close(fig)
+
+
 def plot_critical_difference(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -455,6 +633,9 @@ def plot_critical_difference(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -465,12 +646,13 @@ def plot_critical_difference(
     figsize = (6 * 1.5, 4 * 1.5)
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
-        fig_filename = f"{output_dir}/{gid[0]}_{gid[1]}_criticaldifference"
+    for gid, gdf in df.groupby(list(groupers)):
+        logger.info(gid)
+        filename_id = determine_filename_id(groupers, gid)
+        fig_filename = f"{output_dir}/{filename_id}_criticaldifference"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": fig_filename,
                 "plot_type": "critical_difference",
@@ -488,26 +670,38 @@ def plot_critical_difference(
                 "The significance level is $\alpha=0.05$. "
                 "In order to be considered different, the difference between the mean ranks of two optimizers must be "
                 "greater than the critical difference (CD).",
+                **grouper_info,
             }
         )
         if not replot:
             continue
         df_crit = get_df_crit(gdf, perf_col=perf_col)
-        _ = cd_evaluation(
-            df_crit,
-            maximize_metric=False,
-            ignore_non_significance=True,
-            output_path=fig_filename,
-            figsize=figsize,
-            plot_diagram=True,
-            show_figure=show_figure,
-        )
+        n_optimizers = df_crit.shape[1]
+        if n_optimizers == 1:
+            logger.warning(f"Only one optimizer found for {gid}. Skipping critical difference plot.")
+            continue
+        if n_optimizers == 2:  # noqa: PLR2004
+            logger.warning(f"Only two optimizers found for {gid}. Using Wilcoxon signed-rank test.")
+            result = autorank(df_crit, alpha=0.05, verbose=False)
+            plot_2optimizers_rank_result(result, fig_filename=fig_filename, show_figure=show_figure)
+        else:
+            logger.info(f"Calculating critical difference for {gid} with {n_optimizers} optimizers.")
+            _ = cd_evaluation(
+                df_crit,
+                maximize_metric=False,
+                ignore_non_significance=True,
+                output_path=fig_filename,
+                figsize=figsize,
+                plot_diagram=True,
+                show_figure=show_figure,
+            )
     return resulting_files
 
 
 def plot_performance_per_task(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -516,6 +710,9 @@ def plot_performance_per_task(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -527,12 +724,12 @@ def plot_performance_per_task(
     perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_performancepertask"
+    for gid, gdf in df.groupby(list(groupers)):
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_performancepertask"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "performance_per_task",
@@ -542,6 +739,7 @@ def plot_performance_per_task(
                 "The performance is shown as a heatmap, where the colors indicate the performance of the optimizer "
                 "on a specific task. "
                 "The better the optimizer performs, the lighter/more yellow the color.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -577,12 +775,12 @@ def plot_performance_per_task(
         mesh = ax0.collections[0]
         _annotate_heatmap(ax0, mesh, {"fontsize": 8}, ".6g", annot_data)
 
+        title = get_figure_title(groupers, gid)
         ax0.set_title(
-            f"Final Performance per Task for Task Type {gid[0]} and Set {gid[1]}\n"
-            "Annotations: Raw Values, Colormap: Normalized Values"
+            f"Final Performance per Task for {title}\n" "Annotations: Raw Values, Colormap: Normalized Values"
         )
 
-        ax0.set_title(f"Final Performance per Task for Task Type {gid[0]} and Set {gid[1]}")
+        ax0.set_title(f"Final Performance per Task for {title}")
         ax0.text(
             0.5,
             1.05,
@@ -597,6 +795,7 @@ def plot_performance_per_task(
         ax0.set_xlabel("Optimizer")
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
     return resulting_files
@@ -605,6 +804,7 @@ def plot_performance_per_task(
 def plot_boxplot_violinplot(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -613,6 +813,9 @@ def plot_boxplot_violinplot(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -625,32 +828,33 @@ def plot_boxplot_violinplot(
     x_column = "n_trials_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{gid[0]}_{gid[1]}"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename_boxplot = f"{output_dir}/finalperfboxplot_{filename_id}"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename_boxplot,
                 "plot_type": "finalperformance_boxplot",
                 "plot_type_pretty": "Final Performance (Normalized, Boxplot)",
                 "explanation": "The boxplot shows the final performance of the optimizers. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. ",
+                **grouper_info,
             }
         )
-        figure_filename_violinplot = f"{output_dir}/finalperfviolinplot_{gid[0]}_{gid[1]}"
+        figure_filename_violinplot = f"{output_dir}/finalperfviolinplot_{filename_id}"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename_violinplot,
                 "plot_type": "finalperformance_violinplot",
                 "plot_type_pretty": "Final Performance (Normalized, Violinplot)",
                 "explanation": "The violinplot shows the final performance of the optimizers. "
                 "The performance is first log-transformed, then normalized and averaged over seeds. ",
+                **grouper_info,
             }
         )
         if not replot:
@@ -685,6 +889,7 @@ def plot_boxplot_violinplot(
         ax2.set_title("Log Final Performance (Normalized)")
         savefig(fig, figure_filename_violinplot)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -694,6 +899,7 @@ def plot_boxplot_violinplot(
 def plot_finalperfboxplot(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -702,6 +908,9 @@ def plot_finalperfboxplot(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -714,13 +923,13 @@ def plot_finalperfboxplot(
     key_agg = "median"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_finalperfboxplot"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_finalperfboxplot"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "finalperformance_barplot",
@@ -732,6 +941,7 @@ def plot_finalperfboxplot(
                 "The black square ⬛ marks the mean. "
                 "The distribution is obtained by first averaging the performance over all "
                 "tasks, and then plot the distribution over seeds.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -779,6 +989,7 @@ def plot_finalperfboxplot(
 
         fig.tight_layout()
         if show_figure:
+            logger.info(gid)
             plt.show()
 
         savefig(fig, figure_filename)
@@ -790,6 +1001,7 @@ def plot_finalperfboxplot(
 def plot_finalperfbarplot(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -798,6 +1010,9 @@ def plot_finalperfbarplot(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -809,19 +1024,20 @@ def plot_finalperfbarplot(
     perf_col = "trial_value__cost_inc_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
+    for gid, gdf in df.groupby(list(groupers)):
         palette = get_color_palette(gdf)
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_finalperfbarplot"
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_finalperfbarplot"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "finalperformance_barplot",
                 "plot_type_pretty": "Final Performance (Normalized, Barplot)",
                 "explanation": "The barplot shows the mean final performance of the optimizers "
                 r"with 95-\% confidence interval.",
+                **grouper_info,
             }
         )
         if not replot:
@@ -829,6 +1045,8 @@ def plot_finalperfbarplot(
 
         result = calc_critical_difference(gdf, identifier=None, perf_col=perf_col, plot_diagram=False)
         sorted_ranks, names, groups = get_sorted_rank_groups(result, reverse=False)
+
+        df_final = filter_only_final_performance(df=gdf)
 
         df_final = filter_only_final_performance(df=gdf)
 
@@ -860,6 +1078,7 @@ def plot_finalperfbarplot(
 
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
@@ -869,6 +1088,7 @@ def plot_finalperfbarplot(
 def plot_spearman_rank_correlation(
     df: pd.DataFrame,
     output_dir: str | Path = "figures",
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
     replot: bool = True,  # noqa: FBT001, FBT002
     show_figure: bool = False,  # noqa: FBT001, FBT002
 ) -> list[dict[str, Any]]:
@@ -877,6 +1097,9 @@ def plot_spearman_rank_correlation(
     Args:
         df (pd.DataFrame): The DataFrame containing the results.
         output_dir (str | Path, "figures"): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
         replot (bool, True): Whether to replot the figures.
         show_figure (bool, False): Whether to show the figure.
 
@@ -888,12 +1111,12 @@ def plot_spearman_rank_correlation(
     perf_col = "trial_value__cost_inc_log_norm"
 
     resulting_files = []
-    for gid, gdf in df.groupby(["task_type", "set"]):
-        figure_filename = f"{output_dir}/{gid[0]}_{gid[1]}_spearmanrankcorrelation"
+    for gid, gdf in df.groupby(list(groupers)):
+        filename_id = determine_filename_id(groupers, gid)
+        figure_filename = f"{output_dir}/{filename_id}_spearmanrankcorrelation"
+        grouper_info = dict(zip(groupers, gid, strict=True))
         resulting_files.append(
             {
-                "task_type": gid[0],
-                "set": gid[1],
                 "task_id": None,
                 "filename": figure_filename,
                 "plot_type": "spearman_rank_correlation",
@@ -902,6 +1125,7 @@ def plot_spearman_rank_correlation(
                 "ranks of the optimizers. "
                 "The intuition is that optimizers that perform similarly on the tasks will have a high correlation. "
                 "The ranks are calculated based on the final performance of the optimizers. ",
+                **grouper_info,
             }
         )
         if not replot:
@@ -926,13 +1150,16 @@ def plot_spearman_rank_correlation(
 
         savefig(fig, figure_filename)
         if show_figure:
+            logger.info(gid)
             plt.show()
         plt.close(fig)
 
     return resulting_files
 
 
-def plot_status(logs_normalized: pd.DataFrame, outdir: str | Path) -> None:
+def plot_status(
+    logs_normalized: pd.DataFrame, outdir: str | Path, groupers: tuple[str, ...] = ("task_type", "subset_id")
+) -> None:
     """Plot the status of the optimization runs.
 
     This function creates heatmaps showing the number of trials normalized for each optimizer, task, and seed.
@@ -944,11 +1171,14 @@ def plot_status(logs_normalized: pd.DataFrame, outdir: str | Path) -> None:
     Args:
         logs_normalized (pd.DataFrame): The DataFrame containing the normalized logs.
         outdir (str | Path): The output directory to save the plots to.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
     """
-    df = logs_normalized  # noqa: PD901
+    df = logs_normalized
     outdir = Path(outdir)
 
-    for (task_type, set_id), gdf in df.groupby(["task_type", "set"]):
+    for (task_type, set_id), gdf in df.groupby(list(groupers)):
         all_tasks = gdf["task_id"].unique()
         all_seeds = gdf["seed"].unique()
         all_optimizers = gdf["optimizer_id"].unique()
@@ -1025,7 +1255,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
     """
     # 1. Load results
     logger.info("Loading results from %s", result_path)
-    df = pd.read_parquet(result_path) if str(result_path).endswith(".parquet") else pd.read_csv(result_path)  # noqa: PD901
+    df = pd.read_parquet(result_path) if str(result_path).endswith(".parquet") else pd.read_csv(result_path)
 
     # 2. Preprocess results
     logger.info("Preprocessing results")
@@ -1036,7 +1266,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
 
     if normalize:
         logger.info("...normalizing")
-        df = normalize_logs(df)  # noqa: PD901
+        df = normalize_logs(df)
         result_path = Path(result_path)
         df.to_parquet(result_path.parent / f"{result_path.stem}_normalized{result_path.suffix}", index=False)
     else:
@@ -1049,11 +1279,9 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
 
     if "n_trials" not in df.columns:
         df["n_trials_norm"] = df.groupby("experiment_id")["time"].rank(method="dense", pct=True).round(2)
-    if "set" not in df.columns:
-        if "subset_id" not in df.columns:
-            df["set"] = df["task_id"].apply(lambda x: "dev" if "dev" in x else "test")
-        else:
-            df["set"] = df["subset_id"]
+
+    if "subset_id" not in df.columns:
+        df["subset_id"] = None
 
     if "hypervolume" in df.columns:
         hv_ids = df["hypervolume"].notna()
@@ -1066,7 +1294,7 @@ def load_results(result_path: str | Path, normalize: bool = True) -> pd.DataFram
             )
 
     # Remove rows where "optimizer_id" == "nan"
-    df = df[  # noqa: PD901
+    df = df[
         ~df["optimizer_id"].isin(
             [
                 "SyneTune-DEHB",
@@ -1109,7 +1337,12 @@ report_tex
 """
 
 
-def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, report_name: str) -> None:
+def write_latex_report(
+    resulting_files: pd.DataFrame,
+    report_dir: str | Path,
+    report_name: str,
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
+) -> None:
     """Write latex report.
 
     Parameters
@@ -1120,6 +1353,9 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
         The directory to save the report to.
     report_name : str
         The name of the report.
+    groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
     """
     report_dir = Path(report_dir)
     order = {
@@ -1129,15 +1365,21 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
         ],
         "Anytime Performance": [
             "rank_over_time",
+            "performance_over_time",
+            "performance_over_time_per_task",
         ],
     }
 
-    for (task_type, set_id), info in resulting_files.groupby(["task_type", "set"]):
-        report_tex = ""
-        report_filename = report_dir / f"{report_name}_{task_type}_{set_id}.tex"
-        full_report_filename = report_dir / f"full_{report_name}_{task_type}_{set_id}.tex"
+    for gid, info in resulting_files.groupby(list(groupers)):
+        # Normalize gid to always be a tuple for consistency
+        gid_normalized = gid if isinstance(gid, tuple) else (gid,)
 
-        print(task_type, set_id)
+        report_tex = ""
+        filename_id = determine_filename_id(groupers, list(gid_normalized))
+        report_filename = report_dir / f"{report_name}_{filename_id}.tex"
+        full_report_filename = report_dir / f"full_{report_name}_{filename_id}.tex"
+
+        print(gid)
 
         # Embed plots
         report_tex += "\\section{Plots}\n"
@@ -1146,7 +1388,7 @@ def write_latex_report(resulting_files: pd.DataFrame, report_dir: str | Path, re
 
             for plot_type in _order:
                 _info = info[info["plot_type"] == plot_type].iloc[0]
-                plot_title = f"Task Type: {_info['task_type']} - Set: {_info['set']} - {_info['plot_type_pretty']}"
+                plot_title = f"{get_figure_title(groupers, list(gid_normalized))} - {_info['plot_type_pretty']}"
                 plot_filename = "figures" + _info["filename"].split("figures")[-1]
                 report_tex += latex_template_plot_block.replace("plot_title", plot_title).replace(
                     "plot_filename", plot_filename
@@ -1177,11 +1419,13 @@ def generate_report(
     report_dir: str | Path = "reports",
     report_name: str | None = None,
     normalize_results: bool = True,  # noqa: FBT001, FBT002
+    groupers: tuple[str, ...] = ("task_type", "subset_id"),
 ) -> None:
     """Generate a report from the results of the optimization runs.
 
     Args:
-        result_path (str, "logs.parquet"): Path to the results CSV or parquet file.
+        result_path (str, "logs.parquet"): Path to the results CSV or parquet file. Can also be a directory, if so,
+            it looks for `logs.parquet` in that directory.
         report_dir (str | Path, "reports"): Directory to save the report to.
         report_name (str, "report"): Name of the report, will be the folder name. If none,
             use the curent date and time as folder name.
@@ -1190,6 +1434,9 @@ def generate_report(
             If True, the logs are normalized to the range [0, 1] based on the minimum and maximum values of each column,
             and in the case of multi-objective, the hypervolume is calculated.
             The plotting always needs normalized data.
+        groupers (tuple[str,...]): Grouping variables to create aggregate plots for. Default is
+            `("task_type", "subset_id")`. Another grouping variable could be `"benchmark_id"`,
+            or any custom columns determining the groups.
     """
     logger.info("Generating report")
 
@@ -1201,41 +1448,48 @@ def generate_report(
     figure_dir = report_dir / "figures"
     figure_dir.mkdir(exist_ok=True, parents=True)
 
+    if Path(result_path).is_dir():
+        result_path = str(Path(result_path) / "logs.parquet")
+
     # Load and preprocess results
-    df = load_results(result_path, normalize=normalize_results)  # noqa: PD901
-    plot_status(df, figure_dir)
-    _ = plot_budget_used(df, output_dir=figure_dir, replot=True)
+    df = load_results(result_path, normalize=normalize_results)
+    plot_status(df, figure_dir, groupers=groupers)
+    _ = plot_budget_used(df, output_dir=figure_dir, replot=True, groupers=groupers)
 
     # FINAL PERFORMANCE
     logger.info("Plotting final performance...")
 
     # Critical Difference
     logger.info("\t...critical difference")
-    resulting_files_critical_difference = plot_critical_difference(df, output_dir=figure_dir, replot=True)
+    resulting_files_critical_difference = plot_critical_difference(
+        df, output_dir=figure_dir, replot=True, groupers=groupers
+    )
 
     # Final Performance per Task (Mean over seeds, heatmap)
     logger.info("\t...performance per task")
-    resulting_files_performance_per_task = plot_performance_per_task(df, output_dir=figure_dir, replot=True)
+    resulting_files_performance_per_task = plot_performance_per_task(
+        df, output_dir=figure_dir, replot=True, groupers=groupers
+    )
 
     # Final Performance Barplot per Task (Mean over seeds with std)
     logger.info("\t...barplot")
-    resulting_files_finalperfboxplot = plot_finalperfboxplot(df, output_dir=figure_dir, replot=True)
+    resulting_files_finalperfboxplot = plot_finalperfboxplot(df, output_dir=figure_dir, replot=True, groupers=groupers)
 
     # ANYTIME PERFORMANCE
     logger.info("Plotting anytime performance...")
 
     # Plot ranks over time
     logger.info("\t...ranks over time")
-    resulting_files_rank_over_time = plot_ranks_over_time(df, output_dir=figure_dir, replot=True)
+    resulting_files_rank_over_time = plot_ranks_over_time(df, output_dir=figure_dir, replot=True, groupers=groupers)
 
     logger.info("\t...incumbent cost over time (aggregated, normalized, interpolated)")
     resulting_files_perfovertime = plot_performance_over_time(
-        df, output_dir=figure_dir, per_task=False, replot=True, show_figure=False
+        df, output_dir=figure_dir, per_task=False, replot=True, show_figure=False, groupers=groupers
     )
 
     logger.info("\t...incumbent cost over time per task")
     resulting_files_perfovertime_pertask = plot_performance_over_time(
-        df, output_dir=figure_dir, per_task=True, replot=True, show_figure=False
+        df, output_dir=figure_dir, per_task=True, replot=True, show_figure=False, groupers=groupers
     )
 
     resulting_files = pd.concat(
@@ -1248,7 +1502,7 @@ def generate_report(
             pd.DataFrame(resulting_files_perfovertime_pertask),
         ]
     ).reset_index(drop=True)
-    write_latex_report(resulting_files, report_dir, report_name)
+    write_latex_report(resulting_files, report_dir, report_name, groupers=groupers)
 
     logger.info(f"Find figures at {figure_dir}.")
     logger.info("Done! 🌞")
