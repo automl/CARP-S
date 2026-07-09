@@ -61,7 +61,7 @@ def plot_performance_over_time(
     """
     setup_seaborn(font_scale=1.5)
     sorter = get_order_by_mean(df=df, budget_var=x)
-    df = df.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))  # noqa: PD901
+    df = df.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))
     palette = get_color_palette(df)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
@@ -103,7 +103,7 @@ def plot_rank_over_time(
     """
     setup_seaborn(font_scale=1.5)
     sorter = get_order_by_mean(df=df)
-    df = df.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))  # noqa: PD901
+    df = df.sort_values(by="optimizer_id", key=lambda column: column.map(lambda e: sorter.index(e)))
     palette = get_color_palette(df)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)

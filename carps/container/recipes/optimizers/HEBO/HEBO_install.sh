@@ -1,8 +1,11 @@
 PIP=$PIP
 
-if [ -z "$PIP" ]
-then
-    PIP="pip"
+if [ -z "$PIP" ]; then
+    if command -v uv >/dev/null 2>&1; then
+        PIP="uv pip"
+    else
+        PIP="pip"
+    fi
 fi
 
 hebo_root="lib/HEBO"

@@ -17,7 +17,7 @@ import fire
 import pandas as pd
 from tqdm import tqdm
 
-from carps.analysis.gather_data import maybe_postadd_task, process_logs
+from carps.analysis.gather_data_utils import maybe_postadd_task, process_logs
 from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()

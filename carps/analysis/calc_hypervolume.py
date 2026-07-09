@@ -392,6 +392,6 @@ def load_trajectory(rundir: str) -> pd.DataFrame:
     fn = Path(rundir) / "trajectory.parquet"
     if not fn.is_file():
         raise ValueError(f"Cannot find {fn}. Did you run `python -m carps.analysis.calc_hypervolume {rundir}`?")
-    df = pd.read_parquet(fn)  # noqa: PD901
-    df = df.map(maybe_deserialize)  # noqa: PD901
+    df = pd.read_parquet(fn)
+    df = df.map(maybe_deserialize)
     print(df["trial_value__cost"].iloc[0], type(df["trial_value__cost"].iloc[0]))

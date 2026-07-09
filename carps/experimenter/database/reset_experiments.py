@@ -84,7 +84,7 @@ def get_experiments_with_condition(
     """
 
     def _get_keyfields_from_columns(column_names: list[str], entries: list[dict]) -> tuple[list[str], list[list]]:
-        df = pd.DataFrame(entries, columns=column_names)  # noqa: PD901
+        df = pd.DataFrame(entries, columns=column_names)
         keyfields = database_connector.database_configuration.keyfields.keys()
         entries = df[keyfields].values.tolist()  # noqa: PD011
         return keyfields, entries  # type: ignore[return-value]

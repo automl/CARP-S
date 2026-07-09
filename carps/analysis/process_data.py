@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
+from carps.utils.index_configs import get_index
 from carps.utils.loggingutils import get_logger, setup_logging
 
 setup_logging()
@@ -68,10 +69,7 @@ def maybe_postadd_task(logs: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         Logs with task columns.
     """
-    index_fn = Path(__file__).parent.parent / "configs/task/index.csv"
-    if not index_fn.is_file():
-        raise ValueError("Task ids have not been indexed. Run `python -m carps.utils.index_configs`.")
-    task_index = pd.read_csv(index_fn)
+    task_index = get_index()
 
     def load_task_cfg(task_id: str) -> DictConfig:
         config_fn = task_index["config_fn"][task_index["task_id"] == task_id].iloc[0]
@@ -266,8 +264,8 @@ def load_logs(rundir: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         )
         raise RuntimeError(msg)
 
-    df = pd.read_csv(logs_fn)  # noqa: PD901
-    df = process_logs(df)  # noqa: PD901
+    df = pd.read_csv(logs_fn)
+    df = process_logs(df)
     df_cfg = pd.read_csv(logs_cfg_fn)
     return df, df_cfg
 

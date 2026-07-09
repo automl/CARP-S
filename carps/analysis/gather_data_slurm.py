@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import hydra
 
-from carps.analysis.gather_data import filelogs_to_df
+from carps.analysis.gather_data_utils import filelogs_to_df
 
 if TYPE_CHECKING:
     import pandas as pd

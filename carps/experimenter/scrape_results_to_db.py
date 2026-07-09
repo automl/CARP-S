@@ -13,7 +13,7 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from py_experimenter.experimenter import PyExperimenter, ResultProcessor
 
-from carps.analysis.gather_data import get_run_dirs, load_cfg, load_log
+from carps.analysis.gather_data_utils import get_run_dirs, load_cfg, load_log
 from carps.experimenter.create_cluster_configs import create_config_hash, fill_database
 from carps.loggers.database_logger import DatabaseLogger
 from carps.utils.loggingutils import get_logger, setup_logging

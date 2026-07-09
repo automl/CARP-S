@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from carps.analysis.gather_data import convert_mixed_types_to_str, load_set
+from carps.analysis.gather_data_utils import convert_mixed_types_to_str, load_set
 
 
 def concat_rundata() -> None:
@@ -39,8 +39,8 @@ def concat_rundata() -> None:
         for k, v in item.items():
             args.append((v, k))
     res = [load_set(paths=a[0], set_id=a[1]) for a in args]
-    df = pd.concat([r[0] for r in res]).reset_index(drop=True)  # noqa: PD901
-    df = convert_mixed_types_to_str(df)  # noqa: PD901
+    df = pd.concat([r[0] for r in res]).reset_index(drop=True)
+    df = convert_mixed_types_to_str(df)
     df.to_parquet("rundata.parquet")
 
     df_cfg = pd.concat([d for _, d in res]).reset_index(drop=True)

@@ -176,9 +176,11 @@ tmp*
 *.zip
 *.bak
 *output*
+carps/build/lib
 
 container/python_packages/*
 slurmlogs/*
 
 *.tar.gz
 .DS_Store
+.cenv

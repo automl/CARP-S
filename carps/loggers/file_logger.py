@@ -119,6 +119,7 @@ class FileLogger(AbstractLogger):
     """File logger."""
 
     _filename = "trial_logs.jsonl"
+    _filename_hydra_config = ".hydra/config.yaml"
     _trajectory_filename = "trajectory_logs.jsonl"
 
     def __init__(self, overwrite: bool = False, directory: str | Path | None = None) -> None:  # noqa: FBT001, FBT002
@@ -142,7 +143,7 @@ class FileLogger(AbstractLogger):
         directory = Path(directory) if directory is not None else get_run_directory()
         assert directory is not None, "Directory must be specified in FileLogger or hydra run dir must be available."
         self.directory = directory
-        if (directory / self._filename).is_file():
+        if (directory / self._filename).is_file() or (directory / self._filename_hydra_config).is_file():
             if overwrite:
                 logger.info(f"Found previous run. Removing '{directory}'.")
                 for root, _dirs, files in os.walk(directory):

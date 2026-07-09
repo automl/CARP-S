@@ -12,6 +12,6 @@ else
     echo "Directory is not empty, skipping download."
     exit 0
 fi
-wget https://rewind.tf.uni-freiburg.de/index.php/s/rTwPgaxS2Z7NH39/download/saved-surrogates.zip -P $HPOB_SURROGATES_DIR
+wget https://github.com/sebastianpinedaar/hpo-data/raw/refs/heads/main/saved-surrogates.zip -P $HPOB_SURROGATES_DIR
 unzip $HPOB_SURROGATES_DIR/saved-surrogates.zip -d $HPOB_TASK_DATA_DIR
 rm $HPOB_SURROGATES_DIR/saved-surrogates.zip
