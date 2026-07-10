@@ -193,6 +193,7 @@ nav:
     - "guides/large-scale-benchmarking.md"
     - "guides/using-carps.md"
   - Commands: "commands.md"
+  - API: api/carps/
   - Plot Demos: "plot_demo.md"
   - Contributing:
     - "contributing/index.md"
