@@ -248,8 +248,7 @@ class NevergradOptimizer(Optimizer):
         transformation.
 
         Args:
-            config_nevergrad : parameter.Parameter
-                The configuration to convert.
+            config_nevergrad (parameter.Parameter): The configuration to convert.
 
         Returns:
             Configuration
