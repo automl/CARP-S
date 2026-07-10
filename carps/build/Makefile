@@ -38,7 +38,7 @@ test:
 
 docs:
 	$(PYTHON) -m webbrowser -t "http://127.0.0.1:8000/"
-	$(PYTHON) -m mkdocs serve --clean
+	$(PYTHON) -m properdocs serve --clean
 
 check:
 	pre-commit run --all-files

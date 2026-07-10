@@ -67,7 +67,7 @@ dev = [
   "ruff",
   "mypy",
   "types-Deprecated",
-  "mkdocs",
+  "properdocs",
   "mkdocs-material",
   "mkdocs-autorefs",
   "mkdocs-gen-files",
