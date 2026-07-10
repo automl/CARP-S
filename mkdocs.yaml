@@ -130,6 +130,9 @@ plugins:
       css_dir: css
       javascript_dir: js
       canonical_version: latest
+  - gen-files:
+      scripts:
+        - docs/api_generator.py
   - literate-nav:
         nav_file: SUMMARY.md
   - mkdocstrings:
@@ -139,7 +142,7 @@ plugins:
         python:
           paths: [src]
           # Extra objects which allow for linking to external docs
-          import:
+          inventories:
             - 'https://docs.python.org/3/objects.inv'
             - 'https://numpy.org/doc/stable/objects.inv'
             - 'https://pandas.pydata.org/docs/objects.inv'
@@ -190,6 +193,8 @@ nav:
     - "guides/large-scale-benchmarking.md"
     - "guides/using-carps.md"
   - Commands: "commands.md"
+  - API: api/carps/
+  - Plot Demo: "plot_demo.md"
   - Contributing:
     - "contributing/index.md"
     - "contributing/contributing-a-benchmark.md"
