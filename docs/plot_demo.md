@@ -1,3 +1,5 @@
+Find the notebook at [notebooks/plot_demo.ipynb](https://github.com/automl/CARP-S/blob/main/notebooks/plot_demo.ipynb).
+
 # Plot Demo
 `carps` comes with a selection of different plotting options for visualizing experiment results.
 For the subset data, we show which functions generate the plots.
@@ -104,7 +106,7 @@ figure_dir = "figures"
 results_full = load_results(result_path=handle, normalize=False)
 
 # We only plot subset blackbox test
-results = results_full[(results_full["task_type"]=="blackbox") & (results_full["set"]=="test")]
+results = results_full[(results_full["task_type"]=="blackbox") & (results_full["subset_id"]=="test")]
 ```
 
 
