@@ -49,7 +49,7 @@ Experiments with error status (or any other status) can be reset via:
 - `python -m carps.experimenter.database.reset_experiments ['yahpo_attr_error']` for resetting experiments with
   this specific yahpo error condition.
 - `python -m carps.experimenter.database.reset_experiments ['falsely_done']` for resetting experiments that are
-  falsely marked as done (experiment ids not present in trials table).
+  falsely marked as done (experiment ids are not present in the trials table).
 - `python -m carps.experimenter.database.reset_experiments ['error', 'yahpo_attr_error', 'falsely_done']` for
     resetting all.
 
