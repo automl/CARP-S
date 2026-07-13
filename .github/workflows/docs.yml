@@ -24,4 +24,4 @@ jobs:
       - name: "Install dependencies"
         run: python -m pip install -e ".[dev]"
       - name: "Build Docs"
-        run: mkdocs build --clean --strict
+        run: properdocs build --clean --strict
