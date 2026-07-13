@@ -18,6 +18,7 @@ recursive-exclude notebooks *
 recursive-exclude scripts *
 recursive-exclude subselection *
 recursive-exclude lib *
+recursive-exclude carps/build/lib *
 recursive-exclude env* *
 recursive-exclude carps.egg* *
 recursive-exclude carps/benchmark_data *
