@@ -6,9 +6,12 @@ CONDA_ENV_NAME=$1
 PIP=$PIP
 CARPS_ROOT=$(python -c "from carps.utils.env_vars import CARPS_ROOT; print(CARPS_ROOT)")
 
-if [ -z "$PIP" ]
-then
-    PIP="pip"
+if [ -z "$PIP" ]; then
+    if command -v uv >/dev/null 2>&1; then
+        PIP="uv pip"
+    else
+        PIP="pip"
+    fi
 fi
 
 if [ -z "$CONDA_ENV_NAME" ]

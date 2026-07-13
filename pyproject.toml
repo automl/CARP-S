@@ -10,7 +10,7 @@ include = ["carps"]
 
 [project]
 name = "carps"
-version = "1.0.4"
+version = "1.1.0"
 dependencies = [
   "autorank",
   "ConfigSpace>=1.0.0",
@@ -32,7 +32,8 @@ dependencies = [
   "pymoo",
   "fire",
   "ipywidgets",
-  "py-experimenter>=1.4.1",
+  "tqdm",
+  "polars",
 ]
 
 requires-python = ">=3.9"
@@ -65,7 +66,8 @@ dev = [
   "pre-commit",
   "ruff",
   "mypy",
-  "mkdocs",
+  "types-Deprecated",
+  "properdocs",
   "mkdocs-material",
   "mkdocs-autorefs",
   "mkdocs-gen-files",
@@ -86,6 +88,9 @@ containers = [
   "GitPython",
   "py-experimenter>=1.4.1",
   "pymysql",
+]
+database = [
+  "py-experimenter>=1.4.1",
 ]
 
 # https://docs.pytest.org/en/7.2.x/reference/reference.html#ini-options-ref
@@ -173,8 +178,10 @@ lint.ignore = [
   "W292",    # No newline at end of file
   "PLC1901", # "" can be simplified to be falsey
   "TCH003",  # Move stdlib import into TYPE_CHECKING
+  "S603",    #  `subprocess` call: check for execution of untrusted input
   "B010",    # Do not use `setattr`
   "COM812",
+  "PD901",  # Avoid using the generic variable name `df` for DataFrames
   # These tend to be lighweight and confuse pyright
   "PTH123",
   "PTH109",

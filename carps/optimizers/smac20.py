@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any
 
 from hydra.utils import get_class
 from omegaconf import DictConfig, OmegaConf
-from rich import print as printr
 
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
@@ -122,7 +121,12 @@ class SMAC3Optimizer(Optimizer):
         return configspace
 
     def convert_to_trial(  # type: ignore[override]
-        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
+        self,
+        config: Configuration,
+        seed: int | None = None,
+        budget: float | None = None,
+        instance: str | None = None,
+        cutoff: float | None = None,
     ) -> TrialInfo:
         """Convert proposal from SMAC to TrialInfo.
 
@@ -143,10 +147,15 @@ class SMAC3Optimizer(Optimizer):
             Trial info containing configuration, budget, seed, instance.
         """
         inst = int(instance) if instance is not None else None
-        return TrialInfo(config=config, seed=seed, budget=budget, instance=inst)
+        return TrialInfo(config=config, seed=seed, budget=budget, instance=inst, cutoff=cutoff)
 
     def target_function(
-        self, config: Configuration, seed: int | None = None, budget: float | None = None, instance: str | None = None
+        self,
+        config: Configuration,
+        seed: int | None = None,
+        budget: float | None = None,
+        instance: str | None = None,
+        cutoff: float | None = None,
     ) -> float | list[float]:
         """Target Function.
 
@@ -162,13 +171,15 @@ class SMAC3Optimizer(Optimizer):
             Budget, by default None
         instance : str | None, optional
             Instance, by default None
+        cutoff : float | None, optional
+            Optional cutoff argument for adaptive capping.
 
         Returns:
         -------
         float | list[float]
             Cost as float or list[float], depending on the number of objectives.
         """
-        trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance)
+        trial_info = self.convert_to_trial(config=config, seed=seed, budget=budget, instance=instance, cutoff=cutoff)
         trial_value = self.task.objective_function.evaluate(trial_info=trial_info)
         return trial_value.cost
 
@@ -250,15 +261,10 @@ class SMAC3Optimizer(Optimizer):
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "initial_design", scenario)
         smac_kwargs = maybe_inst_add_scenario(smac_kwargs, "multi_objective_algorithm", scenario)
 
-        printr(smac_class, smac_kwargs)
-
-        smac = smac_class(
+        return smac_class(
             target_function=self.target_function,
             **smac_kwargs,
         )
-        printr(smac)
-
-        return smac
 
     def ask(self) -> TrialInfo:
         """Ask the optimizer for a new trial to evaluate.

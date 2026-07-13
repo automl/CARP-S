@@ -1,8 +1,0 @@
-# @package _global_
-defaults:
-  - base
-optimizer_id: SyneTune-KDE
-optimizer:
-  optimizer_name: 'KDE'
-  optimizer_kwargs:
-    random_seed: ${seed}

@@ -82,7 +82,7 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         self.benchmark_name = benchmark_name
         self.budget_type = budget_type
         self.benchmark = benchmark
-        self.metrics = metric
+        self.metrics = [metric] if isinstance(metric, str) else metric
         self.prior = prior
         self.perturb_prior = perturb_prior
         assert self.benchmark_name in benchmarks_names, f"benchmark_name must be one of {benchmarks_names}"

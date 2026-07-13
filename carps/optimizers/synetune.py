@@ -33,20 +33,7 @@ from syne_tune.config_space import (  # type: ignore
     randint,
     uniform,
 )
-from syne_tune.optimizer.baselines import (  # type: ignore
-    ASHA,
-    BOHB,
-    BORE,
-    DEHB,
-    KDE,
-    MOASHA,
-    MOBSTER,
-    MOREA,
-    BayesianOptimization,
-    MOLinearScalarizationBayesOpt,
-    MORandomScalarizationBayesOpt,
-    SyncMOBSTER,
-)
+from syne_tune.optimizer.baselines import ASHA, BOHB, BORE, CQR, TPE, BOTorch  # type: ignore
 
 from carps.optimizers.optimizer import Optimizer
 from carps.utils.pareto_front import pareto
@@ -62,39 +49,27 @@ if TYPE_CHECKING:
 
 # This is a subset from the syne-tune baselines
 optimizers_dict = {
-    "BayesianOptimization": BayesianOptimization,
-    "BO-MO-RS": MORandomScalarizationBayesOpt,
-    "BO-MO-LS": MOLinearScalarizationBayesOpt,
-    "MOREA": MOREA,
     "ASHA": ASHA,
-    "MOBSTER": MOBSTER,
     "BOHB": BOHB,
-    "KDE": KDE,
+    "CQR": CQR,
     "BORE": BORE,
-    "DEHB": DEHB,
-    "MOASHA": MOASHA,
-    "SyncMOBSTER": SyncMOBSTER,
+    "BOTorch": BOTorch,
+    "TPE": TPE,
 }
 
 
 metric_type_dict = {
-    "BayesianOptimization": str,
-    "BO-MO-RS": list,
-    "BO-MO-LS": list,
-    "MOREA": list,
     "ASHA": str,
-    "MOBSTER": str,
     "BOHB": str,
-    "KDE": str,
+    "CQR": str,
     "BORE": str,
-    "DEHB": str,
-    "MOASHA": list,
-    "SyncMOBSTER": str,
+    "BOTorch": str,
+    "TPE": str,
 }
 
 mf_optimizer_dicts = {
-    "with_mf": {"ASHA", "MOASHA", "DEHB", "MOBSTER", "BOHB", "SyncMOBSTER"},
-    "without_mf": {"BORE", "BayesianOptimization", "KDE"},
+    "with_mf": {"ASHA", "BOHB"},
+    "without_mf": {"BORE", "CQR", "BOTorch", "TPE"},
 }
 
 
@@ -274,7 +249,7 @@ class SynetuneOptimizer(Optimizer):
             trial info (config, seed, instance, budget)
         """
         assert self._solver is not None
-        trial_suggestion = self._solver.suggest(self.trial_counter)
+        trial_suggestion = self._solver.suggest()
         trial = SyneTrial(
             trial_id=self.trial_counter,
             config=trial_suggestion.config,
@@ -350,10 +325,7 @@ class SynetuneOptimizer(Optimizer):
 
     def best_trial(self, metric: str) -> TrialResult:
         """Return the best trial according to the provided metric."""
-        if self.optimizer_name == "MOASHA":
-            self.solver.mode = "min"
-
-        sign = 1.0 if self.solver.mode == "max" else -1.0
+        sign = -1.0 if self.solver.do_minimize else 1.0
 
         return max(
             [value for key, value in self.completed_experiments.items()],
@@ -397,13 +369,11 @@ class SynetuneOptimizer(Optimizer):
 
         _optimizer_kwargs: dict[str, Any] = {
             "metric": self.metric,
-            "mode": "min"
-            if self.task.output_space.n_objectives == 1
-            else list(np.repeat("min", self.task.output_space.n_objectives)),
         }
 
         if self.optimizer_name in mf_optimizer_dicts["with_mf"]:
-            _optimizer_kwargs["resource_attr"] = self.fidelity_type
+            key_fidelity_type = "time_attr"
+            _optimizer_kwargs[key_fidelity_type] = self.fidelity_type
             # _optimizer_kwargs["max_t"] = self.max_fidelity  # TODO check how to set n trials / wallclock limit
             # for synetune
 
@@ -425,10 +395,6 @@ class SynetuneOptimizer(Optimizer):
         _optimizer_kwargs["config_space"] = self.syne_tune_configspace
 
         self.optimizer_kwargs.update(_optimizer_kwargs)
-
-        if self.optimizer_name == "MOASHA":
-            del self.optimizer_kwargs["metric"]
-            del self.optimizer_kwargs["resource_attr"]
 
         if self.optimizer_name in ["SyncMOBSTER"] and "time_attr" in self.optimizer_kwargs:
             del self.optimizer_kwargs["time_attr"]

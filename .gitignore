@@ -169,14 +169,18 @@ runs*
 *.parquet
 run-data*
 *.txt
+subselection/data*
 slurm-*
 tmp*
 *.aux
 *.zip
 *.bak
 *output*
+carps/build/lib
 
 container/python_packages/*
 slurmlogs/*
 
 *.tar.gz
+.DS_Store
+.cenv

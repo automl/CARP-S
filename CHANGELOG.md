@@ -1,6 +1,16 @@
+# 1.1.0
+- Update SyneTune API, add CQR as optimizer (#211).
+- Fix regeneration of runcommands (#212).
+- Update plotting functions and add example notebook (`plot_demo.ipynb`) (#214).
+- Add Papenbench objective functions (#237).
+- Remove empty example directory (#206).
+- Generate report for also less than three optimizers (#223).
+- Add generated API to docs (#224).
+- Fix installation of HPO-B (#240).
+
 # 1.0.4
-- Fix yahpo error (#201)
-- Add missing requirement files (#202)
+- Fix yahpo error (#201).
+- Add missing requirement files (#202).
 
 # v1.0.3
 - Fix the order of optimizer names in the critical difference plots (#196).

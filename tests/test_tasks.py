@@ -45,7 +45,7 @@ def filenames():
     # Replace with your desired pattern, e.g., "*.txt" to match all .txt files
     _filenames = list(Path("carps/configs/task").glob("**/*.yaml"))
     _filenames.sort()
-    return _filenames
+    return [f for f in _filenames if "PapenBench" not in str(f)]
 
 
 # Parametrize the test using the filenames

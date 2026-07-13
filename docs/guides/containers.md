@@ -7,14 +7,14 @@
 
 There are two main ways to use this framework:
 1. Run everything in the same environment (e.g. to test locally)
-2. Build separate Singularity/ Apptainer containers for the optimizer and the benchmark (e.g. to run on a cluster)
+2. Build separate Singularity or Apptainer containers for the optimizer and the benchmark (e.g. to run on a cluster)
 
-The first options can allow for faster development, but the second option is more robust and flexible since python or 
+The first option can allow for faster development, but the second option is more robust and flexible since python or 
 other package versions do not clash, and eases execution on e.g. a SLURM cluster.
 
 The overall benchmarking system works as follows: 
 
-There are three different containers wrapping different functionality and a shell script controlling these containers. 
+There are three different containers wrapping different functionalities and a shell script controlling these containers. 
 The `HydraInitializer` container is responsible for constructing the Hydra configuration, 
 which is required to initialize the `Optimizer` and the `Benchmark` container. 
 The `Benchmark` container wraps the actual benchmark to be run and provides two main functionalities via a web service. 
@@ -37,10 +37,10 @@ you can ignore all aspects of the system just described and simply follow the si
 
 ### Containerization
 To run benchmarking with containers, both the optimizer and benchmark have to be wrapped separately. 
-We use Singularity/ Apptainer for this purpose.
+We use Singularity or Apptainer for this purpose.
 The following example illustrates the principle based on a `DummyOptimizer` and `DummyBenchmark`.
 
-💡 You can check the location of the log files of your singularity instances with `singularity instance list -l`.
+💡 You can check the location of the log files of your Singularity instances with `singularity instance list -l`.
 
 ⚠ When creating recipes, take care that the paths are correct. In particular, check relative vs. absolute paths (e.g. benchmarking/... ❌ vs /benchmarking/... ✔).
 
@@ -59,9 +59,9 @@ mkdir /dev/shm/intexml<X> -p
 
 #### Optimizer
 A Singularity recipe has to be created for the optimizer, which should be saved in the folder `carps/container/recipes`.
-This recipe has the purpose of setting up a container in which the optimizer can be run, e.g., installing the 
+This recipe has the purpose of setting up a container in which the optimizer can be run, e.g. installing the 
 required packages, setting environment variables, copying files and so on.
-For the `Dummy_Optimizer` this is `carps/container/recipes/dummy_optimizer/dummy_optimizer.recipe`, which you can consult 
+For the `Dummy_Optimizer`, this is `carps/container/recipes/dummy_optimizer/dummy_optimizer.recipe`, which you can consult 
 as a basis for other optimizers.
 
 The optimizer then has to be built to an image named after the optimizer id, e.g., `DUMMY_Optimizer.sif` for the
@@ -71,7 +71,7 @@ The optimizer then has to be built to an image named after the optimizer id, e.g
 singularity build containers/optimizers/DUMMY_Optimizer.sif carps/container/recipes/optimizers/DUMMY_Optimizer/DUMMY_Optimizer.recipe
 ```
 
-To facilitate this process, a short script is provided for this purpose, which is however system-specific to Noctua2.
+To facilitate this process, a short script is provided for this purpose, which is, however, system-specific to Noctua2.
 It can be run as follows:
 
 ```bash
@@ -79,7 +79,7 @@ It can be run as follows:
 ```
 
 #### Benchmark
-Like for the optimizer, a Singularity recipe has to be created for the benchmark, which should be saved in the folder
+As with the optimizer, a Singularity recipe has to be created for the benchmark, which should be saved in the folder
 `carps/container/recipes` as well.
 
 The benchmark image also has to be according to the benchmark id, e.g., `DUMMY_ObjectiveFunction.sif` for the 
@@ -98,7 +98,7 @@ Command for Noctua2:
 ```
 
 #### Running
-A third container is needed that handles the hydra config. It does not need to be adjusted for each optimizer or
+A third container is needed that handles the Hydra config. It does not need to be adjusted for each optimizer or
 benchmark, but can be used as is. It can be built as follows:
 
 ```bash
