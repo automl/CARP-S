@@ -1,2 +1,10 @@
 swig
-smac>=2.1.0
+# carps/optimizers/smac20.py calls RunHistory.get_costs(), which is only available on
+# SMAC3's `development` branch (see SMAC3 commit 04d385bfe, "Refactor RunHistory to
+# separate data storage from cost computation", by Jannis Kastner). This rename is not
+# in any published smac release yet -- smac==2.4.0, the latest PyPI release, is the same
+# commit as SMAC3's `main` branch and still only exposes the old get_cost() method -- so
+# a plain "smac>=2.1.0"/"smac>=X.Y.Z" pin is not enough here. Pin to the exact commit
+# that introduced get_costs() until it ships in a numbered SMAC3 release, at which point
+# this should be switched back to a normal version pin (e.g. smac>=<next release>).
+smac @ git+https://github.com/automl/SMAC3.git@04d385bfe8088a0874b46e0dc8650a3bf70fa508
