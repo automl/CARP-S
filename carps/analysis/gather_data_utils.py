@@ -302,7 +302,9 @@ def normalize_drop(df: pd.DataFrame, key: str, rename_columns: bool = False, sep
         Flat data frame
     """
     df_tmp = pd.DataFrame(df[key].tolist())
-    if "additional_info" in df_tmp and df_tmp["additional_info"].iloc[0] == {}:
+    if "additional_info" in df_tmp and all(info == {} for info in df_tmp["additional_info"]):
+        # Only drop the column when no trial reported anything. Judging by the first row alone loses every
+        # later value whenever the first trial happened to report nothing.
         del df_tmp["additional_info"]
     if rename_columns:
         df_tmp = df_tmp.rename(columns={c: f"{key}{sep}{c}" for c in df_tmp.columns})

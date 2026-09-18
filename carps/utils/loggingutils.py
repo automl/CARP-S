@@ -60,6 +60,8 @@ class CustomEncoder(json.JSONEncoder):
             return int(obj)
         if isinstance(obj, np.float64 | np.float32):
             return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
         return super().default(obj)
 
 
