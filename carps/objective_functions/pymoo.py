@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pymoo
@@ -82,14 +82,41 @@ class PymooObjectiveFunction(ObjectiveFunction):
         """
         configuration = np.array(list(trial_info.config.values()))
         start_time = time.time()
-        costs = self._problem.evaluate(configuration).tolist()
+        # Ask for a dictionary rather than the positional return. `evaluate` hands back a bare array only for an
+        # unconstrained problem; as soon as the problem has constraints it returns a tuple, which has no `tolist`.
+        out = self._problem.evaluate(configuration, return_as_dictionary=True)
+        end_time = time.time()
+
+        costs = np.atleast_1d(out["F"]).tolist()
         if len(costs) == 1:
             costs = costs[0]
-        end_time = time.time()
 
         return TrialValue(
             cost=costs,
             time=end_time - start_time,
             starttime=start_time,
             endtime=end_time,
+            additional_info=self._constraint_values(out),
         )
+
+    @staticmethod
+    def _constraint_values(out: dict[str, Any]) -> dict[str, float]:
+        """Names the constraint values pymoo reported, so that a bound can refer to one of them.
+
+        Inequality constraints are `g0`, `g1`, ... and are satisfied when the value is at most zero; equality
+        constraints are `h0`, `h1`, ... and are satisfied at zero. That is pymoo's own convention, kept as is
+        rather than translated, so the numbers mean what the problem definition says they mean.
+
+        Named scalars rather than the raw arrays: a bound has to be able to refer to one constraint, and an array
+        would additionally need custom json encoding to survive the loggers.
+        """
+        values = {}
+
+        for key, prefix in (("G", "g"), ("H", "h")):
+            if key not in out or out[key] is None:
+                continue
+
+            for index, value in enumerate(np.atleast_1d(out[key])):
+                values[f"{prefix}{index}"] = float(value)
+
+        return values
