@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any
 
@@ -388,11 +389,12 @@ class SMAC3Optimizer(Optimizer):
                 for ti in tis
             ]
             tvs = [self.solver.runhistory[k] for k in tks]
-            tvs_dicts = [asdict(tv) for tv in tvs]
-            for tv in tvs_dicts:
-                if "cpu_time" in tv:
-                    _ = tv.pop("cpu_time")
-            tvs = [TrialValue(**tv) for tv in tvs_dicts]
+            # SMAC's trial value and ours are separate dataclasses that have drifted apart - SMAC records
+            # a cpu time and, where a scenario declares bounds, the observed constraint values. Keep the
+            # fields ours actually has rather than dropping the extras by name, which needs editing again
+            # every time SMAC records something new.
+            fields = {field.name for field in dataclasses.fields(TrialValue)}
+            tvs = [TrialValue(**{k: v for k, v in asdict(tv).items() if k in fields}) for tv in tvs]
             incumbent_tuple = list(zip(tis, tvs, strict=False))  # type: ignore[assignment]
 
         return incumbent_tuple
