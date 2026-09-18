@@ -148,10 +148,15 @@ class MFPBenchObjectiveFunction(ObjectiveFunction):
         else:
             vt = result["train_cost"]
 
+        # Every metric the benchmark reported, not only the ones selected as objectives, so that a task can be
+        # bounded on a quantity it does not optimize.
+        additional_info = {key: float(value) for key, value in result.items()}
+
         return TrialValue(
             cost=ret,
             time=end_time - start_time,
             starttime=start_time,
             endtime=end_time,
             virtual_time=vt,
+            additional_info=additional_info,
         )

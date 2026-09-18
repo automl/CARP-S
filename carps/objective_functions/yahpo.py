@@ -205,4 +205,16 @@ class YahpoObjectiveFunction(ObjectiveFunction):
         endtime = time.time()
         T = endtime - starttime
 
-        return TrialValue(cost=costs, time=T, starttime=starttime, endtime=endtime, virtual_time=virtual_time)
+        # Every target the surrogate reported, not only the ones selected as objectives. A task may be bounded on
+        # a quantity it does not optimize - "maximise accuracy, keep training time under a budget" - and those
+        # values would otherwise be discarded here.
+        additional_info = {key: float(value) for key, value in ret.items() if isinstance(value, (int, float))}
+
+        return TrialValue(
+            cost=costs,
+            time=T,
+            starttime=starttime,
+            endtime=endtime,
+            virtual_time=virtual_time,
+            additional_info=additional_info,
+        )
