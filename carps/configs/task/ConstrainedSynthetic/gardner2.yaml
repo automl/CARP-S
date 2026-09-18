@@ -4,6 +4,9 @@ task_id: ConstrainedSynthetic/gardner2
 constraints:
 - c <= -0.95
 constrained_optimum: 0.25462731419482376
+constrained_argmin:
+  x0: 4.712356178089045
+  x1: 1.2546273136568284
 task:
   _target_: carps.utils.task.Task
   name: ConstrainedSynthetic/gardner2

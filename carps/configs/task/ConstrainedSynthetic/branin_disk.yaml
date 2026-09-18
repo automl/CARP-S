@@ -4,6 +4,9 @@ task_id: ConstrainedSynthetic/branin_disk
 constraints:
 - disk <= 50.0
 constrained_optimum: 0.39788926507646494
+constrained_argmin:
+  x0: 3.1415707853926964
+  x1: 2.2736368184092046
 task:
   _target_: carps.utils.task.Task
   name: ConstrainedSynthetic/branin_disk

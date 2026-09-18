@@ -43,6 +43,23 @@ def test_the_constraint_costs_something(name: str) -> None:
     assert problem.constrained_optimum(resolution=1000) > unconstrained + 1e-6
 
 
+def test_the_optimum_location_is_where_branins_surviving_minimum_is() -> None:
+    argmin = PROBLEMS["branin_disk"].constrained_argmin(resolution=3000)
+
+    assert argmin["x0"] == pytest.approx(np.pi, abs=1e-2)
+    assert argmin["x1"] == pytest.approx(2.275, abs=1e-2)
+
+
+@pytest.mark.parametrize("name", sorted(PROBLEMS))
+def test_the_optimum_location_is_feasible_and_attains_the_optimum(name: str) -> None:
+    problem = PROBLEMS[name]
+    argmin = problem.constrained_argmin(resolution=2000)
+    point = np.array([argmin[f"x{i}"] for i in range(problem.dimensions)])
+
+    assert problem.is_feasible(point)
+    assert float(problem.objective(point)) == pytest.approx(problem.constrained_optimum(2000), abs=1e-6)
+
+
 def test_branin_keeps_one_of_its_three_minima() -> None:
     """The point of the disk: the best value is unchanged, but two ways of reaching it are removed."""
     problem = PROBLEMS["branin_disk"]

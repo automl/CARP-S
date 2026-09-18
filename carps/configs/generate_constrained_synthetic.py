@@ -71,6 +71,8 @@ for problem_name, problem in PROBLEMS.items():
             "constraints": problem.constraint_expressions,
             # The best feasible objective value, for reporting a gap rather than a raw cost.
             "constrained_optimum": problem.constrained_optimum(),
+            # Where that value is attained, so that a prior of a known quality can be placed relative to it.
+            "constrained_argmin": problem.constrained_argmin(),
             "task": {
                 "_target_": "carps.utils.task.Task",
                 "name": task_id,

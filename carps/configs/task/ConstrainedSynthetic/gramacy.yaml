@@ -5,6 +5,9 @@ constraints:
 - c1 <= 0.0
 - c2 <= 0.0
 constrained_optimum: 0.599799899949975
+constrained_argmin:
+  x0: 0.19509754877438718
+  x1: 0.4047023511755878
 task:
   _target_: carps.utils.task.Task
   name: ConstrainedSynthetic/gramacy

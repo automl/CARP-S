@@ -84,12 +84,8 @@ class ConstrainedSyntheticProblem:
 
         return True
 
-    def constrained_optimum(self, resolution: int = 2000) -> float:
-        """The best feasible objective value, found on a dense grid.
-
-        Computed rather than recorded, so that the number a task config carries always matches the
-        functions defined here. `resolution` is per dimension; these problems are two-dimensional.
-        """
+    def _feasible_grid(self, resolution: int) -> np.ndarray:
+        """The feasible points of a dense grid over the search space."""
         axes = [np.linspace(lower, upper, resolution) for lower, upper in self.bounds]
         mesh = np.meshgrid(*axes, indexing="ij")
         points = np.stack([m.ravel() for m in mesh], axis=1)
@@ -103,7 +99,28 @@ class ConstrainedSyntheticProblem:
         if not feasible.any():
             raise ValueError(f"No feasible point found for {self.name} at resolution {resolution}.")
 
-        return float(np.min(self.objective(points[feasible].T)))
+        return points[feasible]
+
+    def constrained_optimum(self, resolution: int = 2000) -> float:
+        """The best feasible objective value, found on a dense grid.
+
+        Computed rather than recorded, so that the number a task config carries always matches the
+        functions defined here. `resolution` is per dimension; these problems are two-dimensional.
+        """
+        points = self._feasible_grid(resolution)
+
+        return float(np.min(self.objective(points.T)))
+
+    def constrained_argmin(self, resolution: int = 2000) -> dict[str, float]:
+        """Where the best feasible value is attained, by hyperparameter name.
+
+        A benchmark that states where its optimum lies can be used to build a user prior of a known
+        quality, which is how the prior-guided literature evaluates its methods.
+        """
+        points = self._feasible_grid(resolution)
+        best = points[int(np.argmin(self.objective(points.T)))]
+
+        return {f"x{i}": float(value) for i, value in enumerate(best)}
 
 
 def _branin(x: np.ndarray) -> np.ndarray:
