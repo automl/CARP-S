@@ -11,6 +11,11 @@ from omegaconf import DictConfig, OmegaConf
 # from git import Repo
 # from smac.callback.metadata_callback import MetadataCallback
 from smac.multi_objective.parego import ParEGO
+
+try:  # SMAC moved cost aggregation here; older versions keep it on the run history.
+    from smac.utils.cost_transformer import CostTransformer
+except ImportError:  # pragma: no cover - depends on the installed SMAC version
+    CostTransformer = None
 from smac.runhistory import (
     TrialInfo as SmacTrialInfo,
     TrialKey as SmacTrialKey,
@@ -31,6 +36,19 @@ if TYPE_CHECKING:
     from carps.utils.types import Incumbent
 
 setup_logging()
+
+
+def _mean_cost(runhistory: Any, config: Configuration) -> float | list[float]:
+    """Average cost recorded for a configuration.
+
+    SMAC moved cost aggregation out of the run history and into a cost transformer, so which call returns
+    the aggregated cost depends on the installed version. Both are supported, because the SMAC requirement
+    is a lower bound rather than a pin.
+    """
+    if hasattr(runhistory, "get_cost"):
+        return runhistory.get_cost(config=config)
+
+    return CostTransformer.mean(runhistory.get_costs(config))
 
 
 def maybe_inst_add_scenario(smac_kwargs: dict[str, Any], key: str, scenario: Scenario) -> dict[str, Any]:
@@ -344,7 +362,7 @@ class SMAC3Optimizer(Optimizer):
         """
         if self.solver.scenario.count_objectives() == 1:
             inc = self.solver.intensifier.get_incumbent()
-            cost = self.solver.runhistory.get_cost(config=inc)
+            cost = _mean_cost(self.solver.runhistory, inc)
             trial_info = TrialInfo(config=inc)
             trial_value = TrialValue(cost=cost)
             incumbent_tuple = (trial_info, trial_value)
