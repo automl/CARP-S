@@ -344,7 +344,14 @@ class SMAC3Optimizer(Optimizer):
         """
         if self.solver.scenario.count_objectives() == 1:
             inc = self.solver.intensifier.get_incumbent()
-            cost = self.solver.runhistory.get_cost(config=inc)
+            # SMAC3's RunHistory.get_cost() was renamed to get_costs() and now returns a
+            # list of costs (one per instance-seed-budget key) instead of a single
+            # aggregated float, see SMAC3 commit 04d385bfe ("Refactor RunHistory to
+            # separate data storage from cost computation", by Jannis Kastner). This
+            # rename is not yet in any PyPI release of smac (see SMAC3_requirements.txt),
+            # only on SMAC3's development branch. Indexing [0] is correct here because
+            # we are in the single-objective branch (count_objectives() == 1).
+            cost = self.solver.runhistory.get_costs(config=inc)[0]
             trial_info = TrialInfo(config=inc)
             trial_value = TrialValue(cost=cost)
             incumbent_tuple = (trial_info, trial_value)
